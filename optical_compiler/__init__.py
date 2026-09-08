@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .compiler import OpticalCompiler
+from .compiler import OpticalCompiler, compile_scene
 from .models import (
     CameraProfile,
     CompiledPayload,
@@ -19,6 +19,7 @@ __version__ = "0.1.0"
 
 __all__ = [
     "OpticalCompiler",
+    "compile_scene",
     "SceneInput",
     "CameraProfile",
     "SensorOptics",

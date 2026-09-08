@@ -1,9 +1,10 @@
 # Optical Camera Compiler 📷⚡
 
-[![CI](https://github.com/optical-camera-compiler/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/optical-camera-compiler/optical-camera-compiler/actions)
+[![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 22 Passing](https://img.shields.io/badge/tests-22%20passing-brightgreen.svg)](tests/)
+[![Tests: 26 Passing](https://img.shields.io/badge/tests-26%20passing-brightgreen.svg)](tests/)
+[![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-Flux%20%7C%20Imagen%203%20%7C%20Midjourney%20%7C%20SDXL-orange.svg)](#supported-target-adapters)
 
@@ -63,23 +64,61 @@ Actively suppresses biometric drift:
 
 ---
 
+## Quickstart & Installation
+
+Install directly via pip:
+
+```bash
+pip install optical-camera-compiler
+```
+
+Or clone the repository locally:
+
+```bash
+git clone https://github.com/FabioLousJay/optical-camera-compiler.git
+cd optical-camera-compiler
+```
+
+---
+
 ## Virtual Rig Studio (Interactive Local Web App)
 
 Launch the high-end dark-mode studio UI locally with zero setup:
 
 ```bash
-cd /Users/fjs/.gemini/antigravity/scratch/optical-camera-compiler
-python3 -m optical_compiler.web --open
+optical-studio
+# or: python3 -m optical_compiler.web --open
 ```
 
 * **Live URL**: `http://localhost:8765`
 * **Features**:
-  * Visual Hardware Rig Selectors (Phase One IQ4, Leica M11, Hasselblad H6D).
-  * Interactive Aperture Ring (`f/2.8`, `f/4`, `f/5.6`, `f/8 [SWEET SPOT]`, `f/11`, `f/16`).
-  * Studio Lighting Rig selector (Strobe + Leaf Sync, Northern Daylight, Rembrandt, Golden Hour).
-  * Real-time multi-target compilation tabs (Imagen 3, Flux.1, Midjourney v6+, SDXL, Raw Spec).
-  * One-click clipboard copy with visual notification.
-  * Embedded REST API (`/api/compile`, `/api/profiles`, `/api/health`) with full CORS support for connecting external frontends (such as **Lovable**, Next.js, or cloud dashboards).
+  * **Visual Hardware Rig Selectors**: 10 elite camera systems (Phase One IQ4, Leica M11, Hasselblad H6D, Arri Alexa 35, Linhof 4x5, etc.).
+  * **Local Hardware Image Uploader**: Drag & drop reference photos directly from your machine with client-side resolution & aspect ratio autodetection.
+  * **Interactive Aperture Ring**: `f/2.8`, `f/4`, `f/5.6`, `f/8 [SWEET SPOT]`, `f/11`, `f/16`.
+  * **Studio Lighting Rig selector**: Strobe + Leaf Sync, Northern Daylight, Rembrandt, Golden Hour, Cinematic Contrast.
+  * **Real-time multi-target compilation tabs**: Imagen 3, Flux.1, Midjourney v6+, SDXL, Raw Spec.
+  * **One-click clipboard copy**: Instant copying of the unified prompt + negative shield.
+  * **Embedded REST API**: `/api/compile`, `/api/profiles`, `/api/health` with full CORS support for external frontends (**Lovable**, Next.js, Streamlit, or custom dashboards).
+
+---
+
+## ComfyUI Custom Node Integration
+
+The repository acts as a native **ComfyUI custom node** with zero extra dependencies:
+
+```bash
+cd ComfyUI/custom_nodes
+git clone https://github.com/FabioLousJay/optical-camera-compiler.git
+```
+
+Restart ComfyUI, then right-click on the graph canvas:
+**Add Node ➔ prompt/optical ➔ 📷 Optical Camera Compiler**
+
+* **Outputs**:
+  * `positive_prompt` ➔ Pipe directly into `CLIP Text Encode (Prompt)`
+  * `negative_prompt` ➔ Pipe into `CLIP Text Encode (Negative)`
+  * `unified_payload` ➔ Full prompt with negative shield for single-prompt nodes (Flux.1 / Midjourney)
+* **Controls**: Camera rig selection, target engine (Flux, SDXL, Midjourney, Imagen), reference modes (Restore Upscale vs. Transform Adapt), biometric fidelity lock, and aspect ratio overrides.
 
 ---
 

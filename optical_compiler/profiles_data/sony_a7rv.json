@@ -1,0 +1,59 @@
+{
+  "profile_id": "sony_a7rv",
+  "title": "Sony Alpha A7R V 61MP High-Resolution",
+  "schema_version": "2.0",
+  "purpose": "State-of-the-art modern commercial resolution, razor-sharp G-Master optical acutance, and wide dynamic range.",
+  "sensor_and_optics": {
+    "camera_system": "Sony Alpha 7R V (61.0MP Full-Frame Exmor R BSI CMOS)",
+    "sensor_type": "Full-Frame 35.7x23.8mm Back-Illuminated CMOS with BIONZ XR engine",
+    "sensor_dimensions": "35.7x23.8mm full-frame high-resolution sensor",
+    "full_frame_equivalent": "50mm true focal length",
+    "lens": "Sony FE 50mm f/1.2 GM (G-Master Reference Lens)",
+    "aperture_sweet_spot": "f/2.0",
+    "iso_base": "ISO 100 uncompressed 14-bit RAW",
+    "dynamic_range": "15 stops of modern dynamic range with deep shadow recovery",
+    "shutter": "Low-vibration mechanical shutter, 1/8000s top speed"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "High-end commercial strobe setup with Broncolor beauty dish and soft fill",
+    "light_transport": "Clinical light precision, pinpoint catchlights, pristine edge micro-contrast"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Ultra-fine resolving power: resolved iris filaments, micro-pores, fine vellus hair with zero moire",
+      "G-Master optical clarity: Extreme micro-contrast without chromatic aberration or color fringing",
+      "True modern digital raw fidelity: uncompressed 14-bit tonal gradations"
+    ],
+    "depth_and_optics": [
+      "Signature f/1.2 to f/2.0 circular bokeh with 11 rounded aperture blades",
+      "Ultra-clean transition from critical pinpoint sharpness to buttery background blur",
+      "Tack-sharp corner-to-corner rectilinear geometry"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "denoise smearing",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "glamour retouching",
+      "computational bokeh",
+      "beauty filter glow",
+      "blown highlights"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce modern commercial full-frame high-resolution fidelity. Ultra-sharp G-Master optical resolution, pristine micro-texture, and buttery f/1.2 subject isolation."
+}

@@ -189,3 +189,14 @@ class OpticalCompiler:
         ]:
             results[engine.value] = self.compile(scene, target=engine, **kwargs)
         return results
+
+
+def compile_scene(
+    scene: Union[str, SceneInput],
+    profile_name_or_path: str = "phase_one_iq4",
+    target_model: Union[str, TargetEngine] = TargetEngine.FLUX,
+    **kwargs: Any,
+) -> CompiledPayload:
+    """Convenience helper to initialize compiler and compile a scene in one call."""
+    compiler = OpticalCompiler(profile_name_or_path)
+    return compiler.compile(scene, target=target_model, **kwargs)

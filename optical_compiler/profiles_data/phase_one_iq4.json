@@ -1,0 +1,61 @@
+{
+  "profile_id": "phase_one_iq4",
+  "title": "Phase One XF IQ4 150MP Trichromatic",
+  "schema_version": "2.0",
+  "purpose": "Hardware-level optical and sensor simulation for zero-artifact photorealism.",
+  "sensor_and_optics": {
+    "camera_system": "Phase One XF IQ4 150MP BSI Trichromatic",
+    "sensor_type": "Back-Side Illuminated (BSI) CMOS Medium Format",
+    "sensor_dimensions": "54x40mm medium-format sensor",
+    "full_frame_equivalent": "~50mm full-frame equivalent normal field of view",
+    "lens": "Schneider Kreuznach 80mm LS f/2.8 Blue Ring",
+    "aperture_sweet_spot": "f/8",
+    "iso_base": "ISO 50 base sensor sensitivity",
+    "dynamic_range": "16-bit raw tonal range with 15 stops of dynamic latitude",
+    "shutter": "Leaf shutter with 1/1600s high-speed flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Studio strobe, 1/1600s leaf shutter sync, ISO 50 base sensor sensitivity, 16-bit raw tonal range",
+    "light_transport": "Key light with large parabolic modifier, deep shadows carved with black foam-core negative fill, single-axis specular catchlights"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Natural epidermal skin texture with resolved pores, fine vellus hair, and accurate subsurface scattering without artificial blur or waxy specularities",
+      "True material micro-relief: fabric weave, micro-abrasions, uncompressed specular highlight falloff",
+      "High optical acutance and MTF contrast without digital edge halos or unsharp masking artifacts"
+    ],
+    "depth_and_optics": [
+      "Subtle optical falloff characteristic of large-sensor f/8 depth of field",
+      "Zero perspective distortion, clean rectilinear projection",
+      "Clean edge transitions driven purely by lighting and geometry, not artificial post-process depth slicing"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "glamour retouching",
+      "computational bokeh",
+      "beauty filter glow",
+      "blown highlights",
+      "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce true raw-capture fidelity from a 150MP digital back. Eliminate post-processed sharpening looks, synthetic smoothing, and non-physical lighting."
+}

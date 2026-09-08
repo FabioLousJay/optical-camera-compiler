@@ -1,0 +1,59 @@
+{
+  "profile_id": "leica_m11",
+  "title": "Leica M11 60MP Rangefinder",
+  "schema_version": "2.0",
+  "purpose": "Rangefinder documentary simulation with extreme optical micro-contrast and authentic analog character.",
+  "sensor_and_optics": {
+    "camera_system": "Leica M11 Full-Frame Rangefinder (Triple-Resolution BSI CMOS)",
+    "sensor_type": "Full-Frame 35mm BSI CMOS, zero optical low-pass filter (no anti-aliasing)",
+    "sensor_dimensions": "36x24mm full-frame sensor",
+    "full_frame_equivalent": "35mm true focal length",
+    "lens": "Leica Summilux-M 35mm f/1.4 ASPH FLE II",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "ISO 64 base sensor sensitivity",
+    "dynamic_range": "15 stops dynamic range with natural highlight retention",
+    "shutter": "Quiet mechanical focal-plane shutter, 1/250s sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Directional natural ambient daylight with subtle bounce fill",
+    "light_transport": "Organic light falloff, gentle shadow gradients, authentic spatial separation without artificial studio pop"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Tactile micro-texture with resolved skin pores, natural vellus hair, fine organic skin imperfections without digital smoothing",
+      "Leica micro-contrast pop: distinct textural definition between adjacent tone zones without edge haloing",
+      "True optical acutance from legendary German aspherical optics"
+    ],
+    "depth_and_optics": [
+      "Smooth organic transitional focus falloff characteristic of Leica Summilux glass wide open to f/2.8",
+      "Clean corner-to-corner optical sharpness with subtle natural optical vignetting wide open",
+      "Natural 35mm perspective geometry without digital distortion correction warps"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "glamour retouching",
+      "computational bokeh",
+      "beauty filter glow",
+      "blown highlights"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce authentic Leica rangefinder documentary capture. Preserve natural raw micro-contrast, organic analog falloff, and un-smoothed skin texture."
+}

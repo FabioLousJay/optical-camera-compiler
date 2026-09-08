@@ -17,6 +17,7 @@ from .models import (
 )
 
 DEFAULT_PROFILES_DIR = Path(__file__).resolve().parent.parent / "profiles"
+PACKAGE_PROFILES_DIR = Path(__file__).resolve().parent / "profiles_data"
 
 # Built-in Phase One IQ4 profile fallback to ensure zero runtime file lookup issues
 PHASE_ONE_IQ4_DEFAULT = CameraProfile(
@@ -98,12 +99,13 @@ def load_profile(name_or_path: str = "phase_one_iq4") -> CameraProfile:
             data = json.load(f)
         return CameraProfile.from_dict(data)
 
-    # 2. Check in standard profiles directory
-    candidate = DEFAULT_PROFILES_DIR / f"{name_or_path}.json"
-    if candidate.is_file():
-        with open(candidate, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return CameraProfile.from_dict(data)
+    # 2. Check in standard or package profiles directory
+    for pdir in (DEFAULT_PROFILES_DIR, PACKAGE_PROFILES_DIR):
+        candidate = pdir / f"{name_or_path}.json"
+        if candidate.is_file():
+            with open(candidate, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return CameraProfile.from_dict(data)
 
     # 3. Check for home directory CAMERA_PHASE_ONE.json if requested
     home_candidate = Path.home() / "CAMERA_PHASE_ONE.json"
@@ -165,24 +167,25 @@ def list_available_profiles() -> list[dict[str, str]]:
     })
     seen.add(PHASE_ONE_IQ4_DEFAULT.profile_id)
 
-    # 2. Check profiles directory
-    if DEFAULT_PROFILES_DIR.is_dir():
-        for json_file in sorted(DEFAULT_PROFILES_DIR.glob("*.json")):
-            profile_id = json_file.stem
-            if profile_id not in seen:
-                try:
-                    with open(json_file, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                    profiles.append({
-                        "id": data.get("profile_id", profile_id),
-                        "title": data.get("title", profile_id.replace("_", " ").title()),
-                        "purpose": data.get("purpose", ""),
-                        "sensor": data.get("sensor_and_optics", {}).get("camera_system", ""),
-                        "lens": data.get("sensor_and_optics", {}).get("lens", ""),
-                        "aperture": data.get("sensor_and_optics", {}).get("aperture_sweet_spot", ""),
-                    })
-                    seen.add(profile_id)
-                except Exception:
-                    continue
+    # 2. Check profiles directories
+    for pdir in (DEFAULT_PROFILES_DIR, PACKAGE_PROFILES_DIR):
+        if pdir.is_dir():
+            for json_file in sorted(pdir.glob("*.json")):
+                profile_id = json_file.stem
+                if profile_id not in seen:
+                    try:
+                        with open(json_file, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        profiles.append({
+                            "id": data.get("profile_id", profile_id),
+                            "title": data.get("title", profile_id.replace("_", " ").title()),
+                            "purpose": data.get("purpose", ""),
+                            "sensor": data.get("sensor_and_optics", {}).get("camera_system", ""),
+                            "lens": data.get("sensor_and_optics", {}).get("lens", ""),
+                            "aperture": data.get("sensor_and_optics", {}).get("aperture_sweet_spot", ""),
+                        })
+                        seen.add(profile_id)
+                    except Exception:
+                        continue
 
     return profiles

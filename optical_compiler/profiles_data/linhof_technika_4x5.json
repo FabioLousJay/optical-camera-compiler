@@ -1,0 +1,59 @@
+{
+  "profile_id": "linhof_technika_4x5",
+  "title": "Linhof Master Technika 4x5 Large Format Sheet Film",
+  "schema_version": "2.0",
+  "purpose": "Unsurpassed museum-grade fine art and architectural resolution with Scheimpflug plane-of-focus control and zero vertical converging lines.",
+  "sensor_and_optics": {
+    "camera_system": "Linhof Master Technika 4x5 Large Format Field Camera",
+    "sensor_type": "4x5 inch Sheet Film (102x127mm individual film sheet)",
+    "sensor_dimensions": "102x127mm 4x5 inch large format sheet film negative",
+    "full_frame_equivalent": "~45mm normal field of view with massive image circle coverage",
+    "lens": "Schneider Kreuznach Apo-Symmar 150mm f/5.6 L",
+    "aperture_sweet_spot": "f/16",
+    "iso_base": "Kodak Professional Ektar 100 ultra-fine grain color negative sheet film",
+    "dynamic_range": "15 stops of expansive optical latitude with microscopic resolution",
+    "shutter": "Copal No. 0 mechanical leaf shutter, heavy studio tripod mount"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Controlled architectural daylight balanced with subtle interior fill strobe",
+    "light_transport": "Pure physical light transport, immaculate tonal gradients across polished stone, glass, and wood"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Microscopic detail resolution: individual building material textures, concrete aggregate, wood grain, micro-abrasions",
+      "Kodak Ektar 100 grainless clarity: ultra-vivid, color-saturated reality without digital sharpness artifacts",
+      "Infinite depth of field across diagonal planes via Scheimpflug optical tilt"
+    ],
+    "depth_and_optics": [
+      "Perfect optical perspective correction via rise/fall lens standards: parallel vertical lines with zero keystone distortion",
+      "Corner-to-corner tack-sharp optical MTF fidelity across the entire 4x5 sheet",
+      "Clean, uncompressed rectilinear projection without barrel or pincushion distortion"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "keystone distortion",
+      "converging verticals",
+      "digital sharpening halos",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed surfaces",
+      "synthetic smoothing",
+      "blown digital highlights",
+      "crushed shadows",
+      "computational blur"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 4x5 large-format sheet film museum fidelity. Scheimpflug optical plane alignment, zero keystone distortion, Ektar 100 resolution, and immaculate material micro-detail."
+}

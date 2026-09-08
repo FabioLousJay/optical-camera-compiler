@@ -32,3 +32,6 @@ optical-studio = "optical_compiler.web:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["optical_compiler*"]
+
+[tool.setuptools.package-data]
+optical_compiler = ["profiles_data/*.json"]

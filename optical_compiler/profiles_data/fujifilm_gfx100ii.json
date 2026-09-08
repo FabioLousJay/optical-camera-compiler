@@ -1,0 +1,59 @@
+{
+  "profile_id": "fujifilm_gfx100ii",
+  "title": "Fujifilm GFX 100 II 102MP Medium Format",
+  "schema_version": "2.0",
+  "purpose": "State-of-the-art commercial studio and editorial medium format with Fujifilm analog film simulation color science (Classic Chrome / Reala Ace).",
+  "sensor_and_optics": {
+    "camera_system": "Fujifilm GFX 100 II (102MP CMOS II HS Sensor)",
+    "sensor_type": "43.8x32.9mm Medium Format high-speed CMOS with 16-bit RAW",
+    "sensor_dimensions": "43.8x32.9mm medium format sensor",
+    "full_frame_equivalent": "~87mm full-frame equivalent classic portrait focal length",
+    "lens": "Fujinon GF 110mm f/2 R LM WR Reference Portrait Lens",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "ISO 80 base sensor sensitivity with Fujifilm Classic Chrome color profile",
+    "dynamic_range": "16-bit RAW capture with 16 stops of dynamic range",
+    "shutter": "Focal plane mechanical shutter, 1/4000s sync capability"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Commercial editorial studio strobe with octabox and subtle hair backlight kicker",
+    "light_transport": "Crisp dimensional separation, subtle tonal gradations, subdued saturation with rich tonal contrast"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Ultra-high resolving power: razor-sharp eyelash and corneal reflections with resolved pore fidelity",
+      "Fujifilm color chemistry: muted earthy tones, deep shadows, and luminous skin tones without synthetic magenta tint",
+      "Exceptional tactile clarity on clothing weaves, leather grain, and jewelry micro-reflections"
+    ],
+    "depth_and_optics": [
+      "Creamy, three-dimensional subject isolation characteristic of 110mm f/2 on 44x33mm silicon",
+      "Ultra-smooth spherical blur transitions without onion-ring bokeh rings",
+      "Flawless chromatic aberration suppression across high-contrast edges"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "glamour retouching",
+      "computational bokeh",
+      "beauty filter glow",
+      "blown highlights"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Fujifilm GFX medium-format resolving power. Combine 102MP sensory micro-detail with Classic Chrome film color science and creamy GF 110mm optical falloff."
+}

@@ -1,0 +1,59 @@
+{
+  "profile_id": "hasselblad_500cm",
+  "title": "Hasselblad 500C/M 6x6 Analog Medium Format",
+  "schema_version": "2.0",
+  "purpose": "Legendary square-format 120 analog film portraiture with Carl Zeiss Planar optics and organic silver halide grain structure.",
+  "sensor_and_optics": {
+    "camera_system": "Hasselblad 500C/M 6x6 Medium Format SLR Film Camera",
+    "sensor_type": "120 Roll Film (56x56mm square negative gate)",
+    "sensor_dimensions": "56x56mm 6x6 medium format film gate",
+    "full_frame_equivalent": "~44mm full-frame equivalent field of view in 1:1 aspect ratio",
+    "lens": "Carl Zeiss Planar T* 80mm f/2.8 CF Lens",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "Kodak Professional Portra 400 fine-grain color negative film stock",
+    "dynamic_range": "14 stops of analog highlight latitude with gentle shoulder roll-off",
+    "shutter": "Synchro-Compur mechanical leaf shutter, 1/500s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Soft directional daylight through vintage industrial windows or giant diffused bounce board",
+    "light_transport": "Gentle, non-linear analog tonal curve, soft luminous highlights, deep warm shadow density"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Authentic organic Kodak Portra 400 silver halide dye clouds, fine microscopic grain without digital noise",
+      "True tactile skin texture: resolved pores, natural skin micro-creases, fine vellus hair with warm analog tones",
+      "Carl Zeiss T* multicoating micro-contrast: rich chromatic saturation without digital chromatic aberration"
+    ],
+    "depth_and_optics": [
+      "Velvety medium-format square focal falloff unique to 6x6 planar optics",
+      "Soft circular bokeh with creamy background dissolution",
+      "Pure optical perspective without rectilinear digital warping"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "digital sharpening halos",
+      "digital noise",
+      "compression artifacts",
+      "digital clipping"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "glamour retouching",
+      "computational bokeh",
+      "beauty filter glow",
+      "blown digital highlights"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce authentic 6x6 medium-format analog film rendering. Kodak Portra 400 color science, Zeiss Planar micro-contrast, organic grain structure, and square aspect composition."
+}
