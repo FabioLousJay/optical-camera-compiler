@@ -1,0 +1,37 @@
+name: Camera Rig Profile Request
+description: Propose a new real-world camera body and lens profile
+title: "[Rig Request]: "
+labels: ["profile-request"]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for suggesting a new optical hardware profile for the Optical Camera Compiler!
+  - type: input
+    id: camera_system
+    attributes:
+      label: Camera Body System
+      description: Exact model name (e.g. Hasselblad X2D 100C, Leica Q3 43, Canon EOS R5 II)
+      placeholder: e.g. Hasselblad X2D 100C
+    validations:
+      required: true
+  - type: input
+    id: sensor_format
+    attributes:
+      label: Sensor Dimensions & Silicon
+      description: Exact sensor size in mm (e.g. 43.8 x 32.9mm Medium Format BSI CMOS)
+      placeholder: e.g. 43.8 x 32.9mm
+    validations:
+      required: true
+  - type: textarea
+    id: optics
+    attributes:
+      label: Prime & Zoom Optics
+      description: List 2-5 reference lenses with their optical sweet-spot apertures
+      placeholder: e.g. Hasselblad XCD 55mm f/2.5 V at f/5.6
+    validations:
+      required: true
+  - type: textarea
+    id: unique_physics
+    attributes:
+      label: Unique Color Science & Physical Characteristics
+      description: What makes this camera look distinctive (e.g. HNCS color science, leaf shutter flash sync, film grain)?

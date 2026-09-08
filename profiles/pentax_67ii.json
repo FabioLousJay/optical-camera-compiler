@@ -1,0 +1,59 @@
+{
+  "profile_id": "pentax_67ii",
+  "title": "Pentax 67 II 6x7 Medium Format Film",
+  "schema_version": "2.0",
+  "purpose": "The holy grail of medium-format shallow depth of field portraiture with the legendary 105mm f/2.4 lens.",
+  "sensor_and_optics": {
+    "camera_system": "Pentax 67 II Medium Format SLR Film Camera",
+    "sensor_type": "120 Roll Film (56x70mm oversized negative gate)",
+    "sensor_dimensions": "56x70mm 6x7 giant medium format film negative",
+    "full_frame_equivalent": "~51mm normal focal length with massive depth-of-field compression",
+    "lens": "SMC Pentax 67 105mm f/2.4 Reference Lens",
+    "aperture_sweet_spot": "f/2.4",
+    "iso_base": "Fuji Pro 400H medium-format film stock (cool pastel greens and creamy skin tones)",
+    "dynamic_range": "14 stops of analog highlight recovery",
+    "shutter": "Electrically controlled cloth focal-plane shutter, 1/1000s top speed"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Golden hour raking sidelight with soft open-shadow fill",
+    "light_transport": "Gentle contrast roll-off, ethereal highlight bloom, deep tactile shadow gradients"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Signature 6x7 medium-format subject separation: subject appears three-dimensional and pops off the canvas",
+      "Authentic Fuji Pro 400H silver halide grain, natural skin luminosity without digital gloss",
+      "Fine textural micro-relief on skin, flyaway hair strands, and rustic textiles"
+    ],
+    "depth_and_optics": [
+      "The legendary 105mm f/2.4 optical falloff: razor-thin focal plane at the iris melting into painterly, dreamlike background blur",
+      "Swirling subtle vintage optical vignetting and cat-eye peripheral bokeh wide open",
+      "Unmatched medium-format optical dimensionality"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "digital sharpening halos",
+      "digital noise smearing",
+      "compression artifacts",
+      "computational blur"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "glamour retouching",
+      "computational bokeh",
+      "beauty filter glow",
+      "blown digital highlights"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce authentic Pentax 67 II analog aesthetic. Legendary 105mm f/2.4 three-dimensional subject pop, Fuji Pro 400H pastel color palette, and organic medium-format film grain."
+}

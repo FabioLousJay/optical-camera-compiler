@@ -1,0 +1,61 @@
+{
+  "profile_id": "arri_alexa_35",
+  "title": "ARRI Alexa 35 Cinematic Large-Sensor",
+  "schema_version": "2.0",
+  "purpose": "Industry-standard cinema production with organic skin rendering, gentle highlight roll-off, and 17 stops of dynamic latitude.",
+  "sensor_and_optics": {
+    "camera_system": "ARRI Alexa 35 (Super 35 4K Native ALEV 4 Sensor)",
+    "sensor_type": "Super 35 format ALEV 4 CMOS with 17 stops of exposure latitude",
+    "sensor_dimensions": "27.99x19.22mm Super 35 cinema sensor",
+    "full_frame_equivalent": "~50mm spherical focal length equivalent",
+    "lens": "Cooke S4/i 50mm T2.0 Cine Prime ('The Cooke Look')",
+    "aperture_sweet_spot": "T2.8",
+    "iso_base": "EI 800 base sensor sensitivity with ARRI LogC4 color science",
+    "dynamic_range": "17 stops of total dynamic range with unmatched highlight retention",
+    "shutter": "Electronic rolling shutter with 180-degree cinema shutter angle (1/48s equivalent motion cadence)"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Cinematic soft key through 8x8 diffusion frame with black solid negative fill",
+    "light_transport": "Organic volumetric light falloff, gentle halation around specular light sources, filmic shadow contrast"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Authentic dermal subsurface scattering, soft organic skin texture with natural pore definition without video edge-enhancement",
+      "Cooke optical character: gentle warmth, creamy skin rendering with crisp central resolution",
+      "Subtle optical halation and low-contrast shadow details without digital noise smearing"
+    ],
+    "depth_and_optics": [
+      "Smooth cinematic depth of field roll-off characteristic of cinema prime lenses",
+      "Round, organic out-of-focus background elements without polygonal aperture artifacts",
+      "Zero breathing, clean rectilinear optical projection"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "compression artifacts",
+      "video noise"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "glamour retouching",
+      "computational bokeh",
+      "beauty filter glow",
+      "clipped highlights",
+      "harsh electronic edge"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce high-end feature film cinematic capture. Deliver ARRI LogC4 tonal gradation, organic skin tones, Cooke optical warmth, and natural motion cadence."
+}

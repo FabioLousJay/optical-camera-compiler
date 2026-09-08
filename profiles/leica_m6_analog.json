@@ -1,0 +1,59 @@
+{
+  "profile_id": "leica_m6_analog",
+  "title": "Leica M6 35mm Analog Rangefinder",
+  "schema_version": "2.0",
+  "purpose": "Master reportage, documentary, and street photography with legendary German manual optics and classic silver halide grain.",
+  "sensor_and_optics": {
+    "camera_system": "Leica M6 Classic 35mm Rangefinder Film Camera",
+    "sensor_type": "35mm analog film negative (36x24mm)",
+    "sensor_dimensions": "36x24mm 35mm film gate",
+    "full_frame_equivalent": "50mm normal field of view",
+    "lens": "Leica Summicron-M 50mm f/2 Dual-Range Prime",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "Kodak Tri-X 400 silver halide film (or Kodak Portra 400)",
+    "dynamic_range": "13 stops analog dynamic range with deep rich blacks and luminous highlights",
+    "shutter": "Rubberized cloth horizontal focal plane shutter, whisper-quiet 1/125s capture"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Unposed ambient street daylight, available natural light or moody tungsten streetlamp",
+    "light_transport": "Authentic street documentary realism, deep emotional contrast, natural shadow roll-off"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "True analog silver halide grain structure with tactile micro-acutance",
+      "Authentic skin texture: raw, honest, completely free of artificial smoothing or digital denoise artifacts",
+      "Leica micro-contrast: incredible punch and micro-texture on weathered surfaces, leather, and eyes"
+    ],
+    "depth_and_optics": [
+      "Classic German optical falloff: smooth three-dimensional subject isolation wide open",
+      "Subtle gentle spherical aberration and vintage glow in highlight areas",
+      "True optical perspective with zero digital distortion"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "digital noise smearing",
+      "plastic smoothing"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "glamour retouching",
+      "computational bokeh",
+      "beauty filter glow",
+      "blown digital highlights"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce authentic Leica M6 35mm analog street documentary character. Tangible silver halide film grain, Leica Summicron micro-contrast, honest unretouched human skin texture."
+}

@@ -1,0 +1,60 @@
+{
+  "profile_id": "hasselblad_h6d",
+  "title": "Hasselblad H6D-100c Medium Format",
+  "schema_version": "2.0",
+  "purpose": "Commercial fashion and high-end portraiture with legendary Hasselblad Natural Colour Solution (HNCS).",
+  "sensor_and_optics": {
+    "camera_system": "Hasselblad H6D-100c 100MP CMOS Medium Format",
+    "sensor_type": "100-Megapixel 53.4x40.0mm CMOS Medium Format Sensor",
+    "sensor_dimensions": "53.4x40.0mm medium-format sensor",
+    "full_frame_equivalent": "~70mm full-frame portrait focal length equivalent",
+    "lens": "Hasselblad HC 2,2/100mm Portrait Lens",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 64 base sensor sensitivity",
+    "dynamic_range": "16-bit color depth with 15 stops dynamic range (Hasselblad HNCS)",
+    "shutter": "Integrated central lens shutter, 1/2000s flash synchronization"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Broncolor studio flash with giant soft reflector and subtle edge rim kicker",
+    "light_transport": "Ultra-smooth tonal transitions across skin gradients, gentle highlight roll-off, flawless Scandinavian color fidelity"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Ultra-fine natural skin pore structure, individual eyelash and vellus hair definition with true subsurface dermal warmth",
+      "High-fashion material fidelity: cashmere knit, silk drape, fine metals rendered with authentic micro-reflections",
+      "Hasselblad Natural Colour Solution: neutral true-to-life skin tones without orange/yellow color casts"
+    ],
+    "depth_and_optics": [
+      "Velvety medium-format optical falloff with circular aperture rendering",
+      "Gentle transition from critical sharpness to creaminess across the ear and hairline",
+      "Flawless distortion-free rectilinear optical path"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "glamour retouching",
+      "computational bokeh",
+      "beauty filter glow",
+      "blown highlights",
+      "yellow skin cast"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Hasselblad commercial fashion fidelity. Natural un-retouched skin micro-texture, HNCS true color science, and 100MP medium-format optical depth."
+}
