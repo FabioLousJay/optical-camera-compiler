@@ -1,13 +1,21 @@
-"""Adapter for Midjourney v6+ and raw parameter flag pipelines."""
+"""Adapter for Midjourney v8.2 and raw parameter flag pipelines."""
 
 from __future__ import annotations
 
-from ..models import CameraProfile, CompiledPayload, ReferenceMode, SceneInput, TargetEngine
+from typing import Any
+
+from ..models import (
+    CameraProfile,
+    CompiledPayload,
+    ReferenceMode,
+    SceneInput,
+    TargetEngine,
+)
 from .base import BaseAdapter
 
 
 class MidjourneyAdapter(BaseAdapter):
-    """Compiles prompts with Midjourney v6+ parameters and --style raw enforcement."""
+    """Compiles prompts with Midjourney v8.2 parameters and --style raw enforcement."""
 
     target_engine = TargetEngine.MIDJOURNEY
 
@@ -87,7 +95,7 @@ class MidjourneyAdapter(BaseAdapter):
         flags = [
             f"--ar {scene.aspect_ratio}",
             "--style raw",
-            "--v 6.1",
+            "--v 8.2",
         ]
 
         if is_restore:
@@ -153,7 +161,7 @@ class MidjourneyAdapter(BaseAdapter):
         parameters = {
             "aspect_ratio": scene.aspect_ratio,
             "style": "raw",
-            "version": "6.1",
+            "version": "8.2",
             "no": banned_mj,
         }
         if is_restore:

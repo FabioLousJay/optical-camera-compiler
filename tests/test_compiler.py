@@ -103,7 +103,7 @@ class TestOpticalCompiler(unittest.TestCase):
         self.assertEqual(payload.parameters["height"], 768)
 
     def test_midjourney_compilation(self) -> None:
-        """Verify Midjourney adapter includes --style raw, --v 6.1, --ar, and --no flags."""
+        """Verify Midjourney adapter includes --style raw, --v 8.2, --ar, and --no flags."""
         payload = self.compiler.compile(
             "Ballet dancer in rehearsal",
             target="midjourney",
@@ -112,7 +112,7 @@ class TestOpticalCompiler(unittest.TestCase):
 
         self.assertEqual(payload.target_engine, TargetEngine.MIDJOURNEY)
         self.assertIn("--style raw", payload.positive_prompt)
-        self.assertIn("--v 6.1", payload.positive_prompt)
+        self.assertIn("--v 8.2", payload.positive_prompt)
         self.assertIn("--ar 1:1", payload.positive_prompt)
         self.assertIn("--no", payload.positive_prompt)
         self.assertIn("plastic skin", payload.positive_prompt)

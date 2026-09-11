@@ -10,7 +10,7 @@
 
 > **Deterministic Hardware-Level Optical Simulation for Zero-Artifact Photorealism**
 
-The **Optical Camera Compiler** bridges the gap between artistic creative intent and modern AI image models (**ChatGPT / GPT Images**, **Google Gemini / Imagen 3**, **Midjourney v6.1**, **Flux.1**, **SDXL**). Instead of using buzzwords like *"photorealistic, 8k, masterpiece"*, which trigger synthetic 3D-render, airbrushing, and stock-photo biases, this compiler compiles descriptive intent into physical laws of optics, sensor silicon, lighting transport, and rigorous anti-drift shields.
+The **Optical Camera Compiler** bridges the gap between artistic creative intent and modern AI image models (**ChatGPT / GPT Images**, **Google Gemini / Imagen 3**, **Midjourney v8.2**, **Flux.1**, **SDXL**). Instead of using buzzwords like *"photorealistic, 8k, masterpiece"*, which trigger synthetic 3D-render, airbrushing, and stock-photo biases, this compiler compiles descriptive intent into physical laws of optics, sensor silicon, lighting transport, and rigorous anti-drift shields.
 
 ---
 
@@ -75,8 +75,8 @@ Extends a medium-shot or tight headshot downward into a full-length head-to-toe 
    Outputs the **Page 17 Master Execution Prompt** format: declarative modular blocks covering Subject, Focus discipline, Surface rendering, Lighting geometry, Camera hardware, Output specification, and Hard negative constraints.
 2. **Google Gemini / Imagen 3**:
    Cohesive photographic prose focusing on spatial balance, light transport, sensor physics, and authentic raw capture fidelity.
-3. **Midjourney (v6.1+)**:
-   Concise optical rig strings with `--style raw`, `--v 6.1`, `--ar`, `--cref`, `--cw`, and `--no` suppression flags.
+3. **Midjourney (v8.2+)**:
+   Concise optical rig strings with `--style raw`, `--v 8.2`, `--ar`, `--cref`, `--cw`, and `--no` suppression flags.
 4. **Flux.1 (Dev / Schnell)**:
    Technical declarative prose with negative assertions embedded directly into the physical prompt.
 5. **Stable Diffusion XL (SDXL)**:

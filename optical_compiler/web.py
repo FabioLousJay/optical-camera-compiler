@@ -1065,7 +1065,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div class="tabs">
           <button class="tab active" onclick="setTarget('gpt_images')">🤖 GPT Images (ChatGPT)</button>
           <button class="tab" onclick="setTarget('imagen')">♊ Gemini Images (Imagen 3)</button>
-          <button class="tab" onclick="setTarget('midjourney')">⛵ Midjourney (v6.1)</button>
+          <button class="tab" onclick="setTarget('midjourney')">⛵ Midjourney (v8.2)</button>
           <button class="tab" onclick="setTarget('flux')">⚡ Flux.1 (Dev/Schnell)</button>
           <button class="tab" onclick="setTarget('sdxl')">🎨 SDXL Dual</button>
           <button class="tab" onclick="setTarget('raw')">📋 Raw Spec Audit</button>
@@ -1872,7 +1872,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const badgeMap = {
         gpt_images: "GPT IMAGES // MASTER EXECUTION PROMPT",
         imagen: "GEMINI IMAGES // IMAGEN 3 PROSE",
-        midjourney: "MIDJOURNEY v6.1 // RAW SPEC",
+        midjourney: "MIDJOURNEY v8.2 // RAW SPEC",
         flux: "FLUX.1 // DIRECT PHYSICAL SPEC",
         sdxl: "SDXL DUAL // POSITIVE + NEGATIVE CHANNELS",
         raw: "RAW HARDWARE AUDIT // JSON/YAML",
