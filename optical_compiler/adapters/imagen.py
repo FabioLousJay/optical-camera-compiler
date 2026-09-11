@@ -20,10 +20,18 @@ class ImagenAdapter(BaseAdapter):
 
         is_restore = ref and ref.mode == ReferenceMode.RESTORE_UPSCALE
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
+        is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
 
         # 1. Subject & Scene foundation
         scene_elements = []
-        if is_restore:
+        if is_outpaint:
+            scene_elements.append(
+                "Using the provided medium-shot photo as the base. Outpaint and extend the frame downward to a full-body portrait. "
+                "Preserve the subject's face, identity, expression, hair, and skin texture exactly as in the input image. "
+                "Keep the same wardrobe, colors, fabric texture, and wrinkles. Maintain the same camera height and perspective. "
+                f"No wide-angle distortion. Full body head-to-toe visible including shoes. Depicting {scene.subject}"
+            )
+        elif is_restore:
             scene_elements.append(f"Master optical remaster and high-resolution restoration of the reference photograph")
             if scene.framing:
                 scene_elements.append(f"rendered as a {scene.framing} of {scene.subject}")
@@ -87,36 +95,57 @@ class ImagenAdapter(BaseAdapter):
         )
 
         # 4. Micro-physics & texture enforcement
-        micro_prose = (
-            f"Detail fidelity: {micro.surface_rendering[0]}. "
-            f"{micro.surface_rendering[1]}. "
+        micro_parts = [
+            f"Detail fidelity: {micro.surface_rendering[0]}.",
+            f"{micro.surface_rendering[1]}.",
             f"{micro.depth_and_optics[0]}, with {micro.depth_and_optics[1].lower()}."
-        )
+        ]
+        if scene.sharpness_protocol:
+            micro_parts.append(
+                "Focus discipline: focus locked on the near eye with eyelashes and iris tack sharp, zero motion blur."
+            )
+        micro_prose = " ".join(micro_parts)
 
-        # 5. Natural anti-artifact directive
+        # 5. Natural anti-artifact directive & Quality scaling
+        res_text = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
         style_prose = (
             f"Aesthetic directive: {profile.execution_directive} "
+            f"Output: {res_text}, uncompressed 16-bit raw capture, maximum acutance, zero chroma subsampling. "
             f"Completely avoid {', '.join(shield.skin_and_lighting_drift[:4])}, "
             f"and eliminate {', '.join(shield.render_defects[:4])}."
         )
-        if is_restore or is_transform:
+        if scene.suppress_text_branding:
+            style_prose += " Strictly eliminate all text, watermarks, logos, brand names, and typography."
+        if is_restore or is_transform or is_outpaint:
             style_prose += " Eliminate facial morphing, feature drift, identity loss, and warped geometry."
 
         positive_prompt = f"{scene_core}{ref_prose} {optical_prose} {lighting_prose} {micro_prose} {style_prose}"
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform)
-        all_negatives = shield.all_tokens(include_anti_drift=include_anti_drift)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint)
+        all_negatives = shield.all_tokens(
+            include_anti_drift=include_anti_drift,
+            include_branding=scene.suppress_text_branding,
+            include_compression=True,
+            include_outpaint=is_outpaint,
+        )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
         negative_prompt = ", ".join(dict.fromkeys(all_negatives))
 
         parameters = {
             "aspect_ratio": scene.aspect_ratio,
+            "resolution": res_text,
             "safety_filter_level": "block_medium_and_above",
             "person_generation": "allow_adult",
         }
-        if is_restore and ref:
+        if is_outpaint:
+            parameters.update({
+                "reference_mode": "outpaint_full_body",
+                "outpaint_direction": "downward",
+                "head_to_toe": True,
+            })
+        elif is_restore and ref:
             parameters.update({
                 "reference_mode": "restore_upscale",
                 "fidelity_lock": f"{int(ref.fidelity_lock * 100)}%",

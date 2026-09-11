@@ -19,10 +19,15 @@ class MidjourneyAdapter(BaseAdapter):
 
         is_restore = ref and ref.mode == ReferenceMode.RESTORE_UPSCALE
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
+        is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
 
         # 1. Subject description
         core_elements = []
-        if is_restore:
+        if is_outpaint:
+            core_elements.append(
+                "full body downward outpaint extension of reference photo head-to-toe with shoes, preserving facial identity and clothing"
+            )
+        elif is_restore:
             core_elements.append("optical remaster and high-resolution restoration of reference image")
         elif is_transform:
             core_elements.append("reference-guided photographic adaptation with biometric character lock")
@@ -58,16 +63,22 @@ class MidjourneyAdapter(BaseAdapter):
         prompt_parts.extend(camera_tokens)
 
         # 3. Studio lighting and physical texture
-        prompt_parts.extend(
-            [
-                lighting.primary_lighting,
-                "negative fill flags",
-                "resolved epidermal skin pores",
-                "fine vellus hair",
-                "subsurface scattering",
-                "natural material micro-relief",
-            ]
-        )
+        lighting_tokens = [
+            lighting.primary_lighting,
+            "negative fill flags",
+            "resolved epidermal skin pores",
+            "fine vellus hair",
+            "subsurface scattering",
+            "natural material micro-relief",
+        ]
+        if scene.sharpness_protocol:
+            lighting_tokens.extend([
+                "focus locked on near eye",
+                "eyelashes tack sharp",
+                "iris crisp detail",
+                "zero motion blur",
+            ])
+        prompt_parts.extend(lighting_tokens)
 
         if scene.custom_positives:
             prompt_parts.extend(scene.custom_positives)
@@ -83,6 +94,8 @@ class MidjourneyAdapter(BaseAdapter):
             flags.extend(["--iw 2.0", "--cw 100"])
         elif is_transform:
             flags.extend(["--cref [REFERENCE_IMAGE_URL]", "--cw 80", "--iw 1.5"])
+        elif is_outpaint:
+            flags.extend(["--cref [REFERENCE_IMAGE_URL]", "--cw 100"])
 
         # Negative items for --no flag
         banned_mj = [
@@ -96,7 +109,19 @@ class MidjourneyAdapter(BaseAdapter):
             "computational bokeh",
             "blown highlights",
         ]
-        if is_restore or is_transform:
+        if scene.suppress_text_branding:
+            banned_mj.extend([
+                "text",
+                "watermark",
+                "logo",
+                "brand name",
+                "typography",
+                "letters",
+                "words",
+                "signature",
+                "label",
+            ])
+        if is_restore or is_transform or is_outpaint:
             banned_mj.extend([
                 "facial morphing",
                 "identity drift",
@@ -104,13 +129,21 @@ class MidjourneyAdapter(BaseAdapter):
                 "warped face",
                 "altered bone structure",
             ])
+        if is_outpaint:
+            banned_mj.extend([
+                "mismatched shoes",
+                "twisted legs",
+                "floating feet",
+                "deformed footwear",
+                "wrong shadows",
+            ])
         if scene.custom_negatives:
             banned_mj.extend(scene.custom_negatives)
 
         no_flag = f"--no {', '.join(dict.fromkeys(banned_mj))}"
         flags.append(no_flag)
 
-        prefix = "[REFERENCE_IMAGE_URL] " if is_restore else ""
+        prefix = "[REFERENCE_IMAGE_URL] " if (is_restore or is_outpaint) else ""
         positive_base = prefix + ", ".join(prompt_parts)
         full_mj_prompt = f"{positive_base} {' '.join(flags)}"
 

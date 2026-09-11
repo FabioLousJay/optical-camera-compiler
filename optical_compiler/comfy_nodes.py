@@ -8,7 +8,10 @@ from .compiler import compile_scene
 from .models import ReferenceImageInput, ReferenceMode, SceneInput
 
 RIG_NAMES = [
+    "Sony a1 II Stacked Full-Frame (ILCE-1M2)",
     "Phase One XF IQ4 150MP Trichromatic",
+    "Canon EOS R5 Mark II Stacked Full-Frame",
+    "Nikon Z 9 Stacked Flagship Full-Frame",
     "Hasselblad H6D-100c Studio Medium Format",
     "Leica M11 Rangefinder 60MP",
     "Fujifilm GFX 100 II High-Speed Medium Format",
@@ -21,7 +24,10 @@ RIG_NAMES = [
 ]
 
 RIG_NAME_TO_ID = {
+    "Sony a1 II Stacked Full-Frame (ILCE-1M2)": "sony_a1_ii",
     "Phase One XF IQ4 150MP Trichromatic": "phase_one_iq4",
+    "Canon EOS R5 Mark II Stacked Full-Frame": "canon_eos_r5_ii",
+    "Nikon Z 9 Stacked Flagship Full-Frame": "nikon_z9",
     "Hasselblad H6D-100c Studio Medium Format": "hasselblad_h6d",
     "Leica M11 Rangefinder 60MP": "leica_m11",
     "Fujifilm GFX 100 II High-Speed Medium Format": "fujifilm_gfx100ii",
@@ -42,7 +48,10 @@ class OpticalCameraCompilerNode:
         return {
             "required": {
                 "camera_rig": (RIG_NAMES, {"default": RIG_NAMES[0]}),
-                "model_target": (["flux", "imagen", "midjourney", "sdxl"], {"default": "flux"}),
+                "model_target": (
+                    ["gpt_images", "imagen", "midjourney", "flux", "sdxl"],
+                    {"default": "gpt_images"},
+                ),
                 "subject": (
                     "STRING",
                     {
@@ -67,11 +76,11 @@ class OpticalCameraCompilerNode:
                     },
                 ),
                 "aspect_ratio": (
-                    ["native", "1:1", "4:5", "3:2", "16:9", "21:9", "9:16"],
-                    {"default": "native"},
+                    ["native", "9:11", "4:5", "3:2", "4:3", "5:4", "16:9", "1:1", "21:9", "9:16"],
+                    {"default": "9:11"},
                 ),
                 "reference_mode": (
-                    ["disabled", "transform_adapt", "restore_upscale"],
+                    ["disabled", "transform_adapt", "restore_upscale", "outpaint_full_body"],
                     {"default": "disabled"},
                 ),
                 "fidelity_lock": (
@@ -79,6 +88,8 @@ class OpticalCameraCompilerNode:
                     {"default": 0.85, "min": 0.10, "max": 1.0, "step": 0.05, "round": 0.01},
                 ),
                 "anti_drift_biometrics": (["enabled", "disabled"], {"default": "enabled"}),
+                "brutal_sharpness_protocol": (["enabled", "disabled"], {"default": "enabled"}),
+                "suppress_text_branding": (["enabled", "disabled"], {"default": "enabled"}),
                 "append_negative_shield": (["yes", "no"], {"default": "yes"}),
             },
         }
@@ -95,21 +106,24 @@ class OpticalCameraCompilerNode:
         subject: str,
         environment: str = "",
         lighting_override: str = "",
-        aspect_ratio: str = "native",
+        aspect_ratio: str = "9:11",
         reference_mode: str = "disabled",
         fidelity_lock: float = 0.85,
         anti_drift_biometrics: str = "enabled",
+        brutal_sharpness_protocol: str = "enabled",
+        suppress_text_branding: str = "enabled",
         append_negative_shield: str = "yes",
     ) -> tuple[str, str, str]:
-        profile_id = RIG_NAME_TO_ID.get(camera_rig, "phase_one_iq4")
+        profile_id = RIG_NAME_TO_ID.get(camera_rig, "sony_a1_ii")
 
         ref_input = None
-        if reference_mode in ("transform_adapt", "restore_upscale"):
-            ref_mode = (
-                ReferenceMode.TRANSFORM_ADAPT
-                if reference_mode == "transform_adapt"
-                else ReferenceMode.RESTORE_UPSCALE
-            )
+        if reference_mode in ("transform_adapt", "restore_upscale", "outpaint_full_body"):
+            mode_map = {
+                "transform_adapt": ReferenceMode.TRANSFORM_ADAPT,
+                "restore_upscale": ReferenceMode.RESTORE_UPSCALE,
+                "outpaint_full_body": ReferenceMode.OUTPAINT_FULL_BODY,
+            }
+            ref_mode = mode_map.get(reference_mode, ReferenceMode.NONE)
             elements = (
                 [
                     "facial geometry",
@@ -128,7 +142,7 @@ class OpticalCameraCompilerNode:
                 denoise_strength=round(1.0 - float(fidelity_lock), 2),
             )
 
-        ar_val = "4:5" if aspect_ratio == "native" else aspect_ratio
+        ar_val = "9:11" if aspect_ratio == "native" else aspect_ratio
 
         scene = SceneInput(
             subject=subject.strip(),
@@ -136,6 +150,8 @@ class OpticalCameraCompilerNode:
             lighting=lighting_override.strip() if lighting_override.strip() else None,
             aspect_ratio=ar_val,
             reference=ref_input,
+            sharpness_protocol=(brutal_sharpness_protocol == "enabled"),
+            suppress_text_branding=(suppress_text_branding == "enabled"),
         )
 
         result = compile_scene(

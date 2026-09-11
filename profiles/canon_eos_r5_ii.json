@@ -1,0 +1,50 @@
+{
+  "profile_id": "canon_eos_r5_ii",
+  "title": "Canon EOS R5 Mark II Stacked Full-Frame",
+  "schema_version": "2.0",
+  "purpose": "Flagship high-speed stacked full-frame portrait baseline with modern RF optical primes.",
+  "sensor_and_optics": {
+    "camera_system": "Canon EOS R5 Mark II",
+    "sensor_type": "35mm full-frame back-illuminated stacked CMOS",
+    "sensor_dimensions": "36x24mm full-frame stacked sensor (45.0MP)",
+    "full_frame_equivalent": "35mm native field of view",
+    "lens": "Canon RF 85mm F1.2L USM (9/13 elements, 9 circular blades)",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 100 base sensor sensitivity",
+    "dynamic_range": "14.8 stops dynamic range with 14-bit Dual Pixel RAW",
+    "shutter": "Electronic stacked focal-plane shutter with 1/250s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Flash-dominated studio strobe exposure, 1/250s sync, ISO 100",
+    "light_transport": "Key light 35 to 45 degrees off-axis slightly above eye line, minimal fill, deep negative fill flag on shadow side for high micro-contrast, low-power edge separation rim light"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Natural epidermal skin texture with resolved pores, fine vellus hair, and authentic Canon skin-tone color science",
+      "True material micro-relief: fabric weave, micro-abrasions, uncompressed highlight roll-off",
+      "High optical acutance without digital edge halos or unsharp masking artifacts",
+      "Clean editorial clarity without artificial smoothing, no diffusion, no haze"
+    ],
+    "depth_and_optics": [
+      "Focus locked on the near eye with iris and eyelashes tack sharp, absolute zero motion blur",
+      "Organic focus roll-off characteristic of high-acutance 85mm L-series glass at f/5.6",
+      "Zero perspective distortion, clean rectilinear projection"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "soft focus", "blur", "motion blur", "haze", "diffusion", "dreamy glow",
+      "CGI", "synthetic rendering", "3D render", "illustration", "digital sharpening halos",
+      "chromatic aberration", "denoise smearing", "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "oversmoothed skin", "airbrushed skin", "heavy beauty filter",
+      "computational bokeh", "blown highlights", "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "wide angle", "fisheye", "distorted perspective", "warped anatomy",
+      "extra fingers", "extra limbs", "duplicated body parts", "inconsistent clothing"
+    ]
+  },
+  "execution_directive": "Enforce high-resolution stacked full-frame raw capture at 45MP. Prioritize eye-tracking focus lock and negative fill contrast carving."
+}

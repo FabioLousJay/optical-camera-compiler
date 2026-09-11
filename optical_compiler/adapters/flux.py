@@ -23,6 +23,7 @@ class FluxAdapter(BaseAdapter):
 
         is_restore = ref and ref.mode == ReferenceMode.RESTORE_UPSCALE
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
+        is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
 
         # 1. Subject & Scene
         subject_desc = scene.subject
@@ -35,7 +36,14 @@ class FluxAdapter(BaseAdapter):
         if scene.mood:
             subject_desc += f", {scene.mood}"
 
-        if is_restore:
+        if is_outpaint:
+            sections.append(
+                "Using the provided medium-shot photo as the base. Outpaint and extend the frame downward to a full-body portrait. "
+                "Preserve the subject's face, identity, expression, hair, and skin texture exactly as in the input image. "
+                "Keep the same wardrobe, colors, fabric texture, and wrinkles. Maintain the same camera height and perspective. "
+                f"No wide-angle distortion. Full body head-to-toe visible including shoes. Depicting {subject_desc}."
+            )
+        elif is_restore:
             sections.append(
                 f"Master optical remaster and high-resolution restoration of source reference image. "
                 f"Photo of {subject_desc} with 1:1 biometric identity lock and physical surface reconstruction."
@@ -81,43 +89,65 @@ class FluxAdapter(BaseAdapter):
         sections.append(lighting_desc)
 
         # 4. Micro-texture & physical rendering
-        micro_desc = (
-            f"Sensor detail: {micro.surface_rendering[0]}. "
-            f"{micro.surface_rendering[1]}. "
-            f"{micro.surface_rendering[2]}. "
+        micro_parts = [
+            f"Sensor detail: {micro.surface_rendering[0]}.",
+            f"{micro.surface_rendering[1]}.",
+            f"{micro.surface_rendering[2]}.",
             f"{micro.depth_and_optics[0]} and {micro.depth_and_optics[1].lower()}."
-        )
-        sections.append(micro_desc)
+        ]
+        if scene.sharpness_protocol:
+            micro_parts.append(
+                "Focus discipline: focus locked on near eye with eyelashes and iris tack sharp, zero motion blur."
+            )
+        sections.append(" ".join(micro_parts))
 
-        # 5. Anti-synthetic assertions woven directly into prompt (critical for Flux)
+        # 5. Anti-synthetic assertions & Quality scaling
+        res_text = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
         banned_tropes = (
+            f"Output: {res_text}, uncompressed 16-bit raw capture, lossless acutance, zero chroma subsampling. "
             "Eliminate plastic or poreless airbrushed skin, synthetic beauty filters, "
             "fake computational bokeh, digital sharpening halos, chromatic aberration, "
             "and CGI 3D render looks."
         )
-        if is_restore or is_transform:
+        if scene.suppress_text_branding:
+            banned_tropes += " Eliminate all text, watermarks, logos, brand names, and typography."
+        if is_restore or is_transform or is_outpaint:
             banned_tropes += (
                 " Eliminate facial morphing, identity loss, altered bone structure, "
                 "warped geometry, and hallucinated anatomical features."
             )
+        if is_outpaint:
+            banned_tropes += " Eliminate mismatched shoes, twisted legs, floating feet, and distorted scale."
         sections.append(banned_tropes)
 
         positive_prompt = " ".join(sections)
 
-        # Flux typically runs without CFG-based negative prompts, but we retain it for pipelines that support it
-        include_anti_drift = bool(is_restore or is_transform)
-        all_negatives = shield.all_tokens(include_anti_drift=include_anti_drift)
+        # Negative prompt payload
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint)
+        all_negatives = shield.all_tokens(
+            include_anti_drift=include_anti_drift,
+            include_branding=scene.suppress_text_branding,
+            include_compression=True,
+            include_outpaint=is_outpaint,
+        )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
         negative_prompt = ", ".join(dict.fromkeys(all_negatives))
 
         parameters = {
             "aspect_ratio": scene.aspect_ratio,
+            "resolution": res_text,
             "guidance_scale": 3.5,
             "num_inference_steps": 28,
         }
 
-        if is_restore and ref:
+        if is_outpaint:
+            parameters.update({
+                "reference_mode": "outpaint_full_body",
+                "outpaint_direction": "downward",
+                "head_to_toe": True,
+            })
+        elif is_restore and ref:
             parameters.update({
                 "reference_mode": "restore_upscale",
                 "denoising_strength": ref.denoise_strength,

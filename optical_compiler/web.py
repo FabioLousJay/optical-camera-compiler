@@ -892,17 +892,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div id="refControls" style="display: none; flex-direction: column; gap: 0.75rem; margin-top: 0.15rem;">
           <div class="field-group">
             <label>Reference Workflow Mode</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem;">
               <button type="button" class="mode-card active" id="btnModeRestore" onclick="setRefMode('restore')">
-                <div style="font-size: 0.76rem; font-weight: 700; color: #fff;">🔬 Max-Fidelity Remaster</div>
-                <div style="font-size: 0.66rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.35;">
-                  1:1 Identity lock, upscale to chosen 150MP rig, zero drift
+                <div style="font-size: 0.73rem; font-weight: 700; color: #fff;">🔬 Remaster</div>
+                <div style="font-size: 0.63rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.3;">
+                  1:1 Identity lock & 150MP upscale
                 </div>
               </button>
               <button type="button" class="mode-card" id="btnModeTransform" onclick="setRefMode('transform')">
-                <div style="font-size: 0.76rem; font-weight: 700; color: #fff;">🎨 Re-Shoot & Adapt</div>
-                <div style="font-size: 0.66rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.35;">
-                  Transform context/wardrobe while locking facial bones & gaze
+                <div style="font-size: 0.73rem; font-weight: 700; color: #fff;">🎨 Re-Shoot</div>
+                <div style="font-size: 0.63rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.3;">
+                  Adapt scene while locking bones & gaze
+                </div>
+              </button>
+              <button type="button" class="mode-card" id="btnModeOutpaint" onclick="setRefMode('outpaint')">
+                <div style="font-size: 0.73rem; font-weight: 700; color: #fff;">📐 Outpaint</div>
+                <div style="font-size: 0.63rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.3;">
+                  Extend down head-to-toe with shoes
                 </div>
               </button>
             </div>
@@ -967,13 +973,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             </select>
           </div>
           <div class="field-group">
-            <label for="aspectSelect">Frame Aspect Ratio</label>
+            <label for="aspectSelect">Frame Aspect Ratio & Resolution</label>
             <select id="aspectSelect" onchange="debounceCompile()">
-              <option value="4:5" selected>4:5 (Medium Format Portrait)</option>
-              <option value="1:1">1:1 (Hasselblad Square 6x6)</option>
-              <option value="16:9">16:9 (Cinematic Widescreen)</option>
-              <option value="2.39:1">2.39:1 (Anamorphic Scope)</option>
-              <option value="3:2">3:2 (35mm Standard)</option>
+              <option value="9:11" selected>9:11 (12MP PNG, 3132x3828 — High-End Editorial Portrait)</option>
+              <option value="4:5">4:5 (12MP PNG, 3100x3875 — Standard Portrait)</option>
+              <option value="3:2">3:2 (12MP PNG, 4248x2832 — Classic 35mm)</option>
+              <option value="4:3">4:3 (12MP PNG, 4000x3000 — Medium Format Standard)</option>
+              <option value="5:4">5:4 (12MP PNG, 3875x3100 — Large Format Sheet)</option>
+              <option value="16:9">16:9 (8K UHD, 7680x4320, 33.2MP uncompressed)</option>
+              <option value="1:1">1:1 (12MP PNG, 3464x3464 — Square 6x6)</option>
+              <option value="21:9">21:9 (Anamorphic Scope)</option>
               <option value="9:16">9:16 (Vertical Story)</option>
             </select>
           </div>
@@ -988,8 +997,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div class="field-group">
           <label for="lightingSelect">Lighting Rig & Modifiers</label>
           <select id="lightingSelect" onchange="debounceCompile()">
-            <option value="window_daylight" selected>Directional Daylight with Soft Diffusion, Organic Natural Falloff</option>
-            <option value="strobe_para">Studio Strobe: Broncolor Para 220 + Black Foam-Core Negative Fill (1/1600s Leaf Sync)</option>
+            <option value="strobe_para" selected>Studio Strobe: 35-45° Directional Key + Black Flag Negative Fill (Deep Contrast)</option>
+            <option value="window_daylight">Directional Daylight with Soft Diffusion, Organic Natural Falloff</option>
             <option value="beauty_dish">High-Fashion Beauty Dish with 20° Honeycomb Grid & Diffuser Sock</option>
             <option value="rembrandt_key">Dramatic Chiaroscuro / Rembrandt Single-Source Key (4:1 Contrast Ratio)</option>
             <option value="golden_hour">Low-Angle Golden Hour Sunlight with Unbleached Muslin Bounce</option>
@@ -1016,13 +1025,35 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <div class="field-group">
             <label for="shutterSelect">Shutter & Motion</label>
             <select id="shutterSelect" onchange="debounceCompile()">
-              <option value="shutter_125" selected>1/125s Natural Handheld Shutter</option>
-              <option value="sync_1600">1/1600s Leaf Shutter Flash Freeze</option>
+              <option value="sync_1600" selected>1/1600s Leaf Shutter Flash Freeze</option>
+              <option value="sync_400">1/400s High-Speed Sync (Sony a1 II Stacked Freeze)</option>
               <option value="sync_500">1/500s Strobe Synchronized Action Freeze</option>
+              <option value="shutter_125">1/125s Natural Handheld Shutter</option>
               <option value="shutter_180">180° Cinema Shutter Angle (1/48s Cadence)</option>
               <option value="shutter_drag">1/15s Shutter Drag with Rear-Curtain Flash</option>
             </select>
           </div>
+        </div>
+      </div>
+
+      <!-- 05. BRUTAL SHARPNESS & QUALITY ENFORCEMENT -->
+      <div class="panel-section">
+        <div class="section-header">
+          <div class="section-title">05. Brutal Sharpness & Quality Shields</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.2rem;">
+          <label class="check-item" style="font-weight: 600;">
+            <input type="checkbox" id="chkSharpness" checked onchange="debounceCompile()"> 
+            <span>⚡ Brutal Sharpness Protocol (Near-Eye Focus Lock, Iris & Eyelash Acutance, Stability Cues)</span>
+          </label>
+          <label class="check-item" style="font-weight: 600;">
+            <input type="checkbox" id="chkAntiBrand" checked onchange="debounceCompile()"> 
+            <span>🚫 Anti-Brand & Anti-Text Shield (Suppresses logos, brand names, typography, and watermarks)</span>
+          </label>
+          <label class="check-item" style="font-weight: 600;">
+            <input type="checkbox" id="chkMaxQuality" checked onchange="debounceCompile()"> 
+            <span>💎 12MP / 8K UHD Lossless Bitrate Enforcer (Zero JPEG compression, uncompressed 16-bit raster)</span>
+          </label>
         </div>
       </div>
 
@@ -1032,11 +1063,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div class="output-panel">
       <div class="tabs-bar">
         <div class="tabs">
-          <button class="tab active" onclick="setTarget('imagen')">Google Imagen 3</button>
-          <button class="tab" onclick="setTarget('flux')">Flux.1 (Dev/Schnell)</button>
-          <button class="tab" onclick="setTarget('midjourney')">Midjourney (v6+)</button>
-          <button class="tab" onclick="setTarget('sdxl')">SDXL Dual</button>
-          <button class="tab" onclick="setTarget('raw')">Raw Spec Audit</button>
+          <button class="tab active" onclick="setTarget('gpt_images')">🤖 GPT Images (ChatGPT)</button>
+          <button class="tab" onclick="setTarget('imagen')">♊ Gemini Images (Imagen 3)</button>
+          <button class="tab" onclick="setTarget('midjourney')">⛵ Midjourney (v6.1)</button>
+          <button class="tab" onclick="setTarget('flux')">⚡ Flux.1 (Dev/Schnell)</button>
+          <button class="tab" onclick="setTarget('sdxl')">🎨 SDXL Dual</button>
+          <button class="tab" onclick="setTarget('raw')">📋 Raw Spec Audit</button>
         </div>
         <button class="action-btn" onclick="copyPrompt('unified')">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
@@ -1091,7 +1123,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="toast" id="toast">Copied prompt to clipboard!</div>
 
   <script>
-    let activeTarget = 'imagen';
+    let activeTarget = 'gpt_images';
     let activeAperture = 'f/2.8';
     let availableProfiles = [];
     let compileTimer = null;
@@ -1100,6 +1132,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     // Lens catalog mapped to camera systems
     const LENS_CATALOG = {
+      sony_a1_ii: [
+        "Sony FE 85mm F1.4 GM II (SEL85F14GM2) [High Hit-Rate Portrait]",
+        "Sony FE 50mm F1.2 GM (SEL50F12GM) [Environmental Micro-Contrast]",
+        "Sony FE 135mm F1.8 GM (SEL135F18GM) [Compression Texture Monster]"
+      ],
+      canon_eos_r5_ii: [
+        "Canon RF 85mm F1.2L USM (Reference Portrait Prime)",
+        "Canon RF 50mm F1.2L USM (Micro-Contrast & Natural DOF)",
+        "Canon RF 135mm F1.8L IS USM (Subject Separation & IS)"
+      ],
+      nikon_z9: [
+        "NIKKOR Z 135mm f/1.8 S Plena (Zero Vignetting Texture Monster)",
+        "NIKKOR Z 85mm f/1.2 S (Reference Portrait Prime)",
+        "NIKKOR Z 50mm f/1.2 S (High-Acutance Standard)"
+      ],
       phase_one_iq4: [
         "Schneider Kreuznach 80mm LS f/2.8 Blue Ring (Standard Reference)",
         "Schneider Kreuznach 55mm LS f/2.8 Blue Ring (Wide Architectural)",
@@ -1578,9 +1625,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       activeRefMode = mode;
       document.getElementById('btnModeRestore').classList.toggle('active', mode === 'restore');
       document.getElementById('btnModeTransform').classList.toggle('active', mode === 'transform');
+      const btnOut = document.getElementById('btnModeOutpaint');
+      if (btnOut) btnOut.classList.toggle('active', mode === 'outpaint');
 
       const slider = document.getElementById('fidelitySlider');
       if (mode === 'restore' && parseInt(slider.value, 10) < 90) {
+        slider.value = 95;
+      } else if (mode === 'outpaint') {
         slider.value = 95;
       } else if (mode === 'transform' && parseInt(slider.value, 10) > 90) {
         slider.value = 85;
@@ -1610,9 +1661,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       } else if (activeRefMode === 'restore') {
         badge.textContent = "ACTIVE // 1:1 RESTORE & REMASTER";
         badge.style.color = "var(--accent-cyan)";
-      } else {
-        badge.textContent = "ACTIVE // ADAPT & RE-SHOOT";
+      } else if (activeRefMode === 'outpaint') {
+        badge.textContent = "ACTIVE // FULL-BODY OUTPAINT";
         badge.style.color = "var(--accent-amber)";
+      } else {
+        badge.textContent = "ACTIVE // RE-SHOOT & ADAPT";
+        badge.style.color = "var(--accent-blue)";
       }
     }
 
@@ -1815,7 +1869,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       document.querySelectorAll('.tab').forEach(t => {
         t.classList.toggle('active', t.getAttribute('onclick').includes(engine));
       });
-      document.getElementById('targetBadge').textContent = engine.toUpperCase();
+      const badgeMap = {
+        gpt_images: "GPT IMAGES // MASTER EXECUTION PROMPT",
+        imagen: "GEMINI IMAGES // IMAGEN 3 PROSE",
+        midjourney: "MIDJOURNEY v6.1 // RAW SPEC",
+        flux: "FLUX.1 // DIRECT PHYSICAL SPEC",
+        sdxl: "SDXL DUAL // POSITIVE + NEGATIVE CHANNELS",
+        raw: "RAW HARDWARE AUDIT // JSON/YAML",
+      };
+      document.getElementById('targetBadge').textContent = badgeMap[engine] || engine.toUpperCase();
       compile();
     }
 
@@ -1829,8 +1891,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const selectedLens = customLens || document.getElementById('lensSelect').value;
 
       const lightingMap = {
+        strobe_para: "Studio Strobe: 35-45° Directional Key with Black Foam-Core Negative Fill, single-axis specular catchlight (1/1600s leaf sync)",
         window_daylight: "Directional Daylight with Soft Diffusion, Organic Natural Falloff",
-        strobe_para: "Studio Strobe: Broncolor Para 220 with Black Foam-Core Negative Fill, single-axis specular catchlight (1/1600s leaf sync)",
         beauty_dish: "High-Fashion Beauty Dish with 20° Honeycomb Grid & Diffuser Sock, sculpted shadow cheekbones",
         rembrandt_key: "Dramatic Chiaroscuro / Rembrandt Single-Source Key with Deep Negative Fill (4:1 Contrast Ratio)",
         golden_hour: "Low-Angle Golden Hour Sunlight with Unbleached Muslin Bounce, warm rim flare",
@@ -1861,9 +1923,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       };
 
       const shutterMap = {
-        shutter_125: "1/125s Natural Handheld Exposure",
         sync_1600: "1/1600s Leaf Shutter High-Speed Sync Freeze",
+        sync_400: "1/400s High-Speed Sync (Sony a1 II Stacked Freeze)",
         sync_500: "1/500s Strobe Synchronized Action Freeze",
+        shutter_125: "1/125s Natural Handheld Exposure",
         shutter_180: "180° Cinema Shutter Angle (1/48s Organic Motion Cadence)",
         shutter_drag: "1/15s Shutter Drag with Rear-Curtain Flash Trace"
       };
@@ -1877,11 +1940,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         if (document.getElementById('chkLighting').checked) preserved.push("lighting falloff and mood");
 
         const fidelityVal = parseInt(document.getElementById('fidelitySlider').value, 10) / 100;
-        const denoiseVal = activeRefMode === 'restore' ? 0.35 : 0.65;
+        const denoiseVal = activeRefMode === 'restore' ? 0.35 : (activeRefMode === 'outpaint' ? 0.40 : 0.65);
+
+        let refModeStr = "restore_upscale";
+        if (activeRefMode === 'transform') refModeStr = "transform_adapt";
+        if (activeRefMode === 'outpaint') refModeStr = "outpaint_full_body";
 
         refPayload = {
           filename: refData.filename,
-          mode: activeRefMode === 'restore' ? "restore_upscale" : "transform_adapt",
+          mode: refModeStr,
           fidelity_lock: fidelityVal,
           denoise_strength: denoiseVal,
           detected_aspect_ratio: refData.aspect_ratio,
@@ -1889,10 +1956,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         };
       }
 
+      const aspectEl = document.getElementById('aspectSelect');
+      const selectedResText = aspectEl && aspectEl.selectedOptions && aspectEl.selectedOptions[0] ? aspectEl.selectedOptions[0].text : null;
+
       const payload = {
         scene: document.getElementById('subjectInput').value || 'Subject',
         target: activeTarget,
-        profile: document.getElementById('profileSelect').value || 'phase_one_iq4',
+        profile: document.getElementById('profileSelect').value || 'sony_a1_ii',
         framing: document.getElementById('framingInput').value,
         environment: document.getElementById('environmentInput').value,
         wardrobe: document.getElementById('wardrobeInput').value,
@@ -1904,7 +1974,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         film_stock: filmMap[document.getElementById('filmStockSelect').value],
         optical_filter: filterMap[document.getElementById('filterSelect').value],
         shutter_speed: shutterMap[document.getElementById('shutterSelect').value],
-        reference: refPayload
+        reference: refPayload,
+        sharpness_protocol: document.getElementById('chkSharpness') ? document.getElementById('chkSharpness').checked : true,
+        suppress_text_branding: document.getElementById('chkAntiBrand') ? document.getElementById('chkAntiBrand').checked : true,
+        output_resolution: selectedResText,
       };
 
       try {
@@ -2099,6 +2172,9 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 custom_positives=body.get("custom_positives"),
                 custom_negatives=body.get("custom_negatives"),
                 reference=body.get("reference"),
+                sharpness_protocol=body.get("sharpness_protocol", True),
+                output_resolution=body.get("output_resolution"),
+                suppress_text_branding=body.get("suppress_text_branding", True),
             )
             self._send_json(payload.to_dict())
         except Exception as err:

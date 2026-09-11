@@ -1,0 +1,50 @@
+{
+  "profile_id": "nikon_z9",
+  "title": "Nikon Z 9 Stacked Flagship Full-Frame",
+  "schema_version": "2.0",
+  "purpose": "Flagship stacked full-frame reference baseline with NIKKOR Z Plena optics and zero rolling shutter.",
+  "sensor_and_optics": {
+    "camera_system": "Nikon Z 9",
+    "sensor_type": "35mm full-frame stacked CMOS without mechanical shutter",
+    "sensor_dimensions": "35.9x23.9mm full-frame stacked sensor (45.7MP)",
+    "full_frame_equivalent": "35mm native field of view",
+    "lens": "NIKKOR Z 135mm f/1.8 S Plena (14/16 elements, 11 rounded blades)",
+    "aperture_sweet_spot": "f/5.0",
+    "iso_base": "ISO 64 base sensor sensitivity",
+    "dynamic_range": "15 stops dynamic range with High-Efficiency RAW",
+    "shutter": "Pure electronic stacked sensor readout with 1/200s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Flash-dominated exposure with strobe to freeze micro motion, 1/200s sync, ISO 64",
+    "light_transport": "Harder key light 35 to 45 degrees off-axis for defined texture and edge contrast, strong negative fill close to face on shadow side, dark background to prevent spill"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Hyper-detailed epidermal skin texture with resolved pores and natural dermal micro-relief",
+      "Pristine corner-to-corner acutance characteristic of Plena optics with zero vignetting",
+      "True material micro-relief: fabric weave, micro-abrasions, uncompressed specular highlight roll-off",
+      "No digital sharpening halos, no diffusion, no haze"
+    ],
+    "depth_and_optics": [
+      "Focus locked on the near eye with eyelashes and iris tack sharp, absolute zero motion blur",
+      "Telephoto perspective compression at 135mm with f/5.0 depth of field stability",
+      "Zero perspective distortion, clean rectilinear projection"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "soft focus", "blur", "motion blur", "haze", "diffusion", "dreamy glow",
+      "CGI", "synthetic rendering", "3D render", "illustration", "digital sharpening halos",
+      "chromatic aberration", "denoise smearing", "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "oversmoothed skin", "airbrushed skin", "heavy beauty filter",
+      "computational bokeh", "blown highlights", "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "wide angle", "fisheye", "distorted perspective", "warped anatomy",
+      "extra fingers", "extra limbs", "duplicated body parts", "inconsistent clothing"
+    ]
+  },
+  "execution_directive": "Enforce stacked full-frame raw fidelity at 45.7MP with ISO 64 base sensitivity and NIKKOR Plena telephoto compression."
+}

@@ -50,12 +50,15 @@ class OpticalCompiler:
         custom_positives: Optional[list[str]] = None,
         custom_negatives: Optional[list[str]] = None,
         reference: Optional[Union[ReferenceImageInput, dict[str, Any]]] = None,
+        sharpness_protocol: bool = True,
+        output_resolution: Optional[str] = None,
+        suppress_text_branding: bool = True,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
         Args:
             scene: Plain text description of the subject/scene, or a pre-configured SceneInput.
-            target: Target diffusion engine ('imagen', 'flux', 'sdxl', 'midjourney', 'raw').
+            target: Target diffusion engine ('gpt_images', 'imagen', 'midjourney', 'flux', 'sdxl', 'raw').
             framing: Optional framing (e.g. 'tight macro portrait', 'three-quarter editorial').
             environment: Optional environment/background description.
             wardrobe: Optional styling and wardrobe description.
@@ -63,13 +66,17 @@ class OpticalCompiler:
             aperture: Override lens aperture (e.g. 'f/4', 'f/2.8').
             lens: Override lens model (e.g. 'Schneider Kreuznach 150mm LS f/3.5').
             lighting: Override lighting setup.
-            aspect_ratio: Aspect ratio (default '4:5').
+            aspect_ratio: Aspect ratio (default '4:5' or '9:11').
             film_stock: Film stock or sensor color science (e.g. 'Kodak Portra 400', 'Cinestill 800T').
             optical_filter: Optical diffusion or polarizer (e.g. 'Tiffen Black Pro-Mist 1/8').
             shutter_speed: Shutter speed or motion cadence.
             lighting_modifier: Specific lighting modifier (e.g. 'Broncolor Para 220').
             custom_positives: Additional positive tokens.
             custom_negatives: Additional negative tokens.
+            reference: Reference image metadata and anti-drift settings.
+            sharpness_protocol: Enforce near-eye focus lock, iris sharpness, and stability cues.
+            output_resolution: Exact uncompressed output target (e.g. '12MP PNG, vertical 9:11').
+            suppress_text_branding: Actively eliminate text, brand names, logos, and watermarks.
 
         Returns:
             CompiledPayload with positive prompt, negative prompt, parameters, and metadata.
@@ -79,17 +86,11 @@ class OpticalCompiler:
         if isinstance(reference, ReferenceImageInput):
             ref_obj = reference
         elif isinstance(reference, dict):
-            mode_val = reference.get("mode")
-            mode = (
-                mode_val
-                if isinstance(mode_val, ReferenceMode)
-                else ReferenceMode.from_str(str(mode_val))
-            )
             ref_obj = ReferenceImageInput(
                 filename=reference.get("filename"),
                 file_path=reference.get("file_path"),
                 data_uri=reference.get("data_uri"),
-                mode=mode,
+                mode=ReferenceMode.from_str(reference.get("mode")),
                 denoise_strength=float(reference.get("denoise_strength", 0.35)),
                 fidelity_lock=float(reference.get("fidelity_lock", 0.95)),
                 detected_aspect_ratio=reference.get("detected_aspect_ratio"),
@@ -106,7 +107,7 @@ class OpticalCompiler:
                 ),
             )
 
-        # 2. Normalize SceneInput
+        # 2. Build SceneInput
         if isinstance(scene, str):
             scene_input = SceneInput(
                 subject=scene.strip(),
@@ -125,6 +126,9 @@ class OpticalCompiler:
                 custom_positives=custom_positives or [],
                 custom_negatives=custom_negatives or [],
                 reference=ref_obj,
+                sharpness_protocol=sharpness_protocol,
+                output_resolution=output_resolution,
+                suppress_text_branding=suppress_text_branding,
             )
         else:
             scene_input = scene
@@ -159,6 +163,10 @@ class OpticalCompiler:
                 scene_input.custom_negatives.extend(custom_negatives)
             if ref_obj:
                 scene_input.reference = ref_obj
+            scene_input.sharpness_protocol = sharpness_protocol
+            if output_resolution:
+                scene_input.output_resolution = output_resolution
+            scene_input.suppress_text_branding = suppress_text_branding
 
         # 3. Parse target engine
         engine = (
@@ -182,10 +190,12 @@ class OpticalCompiler:
         """Compile the scene across all registered generation targets at once."""
         results = {}
         for engine in [
+            TargetEngine.GPT_IMAGES,
             TargetEngine.IMAGEN,
+            TargetEngine.MIDJOURNEY,
             TargetEngine.FLUX,
             TargetEngine.SDXL,
-            TargetEngine.MIDJOURNEY,
+            TargetEngine.RAW,
         ]:
             results[engine.value] = self.compile(scene, target=engine, **kwargs)
         return results
@@ -194,9 +204,29 @@ class OpticalCompiler:
 def compile_scene(
     scene: Union[str, SceneInput],
     profile_name_or_path: str = "phase_one_iq4",
-    target_model: Union[str, TargetEngine] = TargetEngine.FLUX,
+    target_model: Union[str, TargetEngine] = TargetEngine.GPT_IMAGES,
     **kwargs: Any,
 ) -> CompiledPayload:
     """Convenience helper to initialize compiler and compile a scene in one call."""
     compiler = OpticalCompiler(profile_name_or_path)
     return compiler.compile(scene, target=target_model, **kwargs)
+
+
+def compile_ab_harness(
+    scene: Union[str, SceneInput],
+    module_a: str = "sony_a1_ii",
+    module_b: str = "phase_one_iq4",
+    target: Union[str, TargetEngine] = TargetEngine.GPT_IMAGES,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    """Compile a side-by-side A/B comparison harness swapping only the camera hardware module."""
+    compiler_a = OpticalCompiler(module_a)
+    compiler_b = OpticalCompiler(module_b)
+    res_a = compiler_a.compile(scene, target=target, **kwargs)
+    res_b = compiler_b.compile(scene, target=target, **kwargs)
+    return {
+        "module_a": res_a,
+        "module_b": res_b,
+        "camera_a": compiler_a.base_profile.title,
+        "camera_b": compiler_b.base_profile.title,
+    }

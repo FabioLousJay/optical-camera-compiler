@@ -11,16 +11,30 @@ from typing import Any, Optional
 class TargetEngine(str, Enum):
     """Supported diffusion and generation model targets."""
 
+    GPT_IMAGES = "gpt_images"
     IMAGEN = "imagen"
+    MIDJOURNEY = "midjourney"
     FLUX = "flux"
     SDXL = "sdxl"
-    MIDJOURNEY = "midjourney"
     RAW = "raw"
 
     @classmethod
     def from_str(cls, value: str) -> TargetEngine:
-        """Parse engine from string case-insensitively."""
+        """Parse engine from string case-insensitively with friendly aliases."""
         normalized = value.strip().lower()
+        alias_map = {
+            "gpt": cls.GPT_IMAGES,
+            "gpt_images": cls.GPT_IMAGES,
+            "chatgpt": cls.GPT_IMAGES,
+            "dalle": cls.GPT_IMAGES,
+            "dalle3": cls.GPT_IMAGES,
+            "gpt4o": cls.GPT_IMAGES,
+            "gemini": cls.IMAGEN,
+            "imagen3": cls.IMAGEN,
+            "mj": cls.MIDJOURNEY,
+        }
+        if normalized in alias_map:
+            return alias_map[normalized]
         for member in cls:
             if member.value == normalized:
                 return member
@@ -82,6 +96,7 @@ class ReferenceMode(str, Enum):
     NONE = "none"
     RESTORE_UPSCALE = "restore_upscale"  # 1:1 Identity restoration and optical remastering
     TRANSFORM_ADAPT = "transform_adapt"  # Aesthetic/scene adaptation with biometric subject lock
+    OUTPAINT_FULL_BODY = "outpaint_full_body"  # Outpaint medium shot to full body head-to-toe
 
     @classmethod
     def from_str(cls, value: Optional[str]) -> ReferenceMode:
@@ -170,11 +185,69 @@ class NegativeShield:
         ]
     )
 
-    def all_tokens(self, include_anti_drift: bool = False) -> list[str]:
-        """Return a flat list of all negative tokens across categories."""
+    branding_and_text: list[str] = field(
+        default_factory=lambda: [
+            "text",
+            "watermark",
+            "logo",
+            "brand name",
+            "typography",
+            "label",
+            "signature",
+            "letters",
+            "words",
+            "trademark",
+            "branding",
+            "advertisement",
+            "graphic design elements",
+            "captions",
+            "subtitles",
+            "barcodes",
+            "timestamps",
+        ]
+    )
+    compression_and_quality: list[str] = field(
+        default_factory=lambda: [
+            "JPEG compression artifacts",
+            "low bitrate",
+            "banding",
+            "chroma subsampling",
+            "lossy compression",
+            "pixelation",
+            "digital noise smearing",
+            "posterization",
+        ]
+    )
+    outpaint_drift: list[str] = field(
+        default_factory=lambda: [
+            "mismatched shoes",
+            "inconsistent clothing folds",
+            "wrong shadows",
+            "twisted legs",
+            "floating feet",
+            "distorted scale",
+            "deformed footwear",
+            "mismatched lighting",
+        ]
+    )
+
+    def all_tokens(
+        self,
+        include_anti_drift: bool = False,
+        include_branding: bool = True,
+        include_compression: bool = True,
+        include_outpaint: bool = False,
+    ) -> list[str]:
+        """Return a flat list of all negative tokens across selected categories."""
         tokens = self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift
+        if include_branding:
+            tokens = tokens + self.branding_and_text
+        if include_compression:
+            tokens = tokens + self.compression_and_quality
         if include_anti_drift:
             tokens = tokens + self.anti_drift_tokens
+        if include_outpaint:
+            tokens = tokens + self.outpaint_drift
         return tokens
 
 
@@ -245,6 +318,9 @@ class SceneInput:
     custom_positives: list[str] = field(default_factory=list)
     custom_negatives: list[str] = field(default_factory=list)
     reference: Optional[ReferenceImageInput] = None
+    sharpness_protocol: bool = True
+    output_resolution: Optional[str] = None
+    suppress_text_branding: bool = True
 
 
 @dataclass
@@ -260,12 +336,10 @@ class CompiledPayload:
     @property
     def unified_prompt(self) -> str:
         """Return the combined prompt payload with the anti-artifact negative shield appended."""
-        if self.target_engine == TargetEngine.MIDJOURNEY:
+        if self.target_engine in (TargetEngine.MIDJOURNEY, TargetEngine.GPT_IMAGES, TargetEngine.RAW):
             return self.positive_prompt
         if self.target_engine == TargetEngine.SDXL:
             return f"{self.positive_prompt}\n\nNegative prompt: {self.negative_prompt}"
-        if self.target_engine == TargetEngine.RAW:
-            return self.positive_prompt
         if self.negative_prompt:
             return f"{self.positive_prompt}\n\n[ANTI-ARTIFACT NEGATIVE SHIELD]:\nEliminate {self.negative_prompt}"
         return self.positive_prompt

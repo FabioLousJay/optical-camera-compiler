@@ -18,11 +18,17 @@ class SDXLAdapter(BaseAdapter):
 
         is_restore = ref and ref.mode == ReferenceMode.RESTORE_UPSCALE
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
+        is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
 
         # 1. Positive Prompt (Weighted camera and texture tokens)
         pos_chunks = []
 
-        if is_restore:
+        if is_outpaint:
+            pos_chunks.append(
+                "full body downward outpaint extension of reference photo head-to-toe with shoes, "
+                "preserving exact facial identity, expression, wardrobe fabric, and wrinkles"
+            )
+        elif is_restore:
             pos_chunks.append(
                 "master optical remaster and high-resolution restoration of reference image, "
                 "1:1 biometric identity lock, exact facial topology, unaltered bone structure"
@@ -69,17 +75,24 @@ class SDXLAdapter(BaseAdapter):
         )
 
         # Micro-texture & physical optical falloff
-        pos_chunks.extend(
-            [
-                "resolved epidermal skin pores",
-                "fine vellus facial hair",
-                "subsurface dermal scattering",
-                "natural material micro-relief and micro-abrasions",
-                "high MTF optical acutance",
-                "natural large-sensor f/8 depth of field falloff",
-                "rectilinear optical projection",
-            ]
-        )
+        texture_tokens = [
+            "resolved epidermal skin pores",
+            "fine vellus facial hair",
+            "subsurface dermal scattering",
+            "natural material micro-relief and micro-abrasions",
+            "high MTF optical acutance",
+            "natural large-sensor f/8 depth of field falloff",
+            "rectilinear optical projection",
+        ]
+        if scene.sharpness_protocol:
+            texture_tokens.extend([
+                "focus locked on near eye",
+                "iris and eyelashes tack sharp",
+                "zero motion blur",
+            ])
+        res_tag = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
+        texture_tokens.append(f"{res_tag}, uncompressed raw quality")
+        pos_chunks.extend(texture_tokens)
 
         if scene.custom_positives:
             pos_chunks.extend(scene.custom_positives)
@@ -87,55 +100,62 @@ class SDXLAdapter(BaseAdapter):
         positive_prompt = ", ".join(pos_chunks)
 
         # 2. Negative Prompt (Comprehensive artifact suppression)
-        neg_chunks = []
-        neg_chunks.extend(shield.render_defects)
-        neg_chunks.extend(shield.skin_and_lighting_drift)
-        neg_chunks.extend(shield.anatomical_drift)
-
-        if is_restore or is_transform:
-            neg_chunks.extend(shield.anti_drift_tokens)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint)
+        all_negatives = shield.all_tokens(
+            include_anti_drift=include_anti_drift,
+            include_branding=scene.suppress_text_branding,
+            include_compression=True,
+            include_outpaint=is_outpaint,
+        )
+        if scene.custom_negatives:
+            all_negatives.extend(scene.custom_negatives)
 
         # Extra standard SDXL plastic artifact suppressors
-        neg_chunks.extend(
+        all_negatives.extend(
             [
                 "over-sharpened",
                 "unsharp mask halos",
                 "doll skin",
                 "porcelain skin",
-                "airbrushed",
                 "filter glow",
                 "bad anatomy",
-                "watermark",
-                "signature",
             ]
         )
 
-        if scene.custom_negatives:
-            neg_chunks.extend(scene.custom_negatives)
-
         # Deduplicate while preserving order
-        negative_prompt = ", ".join(dict.fromkeys(neg_chunks))
+        negative_prompt = ", ".join(dict.fromkeys(all_negatives))
 
         # Resolution mapping based on aspect ratio
         ar_to_res = {
+            "9:11": (896, 1088),
             "4:5": (896, 1152),
             "1:1": (1024, 1024),
             "16:9": (1344, 768),
             "9:16": (768, 1344),
             "3:2": (1216, 832),
             "2:3": (832, 1216),
+            "4:3": (1152, 864),
+            "3:4": (864, 1152),
+            "5:4": (1152, 928),
         }
         width, height = ar_to_res.get(scene.aspect_ratio, (896, 1152))
 
         parameters = {
             "width": width,
             "height": height,
+            "resolution": res_tag,
             "cfg_scale": 6.5,
             "steps": 35,
             "sampler": "DPM++ 2M Karras",
         }
 
-        if is_restore and ref:
+        if is_outpaint:
+            parameters.update({
+                "reference_mode": "outpaint_full_body",
+                "outpaint_direction": "downward",
+                "controlnet_inpaint_weight": 0.90,
+            })
+        elif is_restore and ref:
             parameters.update({
                 "reference_mode": "restore_upscale",
                 "denoising_strength": ref.denoise_strength,

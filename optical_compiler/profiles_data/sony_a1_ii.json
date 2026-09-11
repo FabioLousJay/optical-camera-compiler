@@ -1,0 +1,72 @@
+{
+  "profile_id": "sony_a1_ii",
+  "title": "Sony a1 II Stacked Full-Frame (ILCE-1M2)",
+  "schema_version": "2.0",
+  "purpose": "Flagship stacked full-frame baseline for maximum sharpness hit-rate and micro-motion freeze.",
+  "sensor_and_optics": {
+    "camera_system": "Sony a1 II (ILCE-1M2)",
+    "sensor_type": "35mm full-frame stacked Exmor RS BSI CMOS",
+    "sensor_dimensions": "35.9x24.0mm full-frame stacked sensor (50.1MP)",
+    "full_frame_equivalent": "35mm native field of view",
+    "lens": "Sony FE 85mm F1.4 GM II (SEL85F14GM2)",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 100 base sensor sensitivity",
+    "dynamic_range": "15 stops dynamic range with 16-bit processing pipeline",
+    "shutter": "Electronic stacked shutter with 1/400s high-speed flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Flash-dominated exposure with studio strobe to freeze micro motion, 1/400s flash sync, ISO 100",
+    "light_transport": "Key light 35 to 45 degrees camera left and slightly above eye line, minimal fill, strong black flag negative fill on shadow side for deep micro-contrast, optional low-power rim light for edge separation"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Natural epidermal skin texture with resolved pores, fine vellus hair, and accurate subsurface dermal scattering",
+      "True material micro-relief: fabric weave, micro-abrasions, uncompressed specular highlight falloff",
+      "Ultra-sharp editorial clarity without artificial smoothing, no diffusion, no haze",
+      "High optical acutance without digital edge halos or unsharp masking artifacts"
+    ],
+    "depth_and_optics": [
+      "Focus locked on the near eye with eyelashes and iris tack sharp, absolute zero motion blur",
+      "Natural compression characteristic of 85mm portrait telephoto optics at f/5.6",
+      "Zero perspective distortion, clean rectilinear projection"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "soft focus",
+      "blur",
+      "motion blur",
+      "haze",
+      "diffusion",
+      "dreamy glow",
+      "CGI",
+      "synthetic rendering",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin",
+      "oversmoothed skin",
+      "airbrushed skin",
+      "heavy beauty filter",
+      "computational bokeh",
+      "blown highlights",
+      "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "wide angle",
+      "fisheye",
+      "distorted perspective",
+      "warped anatomy",
+      "extra fingers",
+      "extra limbs",
+      "duplicated body parts",
+      "inconsistent clothing"
+    ]
+  },
+  "execution_directive": "Enforce stacked full-frame raw capture fidelity at 50.1MP. Prioritize shutter freeze (1/400s flash sync) and near-eye focus lock for maximum sharpness hit-rate."
+}

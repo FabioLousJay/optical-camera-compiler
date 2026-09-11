@@ -7,16 +7,18 @@ from typing import Type
 from ..models import TargetEngine
 from .base import BaseAdapter
 from .flux import FluxAdapter
+from .gpt_images import GPTImagesAdapter
 from .imagen import ImagenAdapter
 from .midjourney import MidjourneyAdapter
 from .raw import RawSpecAdapter
 from .sdxl import SDXLAdapter
 
 ADAPTER_REGISTRY: dict[TargetEngine, Type[BaseAdapter]] = {
+    TargetEngine.GPT_IMAGES: GPTImagesAdapter,
     TargetEngine.IMAGEN: ImagenAdapter,
+    TargetEngine.MIDJOURNEY: MidjourneyAdapter,
     TargetEngine.FLUX: FluxAdapter,
     TargetEngine.SDXL: SDXLAdapter,
-    TargetEngine.MIDJOURNEY: MidjourneyAdapter,
     TargetEngine.RAW: RawSpecAdapter,
 }
 
@@ -35,6 +37,7 @@ def get_adapter(engine: TargetEngine | str) -> BaseAdapter:
 
 __all__ = [
     "BaseAdapter",
+    "GPTImagesAdapter",
     "ImagenAdapter",
     "FluxAdapter",
     "SDXLAdapter",
