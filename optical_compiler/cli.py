@@ -110,6 +110,31 @@ def build_parser() -> argparse.ArgumentParser:
         help="Denoising strength override (default: 0.35 for restore, 0.65 for transform).",
     )
     parser.add_argument(
+        "--lighting-preset",
+        choices=[
+            "golden_hour",
+            "blue_hour",
+            "studio_soft",
+            "studio_hard",
+            "flash_freeze",
+            "overcast",
+            "dramatic",
+            "neon",
+        ],
+        help="Photographic lighting preset from the High-End Master framework.",
+    )
+    parser.add_argument(
+        "--capture-mode",
+        choices=[
+            "static_max_detail",
+            "portrait_max_detail",
+            "action_max_detail",
+            "macro_max_detail",
+            "landscape_architecture_max_detail",
+        ],
+        help="Photographic capture intent mode enforcing physical sensor/stability directives.",
+    )
+    parser.add_argument(
         "--json",
         action="store_true",
         help="Output raw JSON payload.",
@@ -171,7 +196,15 @@ def main(argv: Optional[list[str]] = None) -> int:
         "lighting": args.lighting,
         "aspect_ratio": args.aspect_ratio,
         "reference": ref_dict,
+        "lighting_preset": args.lighting_preset,
+        "capture_mode": args.capture_mode,
     }
+
+    profile_title = (
+        compiler.base_profile.title
+        if compiler.base_profile
+        else "Auto (Intelligent Camera Router)"
+    )
 
     if args.target == "all":
         results = compiler.compile_all(args.scene, **common_kwargs)
@@ -180,7 +213,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         else:
             print("=" * 80)
             print(f"OPTICAL COMPILATION: {args.scene}")
-            print(f"Base Profile: {compiler.base_profile.title}")
+            print(f"Base Profile: {profile_title}")
             print("=" * 80)
             for target_name, payload in results.items():
                 print(f"\n--- [{target_name.upper()}] ---")
@@ -208,7 +241,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     else:
         print("=" * 80)
         print(f"OPTICAL COMPILER [Target: {payload.target_engine.value.upper()}]")
-        print(f"Profile: {compiler.base_profile.title}")
+        print(f"Profile: {profile_title}")
         print("=" * 80)
         print("\n[COMPILED PROMPT]:")
         print(payload.positive_prompt)

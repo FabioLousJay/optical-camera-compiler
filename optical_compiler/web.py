@@ -1215,6 +1215,36 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         "Sony FE 85mm f/1.4 GM II (Cinematic Portrait Prime)",
         "Sony FE 135mm f/1.8 GM (Cinematic Separation Prime)",
         "Sony FE 16-35mm f/2.8 GM II (Wide Cine Master)"
+      ],
+      hasselblad_x2d_ii_100c: [
+        "Hasselblad XCD 90mm f/2.5 V (Reference Medium Format Portrait Prime)",
+        "Hasselblad XCD 55mm f/2.5 V (High-Resolution Normal)",
+        "Hasselblad XCD 38mm f/2.5 V (Environmental Wide)",
+        "Hasselblad XCD 135mm f/2.8 with 1.7x Converter"
+      ],
+      fujifilm_gfx100rf: [
+        "Fujinon GF 45mm f/2.8 R WR (Compact Documentary Prime)",
+        "Fujinon GF 63mm f/2.8 R WR (Standard Rangefinder Normal)",
+        "Fujinon GF 110mm f/2 R LM WR (Reference Portrait Prime)",
+        "Fujinon GF 30mm f/3.5 R WR (Wide Street Architecture)"
+      ],
+      canon_eos_r1: [
+        "Canon RF 85mm F1.2L USM (Reference Portrait & Decisive Action)",
+        "Canon RF 70-200mm F2.8L IS USM Z (Action & Sports Master)",
+        "Canon RF 400mm F2.8L IS USM (Super-Telephoto Action)",
+        "Canon RF 24-70mm F2.8L IS USM (Universal Fast Zoom)"
+      ],
+      leica_sl3_p: [
+        "Leica APO-Summicron-SL 50mm f/2 ASPH (Apochromatic Benchmark)",
+        "Leica APO-Summicron-SL 75mm f/2 ASPH (Portrait Micro-Contrast)",
+        "Leica APO-Summicron-SL 35mm f/2 ASPH (Environmental Documentary)",
+        "Leica Super-Vario-Elmar-SL 16-35mm f/3.5-4.5 ASPH"
+      ],
+      panasonic_lumix_s1rii: [
+        "Lumix S PRO 50mm f/1.4 Leica-Certified (Ultimate Optical Purity)",
+        "Lumix S PRO 85mm f/1.8 (Lightweight Portrait Prime)",
+        "Lumix S 100mm f/2.8 Macro (1:1 Micro-Detail Specialist)",
+        "Lumix S PRO 24-70mm f/2.8 (Professional Documentary Standard)"
       ]
     };
 

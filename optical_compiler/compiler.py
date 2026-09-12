@@ -13,22 +13,27 @@ from .models import (
     SceneInput,
     TargetEngine,
 )
-from .profiles import apply_overrides, load_profile
+from .profiles import apply_overrides, auto_select_profile, load_profile
 
 
 class OpticalCompiler:
     """Deterministic compiler translating scene intent into physically-grounded optical prompts."""
 
     def __init__(self, profile: Union[str, CameraProfile] = "phase_one_iq4") -> None:
-        """Initialize compiler with a base camera profile.
+        """Initialize compiler with a base camera profile or 'auto' router.
 
         Args:
-            profile: Profile name (e.g. 'phase_one_iq4'), file path, or CameraProfile object.
+            profile: Profile name (e.g. 'phase_one_iq4', 'auto'), file path, or CameraProfile object.
         """
         if isinstance(profile, CameraProfile):
             self.base_profile = profile
+            self.is_auto = False
+        elif profile == "auto":
+            self.base_profile = None
+            self.is_auto = True
         else:
             self.base_profile = load_profile(profile)
+            self.is_auto = False
 
     def compile(
         self,
@@ -53,6 +58,8 @@ class OpticalCompiler:
         sharpness_protocol: bool = True,
         output_resolution: Optional[str] = None,
         suppress_text_branding: bool = True,
+        lighting_preset: Optional[str] = None,
+        capture_mode: Optional[str] = None,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -126,6 +133,8 @@ class OpticalCompiler:
                 custom_positives=custom_positives or [],
                 custom_negatives=custom_negatives or [],
                 reference=ref_obj,
+                lighting_preset=lighting_preset,
+                capture_mode=capture_mode,
                 sharpness_protocol=sharpness_protocol,
                 output_resolution=output_resolution,
                 suppress_text_branding=suppress_text_branding,
@@ -163,6 +172,10 @@ class OpticalCompiler:
                 scene_input.custom_negatives.extend(custom_negatives)
             if ref_obj:
                 scene_input.reference = ref_obj
+            if lighting_preset:
+                scene_input.lighting_preset = lighting_preset
+            if capture_mode:
+                scene_input.capture_mode = capture_mode
             scene_input.sharpness_protocol = sharpness_protocol
             if output_resolution:
                 scene_input.output_resolution = output_resolution
@@ -175,10 +188,17 @@ class OpticalCompiler:
             else TargetEngine.from_str(target)
         )
 
-        # 3. Apply overrides to active profile
-        active_profile = apply_overrides(self.base_profile, scene_input)
+        # 4. Resolve base profile (dynamic auto router or fixed profile)
+        if self.is_auto:
+            target_profile_id = auto_select_profile(scene_input)
+            base = load_profile(target_profile_id)
+        else:
+            base = self.base_profile
 
-        # 4. Compile via target adapter
+        # 5. Apply overrides to active profile
+        active_profile = apply_overrides(base, scene_input)
+
+        # 6. Compile via target adapter
         adapter = get_adapter(engine)
         return adapter.compile(scene_input, active_profile)
 

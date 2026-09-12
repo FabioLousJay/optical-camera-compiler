@@ -8,10 +8,17 @@ from .compiler import compile_scene
 from .models import ReferenceImageInput, ReferenceMode, SceneInput
 
 RIG_NAMES = [
+    "Auto (Intelligent Camera Router)",
     "Sony a1 II Stacked Full-Frame (ILCE-1M2)",
     "Phase One XF IQ4 150MP Trichromatic",
+    "Hasselblad X2D II 100C Medium Format (HNCS)",
+    "FUJIFILM GFX100RF Rangefinder Large Format (102MP)",
+    "Canon EOS R1 Stacked Flagship (Action / Sports)",
     "Canon EOS R5 Mark II Stacked Full-Frame",
     "Nikon Z 9 Stacked Flagship Full-Frame",
+    "Leica SL3-P Full-Frame Mirrorless (Maestro IV)",
+    "Panasonic LUMIX S1RII High-Resolution Mirrorless",
+    "Sony FX Cinema Line Full-Frame (Venice S-Log3)",
     "Hasselblad H6D-100c Studio Medium Format",
     "Leica M11 Rangefinder 60MP",
     "Fujifilm GFX 100 II High-Speed Medium Format",
@@ -21,14 +28,20 @@ RIG_NAMES = [
     "Hasselblad 500 C/M Square Analog Medium Format",
     "Leica M6 35mm Rangefinder Analog Film",
     "Linhof Master Technika 4x5 Large Format Sheet Film",
-    "Sony FX Cinema Line Full-Frame (Venice S-Log3)",
 ]
 
 RIG_NAME_TO_ID = {
+    "Auto (Intelligent Camera Router)": "auto",
     "Sony a1 II Stacked Full-Frame (ILCE-1M2)": "sony_a1_ii",
     "Phase One XF IQ4 150MP Trichromatic": "phase_one_iq4",
+    "Hasselblad X2D II 100C Medium Format (HNCS)": "hasselblad_x2d_ii_100c",
+    "FUJIFILM GFX100RF Rangefinder Large Format (102MP)": "fujifilm_gfx100rf",
+    "Canon EOS R1 Stacked Flagship (Action / Sports)": "canon_eos_r1",
     "Canon EOS R5 Mark II Stacked Full-Frame": "canon_eos_r5_ii",
     "Nikon Z 9 Stacked Flagship Full-Frame": "nikon_z9",
+    "Leica SL3-P Full-Frame Mirrorless (Maestro IV)": "leica_sl3_p",
+    "Panasonic LUMIX S1RII High-Resolution Mirrorless": "panasonic_lumix_s1rii",
+    "Sony FX Cinema Line Full-Frame (Venice S-Log3)": "sony_fx_series",
     "Hasselblad H6D-100c Studio Medium Format": "hasselblad_h6d",
     "Leica M11 Rangefinder 60MP": "leica_m11",
     "Fujifilm GFX 100 II High-Speed Medium Format": "fujifilm_gfx100ii",
@@ -38,7 +51,6 @@ RIG_NAME_TO_ID = {
     "Hasselblad 500 C/M Square Analog Medium Format": "hasselblad_500cm",
     "Leica M6 35mm Rangefinder Analog Film": "leica_m6_analog",
     "Linhof Master Technika 4x5 Large Format Sheet Film": "linhof_technika_4x5",
-    "Sony FX Cinema Line Full-Frame (Venice S-Log3)": "sony_fx_series",
 }
 
 
@@ -89,6 +101,31 @@ class OpticalCameraCompilerNode:
                     "FLOAT",
                     {"default": 0.85, "min": 0.10, "max": 1.0, "step": 0.05, "round": 0.01},
                 ),
+                "capture_mode": (
+                    [
+                        "default",
+                        "static_max_detail",
+                        "portrait_max_detail",
+                        "action_max_detail",
+                        "macro_max_detail",
+                        "landscape_architecture_max_detail",
+                    ],
+                    {"default": "default"},
+                ),
+                "lighting_preset": (
+                    [
+                        "none",
+                        "golden_hour",
+                        "blue_hour",
+                        "studio_soft",
+                        "studio_hard",
+                        "flash_freeze",
+                        "overcast",
+                        "dramatic",
+                        "neon",
+                    ],
+                    {"default": "none"},
+                ),
                 "anti_drift_biometrics": (["enabled", "disabled"], {"default": "enabled"}),
                 "brutal_sharpness_protocol": (["enabled", "disabled"], {"default": "enabled"}),
                 "suppress_text_branding": (["enabled", "disabled"], {"default": "enabled"}),
@@ -111,12 +148,14 @@ class OpticalCameraCompilerNode:
         aspect_ratio: str = "9:11",
         reference_mode: str = "disabled",
         fidelity_lock: float = 0.85,
+        capture_mode: str = "default",
+        lighting_preset: str = "none",
         anti_drift_biometrics: str = "enabled",
         brutal_sharpness_protocol: str = "enabled",
         suppress_text_branding: str = "enabled",
         append_negative_shield: str = "yes",
     ) -> tuple[str, str, str]:
-        profile_id = RIG_NAME_TO_ID.get(camera_rig, "sony_a1_ii")
+        profile_id = RIG_NAME_TO_ID.get(camera_rig, "auto")
 
         ref_input = None
         if reference_mode in ("transform_adapt", "restore_upscale", "outpaint_full_body"):
@@ -145,6 +184,8 @@ class OpticalCameraCompilerNode:
             )
 
         ar_val = "9:11" if aspect_ratio == "native" else aspect_ratio
+        cm_val = None if capture_mode == "default" else capture_mode
+        lp_val = None if lighting_preset == "none" else lighting_preset
 
         scene = SceneInput(
             subject=subject.strip(),
@@ -152,6 +193,8 @@ class OpticalCameraCompilerNode:
             lighting=lighting_override.strip() if lighting_override.strip() else None,
             aspect_ratio=ar_val,
             reference=ref_input,
+            capture_mode=cm_val,
+            lighting_preset=lp_val,
             sharpness_protocol=(brutal_sharpness_protocol == "enabled"),
             suppress_text_branding=(suppress_text_branding == "enabled"),
         )

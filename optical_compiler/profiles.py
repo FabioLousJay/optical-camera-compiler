@@ -9,6 +9,10 @@ from typing import Optional
 
 from .models import (
     CameraProfile,
+    CaptureMode,
+    CAPTURE_MODE_DIRECTIVES,
+    LightingPreset,
+    LIGHTING_PRESET_DESCRIPTIONS,
     LightingSetup,
     MicroPhysics,
     NegativeShield,
@@ -18,6 +22,220 @@ from .models import (
 
 DEFAULT_PROFILES_DIR = Path(__file__).resolve().parent.parent / "profiles"
 PACKAGE_PROFILES_DIR = Path(__file__).resolve().parent / "profiles_data"
+
+# Master Domain Router Rules: mapping scene genres/keywords to optimized camera systems
+CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
+    (
+        "arri_alexa_35",
+        [
+            "alexa",
+            "arri raw",
+            "feature film",
+            "hollywood",
+            "anamorphic flare",
+            "arri signature",
+            "cooke look",
+        ],
+    ),
+    (
+        "sony_fx_series",
+        [
+            "cinema",
+            "cinematic",
+            "movie",
+            "film still",
+            "video",
+            "narrative",
+            "venice",
+            "s-log",
+            "s-log3",
+            "180-degree shutter",
+            "motion picture",
+            "scene still",
+            "cinematography",
+            "colorist",
+        ],
+    ),
+    (
+        "panasonic_lumix_s1rii",
+        [
+            "macro",
+            "scientific",
+            "extreme closeup",
+            "micro-detail",
+            "micro-relief",
+            "insect",
+            "botanical",
+            "specimen",
+            "micro texture",
+            "texture study",
+            "focus stack",
+            "close-up detail",
+        ],
+    ),
+    (
+        "canon_eos_r1",
+        [
+            "sports",
+            "athlete",
+            "athletic",
+            "sprint",
+            "stadium",
+            "decisive moment",
+            "fast action",
+            "tournament",
+            "race",
+            "racing",
+            "high fps",
+            "burst",
+            "action capture",
+        ],
+    ),
+    (
+        "sony_a1_ii",
+        [
+            "wildlife",
+            "animal",
+            "bird",
+            "birds",
+            "fauna",
+            "safari",
+            "predator",
+            "prey",
+            "falcon",
+            "eagle",
+            "hawk",
+            "raptor",
+            "telephoto",
+            "high-speed tracking",
+            "dynamic motion",
+            "action wildlife",
+            "feather detail",
+            "cheetah",
+            "lion",
+            "tiger",
+            "wolf",
+        ],
+    ),
+    (
+        "linhof_technika_4x5",
+        [
+            "architecture",
+            "architectural",
+            "building",
+            "facade",
+            "interior design",
+            "large format",
+            "tilt-shift",
+            "perspective control",
+            "bellows",
+            "rectilinear",
+            "monument",
+        ],
+    ),
+    (
+        "phase_one_iq4",
+        [
+            "luxury",
+            "fine art",
+            "museum",
+            "jewelry",
+            "timepiece",
+            "horology",
+            "watchmaker",
+            "ultra commercial",
+            "campaign",
+            "haute couture",
+            "still life",
+            "gallery",
+            "150mp",
+            "trichromatic",
+        ],
+    ),
+    (
+        "leica_m6_analog",
+        [
+            "35mm film",
+            "vintage film",
+            "analog film",
+            "kodak tri-x",
+            "cinestill",
+            "grainy film",
+            "silver halide",
+            "film grain",
+        ],
+    ),
+    (
+        "pentax_67ii",
+        [
+            "medium format film",
+            "120 film",
+            "analog portrait",
+            "6x7 film",
+        ],
+    ),
+    (
+        "leica_sl3_p",
+        [
+            "reportage",
+            "photojournalism",
+            "prestige documentary",
+            "editorial assignment",
+            "leica optics",
+            "war correspondent",
+            "investigative",
+        ],
+    ),
+    (
+        "fujifilm_gfx100rf",
+        [
+            "travel",
+            "street",
+            "documentary",
+            "candid",
+            "flaneur",
+            "urban street",
+            "classic chrome",
+            "reala ace",
+            "rangefinder",
+            "city walk",
+        ],
+    ),
+    (
+        "hasselblad_x2d_ii_100c",
+        [
+            "portrait",
+            "beauty",
+            "headshot",
+            "editorial portrait",
+            "face",
+            "skin",
+            "natural color",
+            "fashion model",
+            "cosmetics",
+            "eyelashes",
+            "glamour",
+            "model",
+        ],
+    ),
+]
+
+
+def auto_select_profile(scene: Union[str, SceneInput]) -> str:
+    """Intelligently route a scene description or SceneInput to the optimal camera profile."""
+    if isinstance(scene, SceneInput):
+        text = f"{scene.subject} {scene.framing or ''} {scene.environment or ''} {scene.mood or ''}".lower()
+    else:
+        text = str(scene).lower()
+
+    for profile_id, keywords in CAMERA_ROUTER_RULES:
+        for kw in keywords:
+            if kw in text:
+                return profile_id
+
+    # Default fallback to flagship 150MP Trichromatic medium format reference
+    return "phase_one_iq4"
+
 
 # Built-in Phase One IQ4 profile fallback to ensure zero runtime file lookup issues
 PHASE_ONE_IQ4_DEFAULT = CameraProfile(
@@ -83,15 +301,23 @@ PHASE_ONE_IQ4_DEFAULT = CameraProfile(
 )
 
 
-def load_profile(name_or_path: str = "phase_one_iq4") -> CameraProfile:
-    """Load a CameraProfile from an ID, profile name, or direct filepath.
+def load_profile(
+    name_or_path: str = "phase_one_iq4",
+    scene: Optional[Union[str, SceneInput]] = None,
+) -> CameraProfile:
+    """Load a CameraProfile from an ID, profile name, direct filepath, or 'auto'.
 
     Args:
-        name_or_path: 'phase_one_iq4', path to JSON file, or filename in profiles directory.
+        name_or_path: 'auto', 'phase_one_iq4', path to JSON file, or filename in profiles directory.
+        scene: Optional scene context used to intelligently select the camera when name_or_path is 'auto'.
 
     Returns:
         CameraProfile instance.
     """
+    if name_or_path == "auto":
+        target_id = auto_select_profile(scene) if scene else "phase_one_iq4"
+        return load_profile(target_id)
+
     # 1. Direct path check
     direct_path = Path(name_or_path)
     if direct_path.is_file():
@@ -131,6 +357,22 @@ def load_profile(name_or_path: str = "phase_one_iq4") -> CameraProfile:
 def apply_overrides(profile: CameraProfile, scene: SceneInput) -> CameraProfile:
     """Return a new CameraProfile with optical overrides from the SceneInput applied."""
     p = copy.deepcopy(profile)
+
+    # Lighting preset application
+    if scene.lighting_preset:
+        preset = LightingPreset.from_str(scene.lighting_preset)
+        if preset and preset in LIGHTING_PRESET_DESCRIPTIONS:
+            primary, transport = LIGHTING_PRESET_DESCRIPTIONS[preset]
+            if not scene.lighting:
+                p.lighting_and_exposure.primary_lighting = primary
+            p.lighting_and_exposure.light_transport = f"{transport}, {p.lighting_and_exposure.light_transport}"
+
+    # Capture mode application
+    if scene.capture_mode:
+        cm = CaptureMode.from_str(scene.capture_mode)
+        if cm and cm in CAPTURE_MODE_DIRECTIVES:
+            directive = CAPTURE_MODE_DIRECTIVES[cm]
+            p.micro_detail_and_physics.surface_rendering.insert(0, directive)
 
     if scene.aperture:
         p.sensor_and_optics.aperture_sweet_spot = scene.aperture

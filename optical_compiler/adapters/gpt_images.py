@@ -83,8 +83,10 @@ class GPTImagesAdapter(BaseAdapter):
             )
         sections.append(focus_block)
 
+        surface_directives = ". ".join(profile.micro_detail_and_physics.surface_rendering)
         surface_block = (
             "Surface rendering: Natural human skin with visible pores and micro texture. "
+            f"{surface_directives}. "
             "Accurate dermal subsurface scattering without waxy specularities or artificial blur. "
             "High micro-contrast. Crisp edges. No haze. No diffusion."
         )

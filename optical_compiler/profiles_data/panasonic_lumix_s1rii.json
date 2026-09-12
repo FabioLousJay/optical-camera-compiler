@@ -1,0 +1,65 @@
+{
+  "profile_id": "panasonic_lumix_s1rii",
+  "title": "Panasonic LUMIX S1RII High-Resolution Hybrid Full-Frame",
+  "schema_version": "2.0",
+  "purpose": "High-resolution hybrid still and commercial production with 44.3MP full-frame CMOS, wide dynamic range, and precision Leica L-mount optical resolution.",
+  "sensor_and_optics": {
+    "camera_system": "Panasonic LUMIX S1RII (DC-S1RM2) Full-Frame Mirrorless",
+    "sensor_type": "35.9x23.9mm Full-Frame CMOS (44.3MP) with Dual Native ISO",
+    "sensor_dimensions": "35.9x23.9mm full-frame sensor (44.3MP)",
+    "full_frame_equivalent": "35mm native field of view",
+    "lens": "Panasonic Lumix S PRO 50mm f/1.4 (Certified by Leica) stopped down to f/4 sweet spot",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 100 base sensor sensitivity (Dual Native ISO 100/640)",
+    "dynamic_range": "14+ stops dynamic range with 14-bit uncompressed RAW",
+    "shutter": "Focal-plane shutter with 1/250s flash sync and high-speed electronic shutter up to 40 fps"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Controlled commercial studio strobe or natural architectural daylight, 1/250s flash sync, base ISO 100",
+    "light_transport": "Clean commercial contrast with balanced fill, accurate neutral skin tone reproduction, and high tonal gradations"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Natural epidermal skin texture with resolved pores, fine vellus hair, and accurate subsurface dermal scattering",
+      "True material micro-relief: architectural concrete, fine fabric weave, product specularities",
+      "High MTF resolving power without electronic edge ringing or digital oversharpening"
+    ],
+    "depth_and_optics": [
+      "Smooth full-frame subject separation with 11-blade circular aperture bokeh",
+      "Zero perspective distortion, clean rectilinear projection",
+      "Controlled edge roll-off with minimal vignetting"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "focus miss",
+      "double edges",
+      "ringing",
+      "oversharpening",
+      "crunchy HDR"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial pore carving",
+      "computational bokeh",
+      "beauty filter glow",
+      "clipped highlights",
+      "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Panasonic LUMIX S1RII commercial 44.3MP full-frame capture with Leica-certified optical clarity. Eliminate post-processed digital sharpening, synthetic smoothing, and plastic textures."
+}

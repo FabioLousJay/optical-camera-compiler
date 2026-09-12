@@ -3,10 +3,10 @@
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 36 Passing](https://img.shields.io/badge/tests-36%20passing-brightgreen.svg)](tests/)
+[![Tests: 43 Passing](https://img.shields.io/badge/tests-43%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
-[![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL-orange.svg)](#supported-target-adapters)
+[![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
 
 > **Deterministic Hardware-Level Optical Simulation for Zero-Artifact Photorealism**
 
@@ -127,65 +127,127 @@ print(harness["module_b"].positive_prompt)
 
 ---
 
-## Hardware Profile Library (14 Elite Camera Systems)
+## Hardware Profile Library (19 Elite Camera Systems)
 
 The compiler includes calibrated optical profiles across stacked full-frame, medium format, large format, 35mm rangefinders, cinema cameras, and analog film:
 
-### Stacked Full-Frame Portrait Baseline (New in 2026)
+### 🧠 Intelligent Auto Camera Router (`profile="auto"`)
+When `profile="auto"` is specified (default in ComfyUI), the compiler inspects your scene intent and automatically routes it to the optimal hardware profile:
+* **Wildlife & Fauna** $\rightarrow$ `sony_a1_ii` (Ultra-high-speed AF tracking, 50.1MP reach, $1/400\,\text{s}$ freeze)
+* **Sports & Decisive Action** $\rightarrow$ `canon_eos_r1` (40 fps burst, zero rolling shutter, high-speed sports primes)
+* **Macro & Specimen Science** $\rightarrow$ `panasonic_lumix_s1rii` (1:1 reproduction ratio, micro-relief acutance, diffraction suppression)
+* **Cinema & Narrative Film Stills** $\rightarrow$ `sony_fx_series` (Venice color science, $180^\circ$ shutter, 10-bit S-Log3)
+* **Feature Film Hollywood Masters** $\rightarrow$ `arri_alexa_35` (Super 35 ALEV 4 sensor, Cooke S4/i primes, LogC4)
+* **Architecture & Interior Structure** $\rightarrow$ `linhof_technika_4x5` (Large-format sheet film, Scheimpflug tilt-shift perspective control)
+* **Luxury, Horology & Fine Art** $\rightarrow$ `phase_one_iq4` (150MP Trichromatic medium format, 16-bit raw latitude)
+* **Portraits, Beauty & Fashion** $\rightarrow$ `hasselblad_x2d_ii_100c` (100MP BSI CMOS, HNCS natural skin tonality, XCD 90V prime)
+* **Street & Travel Documentary** $\rightarrow$ `fujifilm_gfx100rf` (102MP large-format rangefinder, Classic Chrome / Reala Ace)
+* **Prestige Photojournalism & Reportage** $\rightarrow$ `leica_sl3_p` (44.9MP BSI CMOS, Maestro IV processor, APO-Summicron-SL glass)
+* **Nostalgic 35mm Analog Film** $\rightarrow$ `leica_m6_analog` (35mm silver halide, Kodak Tri-X 400, classic German micro-contrast)
+* **Analog Medium Format Film** $\rightarrow$ `pentax_67ii` (6x7 oversized negative, legendary SMC 105mm $f/2.4$ bokeh king)
+
+---
+
+### Stacked Full-Frame & Flagship Action
 1. **Sony a1 II Stacked Full-Frame (`sony_a1_ii`)**:
    * *Sensor*: $35.9 \times 24.0\,\text{mm}$ 50.1MP Exmor RS stacked CMOS.
    * *Optics*: Sony FE 85mm F1.4 GM II (SEL85F14GM2) at $f/5.6$ sweet spot, FE 50mm F1.2 GM, FE 135mm F1.8 GM.
    * *Physics*: $1/400\,\text{s}$ flash sync, maximum sharpness hit-rate, micro-motion freeze.
-2. **Canon EOS R5 Mark II Stacked Full-Frame (`canon_eos_r5_ii`)**:
+2. **Canon EOS R1 Stacked Flagship Action (`canon_eos_r1`)**:
+   * *Sensor*: $36.0 \times 24.0\,\text{mm}$ 24.2MP back-illuminated stacked CMOS, Accelerated Capture DIGIC Accelerator.
+   * *Optics*: Canon RF 85mm F1.2L USM, RF 70-200mm F2.8L IS USM Z, RF 400mm F2.8L IS USM.
+   * *Physics*: 40 fps burst rate, $1/2000\,\text{s}$ freeze, zero rolling shutter, cross-type AF tracking.
+3. **Canon EOS R5 Mark II Stacked Full-Frame (`canon_eos_r5_ii`)**:
    * *Sensor*: $36.0 \times 24.0\,\text{mm}$ 45.0MP back-illuminated stacked CMOS.
    * *Optics*: Canon RF 85mm F1.2L USM at $f/5.6$ sweet spot, RF 50mm F1.2L USM, RF 135mm F1.8L IS USM.
    * *Physics*: Accelerated capture architecture, organic skin tonal gradation, dual-pixel micro-contrast.
-3. **Nikon Z 9 Stacked Flagship Full-Frame (`nikon_z9`)**:
+4. **Nikon Z 9 Stacked Flagship Full-Frame (`nikon_z9`)**:
    * *Sensor*: $35.9 \times 23.9\,\text{mm}$ 45.7MP stacked CMOS (pure electronic shutter).
    * *Optics*: NIKKOR Z 135mm f/1.8 S Plena at $f/5.0$ sweet spot, Z 85mm f/1.2 S, Z 50mm f/1.2 S.
    * *Physics*: Zero rolling shutter, Plena circular bokeh geometry, base ISO 64 High-Efficiency RAW.
 
 ### Medium & Large Format
-4. **Phase One XF IQ4 150MP Trichromatic (`phase_one_iq4`)**:
+5. **Phase One XF IQ4 150MP Trichromatic (`phase_one_iq4`)**:
    * *Sensor*: $54 \times 40\,\text{mm}$ BSI CMOS Medium Format, 150MP, base ISO 50.
    * *Optics*: Schneider Kreuznach 80mm LS f/2.8 Blue Ring at $f/8$, 55mm LS, 110mm LS, 150mm LS.
    * *Physics*: 16-bit raw latitude, leaf shutter $1/1600\,\text{s}$ sync, negative fill contrast carving.
-5. **Hasselblad H6D-100c Medium Format (`hasselblad_h6d`)**:
+6. **Hasselblad X2D II 100C Medium Format (`hasselblad_x2d_ii_100c`)**:
+   * *Sensor*: $43.8 \times 32.9\,\text{mm}$ 100MP BSI CMOS, 16-bit raw, 15.3 stops dynamic range.
+   * *Optics*: Hasselblad XCD 90mm f/2.5 V, XCD 55mm f/2.5 V, XCD 38mm f/2.5 V.
+   * *Physics*: Hasselblad Natural Colour Solution (HNCS), 10-stop IBIS, leaf shutter $1/4000\,\text{s}$ flash sync.
+7. **Hasselblad H6D-100c Medium Format (`hasselblad_h6d`)**:
    * *Sensor*: $53.4 \times 40.0\,\text{mm}$ 100MP CMOS.
    * *Optics*: Hasselblad HC 100mm f/2.2, HC 50mm f/3.5 II, HC 150mm f/3.2.
-   * *Physics*: Hasselblad Natural Colour Solution (HNCS), central lens shutter $1/2000\,\text{s}$ sync.
-6. **Fujifilm GFX 100 II 102MP Medium Format (`fujifilm_gfx100ii`)**:
+   * *Physics*: Central lens shutter $1/2000\,\text{s}$ sync, studio commercial baseline.
+8. **Fujifilm GFX 100 II 102MP Medium Format (`fujifilm_gfx100ii`)**:
    * *Sensor*: $43.8 \times 32.9\,\text{mm}$ high-speed 102MP CMOS II HS.
    * *Optics*: Fujinon GF 110mm f/2 R LM WR, GF 80mm f/1.7, GF 55mm f/1.7.
    * *Physics*: Fujifilm color science (Classic Chrome / Reala Ace / Astia), 16-bit raw latitude.
-7. **Linhof Master Technika 4x5 Large Format (`linhof_technika_4x5`)**:
-   * *Sensor*: $102 \times 127\,\text{mm}$ (4x5 inch) sheet film.
-   * *Optics*: Schneider Apo-Symmar 150mm f/5.6 L, Rodenstock Grandagon-N 90mm f/4.5.
-   * *Physics*: Scheimpflug optical plane alignment, zero vertical keystoning, Kodak Ektar 100 resolution.
+9. **FUJIFILM GFX100RF Rangefinder Large Format (`fujifilm_gfx100rf`)**:
+   * *Sensor*: $43.8 \times 32.9\,\text{mm}$ 102MP Large-Format CMOS II rangefinder.
+   * *Optics*: Fujinon GF 45mm f/2.8 R WR, GF 63mm f/2.8 R WR, GF 110mm f/2 R LM WR.
+   * *Physics*: Rangefinder form factor, street documentary fidelity, film simulation color science.
+10. **Linhof Master Technika 4x5 Large Format (`linhof_technika_4x5`)**:
+    * *Sensor*: $102 \times 127\,\text{mm}$ (4x5 inch) sheet film.
+    * *Optics*: Schneider Apo-Symmar 150mm f/5.6 L, Rodenstock Grandagon-N 90mm f/4.5.
+    * *Physics*: Scheimpflug optical plane alignment, zero vertical keystoning, Kodak Ektar 100 resolution.
 
-### Rangefinders & Commercial High-Res
-8. **Leica M11 60MP Rangefinder (`leica_m11`)**:
-   * *Sensor*: Full-frame 35mm BSI CMOS, zero optical low-pass filter (no AA filter).
-   * *Optics*: Leica Summilux-M 35mm f/1.4 ASPH FLE II, Noctilux-M 50mm f/0.95, APO-Summicron 50mm f/2.
-   * *Physics*: German aspherical acutance, extreme optical micro-contrast, reportage realism.
-9. **Sony Alpha A7R V 61MP High-Resolution (`sony_a7rv`)**:
-   * *Sensor*: Full-frame 61MP Exmor R BSI CMOS.
-   * *Optics*: Sony FE 50mm f/1.2 GM, FE 85mm f/1.4 GM II, FE 135mm f/1.8 GM.
-   * *Physics*: Modern commercial resolution, razor-sharp G-Master optical acutance.
+### Rangefinders, Reportage & Micro-Science
+11. **Leica SL3-P Mirrorless Maestro IV (`leica_sl3_p`)**:
+    * *Sensor*: $36.0 \times 24.0\,\text{mm}$ 44.9MP BSI CMOS, Maestro IV processor with L-Mount optics.
+    * *Optics*: Leica APO-Summicron-SL 50mm f/2 ASPH, APO-Summicron-SL 75mm f/2 ASPH.
+    * *Physics*: Benchmark apochromatic acutance, zero color fringing, prestige documentary reportage.
+12. **Panasonic LUMIX S1RII Micro-Science Master (`panasonic_lumix_s1rii`)**:
+    * *Sensor*: $35.9 \times 23.9\,\text{mm}$ 44.3MP CMOS with Dual Native ISO (100/640).
+    * *Optics*: Lumix S PRO 50mm f/1.4 (Certified by Leica), Lumix S 100mm f/2.8 Macro.
+    * *Physics*: 1:1 macro reproduction ratio, micro-relief diffraction suppression, scientific fidelity.
+13. **Leica M11 60MP Rangefinder (`leica_m11`)**:
+    * *Sensor*: Full-frame 35mm BSI CMOS, zero optical low-pass filter (no AA filter).
+    * *Optics*: Leica Summilux-M 35mm f/1.4 ASPH FLE II, Noctilux-M 50mm f/0.95, APO-Summicron 50mm f/2.
+    * *Physics*: German aspherical acutance, extreme optical micro-contrast, street reportage realism.
+14. **Sony Alpha A7R V 61MP High-Resolution (`sony_a7rv`)**:
+    * *Sensor*: Full-frame 61MP Exmor R BSI CMOS.
+    * *Optics*: Sony FE 50mm f/1.2 GM, FE 85mm f/1.4 GM II, FE 135mm f/1.8 GM.
+    * *Physics*: Modern commercial resolution, razor-sharp G-Master optical acutance.
 
-### Analog Film Classics & Cinema
-10. **Hasselblad 500C/M 6x6 Analog Medium Format (`hasselblad_500cm`)**:
-    * *Format*: $56 \times 56\,\text{mm}$ square 120 film gate, Carl Zeiss Planar T* 80mm f/2.8 CF.
-11. **Pentax 67 II 6x7 Medium Format Film (`pentax_67ii`)**:
-    * *Format*: $56 \times 70\,\text{mm}$ oversized negative, SMC Pentax 67 105mm f/2.4 Reference Lens.
-12. **Leica M6 Classic 35mm Analog Rangefinder (`leica_m6_analog`)**:
-    * *Format*: 35mm silver halide film gate, Leica Summicron-M 50mm f/2 Dual-Range, Kodak Tri-X 400.
-13. **ARRI Alexa 35 Cinema Large-Sensor (`arri_alexa_35`)**:
-    * *Format*: Super 35 Native 4K ALEV 4 sensor, Cooke S4/i 50mm T2.0 Prime, ARRI LogC4.
-14. **Sony FX Cinema Line Full-Frame (`sony_fx_series`)**:
+### Cinema Production & Venice Color Science
+15. **Sony FX Cinema Line Full-Frame (`sony_fx_series`)**:
     * *Format*: $35.6 \times 23.8\,\text{mm}$ full-frame cinema 4K Exmor R BSI CMOS, 15+ stops dynamic range.
     * *Optics*: Sony FE 50mm f/1.2 GM stopped down to $f/2.8$ cinematic sweet spot, FE 24-70mm f/2.8 GM II, FE 85mm f/1.4 GM II.
     * *Physics*: Venice color science highlight rolloff, $180^\circ$ cinema shutter angle ($1/48\,\text{s}$ cadence), Dual Base ISO 800/12800, 10-bit 4:2:2 All-Intra S-Log3/S-Gamut3.Cine.
+16. **ARRI Alexa 35 Cinema Large-Sensor (`arri_alexa_35`)**:
+    * *Format*: Super 35 Native 4K ALEV 4 sensor, Cooke S4/i 50mm T2.0 Prime, ARRI LogC4.
+
+### Analog Film Classics
+17. **Hasselblad 500C/M 6x6 Analog Medium Format (`hasselblad_500cm`)**:
+    * *Format*: $56 \times 56\,\text{mm}$ square 120 film gate, Carl Zeiss Planar T* 80mm f/2.8 CF.
+18. **Pentax 67 II 6x7 Medium Format Film (`pentax_67ii`)**:
+    * *Format*: $56 \times 70\,\text{mm}$ oversized negative, SMC Pentax 67 105mm f/2.4 Reference Lens.
+19. **Leica M6 Classic 35mm Analog Rangefinder (`leica_m6_analog`)**:
+    * *Format*: 35mm silver halide film gate, Leica Summicron-M 50mm f/2 Dual-Range, Kodak Tri-X 400.
+
+---
+
+## 💡 Master Photographic Lighting Presets
+Apply physical lighting recipes via `--lighting-preset` or in the Studio UI:
+* **`golden_hour`**: Low-angle directional golden sunlight (3200K–3800K), warm specular edge wrap, soft atmospheric glow.
+* **`blue_hour`**: Deep twilight ambient sky illumination (7500K–9000K), cool soft fill balanced against 2700K tungsten practical lights.
+* **`studio_soft`**: Large parabolic softbox key at $45^\circ$, subtle negative fill, diffused wrap-around illumination.
+* **`studio_hard`**: Focused beauty dish or fresnel key, crisp shadow boundaries, sculpted facial micro-contrast.
+* **`flash_freeze`**: High-speed optical flash strobe ($1/1600\,\text{s}$ leaf sync), microsecond duration motion freeze.
+* **`overcast`**: Giant natural atmospheric softbox, diffused neutral daylight (5500K–6000K), linear shadow gradient.
+* **`dramatic`**: Chiaroscuro high-contrast lighting, single directional key, 8:1 contrast ratio, deep true black shadows.
+* **`neon`**: Multi-chromatic saturated ambient rim and key lights, complementary cyan/magenta or amber/teal contrast.
+
+---
+
+## 🎯 Modular Capture Modes
+Enforce physical camera discipline via `--capture-mode`:
+* **`static_max_detail`**: Tripod-mounted lock, zero sensor shake, base ISO, maximum MTF optical acutance.
+* **`portrait_max_detail`**: Focus locked on the near eye, iris and eyelashes tack sharp, resolved epidermal skin pores.
+* **`action_max_detail`**: Decisive-moment freeze, high-speed shutter, zero motion smear, dynamic muscle tension.
+* **`macro_max_detail`**: 1:1 reproduction ratio, extreme micro-plane depth slicing, diffraction-suppressed optical plane.
+* **`landscape_architecture_max_detail`**: Rectilinear zero-distortion geometry, infinite hyperfocal plane, level horizon.
 
 ---
 

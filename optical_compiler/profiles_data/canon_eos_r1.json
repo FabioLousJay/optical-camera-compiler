@@ -1,0 +1,65 @@
+{
+  "profile_id": "canon_eos_r1",
+  "title": "Canon EOS R1 Flagship Sports & Action Stacked Full-Frame",
+  "schema_version": "2.0",
+  "purpose": "Elite sports, wildlife, fast action, and decisive-moment photojournalism where capture responsiveness, 40 fps speed, and micro-motion freeze outrank pure pixel count.",
+  "sensor_and_optics": {
+    "camera_system": "Canon EOS R1 Flagship Full-Frame Back-Illuminated Stacked CMOS",
+    "sensor_type": "36x24mm Full-Frame Back-Illuminated Stacked CMOS with Accelerated Capture System",
+    "sensor_dimensions": "36.0x24.0mm full-frame sensor (24.2MP)",
+    "full_frame_equivalent": "35mm native field of view",
+    "lens": "Canon RF 85mm F1.2L USM stopped down to f/2.8 action sweet spot",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "ISO 100 base sensor sensitivity (ultra-clean high-ISO up to 102,400)",
+    "dynamic_range": "15+ stops dynamic range with 14-bit RAW processing",
+    "shutter": "Electronic stacked shutter up to 1/64000s and 1/400s high-speed flash sync, zero rolling shutter skew"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "High-speed outdoor arena or natural ambient daylight with fast shutter freeze (1/2000s to 1/8000s), base ISO 100",
+    "light_transport": "High-contrast dynamic action lighting, crisp rim separation, zero motion blur on fast-moving limbs"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Tack-sharp action detail: athletic sweat beads, muscle striations, fabric tension weave, airborne dirt or water droplets",
+      "Accurate skin micro-relief without smearing from high-speed electronic readout",
+      "Crisp optical acutance with zero chromatic fringing or digital edge halos"
+    ],
+    "depth_and_optics": [
+      "Precise subject isolation with fast tracking autofocus on athletes or wildlife",
+      "Smooth foreground and background out-of-focus roll-off without synthetic computational blur",
+      "Clean rectilinear geometry with zero distortion across edges"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "motion blur when freeze is requested",
+      "focus miss",
+      "double edges",
+      "rolling shutter distortion"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "computational bokeh",
+      "beauty filter glow",
+      "clipped highlights",
+      "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features",
+      "twisted legs",
+      "unnatural athletic anatomy"
+    ]
+  },
+  "execution_directive": "Enforce Canon EOS R1 decisive-moment sports capture at 1/2000s+ shutter freeze. Eliminate motion blur on action subjects, plastic skin, rolling shutter skew, and synthetic blur."
+}

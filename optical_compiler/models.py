@@ -102,6 +102,94 @@ class MicroPhysics:
     )
 
 
+class LightingPreset(str, Enum):
+    """Photographic lighting recipes from the High-End Pro Master Framework."""
+
+    GOLDEN_HOUR = "golden_hour"
+    BLUE_HOUR = "blue_hour"
+    STUDIO_SOFT = "studio_soft"
+    STUDIO_HARD = "studio_hard"
+    FLASH_FREEZE = "flash_freeze"
+    OVERCAST = "overcast"
+    DRAMATIC = "dramatic"
+    NEON = "neon"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[LightingPreset]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+
+LIGHTING_PRESET_DESCRIPTIONS: dict[LightingPreset, tuple[str, str]] = {
+    LightingPreset.GOLDEN_HOUR: (
+        "Low-angle directional golden sunlight (3200K-3800K), warm specular edge wrap, soft atmospheric glow",
+        "Key sunlight at 15-degree elevation, deep warm shadows, single-axis specular rim highlights with natural atmospheric scatter",
+    ),
+    LightingPreset.BLUE_HOUR: (
+        "Deep twilight ambient sky illumination (7500K-9000K), cool soft fill, high dynamic range balance against warm practical lights",
+        "Omnidirectional soft skylight fill balanced against warm 2700K tungsten practical accents, gradient sky backdrop",
+    ),
+    LightingPreset.STUDIO_SOFT: (
+        "Large parabolic softbox key light, subtle edge negative fill, diffused wrap-around illumination",
+        "Key light through large diffusion scrim at 45 degrees, soft fill card opposite, subtle hair rim light, low micro-contrast shadow gradient",
+    ),
+    LightingPreset.STUDIO_HARD: (
+        "Focused direct beauty dish or fresnel key light, crisp shadow boundaries, sculpted micro-contrast",
+        "Un-diffused silver reflector key, razor shadow cutoffs, high specular acutance, deep black negative fill",
+    ),
+    LightingPreset.FLASH_FREEZE: (
+        "High-speed optical flash strobe (1/1600s leaf sync), microsecond duration motion freeze, razor-sharp edge definition",
+        "Twin high-speed studio strobes, zero ambient spill, tack-sharp specular catchlights, complete motion freeze",
+    ),
+    LightingPreset.OVERCAST: (
+        "Giant natural atmospheric softbox, diffused neutral daylight (5500K-6000K), zero harsh cast shadows",
+        "Even hemispherical cloud diffusion, gentle top-down natural light wrap, subtle linear shadow gradient under jaw and chin",
+    ),
+    LightingPreset.DRAMATIC: (
+        "Chiaroscuro high-contrast lighting, single directional key, deep unlit negative space, emotive rim light",
+        "Single focused spotlight from steep side angle, 8:1 contrast ratio, deep true black shadows, razor specular cheek highlight",
+    ),
+    LightingPreset.NEON: (
+        "Multi-chromatic saturated ambient rim and key lights, complementary color contrast, high-intensity specular sheen",
+        "Dual-tone directional lighting (cyan and magenta/amber), saturated chromatic rim separation, glossy surface reflection bounce",
+    ),
+}
+
+
+class CaptureMode(str, Enum):
+    """Photographic capture intent modes."""
+
+    STATIC_MAX_DETAIL = "static_max_detail"
+    PORTRAIT_MAX_DETAIL = "portrait_max_detail"
+    ACTION_MAX_DETAIL = "action_max_detail"
+    MACRO_MAX_DETAIL = "macro_max_detail"
+    LANDSCAPE_ARCHITECTURE_MAX_DETAIL = "landscape_architecture_max_detail"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[CaptureMode]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+
+CAPTURE_MODE_DIRECTIVES: dict[CaptureMode, str] = {
+    CaptureMode.STATIC_MAX_DETAIL: "Tripod-mounted lock, zero sensor shake, base ISO, maximum MTF optical resolution, ultra-deep tonal gradation",
+    CaptureMode.PORTRAIT_MAX_DETAIL: "Focus locked on the near eye, iris and eyelashes tack sharp, resolved epidermal skin pores, natural subcutaneous scatter",
+    CaptureMode.ACTION_MAX_DETAIL: "Decisive-moment freeze, high-speed shutter, zero motion smear, dynamic muscle tension, tack-sharp trajectory",
+    CaptureMode.MACRO_MAX_DETAIL: "1:1 reproduction ratio, extreme micro-plane depth slicing, razor micro-ridges, diffraction-suppressed optical plane",
+    CaptureMode.LANDSCAPE_ARCHITECTURE_MAX_DETAIL: "Rectilinear zero-distortion geometry, infinite optical hyperfocal plane, level horizon, corner-to-corner tack sharpness",
+}
+
+
 class ReferenceMode(str, Enum):
     """Workflow mode when processing a reference image."""
 
@@ -158,6 +246,15 @@ class NegativeShield:
             "chromatic aberration",
             "denoise smearing",
             "compression artifacts",
+            "focus miss",
+            "double edges",
+            "ringing",
+            "oversharpening",
+            "crunchy HDR",
+            "perspective drift",
+            "unmotivated bokeh",
+            "fake shallow depth of field",
+            "tilted horizon",
         ]
     )
     skin_and_lighting_drift: list[str] = field(
@@ -173,6 +270,10 @@ class NegativeShield:
             "clipped digital highlights",
             "crushed blacks",
             "oversaturated rec709 tint",
+            "artificial pore carving",
+            "invented eyelashes",
+            "invented fur strands",
+            "unmotivated teal-orange grading",
         ]
     )
     anatomical_drift: list[str] = field(
@@ -220,6 +321,10 @@ class NegativeShield:
             "subtitles",
             "barcodes",
             "timestamps",
+            "invented text",
+            "garbled typography",
+            "product-design drift",
+            "logo drift",
         ]
     )
     compression_and_quality: list[str] = field(
@@ -258,15 +363,48 @@ class NegativeShield:
         include_outpaint: bool = False,
     ) -> list[str]:
         """Return a flat list of all negative tokens across selected categories."""
-        tokens = self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift
+        tokens = list(self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift)
+        seen = set(tokens)
+
+        # Baseline master anti-defect tokens to ensure all profiles get maximum protection
+        for t in (
+            "focus miss",
+            "double edges",
+            "ringing",
+            "oversharpening",
+            "crunchy HDR",
+            "perspective drift",
+            "unmotivated bokeh",
+            "fake shallow depth of field",
+            "tilted horizon",
+            "artificial pore carving",
+            "invented eyelashes",
+            "unmotivated teal-orange grading",
+        ):
+            if t not in seen:
+                tokens.append(t)
+                seen.add(t)
+
         if include_branding:
-            tokens = tokens + self.branding_and_text
+            for t in self.branding_and_text:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
         if include_compression:
-            tokens = tokens + self.compression_and_quality
+            for t in self.compression_and_quality:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
         if include_anti_drift:
-            tokens = tokens + self.anti_drift_tokens
+            for t in self.anti_drift_tokens:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
         if include_outpaint:
-            tokens = tokens + self.outpaint_drift
+            for t in self.outpaint_drift:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
         return tokens
 
 
@@ -337,6 +475,8 @@ class SceneInput:
     custom_positives: list[str] = field(default_factory=list)
     custom_negatives: list[str] = field(default_factory=list)
     reference: Optional[ReferenceImageInput] = None
+    lighting_preset: Optional[str] = None
+    capture_mode: Optional[str] = None
     sharpness_protocol: bool = True
     output_resolution: Optional[str] = None
     suppress_text_branding: bool = True

@@ -1,0 +1,67 @@
+{
+  "profile_id": "hasselblad_x2d_ii_100c",
+  "title": "Hasselblad X2D II 100C Medium Format",
+  "schema_version": "2.0",
+  "purpose": "State-of-the-art 100MP medium-format handheld precision with 16-bit color, 15.3 stops dynamic range, and Hasselblad Natural Colour Solution (HNCS).",
+  "sensor_and_optics": {
+    "camera_system": "Hasselblad X2D II 100C Medium Format",
+    "sensor_type": "43.8x32.9mm Back-Side Illuminated (BSI) CMOS Medium Format",
+    "sensor_dimensions": "43.8x32.9mm medium format sensor (100MP)",
+    "full_frame_equivalent": "38mm-71mm medium-format perspective (0.79x crop factor)",
+    "lens": "Hasselblad XCD 2,5/90V Reference Portrait Lens stopped down to f/5.6 sweet spot",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 64 base sensor sensitivity",
+    "dynamic_range": "16-bit raw color depth with 15.3 stops dynamic range and HNCS",
+    "shutter": "Integrated leaf shutter with up to 1/4000s flash sync and 5-axis 10-stop in-body image stabilization (IBIS)"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Natural daylight balanced strobe, 1/2000s leaf shutter flash sync, base ISO 64, 16-bit raw tonal range",
+    "light_transport": "Large parabolic key modifier with subtle organic negative fill; gradual specular highlight roll-off and authentic HNCS color separation"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Natural epidermal skin texture with resolved pores, fine vellus hair, and accurate subsurface dermal scattering without waxy specularities",
+      "True material micro-relief: fabric weave, micro-abrasions, uncompressed specular highlight falloff",
+      "High optical acutance and MTF contrast without digital edge halos or unsharp masking artifacts"
+    ],
+    "depth_and_optics": [
+      "Medium-format optical dimensionality with smooth focus plane transition",
+      "Zero perspective distortion, clean rectilinear projection",
+      "Soft natural background dissolution characteristic of large-sensor optics"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "focus miss",
+      "double edges",
+      "ringing",
+      "oversharpening",
+      "crunchy HDR"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial pore carving",
+      "computational bokeh",
+      "beauty filter glow",
+      "clipped highlights",
+      "crushed shadows",
+      "unmotivated teal-orange grading"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features",
+      "invented eyelashes"
+    ]
+  },
+  "execution_directive": "Enforce Hasselblad X2D II 100C medium-format raw capture fidelity at 100MP with HNCS 16-bit color. Eliminate post-processed digital sharpening, synthetic smoothing, and non-physical lighting."
+}

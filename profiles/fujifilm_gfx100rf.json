@@ -1,0 +1,66 @@
+{
+  "profile_id": "fujifilm_gfx100rf",
+  "title": "FUJIFILM GFX100RF Large Format Rangefinder",
+  "schema_version": "2.0",
+  "purpose": "Portable large-format rangefinder form factor for travel, environmental portraiture, documentary, and landscape with maximum resolution and analog film simulation color science.",
+  "sensor_and_optics": {
+    "camera_system": "FUJIFILM GFX100RF (102MP GFX CMOS II Large Format)",
+    "sensor_type": "43.8x32.9mm Large Format GFX CMOS II with X-Processor 5",
+    "sensor_dimensions": "43.8x32.9mm large format sensor (102MP)",
+    "full_frame_equivalent": "~40mm full-frame normal-wide field of view",
+    "lens": "Fujinon GF 50mm f/3.5 R LM WR stopped down to f/5.6 optical sweet spot",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 80 base sensor sensitivity",
+    "dynamic_range": "16-bit raw tonal latitude with Fujifilm analog color science (Classic Chrome / Reala Ace)",
+    "shutter": "Focal-plane shutter with 1/125s flash sync and high-speed electronic shutter"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Natural ambient directional daylight with subtle reflector bounce, base ISO 80, 16-bit raw capture",
+    "light_transport": "Open environmental light transport, soft shadow graduation, authentic analog highlight roll-off"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Natural epidermal skin texture with resolved pores, fine vellus hair, and accurate subsurface scattering",
+      "True material micro-relief: fabric weave, weathered stone, foliage micro-textures",
+      "Organic acutance without digital edge ringing or clarity boosts"
+    ],
+    "depth_and_optics": [
+      "Natural large-format environmental separation with subtle focal falloff",
+      "Rectilinear optical projection, zero edge distortion",
+      "Uncompressed tonal transitions across midtones"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "focus miss",
+      "double edges",
+      "ringing",
+      "oversharpening",
+      "crunchy HDR"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial pore carving",
+      "computational bokeh",
+      "beauty filter glow",
+      "clipped highlights",
+      "crushed shadows",
+      "unmotivated teal-orange grading"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce FUJIFILM GFX100RF 102MP large-format documentary fidelity with authentic Classic Chrome / Reala Ace tonal depth. Eliminate digital sharpening, synthetic smoothing, and plastic textures."
+}

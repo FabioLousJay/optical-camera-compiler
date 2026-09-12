@@ -1,0 +1,66 @@
+{
+  "profile_id": "leica_sl3_p",
+  "title": "Leica SL3-P Flagship Full-Frame Mirrorless",
+  "schema_version": "2.0",
+  "purpose": "Premium editorial, documentary, fashion, and commercial hybrid with Maestro IV processing, benchmark optical micro-contrast, and restrained German color science.",
+  "sensor_and_optics": {
+    "camera_system": "Leica SL3-P Full-Frame Mirrorless (Maestro IV Processor)",
+    "sensor_type": "35.8x23.9mm Full-Frame BSI CMOS (Triple Resolution 45MP)",
+    "sensor_dimensions": "35.8x23.9mm full-frame sensor (44.9MP)",
+    "full_frame_equivalent": "35mm native field of view",
+    "lens": "Leica APO-Summicron-SL 50mm f/2 ASPH stopped down to f/4 optical sweet spot",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 50 base sensor sensitivity with dual native ISO",
+    "dynamic_range": "15 stops dynamic range with 14-bit uncompressed DNG",
+    "shutter": "Hybrid focal-plane/electronic shutter up to 1/16000s and 1/250s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Refined editorial studio daylight or continuous HMI, 1/250s sync, base ISO 50, 14-bit DNG raw tonal range",
+    "light_transport": "Restrained European tonal balance, soft highlight roll-off, deep natural shadow micro-contrast without muddy blacks"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Leica optical micro-contrast: incredible separation of fine tactile textures, skin pores, hair strands, and textile weave",
+      "Benchmark German aspherical acutance with zero digital edge ringing or sharpening halos",
+      "Subtle dermal subsurface scattering with honest, un-smoothed human skin character"
+    ],
+    "depth_and_optics": [
+      "Apochromatic color correction: zero longitudinal or lateral chromatic aberration",
+      "Clean rectilinear optical projection, razor-sharp edge-to-edge resolution",
+      "Smooth natural optical fall-off without computational depth slicing"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "focus miss",
+      "double edges",
+      "ringing",
+      "oversharpening",
+      "crunchy HDR"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial pore carving",
+      "computational bokeh",
+      "beauty filter glow",
+      "clipped highlights",
+      "crushed shadows",
+      "unmotivated teal-orange grading"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Leica SL3-P 45MP full-frame editorial fidelity with authentic APO-Summicron optical micro-contrast and restrained Leica color. Eliminate post-processed digital sharpening, synthetic smoothing, and plastic textures."
+}

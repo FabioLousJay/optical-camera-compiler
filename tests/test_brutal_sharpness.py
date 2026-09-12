@@ -24,7 +24,12 @@ class TestBrutalSharpnessKit(unittest.TestCase):
         self.assertIn("canon_eos_r5_ii", profile_ids)
         self.assertIn("nikon_z9", profile_ids)
         self.assertIn("sony_fx_series", profile_ids)
-        self.assertGreaterEqual(len(available), 14)
+        self.assertIn("hasselblad_x2d_ii_100c", profile_ids)
+        self.assertIn("fujifilm_gfx100rf", profile_ids)
+        self.assertIn("canon_eos_r1", profile_ids)
+        self.assertIn("leica_sl3_p", profile_ids)
+        self.assertIn("panasonic_lumix_s1rii", profile_ids)
+        self.assertGreaterEqual(len(available), 19)
 
         # Verify Sony FX Cinema Line
         fx = load_profile("sony_fx_series")
@@ -56,7 +61,7 @@ class TestBrutalSharpnessKit(unittest.TestCase):
         """Verify that all profiles compile without error across all supported engines."""
         available = list_available_profiles()
         profile_ids = [p["id"] for p in available]
-        self.assertGreaterEqual(len(profile_ids), 14)
+        self.assertGreaterEqual(len(profile_ids), 19)
         targets = [
             TargetEngine.GPT_IMAGES,
             TargetEngine.IMAGEN,
