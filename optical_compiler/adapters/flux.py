@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from ..models import (
     AdSafeZone,
+    BackgroundStyle,
     CameraProfile,
     CompiledPayload,
     CopySpace,
+    MaterialStyle,
+    PaperProfile,
     ReferenceMode,
     SceneInput,
     TargetEngine,
@@ -37,6 +40,10 @@ class FluxAdapter(BaseAdapter):
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
 
         # 1. Subject & Scene
+        if scene.is_policy_safe:
+            sections.append(
+                "Policy-Safe Compliance Directive: Dignified, tasteful editorial photographic execution adhering to platform ethical guidelines with fully clothed subjects and authentic camera physics."
+            )
         subject_desc = scene.subject
         if scene.framing:
             subject_desc = f"{scene.framing} of {scene.subject}"
@@ -151,6 +158,28 @@ class FluxAdapter(BaseAdapter):
                 "Tonal response: Restrained black-and-white indie-cinema monochrome, gentle highlight roll-off, clean midtones, no HDR, fine subtle organic film grain."
             )
 
+        if scene.has_body_morphology:
+            regions = scene.body_volume or (", ".join(scene.body_morphology.volume_regions) if scene.body_morphology and scene.body_morphology.volume_regions else "biceps, chest, gut")
+            wt = f" with calibrated body mass {scene.weight_lb} lbs" if scene.weight_lb else ""
+            sections.append(
+                f"Proportional Body Volume Calibration ({regions}{wt}): All enlarged regions strictly proportional to skeletal frame and head size; "
+                "preserving authentic bilateral asymmetry, realistic soft-tissue gravity and seated compression, and natural clothing conformity without comic-book exaggeration."
+            )
+
+        if scene.has_material_style:
+            mat_desc = scene.material_style.value.replace("_", " ") if scene.material_style and scene.material_style != MaterialStyle.NONE else "dimensional volumetric finish"
+            bg_desc = f" Background: {scene.background_style.value.replace('_', ' ')}." if scene.background_style and scene.background_style != BackgroundStyle.DEFAULT else ""
+            sections.append(
+                f"4D Volumetric & Premium Material Engine: Rendered with {mat_desc},{bg_desc} sculpted contour rim lighting, controlled specular highlights, deep tonal separation, and physical micro-relief."
+            )
+
+        if scene.remove_text_when_present:
+            sections.append("Text removal engine: Cleanly remove visible text, typography, and lettering, seamlessly filling background contextually.")
+
+        if scene.is_print_calibrated:
+            paper_name = scene.paper_profile.value.replace("_", " ") if scene.paper_profile and scene.paper_profile != PaperProfile.NONE else (scene.print_spec.paper.value.replace("_", " ") if scene.print_spec and scene.print_spec.paper != PaperProfile.NONE else "exhibition fine art paper")
+            sections.append(f"Print-calibrated exhibition prepress specification for {paper_name}, preserving tonal gradient depth, Dmax response, and zero digital banding.")
+
         # 2. Exact physical camera rig
         camera_parts = [
             f"Shot on a {optics.camera_system}, {optics.lens} set to {optics.aperture_sweet_spot},",
@@ -253,6 +282,10 @@ class FluxAdapter(BaseAdapter):
             banned_tropes += " Eliminate mismatched shoes, twisted legs, floating feet, and distorted scale."
         if scene.has_hand_lock:
             banned_tropes += " Eliminate fused digits, clipping fingers, extra phalanges, rubber knuckles, dislocated thumbs, missing knuckles, and deformed nails."
+        if scene.has_body_morphology:
+            banned_tropes += " Eliminate balloon muscles, cartoon proportions, comic-book anatomy, hyper-vascularity, and grotesque body distortion."
+        if scene.remove_text_when_present:
+            banned_tropes += " Eliminate visible letters, text, typography, and words."
         sections.append(banned_tropes)
 
         positive_prompt = " ".join(sections)
@@ -267,6 +300,7 @@ class FluxAdapter(BaseAdapter):
             include_skin_realism=scene.human_skin_realism,
             include_product_drift=is_product_lock,
             include_hand_drift=scene.has_hand_lock,
+            include_body_distortion=scene.has_body_morphology,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)

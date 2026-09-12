@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ..models import CameraProfile, CompiledPayload, SceneInput, TargetEngine
+from ..models import CameraProfile, CompiledPayload, PaperProfile, SceneInput, TargetEngine
 from .base import BaseAdapter
 
 
@@ -93,11 +93,60 @@ class RawSpecAdapter(BaseAdapter):
                 "Gate H5 (Mutation Shield): 100% rejection of fused digits, extra phalanges, rubber knuckles, dislocated thumbs",
             ])
 
+        if scene.is_policy_safe:
+            lines.extend([
+                "",
+                "--- Policy-Safe Compliance Recovery Directive ---",
+                "Status: ENFORCED",
+                "Compliance Mode: Tasteful editorial fine-art, fully clothed subjects, strictly safe platform output",
+                "Preservation: Camera physics, optical acutance, authentic lighting, and anatomical fidelity fully locked",
+            ])
+
+        if scene.has_body_morphology:
+            regions = scene.body_volume or (", ".join(scene.body_morphology.volume_regions) if scene.body_morphology and scene.body_morphology.volume_regions else "biceps, chest, gut")
+            lines.extend([
+                "",
+                "--- Body Morphology & Proportional Volume Calibration ---",
+                f"Volume Target Regions: {regions}",
+                f"Calibrated Weight: {scene.weight_lb} lbs" if scene.weight_lb else "Calibrated Weight: Frame-proportional",
+                "Proportionality Rule: Proportional to skeletal frame, head size, and total mass",
+                "Bilateral Asymmetry: Authentic human asymmetry strictly preserved (anti-mirroring)",
+                "Soft-Tissue Mechanics: Believable gravity, seated abdominal compression, continuous anatomical contours",
+                "Clothing Conformity: Authentic garment tension and stretch over enlarged mass",
+                "Anti-Exaggeration Lock: Absolute prohibition of cartoon musculature or caricature ballooning",
+            ])
+
+        if scene.has_material_style or scene.is_4d_volumetric:
+            lines.extend([
+                "",
+                "--- 4D Volumetric & Premium Material Engine ---",
+                f"Material Style: {scene.material_style.value if scene.material_style else 'dimensional_volumetric'}",
+                f"Background Style: {scene.background_style.value if scene.background_style else 'default'}",
+                "Volumetric Rendering: Tangible foreground-background separation, rim contour lighting, deep tonal isolation",
+                "Specular Physics: Controlled micro-contrast, realistic surface curvature, uncompressed specular highlights",
+                f"Conditional Text Removal: {'ENFORCED' if scene.remove_text_when_present else 'DISABLED'}",
+            ])
+
+        if scene.is_print_calibrated:
+            paper_name = scene.paper_profile.value if scene.paper_profile and scene.paper_profile != PaperProfile.NONE else (scene.print_spec.paper.value if scene.print_spec and scene.print_spec.paper != PaperProfile.NONE else 'fine_art')
+            lines.extend([
+                "",
+                "--- Print-Calibrated Prepress & Exhibition Lab Matrix ---",
+                f"Paper Profile: {paper_name}",
+            ])
+            if scene.print_spec:
+                lines.extend([
+                    f"Physical Print Size: {scene.print_spec.width_in}\" x {scene.print_spec.height_in}\" @ {scene.print_spec.ppi} PPI",
+                    f"Pixel Dimensions: {int(round(scene.print_spec.width_in * scene.print_spec.ppi))} x {int(round(scene.print_spec.height_in * scene.print_spec.ppi))}",
+                    f"Rendering Intent: {scene.print_spec.rendering_intent.value}",
+                ])
+
         positive_prompt = "\n".join(lines)
         negative_prompt = ", ".join(
             shield.all_tokens(
                 include_product_drift=scene.has_product_lock,
                 include_hand_drift=scene.has_hand_lock,
+                include_body_distortion=scene.has_body_morphology,
             )
         )
 

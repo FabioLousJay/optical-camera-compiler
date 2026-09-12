@@ -3,7 +3,7 @@
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 111 Passing](https://img.shields.io/badge/tests-111%20passing-brightgreen.svg)](tests/)
+[![Tests: 128 Passing](https://img.shields.io/badge/tests-128%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -138,6 +138,61 @@ Transforms raw photo generations into ready-to-deploy commercial, print, billboa
 * **Asymmetric Negative Copy-Space (`--copy-space`)**: `left_third`, `right_third`, `top_third`, `bottom_third`—strictly reserves calm, uncluttered background space for brand headlines, logos, and typographic copy.
 * **Ad-Safe Safe-Zone Framing (`--ad-safe-zone`)**: `tiktok_reels_9_16` (keeps content clear of right-side icons and bottom captions), `instagram_feed_4_5`, `ecommerce_catalog_1_1`.
 * **CLI Flag**: `--gobo venetian_blinds`, `--grip beauty_dish_honeycomb`, `--lighting-ratio 4:1`, `--copy-space left_third`, `--ad-safe-zone instagram_feed_4_5`
+
+---
+
+## 💎 GenAI Photography Mastery Suite (v3.4)
+
+Five state-of-the-art additions bringing hyper-refined anatomical control, dimensional volumetric rendering, non-destructive policy compliance, fine-art prepress lab calibration, and 8K-class master resolution synthesis:
+
+### 1. 🏋️ Body Morphology & Proportional Volume Calibration Engine
+Solves anatomical ballooning, impossible insertions, and comic-book caricature exaggeration when requesting larger muscular or heavier body mass:
+* **Proportional Scaling Rule**: All volume increases in target regions (`biceps`, `chest`, `gut`, `legs`, `waist`, etc.) are mathematically bound to existing skeletal frame dimensions, shoulder width, torso depth, limb length, and head size.
+* **Calibrated Target Body Mass (`--weight-lb`)**: Injects exact calibrated weight (e.g. `230 lb`) to anchor realistic overall mass distribution.
+* **Bilateral Asymmetry Preservation**: Prohibits mechanical mirroring, unnatural bilateral symmetry, and cloned muscle insertions.
+* **Gravitational Physics & Seated Compression**: Enforces realistic abdominal soft-tissue projection, natural compression against seating or surfaces, and authentic skin fold kinematics.
+* **Clothing Conformity**: Wardrobe conforms, stretches, and contours naturally over enlarged muscle or body mass without tearing, breaking seam geometry, or altering color patterns.
+* **20+ Specialized Anti-Distortion Tokens**: Automatically injected into the negative shield whenever morphology is active (`extreme bodybuilding`, `cartoon proportions`, `balloon muscles`, `impossible muscle insertions`, `hyper-inflated limbs`, `grotesque exaggeration`, etc.).
+* **CLI Flag**: `--body-volume "biceps:significant, chest:moderate" --weight-lb 230`
+
+### 2. 🔮 4D Volumetric & Premium Material Engine
+Renders subjects and objects with physical dimensional presence and tangible light interaction:
+* **Dimensional Volumetric Depth (`--volumetric-4d`)**: Clear foreground-background separation, contour rim lighting, deep tonal separation, and tangible 3D/4D volumetric presence (strictly prohibiting temporal motion trails or surreal sci-fi blur).
+* **Premium Surface Physics (`--material`)**:
+  * `latex_gloss`: High-gloss reflective latex with authentic curvature highlights and specular roll-off.
+  * `liquid_glass`: Transparent optical refractive glass with caustic light distribution.
+  * `dielectric_acrylic`: Clear lucite/perspex with clean edge definition and internal refraction.
+  * `polished_vinyl`: Reflective architectural PVC and polished synthetic sheen.
+  * `anodized_aluminum`: Matte-metallic surface scattering with brushed directional highlights.
+* **Studio Background Isolation (`--background-style`)**: `pure_black_blur` (opaque softly blurred black void for maximum subject pop), `minimalist_studio_grey`, `clean_high_key_white`.
+* **Conditional Text Removal Engine (`--remove-text`)**: When letters, labels, or watermarks exist on reference crops, cleanly removes typography and fills the surface with authentic material physics.
+* **CLI Flag**: `--volumetric-4d --material latex_gloss --background-style pure_black_blur --remove-text`
+
+### 3. 🛡️ Policy-Safe Compliance Recovery Layer (`--policy-safe`)
+Prevents non-compliant refusal loops and false-positive safety flags across hosted enterprise models (**ChatGPT DALL-E 3**, **Google Imagen 3**, **Midjourney v8.2**):
+* **Non-Destructive Transformation**: Converts sensitive, form-fitting, or edgy creative concepts into elegant, dignified, tasteful fine-art editorial execution without losing camera physics, optical acutance, anatomy, or lighting geometry.
+* **Safe Aesthetic Framing**: Injects safe platform styling into positive prompts while activating safety suppression in the negative shield (`provocative`, `inappropriate`, `revealing`, `gratuitous`).
+* **Universal Model Support**: Active across all 7 target adapters (GPT Images, Imagen 3, Midjourney, Flux.1, SDXL, Raw Spec, and JSON Schema 3.4).
+* **CLI Flag**: `--policy-safe`
+
+### 4. 🖨️ Print-Calibrated Prepress & Exhibition Lab Matrix
+Prepares generated imagery for fine-art exhibition, gallery prints, and high-Dmax print lab production:
+* **Exact Mathematical Pixel Calculations (`inches_to_pixels`)**: Calculates exact raster dimensions at specified print density (e.g. 16" x 24" at 300 PPI = $4800 \times 7200\text{ px}$; 9" x 12" at 640 PPI = $5760 \times 7680\text{ px}$).
+* **Fine-Art Paper Profiles (`--paper`)**:
+  * `matte_cotton`: Hahnemühle Photo Rag 308g (100% cotton matte, zero specular glare, soft optical ink absorption, Dmax 1.65–1.75).
+  * `baryta`: Canson Infinity Baryta Photographique II 310g (traditional silver-halide darkroom satin finish, museum grade, Dmax 2.60–2.75).
+  * `luster`: Epson Ultra Premium Luster 260g (pebbled surface, commercial portrait standard, Dmax 2.10–2.25).
+  * `glossy`: Ilford Galerie Smooth Gloss 310g (mirror finish, maximum dynamic contrast, Dmax 2.40–2.55).
+  * `canvas`: Breathing Color Lyve Canvas 450g (textured weave, physical relief, painterly depth).
+* **Rendering Intent**: Supports `relative_colorimetric` (with Black Point Compensation) and `perceptual` color reproduction.
+* **CLI Flag**: `--paper baryta --print-size 16x24@300`
+
+### 5. 🖥️ Master Resolution Engine & JSON Schema 3.4
+* **New Aspect Ratios**:
+  * **`5:5` (Square 16MP Full-Frame Master)**: Renders at $4000 \times 4000\text{ px}$ uncompressed.
+  * **`9:12` (Vertical 44.2MP 8K-Class Exhibition Master)**: Renders at $5760 \times 7680\text{ px}$ uncompressed.
+* **JSON Prompt Schema 3.4 Upgrade**: Automatically emits `schema_version: "3.4"` with dedicated structured blocks: `body_morphology_volume_engine`, `volumetric_material_engine`, `prepress_matrix`, and `policy_compliance_layer`.
+* **Two-Stage Quality Inspection**: Standardized checklist for 100% and 200% zoom validation of iris detail, fingernail lunula, textile weave, and text sharpness.
 
 ---
 

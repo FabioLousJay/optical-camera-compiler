@@ -23,8 +23,10 @@ from .models import (
     LIGHTING_PRESET_DESCRIPTIONS,
     LightingRatio,
     LightingSetup,
+    MaterialStyle,
     MicroPhysics,
     NegativeShield,
+    PaperProfile,
     ReferenceMode,
     SceneInput,
     SensorOptics,
@@ -528,6 +530,44 @@ def apply_overrides(profile: CameraProfile, scene: SceneInput) -> CameraProfile:
             "Zero missing knuckles, zero fused digits, zero clipping through objects, zero rubber fingers."
         )
         p.micro_detail_and_physics.surface_rendering.insert(0, hand_directive)
+
+    # Body Morphology & Proportional Volume Calibration
+    if scene.has_body_morphology:
+        regions = scene.body_volume or (", ".join(scene.body_morphology.volume_regions) if scene.body_morphology and scene.body_morphology.volume_regions else "biceps, chest, gut")
+        wt = f" (target body mass: {scene.weight_lb} lbs)" if scene.weight_lb else ""
+        morph_directive = (
+            f"Body Morphology & Proportional Volume Calibration ({regions}{wt}): "
+            "Proportional volume scaling strictly anchored to skeletal frame, limb length, and torso width. "
+            "Preserve authentic human bilateral asymmetry without mechanical mirroring or cloned forms. "
+            "Realistic soft-tissue gravitational physics, seated tissue compression, and continuous anatomical contours into adjacent musculature. "
+            "Clothing must conform and stretch naturally over enlarged forms without altered garment structure or broken patterns. "
+            "Strict anti-exaggeration lock: Zero extreme bodybuilding, zero balloon muscles, zero impossible insertions."
+        )
+        p.micro_detail_and_physics.surface_rendering.insert(0, morph_directive)
+
+    # 4D Volumetric & Premium Material Engine
+    if scene.has_material_style:
+        mat_name = scene.material_style.value.replace("_", " ") if scene.material_style and scene.material_style != MaterialStyle.NONE else "dimensional volumetric finish"
+        mat_directive = (
+            f"4D Volumetric & Premium Material Engine ({mat_name}): "
+            "High-fidelity dimensional volume with clear foreground-background separation, precise contour rim lighting, "
+            "controlled specular highlight curvature, and deep tonal separation. "
+            "Material response features realistic surface curvature, high micro-contrast, and clean edge definition without cheap plastic appearance or flat CGI shading."
+        )
+        p.micro_detail_and_physics.surface_rendering.insert(0, mat_directive)
+
+    # Print-Calibrated Prepress & Exhibition Lab Matrix
+    if scene.is_print_calibrated:
+        paper_name = scene.paper_profile.value.replace("_", " ") if scene.paper_profile and scene.paper_profile != PaperProfile.NONE else (scene.print_spec.paper.value.replace("_", " ") if scene.print_spec and scene.print_spec.paper != PaperProfile.NONE else "exhibition fine-art paper")
+        prepress_directive = (
+            f"Exhibition Prepress Calibration ({paper_name}): "
+            "Tonal mapping and contrast curve calibrated for fine-art exhibition print media with authentic paper Dmax response and zero digital banding."
+        )
+        p.lighting_and_exposure.light_transport = f"{prepress_directive}, {p.lighting_and_exposure.light_transport}"
+
+    # Policy-Safe Compliance Recovery Layer
+    if scene.is_policy_safe:
+        p.execution_directive = f"Policy-Safe Compliance Layer Active: {p.execution_directive} Modify only minimum required elements to ensure 100% compliance while preserving all camera optics, lighting geometry, and realism."
 
     return p
 

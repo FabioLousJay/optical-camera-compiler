@@ -10,9 +10,12 @@ from typing import Any
 
 from ..models import (
     AdSafeZone,
+    BackgroundStyle,
     CameraProfile,
     CompiledPayload,
     CopySpace,
+    MaterialStyle,
+    PaperProfile,
     ReferenceMode,
     SceneInput,
     TargetEngine,
@@ -29,6 +32,12 @@ class GPTImagesAdapter(BaseAdapter):
 
     def compile(self, scene: SceneInput, profile: CameraProfile) -> CompiledPayload:
         sections = []
+
+        # Policy-Safe Compliance Recovery Directive
+        if scene.is_policy_safe:
+            sections.append(
+                "Policy-Safe Compliance Recovery Directive: Maintain an editorial, dignified, fine-art photographic execution strictly adhering to platform safety and ethical guidelines. All subjects are depicted fully clothed in realistic, tasteful, elegant attire. Strictly avoid gratuitous, suggestive, or non-compliant elements while fully preserving authentic camera physics, anatomy, lighting, material realism, and optical fidelity."
+            )
 
         # 1. Base instruction / Subject block
         is_ref = bool(scene.reference and scene.reference.mode != ReferenceMode.NONE)
@@ -227,6 +236,50 @@ class GPTImagesAdapter(BaseAdapter):
             )
             sections.append(hand_block)
 
+        # Body Morphology & Proportional Volume Calibration
+        if scene.has_body_morphology:
+            regions = scene.body_volume or (", ".join(scene.body_morphology.volume_regions) if scene.body_morphology and scene.body_morphology.volume_regions else "biceps, chest, gut")
+            wt = f" with target body mass {scene.weight_lb} lbs" if scene.weight_lb else ""
+            morph_lines = [
+                f"Body Morphology & Proportional Volume Calibration ({regions}{wt}):",
+                "- [PROPORTIONALITY RULE]: All enlarged regions (biceps, chest, gut, legs, waist) must remain strictly proportional to existing skeletal frame, shoulder width, torso width, limb length, head size, and total body mass. Read as one coherent fuller physique rather than isolated inflated parts.",
+                "- [NATURAL ASYMMETRY RULE]: Preserve authentic human bilateral asymmetry. Strictly prohibit mechanical mirroring or cloned anatomical forms.",
+                "- [GRAVITATIONAL & SOFT-TISSUE BEHAVIOR]: Natural abdominal projection, realistic seated soft-tissue compression, believable weight distribution, and continuous smooth anatomical contours into adjacent musculature.",
+                "- [CLOTHING CONFORMITY]: Garments conform and stretch naturally over enlarged body mass while retaining original pattern, color sequence, straps, and construction without breaking or warping.",
+                "- [ANTI-EXAGGERATION LOCK]: Absolute prohibition of extreme bodybuilding, comic-book musculature, balloon abdomen, hyper-vascularity, or detached limbs.",
+            ]
+            sections.append("\n".join(morph_lines))
+
+        # 4D Volumetric & Premium Material Engine
+        if scene.has_material_style:
+            mat_desc = scene.material_style.value.replace("_", " ") if scene.material_style and scene.material_style != MaterialStyle.NONE else "dimensional volumetric finish"
+            bg_desc = f" Background: {scene.background_style.value.replace('_', ' ')}." if scene.background_style and scene.background_style != BackgroundStyle.DEFAULT else ""
+            mat_lines = [
+                f"4D Volumetric & Premium Material Engine ({mat_desc}):",
+                "- [VOLUMETRIC PRESENCE]: Clear foreground-background separation, precise contour rim lighting, deep tonal separation, and tangible 3D/4D volumetric presence (prohibiting temporal motion trails or surreal distortion).",
+                "- [MATERIAL PHYSICS]: Realistic surface curvature, controlled specular highlights, rounded dimensional highlights, micro-contrast, and clean edge definition without cheap plastic toy appearance or flat CGI shading.",
+            ]
+            if bg_desc:
+                mat_lines.append(f"- [BACKGROUND ISOLATION]:{bg_desc} Strong subject separation, opaque and non-distracting.")
+            sections.append("\n".join(mat_lines))
+
+        # Conditional text removal engine
+        if scene.remove_text_when_present:
+            sections.append(
+                "Text removal engine: Remove letters, words, captions, typography, and decorative lettering only when visibly present in source/reference. "
+                "Replace removed text areas with contextually consistent background/material without introducing new symbols or graphics."
+            )
+
+        # Print-Calibrated Prepress Specification
+        if scene.is_print_calibrated:
+            paper_name = scene.paper_profile.value.replace("_", " ") if scene.paper_profile and scene.paper_profile != PaperProfile.NONE else (scene.print_spec.paper.value.replace("_", " ") if scene.print_spec and scene.print_spec.paper != PaperProfile.NONE else "exhibition fine art paper")
+            prepress_desc = [f"Print-calibrated exhibition prepress specification ({paper_name}):"]
+            if scene.print_spec:
+                prepress_desc.append(f"- Target print size: {scene.print_spec.width_in}\" x {scene.print_spec.height_in}\" at {scene.print_spec.ppi} PPI ({int(round(scene.print_spec.width_in * scene.print_spec.ppi))} x {int(round(scene.print_spec.height_in * scene.print_spec.ppi))} pixels).")
+                prepress_desc.append(f"- Rendering intent: {scene.print_spec.rendering_intent.value.replace('_', ' ')} with Black Point Compensation.")
+            prepress_desc.append(f"- Paper profile: {paper_name}, preserving tonal gradient depth, Dmax response, and zero digital banding.")
+            sections.append("\n".join(prepress_desc))
+
         # 6. Focus discipline & Surface rendering
         is_slow_shutter = (
             scene.capture_mode == "slow_shutter_crowd_motion"
@@ -354,6 +407,7 @@ class GPTImagesAdapter(BaseAdapter):
             include_skin_realism=scene.human_skin_realism,
             include_product_drift=scene.has_product_lock,
             include_hand_drift=scene.has_hand_lock,
+            include_body_distortion=scene.has_body_morphology,
         )
         if scene.custom_negatives:
             neg_tokens.extend(scene.custom_negatives)
@@ -390,6 +444,8 @@ class GPTImagesAdapter(BaseAdapter):
     def _resolve_default_resolution(self, aspect_ratio: str) -> str:
         """Map aspect ratio to exact uncompressed resolution string."""
         mapping = {
+            "5:5": "16MP PNG, square 5:5 full-frame ratio (4000 x 4000)",
+            "9:12": "44.2MP PNG, vertical 9:12 aspect ratio (5760 x 7680, 8K-class master)",
             "9:11": "12MP PNG, vertical 9:11 aspect ratio (3132 x 3828)",
             "4:5": "12MP PNG, vertical 4:5 aspect ratio (3100 x 3875)",
             "3:2": "12MP PNG, vertical 3:2 aspect ratio (4248 x 2832)",

@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from ..models import (
     AdSafeZone,
+    BackgroundStyle,
     CameraProfile,
     CompiledPayload,
     CopySpace,
+    MaterialStyle,
+    PaperProfile,
     ReferenceMode,
     SceneInput,
     TargetEngine,
@@ -35,6 +38,10 @@ class ImagenAdapter(BaseAdapter):
 
         # 1. Subject & Scene foundation
         scene_elements = []
+        if scene.is_policy_safe:
+            scene_elements.append(
+                "Policy-Safe Compliance Directive: Dignified, tasteful editorial photographic execution adhering to platform ethical guidelines with fully clothed subjects and authentic camera physics"
+            )
         if is_outpaint:
             scene_elements.append(
                 "Using the provided medium-shot photo as the base. Outpaint and extend the frame downward to a full-body portrait. "
@@ -166,6 +173,29 @@ class ImagenAdapter(BaseAdapter):
                 "Cap geometry, closure threading, label kerning, typographic tracking, mold parting seams, and SKU color are locked. "
                 "Reject any distortion, cap substitution, or text hallucination."
             )
+
+        if scene.has_body_morphology:
+            regions = scene.body_volume or (", ".join(scene.body_morphology.volume_regions) if scene.body_morphology and scene.body_morphology.volume_regions else "biceps, chest, gut")
+            wt = f" with calibrated body mass {scene.weight_lb} lbs" if scene.weight_lb else ""
+            ref_directives.append(
+                f"Proportional Body Volume Calibration ({regions}{wt}): "
+                "Enlarged physical regions remain strictly proportional to skeletal frame, head size, and total mass; "
+                "preserve authentic bilateral asymmetry, realistic soft-tissue gravity and seated compression, "
+                "and natural clothing conformity with zero ballooning or caricature exaggeration."
+            )
+        if scene.has_material_style:
+            mat_desc = scene.material_style.value.replace("_", " ") if scene.material_style and scene.material_style != MaterialStyle.NONE else "dimensional volumetric finish"
+            bg_str = f" against {scene.background_style.value.replace('_', ' ')} background" if scene.background_style and scene.background_style != BackgroundStyle.DEFAULT else ""
+            ref_directives.append(
+                f"4D Volumetric & Premium Material Engine: Rendered with {mat_desc}{bg_str}, "
+                "sculpted contour rim lighting, controlled specular highlights, deep tonal separation, "
+                "and authentic material micro-physics without synthetic plastic sheen."
+            )
+        if scene.remove_text_when_present:
+            ref_directives.append("Remove visible text and lettering cleanly, filling background contextually.")
+        if scene.is_print_calibrated:
+            paper_name = scene.paper_profile.value.replace("_", " ") if scene.paper_profile and scene.paper_profile != PaperProfile.NONE else (scene.print_spec.paper.value.replace("_", " ") if scene.print_spec and scene.print_spec.paper != PaperProfile.NONE else "exhibition fine art paper")
+            ref_directives.append(f"Print-calibrated exhibition prepress specification for {paper_name}, preserving tonal gradient depth and Dmax response.")
         ref_prose = (" " + " ".join(ref_directives)) if ref_directives else ""
 
         # 2. Optical rig description in natural photography prose
@@ -243,6 +273,8 @@ class ImagenAdapter(BaseAdapter):
             style_prose += " Eliminate wrong cap geometry, incorrect label kerning, sku color drift, missing seams, and packaging distortion."
         if scene.has_hand_lock:
             style_prose += " Eliminate fused fingers, missing knuckles, rubber joints, clipping digits, and hand mutations."
+        if scene.has_body_morphology:
+            style_prose += " Eliminate balloon muscles, grotesque proportions, comic-book anatomy, and body distortion."
 
         positive_prompt = f"{scene_core}{ref_prose} {optical_prose} {lighting_prose} {micro_prose} {style_prose}"
 
@@ -256,6 +288,7 @@ class ImagenAdapter(BaseAdapter):
             include_skin_realism=scene.human_skin_realism,
             include_product_drift=is_product_lock,
             include_hand_drift=scene.has_hand_lock,
+            include_body_distortion=scene.has_body_morphology,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)

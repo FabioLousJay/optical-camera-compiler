@@ -489,3 +489,85 @@ def restore_and_upscale_102mp(
     }
 
     return report
+
+
+def inches_to_pixels(width_in: float, height_in: float, ppi: int = 300) -> tuple[int, int]:
+    """Convert physical print dimensions (inches) and target raster PPI to exact pixel dimensions.
+
+    Formula: pixels = print inches * PPI
+    """
+    return int(round(width_in * ppi)), int(round(height_in * ppi))
+
+
+STANDARD_PRINT_SIZES: dict[str, dict[str, Any]] = {
+    "16x24@300": {
+        "width_in": 16.0,
+        "height_in": 24.0,
+        "ppi": 300,
+        "dimensions": (4800, 7200),
+        "megapixels": 34.56,
+        "purpose": "Exhibition gallery portrait standard",
+    },
+    "24x36@240": {
+        "width_in": 24.0,
+        "height_in": 36.0,
+        "ppi": 240,
+        "dimensions": (5760, 8640),
+        "megapixels": 49.77,
+        "purpose": "Large-format museum exhibition print",
+    },
+    "20x30@300": {
+        "width_in": 20.0,
+        "height_in": 30.0,
+        "ppi": 300,
+        "dimensions": (6000, 9000),
+        "megapixels": 54.0,
+        "purpose": "High-density fine art archival display",
+    },
+    "9x12@640": {
+        "width_in": 9.0,
+        "height_in": 12.0,
+        "ppi": 640,
+        "dimensions": (5760, 7680),
+        "megapixels": 44.24,
+        "purpose": "8K vertical master presentation (3:4 ratio)",
+    },
+}
+
+PAPER_CHARACTERISTICS: dict[str, dict[str, Any]] = {
+    "matte_cotton": {
+        "name": "Hahnemühle Photo Rag 308g (100% Cotton Matte)",
+        "dmax": "1.65 - 1.75",
+        "surface": "Smooth matte, zero specular glare, soft optical absorption",
+        "gamut": "Refined tonal transitions, muted ultra-saturated tones",
+        "recommended_sharpening": "Slightly higher output micro-contrast to compensate for ink absorption",
+    },
+    "luster": {
+        "name": "Epson Ultra Premium Luster (260g)",
+        "dmax": "2.10 - 2.25",
+        "surface": "Fine pebbled luster, controlled specular highlight wrap",
+        "gamut": "Wide commercial portrait gamut, vibrant skin tones",
+        "recommended_sharpening": "Standard neutral unsharp mask (r=0.75, p=42, th=5)",
+    },
+    "glossy": {
+        "name": "Ilford Galerie Smooth Gloss (310g)",
+        "dmax": "2.40 - 2.55",
+        "surface": "High-gloss mirror finish, maximum optical depth",
+        "gamut": "Maximum chromatic range, deep punchy blacks",
+        "recommended_sharpening": "Conservative low-radius sharpening to avoid visible edge diffraction",
+    },
+    "baryta": {
+        "name": "Canson Infinity Baryta Photographique II (310g True Barium Sulfate)",
+        "dmax": "2.60 - 2.75",
+        "surface": "Traditional darkroom silver-halide satin finish, museum grade",
+        "gamut": "Exceptional micro-contrast, velvety blacks, luminous highlight roll-off",
+        "recommended_sharpening": "Acutance-preserving high-frequency pass",
+    },
+    "canvas": {
+        "name": "Breathing Color Lyve Canvas (450g Textured Weave)",
+        "dmax": "1.80 - 1.95",
+        "surface": "Heavy cotton-poly blend weave, physical texture depth",
+        "gamut": "Robust painterly tonal spread",
+        "recommended_sharpening": "Substantial edge reinforcement to overcome tactile fabric grain",
+    },
+}

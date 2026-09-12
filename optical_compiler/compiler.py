@@ -8,6 +8,8 @@ from .adapters import get_adapter
 from .models import (
     AdSafeZone,
     AnamorphicSqueeze,
+    BackgroundStyle,
+    BodyMorphologyConfig,
     CameraProfile,
     CompiledPayload,
     ContentType,
@@ -17,6 +19,9 @@ from .models import (
     GripType,
     IrisBladeCount,
     LightingRatio,
+    MaterialStyle,
+    PaperProfile,
+    PrintSpec,
     ReferenceImageInput,
     ReferenceMode,
     SceneInput,
@@ -95,6 +100,16 @@ class OpticalCompiler:
         lighting_ratio: Optional[Union[str, LightingRatio]] = None,
         copy_space: Optional[Union[str, CopySpace]] = None,
         ad_safe_zone: Optional[Union[str, AdSafeZone]] = None,
+        body_volume: Optional[str] = None,
+        weight_lb: Optional[int] = None,
+        body_morphology: Optional[BodyMorphologyConfig] = None,
+        material_style: Optional[Union[str, MaterialStyle]] = None,
+        background_style: Optional[Union[str, BackgroundStyle]] = None,
+        is_4d_volumetric: bool = False,
+        remove_text_when_present: bool = False,
+        paper_profile: Optional[Union[str, PaperProfile]] = None,
+        print_spec: Optional[PrintSpec] = None,
+        policy_safe: bool = False,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -184,6 +199,38 @@ class OpticalCompiler:
         cs = CopySpace.from_str(copy_space) if isinstance(copy_space, str) else copy_space
         asz = AdSafeZone.from_str(ad_safe_zone) if isinstance(ad_safe_zone, str) else ad_safe_zone
 
+        mat_style = MaterialStyle.from_str(material_style) if isinstance(material_style, str) else material_style
+        bg_style = BackgroundStyle.from_str(background_style) if isinstance(background_style, str) else background_style
+        paper_prof = PaperProfile.from_str(paper_profile) if isinstance(paper_profile, str) else paper_profile
+        if is_4d_volumetric and not mat_style:
+            mat_style = MaterialStyle.VOLUMETRIC_4D
+
+        if isinstance(print_spec, str):
+            from .restoration import STANDARD_PRINT_SIZES
+            ps_norm = print_spec.strip().lower()
+            if ps_norm in STANDARD_PRINT_SIZES:
+                spec_info = STANDARD_PRINT_SIZES[ps_norm]
+                print_spec = PrintSpec(
+                    width_in=spec_info["width_in"],
+                    height_in=spec_info["height_in"],
+                    ppi=spec_info["ppi"],
+                    paper=paper_prof or PaperProfile.NONE,
+                )
+            elif "x" in ps_norm:
+                parts = ps_norm.split("@")
+                dims = parts[0].split("x")
+                ppi = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 300
+                w = float(dims[0]) if dims[0].replace(".", "", 1).isdigit() else 16.0
+                h = float(dims[1]) if dims[1].replace(".", "", 1).isdigit() else 24.0
+                print_spec = PrintSpec(width_in=w, height_in=h, ppi=ppi, paper=paper_prof or PaperProfile.NONE)
+        elif print_spec is None and paper_prof and paper_prof != PaperProfile.NONE:
+            print_spec = PrintSpec(paper=paper_prof)
+
+        if body_volume and not body_morphology:
+            body_morphology = BodyMorphologyConfig.from_str(body_volume, weight_lb=weight_lb)
+        elif body_morphology and weight_lb and body_morphology.weight_lb is None:
+            body_morphology.weight_lb = weight_lb
+
         # 2. Build SceneInput
         if isinstance(scene, str):
             scene_input = SceneInput(
@@ -232,6 +279,16 @@ class OpticalCompiler:
                 lighting_ratio=lr,
                 copy_space=cs,
                 ad_safe_zone=asz,
+                body_volume=body_volume,
+                weight_lb=weight_lb,
+                body_morphology=body_morphology,
+                material_style=mat_style,
+                background_style=bg_style,
+                is_4d_volumetric=is_4d_volumetric,
+                remove_text_when_present=remove_text_when_present,
+                paper_profile=paper_prof,
+                print_spec=print_spec,
+                policy_safe=policy_safe,
             )
         else:
             scene_input = scene
@@ -319,6 +376,26 @@ class OpticalCompiler:
                 scene_input.copy_space = cs
             if asz:
                 scene_input.ad_safe_zone = asz
+            if body_volume:
+                scene_input.body_volume = body_volume
+            if weight_lb is not None:
+                scene_input.weight_lb = weight_lb
+            if body_morphology:
+                scene_input.body_morphology = body_morphology
+            if mat_style:
+                scene_input.material_style = mat_style
+            if bg_style:
+                scene_input.background_style = bg_style
+            if is_4d_volumetric:
+                scene_input.is_4d_volumetric = is_4d_volumetric
+            if remove_text_when_present:
+                scene_input.remove_text_when_present = remove_text_when_present
+            if paper_prof:
+                scene_input.paper_profile = paper_prof
+            if print_spec:
+                scene_input.print_spec = print_spec
+            if policy_safe:
+                scene_input.policy_safe = policy_safe
 
         # 3. Parse target engine
         engine = (
@@ -343,6 +420,9 @@ class OpticalCompiler:
         adapter = get_adapter(engine)
         payload = adapter.compile(scene_input, active_profile)
         payload.metadata.setdefault("hardware_profile", active_profile.profile_id)
+        payload.metadata["policy_safe"] = scene_input.is_policy_safe
+        if "aspect_ratio" not in payload.parameters:
+            payload.parameters["aspect_ratio"] = scene_input.aspect_ratio
         return payload
 
     def compile_all(

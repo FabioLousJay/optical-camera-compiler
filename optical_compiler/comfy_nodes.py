@@ -8,6 +8,7 @@ from .compiler import compile_scene
 from .models import (
     AdSafeZone,
     AnamorphicSqueeze,
+    BackgroundStyle,
     ContentType,
     CopySpace,
     GoboPattern,
@@ -15,6 +16,8 @@ from .models import (
     GripType,
     IrisBladeCount,
     LightingRatio,
+    MaterialStyle,
+    PaperProfile,
     ReferenceImageInput,
     ReferenceMode,
     SceneInput,
@@ -106,7 +109,7 @@ class OpticalCameraCompilerNode:
                     },
                 ),
                 "aspect_ratio": (
-                    ["native", "9:11", "4:5", "3:2", "4:3", "5:4", "16:9", "1:1", "21:9", "9:16"],
+                    ["native", "9:11", "4:5", "3:2", "4:3", "5:4", "16:9", "1:1", "21:9", "9:16", "5:5", "9:12"],
                     {"default": "9:11"},
                 ),
                 "reference_mode": (
@@ -216,6 +219,20 @@ class OpticalCameraCompilerNode:
                     ["none", "tiktok_reels_9_16", "instagram_feed_4_5", "ecommerce_catalog_1_1"],
                     {"default": "none"},
                 ),
+                "body_volume": ("STRING", {"default": ""}),
+                "weight_lb": ("INT", {"default": 0, "min": 0, "max": 500}),
+                "material_style": (
+                    ["none", "glossy_latex", "liquid_glass", "dielectric_acrylic", "brushed_titanium", "matte_silicone", "high_gloss_plastic", "metallic_flake", "translucent_resin", "volumetric_4d"],
+                    {"default": "none"},
+                ),
+                "background_style": (
+                    ["default", "opaque_black_blur", "pure_black_matte", "studio_cyclorama", "negative_void", "environmental_natural"],
+                    {"default": "default"},
+                ),
+                "volumetric_4d": (["disabled", "enabled"], {"default": "disabled"}),
+                "remove_text": (["disabled", "enabled"], {"default": "disabled"}),
+                "paper_profile": (["none", "matte_cotton", "luster", "glossy", "baryta", "canvas"], {"default": "none"}),
+                "policy_safe": (["disabled", "enabled"], {"default": "disabled"}),
             },
         }
 
@@ -261,6 +278,14 @@ class OpticalCameraCompilerNode:
         lighting_ratio: str = "default",
         copy_space: str = "none",
         ad_safe_zone: str = "none",
+        body_volume: str = "",
+        weight_lb: int = 0,
+        material_style: str = "none",
+        background_style: str = "default",
+        volumetric_4d: str = "disabled",
+        remove_text: str = "disabled",
+        paper_profile: str = "none",
+        policy_safe: str = "disabled",
     ) -> tuple[str, str, str]:
         profile_id = RIG_NAME_TO_ID.get(camera_rig, "auto")
 
@@ -372,6 +397,14 @@ class OpticalCameraCompilerNode:
             lighting_ratio=lr_val,
             copy_space=cs_val,
             ad_safe_zone=asz_val,
+            body_volume=body_volume.strip() if body_volume.strip() else None,
+            weight_lb=weight_lb if weight_lb > 0 else None,
+            material_style=MaterialStyle.from_str(material_style) if material_style != "none" else (MaterialStyle.VOLUMETRIC_4D if volumetric_4d == "enabled" else None),
+            background_style=BackgroundStyle.from_str(background_style) if background_style != "default" else None,
+            is_4d_volumetric=(volumetric_4d == "enabled"),
+            remove_text_when_present=(remove_text == "enabled"),
+            paper_profile=PaperProfile.from_str(paper_profile) if paper_profile != "none" else None,
+            policy_safe=(policy_safe == "enabled"),
         )
 
         result = compile_scene(

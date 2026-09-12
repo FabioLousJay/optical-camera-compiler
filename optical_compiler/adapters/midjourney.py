@@ -6,9 +6,12 @@ from typing import Any
 
 from ..models import (
     AdSafeZone,
+    BackgroundStyle,
     CameraProfile,
     CompiledPayload,
     CopySpace,
+    MaterialStyle,
+    PaperProfile,
     ReferenceMode,
     SceneInput,
     TargetEngine,
@@ -91,6 +94,26 @@ class MidjourneyAdapter(BaseAdapter):
                 core_elements.append(f"commercial negative copy space in {scene.copy_space.value.replace('_', ' ')}")
             if scene.ad_safe_zone and scene.ad_safe_zone != AdSafeZone.NONE:
                 core_elements.append(f"{scene.ad_safe_zone.value.replace('_', ' ')} advertising safe zone framing")
+
+        if scene.is_policy_safe:
+            core_elements.append("dignified tasteful portrait, safe ethical fine-art styling")
+
+        if scene.has_body_morphology:
+            regions = scene.body_volume or (", ".join(scene.body_morphology.volume_regions) if scene.body_morphology and scene.body_morphology.volume_regions else "biceps, chest, gut")
+            wt = f" {scene.weight_lb}lbs" if scene.weight_lb else ""
+            core_elements.append(
+                f"proportional {regions} volume calibration{wt}, natural bilateral asymmetry, realistic soft-tissue gravity and seated compression, authentic weight distribution"
+            )
+
+        if scene.has_material_style:
+            mat_desc = scene.material_style.value.replace("_", " ") if scene.material_style and scene.material_style != MaterialStyle.NONE else "dimensional volumetric finish"
+            core_elements.append(f"4D volumetric depth, {mat_desc}, contour rim lighting, controlled specular highlights, deep tonal separation")
+            if scene.background_style and scene.background_style != BackgroundStyle.DEFAULT:
+                core_elements.append(f"{scene.background_style.value.replace('_', ' ')} background")
+
+        if scene.is_print_calibrated:
+            paper_name = scene.paper_profile.value.replace("_", " ") if scene.paper_profile and scene.paper_profile != PaperProfile.NONE else (scene.print_spec.paper.value.replace("_", " ") if scene.print_spec and scene.print_spec.paper != PaperProfile.NONE else "exhibition fine art paper")
+            core_elements.append(f"print-calibrated exhibition prepress {paper_name}")
 
         if scene.environment:
             core_elements.append(f"in {scene.environment}")
@@ -283,6 +306,15 @@ class MidjourneyAdapter(BaseAdapter):
                 "deformed footwear",
                 "wrong shadows",
             ])
+        if scene.has_body_morphology:
+            banned_mj.extend([
+                "extreme bodybuilding", "comic book muscles", "balloon muscles", "impossible muscle insertions",
+                "hyper-vascularity", "body distortion", "grotesque proportions", "unnatural anatomy",
+            ])
+        if scene.remove_text_when_present:
+            banned_mj.extend(["text", "typography", "letters", "writing", "words", "captions"])
+        if scene.is_policy_safe:
+            banned_mj.extend(["provocative", "inappropriate", "revealing", "gratuitous"])
         if scene.custom_negatives:
             banned_mj.extend(scene.custom_negatives)
 

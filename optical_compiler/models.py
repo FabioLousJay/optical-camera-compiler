@@ -680,6 +680,334 @@ class ReferenceMode(str, Enum):
     from_string = from_str
 
 
+class BodyVolumeRegion(str, Enum):
+    """Anatomical regions for reference-guided proportional volume increases."""
+
+    BICEPS = "biceps"
+    CHEST = "chest"
+    GUT = "gut"
+    LEGS = "legs"
+    WAIST = "waist"
+    FULL_BODY = "full_body"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[BodyVolumeRegion]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "bicep": cls.BICEPS,
+            "biceps": cls.BICEPS,
+            "arms": cls.BICEPS,
+            "upper_arms": cls.BICEPS,
+            "chest": cls.CHEST,
+            "pecs": cls.CHEST,
+            "torso": cls.CHEST,
+            "gut": cls.GUT,
+            "abdomen": cls.GUT,
+            "belly": cls.GUT,
+            "stomach": cls.GUT,
+            "legs": cls.LEGS,
+            "thighs": cls.LEGS,
+            "quads": cls.LEGS,
+            "waist": cls.WAIST,
+            "midsection": cls.WAIST,
+            "love_handles": cls.WAIST,
+            "hips": cls.WAIST,
+            "full_body": cls.FULL_BODY,
+            "full": cls.FULL_BODY,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for m in cls:
+            if m.value == norm or m.name.lower() == norm:
+                return m
+        return None
+
+    from_string = from_str
+
+
+class VolumeDegree(str, Enum):
+    """Degree of proportional body volume enlargement."""
+
+    SUBTLE = "subtle"
+    NOTICEABLE_RESTRAINED = "noticeable_restrained"
+    HEAVY_WEIGHT = "heavy_weight"
+    CALIBRATED = "calibrated"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> VolumeDegree:
+        if not value:
+            return cls.NOTICEABLE_RESTRAINED
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "subtle": cls.SUBTLE,
+            "slight": cls.SUBTLE,
+            "minor": cls.SUBTLE,
+            "mild": cls.SUBTLE,
+            "light": cls.SUBTLE,
+            "noticeable": cls.NOTICEABLE_RESTRAINED,
+            "restrained": cls.NOTICEABLE_RESTRAINED,
+            "noticeable_restrained": cls.NOTICEABLE_RESTRAINED,
+            "moderate": cls.NOTICEABLE_RESTRAINED,
+            "medium": cls.NOTICEABLE_RESTRAINED,
+            "natural": cls.NOTICEABLE_RESTRAINED,
+            "athletic": cls.NOTICEABLE_RESTRAINED,
+            "muscular": cls.NOTICEABLE_RESTRAINED,
+            "cut": cls.NOTICEABLE_RESTRAINED,
+            "significant": cls.HEAVY_WEIGHT,
+            "heavy": cls.HEAVY_WEIGHT,
+            "heavy_weight": cls.HEAVY_WEIGHT,
+            "heavyweight": cls.HEAVY_WEIGHT,
+            "large": cls.HEAVY_WEIGHT,
+            "bulky": cls.HEAVY_WEIGHT,
+            "bodybuilder": cls.HEAVY_WEIGHT,
+            "powerlifter": cls.HEAVY_WEIGHT,
+            "calibrated": cls.CALIBRATED,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for m in cls:
+            if m.value == norm or m.name.lower() == norm:
+                return m
+        return cls.NOTICEABLE_RESTRAINED
+
+    from_string = from_str
+
+
+class MaterialStyle(str, Enum):
+    """Dimensional 4D and material surface finish styles."""
+
+    NONE = "none"
+    LATEX_GLOSS = "latex_gloss"
+    LIQUID_GLASS = "liquid_glass"
+    DIELECTRIC_ACRYLIC = "dielectric_acrylic"
+    MATTE_FINISH = "matte_finish"
+    BARYTA_SURFACE = "baryta_surface"
+    POLISHED_VINYL = "polished_vinyl"
+    ANODIZED_ALUMINUM = "anodized_aluminum"
+    VOLUMETRIC_4D = "volumetric_4d"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> MaterialStyle:
+        if not value:
+            return cls.NONE
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "latex": cls.LATEX_GLOSS,
+            "latex_gloss": cls.LATEX_GLOSS,
+            "shiny_latex": cls.LATEX_GLOSS,
+            "glossy_latex": cls.LATEX_GLOSS,
+            "black_latex": cls.LATEX_GLOSS,
+            "glass": cls.LIQUID_GLASS,
+            "liquid_glass": cls.LIQUID_GLASS,
+            "glass_cube": cls.LIQUID_GLASS,
+            "blown_glass": cls.LIQUID_GLASS,
+            "acrylic": cls.DIELECTRIC_ACRYLIC,
+            "dielectric_acrylic": cls.DIELECTRIC_ACRYLIC,
+            "lucite": cls.DIELECTRIC_ACRYLIC,
+            "perspex": cls.DIELECTRIC_ACRYLIC,
+            "vinyl": cls.POLISHED_VINYL,
+            "pvc": cls.POLISHED_VINYL,
+            "polished_vinyl": cls.POLISHED_VINYL,
+            "aluminum": cls.ANODIZED_ALUMINUM,
+            "metallic": cls.ANODIZED_ALUMINUM,
+            "anodized_aluminum": cls.ANODIZED_ALUMINUM,
+            "matte": cls.MATTE_FINISH,
+            "matte_finish": cls.MATTE_FINISH,
+            "baryta": cls.BARYTA_SURFACE,
+            "baryta_surface": cls.BARYTA_SURFACE,
+            "volumetric_4d": cls.VOLUMETRIC_4D,
+            "volumetric": cls.VOLUMETRIC_4D,
+            "4d": cls.VOLUMETRIC_4D,
+            "none": cls.NONE,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for m in cls:
+            if m.value == norm or m.name.lower() == norm:
+                return m
+        return cls.NONE
+
+    from_string = from_str
+
+
+class BackgroundStyle(str, Enum):
+    """Background treatment and studio isolation styles."""
+
+    DEFAULT = "default"
+    OPAQUE_BLACK_BLURRED = "opaque_black_blurred"
+    PURE_BLACK_BLUR = "pure_black_blur"
+    MINIMALIST_STUDIO_GREY = "minimalist_studio_grey"
+    CLEAN_HIGH_KEY_WHITE = "clean_high_key_white"
+    STUDIO_SEAMLESS = "studio_seamless"
+    OUTDOOR_NATURAL = "outdoor_natural"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> BackgroundStyle:
+        if not value:
+            return cls.DEFAULT
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "pure_black_blur": cls.PURE_BLACK_BLUR,
+            "black_blur": cls.PURE_BLACK_BLUR,
+            "soft_black": cls.PURE_BLACK_BLUR,
+            "black_background": cls.PURE_BLACK_BLUR,
+            "minimalist_studio_grey": cls.MINIMALIST_STUDIO_GREY,
+            "studio_grey": cls.MINIMALIST_STUDIO_GREY,
+            "grey_cyclorama": cls.MINIMALIST_STUDIO_GREY,
+            "clean_high_key_white": cls.CLEAN_HIGH_KEY_WHITE,
+            "high_key": cls.CLEAN_HIGH_KEY_WHITE,
+            "pure_white": cls.CLEAN_HIGH_KEY_WHITE,
+            "opaque_black": cls.OPAQUE_BLACK_BLURRED,
+            "black_opaque": cls.OPAQUE_BLACK_BLURRED,
+            "opaque_black_blurred": cls.OPAQUE_BLACK_BLURRED,
+            "blurred_black": cls.OPAQUE_BLACK_BLURRED,
+            "black": cls.OPAQUE_BLACK_BLURRED,
+            "studio": cls.STUDIO_SEAMLESS,
+            "seamless": cls.STUDIO_SEAMLESS,
+            "studio_seamless": cls.STUDIO_SEAMLESS,
+            "outdoor": cls.OUTDOOR_NATURAL,
+            "natural": cls.OUTDOOR_NATURAL,
+            "outdoor_natural": cls.OUTDOOR_NATURAL,
+            "default": cls.DEFAULT,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for m in cls:
+            if m.value == norm or m.name.lower() == norm:
+                return m
+        return cls.DEFAULT
+
+    from_string = from_str
+
+
+class PaperProfile(str, Enum):
+    """Exhibition and print lab fine-art paper profiles."""
+
+    NONE = "none"
+    MATTE_COTTON = "matte_cotton"
+    LUSTER = "luster"
+    GLOSSY = "glossy"
+    BARYTA = "baryta"
+    CANVAS = "canvas"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> PaperProfile:
+        if not value:
+            return cls.NONE
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "matte": cls.MATTE_COTTON,
+            "cotton": cls.MATTE_COTTON,
+            "matte_cotton": cls.MATTE_COTTON,
+            "cotton_rag": cls.MATTE_COTTON,
+            "rag": cls.MATTE_COTTON,
+            "hahnemuhle": cls.MATTE_COTTON,
+            "luster": cls.LUSTER,
+            "lustre": cls.LUSTER,
+            "semi_gloss": cls.LUSTER,
+            "satin": cls.LUSTER,
+            "glossy": cls.GLOSSY,
+            "gloss": cls.GLOSSY,
+            "high_gloss": cls.GLOSSY,
+            "baryta": cls.BARYTA,
+            "baryta_photographique": cls.BARYTA,
+            "fiber": cls.BARYTA,
+            "exhibition_baryta": cls.BARYTA,
+            "canvas": cls.CANVAS,
+            "stretched_canvas": cls.CANVAS,
+            "none": cls.NONE,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for m in cls:
+            if m.value == norm or m.name.lower() == norm:
+                return m
+        return cls.NONE
+
+    from_string = from_str
+
+
+class RenderingIntent(str, Enum):
+    """ICC color management rendering intent."""
+
+    RELATIVE_COLORIMETRIC = "relative_colorimetric"
+    PERCEPTUAL = "perceptual"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> RenderingIntent:
+        if not value:
+            return cls.RELATIVE_COLORIMETRIC
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "relative": cls.RELATIVE_COLORIMETRIC,
+            "relative_colorimetric": cls.RELATIVE_COLORIMETRIC,
+            "colorimetric": cls.RELATIVE_COLORIMETRIC,
+            "perceptual": cls.PERCEPTUAL,
+            "photographic": cls.PERCEPTUAL,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for m in cls:
+            if m.value == norm or m.name.lower() == norm:
+                return m
+        return cls.RELATIVE_COLORIMETRIC
+
+    from_string = from_str
+
+
+@dataclass
+class BodyMorphologyConfig:
+    """Anatomical body volume scaling and morphology parameters."""
+
+    weight_lb: Optional[float] = None
+    volume_regions: list[str] = field(default_factory=list)
+    target_regions: dict[BodyVolumeRegion, VolumeDegree] = field(default_factory=dict)
+    degree: VolumeDegree = VolumeDegree.NOTICEABLE_RESTRAINED
+    proportionality_lock: bool = True
+    natural_asymmetry_lock: bool = True
+    gravitational_tissue_behavior: bool = True
+    clothing_conformity: bool = True
+    anti_exaggeration: bool = True
+
+    @classmethod
+    def from_str(cls, text: Optional[str], weight_lb: Optional[float] = None) -> BodyMorphologyConfig:
+        cfg = cls(weight_lb=weight_lb)
+        if not text:
+            return cfg
+        parts = [p.strip() for p in text.split(",") if p.strip()]
+        for p in parts:
+            if ":" in p:
+                r_str, d_str = p.split(":", 1)
+                reg = BodyVolumeRegion.from_str(r_str)
+                deg = VolumeDegree.from_str(d_str)
+                if reg:
+                    cfg.target_regions[reg] = deg
+                    cfg.volume_regions.append(reg.value)
+            else:
+                reg = BodyVolumeRegion.from_str(p)
+                if reg:
+                    cfg.target_regions[reg] = cfg.degree
+                    cfg.volume_regions.append(reg.value)
+                else:
+                    cfg.volume_regions.append(p)
+        return cfg
+
+    from_string = from_str
+
+
+@dataclass
+class PrintSpec:
+    """Print lab calibration specification."""
+
+    width_in: float = 0.0
+    height_in: float = 0.0
+    ppi: int = 300
+    paper: PaperProfile = PaperProfile.NONE
+    rendering_intent: RenderingIntent = RenderingIntent.RELATIVE_COLORIMETRIC
+
+
 @dataclass
 class ReferenceImageInput:
     """Metadata and controls for reference-guided generation and anti-drift locks."""
@@ -947,6 +1275,30 @@ class NegativeShield:
             "floating knuckles",
         ]
     )
+    body_distortion: list[str] = field(
+        default_factory=lambda: [
+            "extreme bodybuilding",
+            "cartoon proportions",
+            "balloon muscles",
+            "impossible muscle insertions",
+            "hyper-inflated limbs",
+            "extreme vascularity",
+            "unnatural six-pack",
+            "deformed limbs",
+            "balloon anatomy",
+            "plastic toy look",
+            "unnatural bilateral symmetry",
+            "pinched waist",
+            "disconnected thighs",
+            "competition bodybuilder",
+            "comic-book musculature",
+            "mirrored anatomy",
+            "spherical muscles",
+            "prosthetic abdomen",
+            "detached body parts",
+            "grotesque exaggeration",
+        ]
+    )
 
     def all_tokens(
         self,
@@ -957,6 +1309,7 @@ class NegativeShield:
         include_skin_realism: bool = True,
         include_product_drift: bool = False,
         include_hand_drift: bool = False,
+        include_body_distortion: bool = False,
     ) -> list[str]:
         """Return a flat list of all negative tokens across selected categories."""
         tokens = list(self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift)
@@ -1013,6 +1366,11 @@ class NegativeShield:
                     seen.add(t)
         if include_hand_drift:
             for t in self.hand_drift:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
+        if include_body_distortion:
+            for t in self.body_distortion:
                 if t not in seen:
                     tokens.append(t)
                     seen.add(t)
@@ -1123,6 +1481,16 @@ class SceneInput:
     lighting_ratio: Optional[LightingRatio] = None
     copy_space: Optional[CopySpace] = None
     ad_safe_zone: Optional[AdSafeZone] = None
+    body_volume: Optional[str] = None
+    weight_lb: Optional[float] = None
+    body_morphology: Optional[BodyMorphologyConfig] = None
+    material_style: Optional[MaterialStyle] = None
+    background_style: Optional[BackgroundStyle] = None
+    is_4d_volumetric: bool = False
+    remove_text_when_present: bool = False
+    paper_profile: Optional[PaperProfile] = None
+    print_spec: Optional[PrintSpec] = None
+    policy_safe: bool = False
 
     @property
     def has_product_lock(self) -> bool:
@@ -1216,6 +1584,58 @@ class SceneInput:
             )
         )
 
+    @property
+    def has_body_morphology(self) -> bool:
+        """Return True if body volume scaling or morphology calibration is active."""
+        if self.body_volume or self.weight_lb or self.body_morphology:
+            return True
+        check_text = f"{self.subject} {self.framing or ''}".lower()
+        return any(
+            k in check_text
+            for k in (
+                "biceps",
+                "chest",
+                "gut",
+                "waist",
+                "thighs",
+                "heavier",
+                "body mass",
+                "lbs",
+                "weight",
+                "fuller physique",
+            )
+        )
+
+    @property
+    def has_material_style(self) -> bool:
+        """Return True if custom material surface or 4D volumetric rendering is active."""
+        if self.material_style and self.material_style != MaterialStyle.NONE:
+            return True
+        if self.is_4d_volumetric:
+            return True
+        check_text = f"{self.subject} {self.mood or ''}".lower()
+        return any(
+            k in check_text
+            for k in ("latex", "shiny latex", "liquid glass", "acrylic", "4d", "volumetric")
+        )
+
+    @property
+    def is_print_calibrated(self) -> bool:
+        """Return True if exhibition print lab calibration or fine art paper is specified."""
+        if self.print_spec:
+            return True
+        return bool(self.paper_profile and self.paper_profile != PaperProfile.NONE)
+
+    @property
+    def is_policy_safe(self) -> bool:
+        """Return True if policy-safe compliance recovery layer is active."""
+        return self.policy_safe
+
+    @property
+    def is_4d(self) -> bool:
+        """Return True if 4D volumetric rendering is active."""
+        return self.is_4d_volumetric or "4d" in self.subject.lower()
+
 
 @dataclass
 class CompiledPayload:
@@ -1226,6 +1646,16 @@ class CompiledPayload:
     negative_prompt: str
     parameters: dict[str, Any] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def aspect_ratio(self) -> Optional[str]:
+        """Return the target aspect ratio if present in parameters."""
+        return self.parameters.get("aspect_ratio")
+
+    @property
+    def policy_safe(self) -> bool:
+        """Return whether policy safe compliance mode was active."""
+        return bool(self.metadata.get("policy_safe", False) or self.parameters.get("policy_safe", False))
 
     @property
     def unified_prompt(self) -> str:

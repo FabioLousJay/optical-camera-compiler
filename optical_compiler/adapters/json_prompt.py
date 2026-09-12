@@ -56,6 +56,7 @@ class JSONAllInOneAdapter(BaseAdapter):
             include_skin_realism=scene.human_skin_realism,
             include_product_drift=scene.has_product_lock,
             include_hand_drift=scene.has_hand_lock,
+            include_body_distortion=scene.has_body_morphology,
         )
         if scene.custom_negatives:
             all_neg_tokens.extend(scene.custom_negatives)
@@ -67,7 +68,15 @@ class JSONAllInOneAdapter(BaseAdapter):
             resolution_str = scene.output_resolution or f"12MP PNG, {scene.aspect_ratio}"
 
         # 4. Build master All-in-One JSON dictionary
-        if scene.has_hand_lock and scene.has_product_lock:
+        if scene.is_policy_safe:
+            protocol_name = "Policy-Safe Compliance Recovery & GenAI Photography Mastery Suite"
+        elif scene.has_body_morphology:
+            protocol_name = "Body Morphology & Proportional Volume Calibration Protocol"
+        elif scene.has_material_style:
+            protocol_name = "4D Volumetric & Premium Material Engine Master Specification"
+        elif scene.is_print_calibrated:
+            protocol_name = "Print-Calibrated Prepress & Exhibition Lab Matrix"
+        elif scene.has_hand_lock and scene.has_product_lock:
             protocol_name = "Commercial Product SKU & Biomechanical 5-Point Hand Precision Gate Protocol"
         elif scene.is_anamorphic:
             protocol_name = "Cinema Anamorphic Optics & Flare Engine Master Specification"
@@ -82,13 +91,20 @@ class JSONAllInOneAdapter(BaseAdapter):
         else:
             protocol_name = "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
 
+        is_schema_3_4 = bool(
+            scene.has_body_morphology
+            or scene.has_material_style
+            or scene.is_print_calibrated
+            or scene.is_policy_safe
+            or scene.remove_text_when_present
+        )
         is_schema_3_3 = bool(
             scene.has_hand_lock
             or scene.is_anamorphic
             or scene.has_copy_space
             or scene.has_gobo
         )
-        schema_ver = "3.3" if is_schema_3_3 else "3.2"
+        schema_ver = "3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2")
 
         all_in_one_data: dict[str, Any] = {
             "$schema": "https://raw.githubusercontent.com/FabioLousJay/optical-camera-compiler/main/schemas/all_in_one_prompt.json",
@@ -130,6 +146,14 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "lighting_ratio": scene.lighting_ratio.value if scene.lighting_ratio else None,
                 "copy_space": scene.copy_space.value if scene.copy_space else None,
                 "ad_safe_zone": scene.ad_safe_zone.value if scene.ad_safe_zone else None,
+                "body_volume": scene.body_volume,
+                "weight_lb": scene.weight_lb,
+                "material_style": scene.material_style.value if scene.material_style else None,
+                "background_style": scene.background_style.value if scene.background_style else None,
+                "is_4d_volumetric": scene.is_4d_volumetric,
+                "remove_text_when_present": scene.remove_text_when_present,
+                "paper_profile": scene.paper_profile.value if scene.paper_profile else None,
+                "policy_safe": scene.policy_safe,
             },
             "product_fidelity": {
                 "active": scene.has_product_lock,
@@ -180,6 +204,43 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "active": scene.has_copy_space,
                 "copy_space": scene.copy_space.value if scene.copy_space else "none",
                 "ad_safe_zone": scene.ad_safe_zone.value if scene.ad_safe_zone else "none",
+            },
+            "body_morphology_volume_engine": {
+                "active": scene.has_body_morphology,
+                "volume_regions": scene.body_volume or (", ".join(scene.body_morphology.volume_regions) if scene.body_morphology and scene.body_morphology.volume_regions else None),
+                "target_weight_lb": scene.weight_lb,
+                "weight_lb": scene.weight_lb,
+                "proportionality_rule": "Strict proportionality to skeletal frame, head size, and total mass",
+                "natural_bilateral_asymmetry": True,
+                "soft_tissue_gravity_and_compression": True,
+                "clothing_conformity": True,
+                "anti_exaggeration_lock": True,
+            },
+            "volumetric_material_engine": {
+                "active": scene.has_material_style or scene.is_4d_volumetric,
+                "material_style": scene.material_style.value if scene.material_style else None,
+                "background_style": scene.background_style.value if scene.background_style else None,
+                "contour_rim_lighting": True,
+                "specular_micro_physics": True,
+                "conditional_text_removal": scene.remove_text_when_present,
+            },
+            "prepress_matrix": {
+                "active": scene.is_print_calibrated,
+                "paper_profile": scene.paper_profile.value if scene.paper_profile else (scene.print_spec.paper.value if scene.print_spec else None),
+                "width_in": scene.print_spec.width_in if scene.print_spec else None,
+                "height_in": scene.print_spec.height_in if scene.print_spec else None,
+                "ppi": scene.print_spec.ppi if scene.print_spec else 300,
+                "pixel_dimensions": (
+                    f"{int(round(scene.print_spec.width_in * scene.print_spec.ppi))} x {int(round(scene.print_spec.height_in * scene.print_spec.ppi))}"
+                    if scene.print_spec else None
+                ),
+                "rendering_intent": scene.print_spec.rendering_intent.value if scene.print_spec else None,
+            },
+            "policy_compliance_layer": {
+                "active": scene.is_policy_safe,
+                "compliance_mode": "editorial_dignified_fine_art",
+                "fully_clothed": True,
+                "physics_preserved": True,
             },
             "content_classification": {
                 "type": scene.content_type.value if scene.content_type else "photograph",
@@ -266,6 +327,7 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "anti_drift": shield.anti_drift_tokens if is_ref else [],
                 "product_drift": shield.product_drift if scene.has_product_lock else [],
                 "hand_drift": shield.hand_drift if scene.has_hand_lock else [],
+                "body_distortion": shield.body_distortion if scene.has_body_morphology else [],
                 "all_negative_tokens": all_neg_tokens,
             },
             "compiled_prompts": {

@@ -115,6 +115,34 @@ class TestWebStudioHandler(unittest.TestCase):
         self.assertIn("Phase One XF IQ4", res_data["unified_prompt"])
         self.assertIn("airbrushed skin", res_data["unified_prompt"])
 
+    def test_post_compile_v3_4_suite(self) -> None:
+        """Verify /api/compile handles v3.4 parameters correctly."""
+        payload = {
+            "scene": "Fine-art gallery portrait in black latex",
+            "target": "gpt_images",
+            "profile": "phase_one_iq4",
+            "body_volume": "biceps:significant, chest:moderate",
+            "weight_lb": 230,
+            "material": "latex_gloss",
+            "background_style": "pure_black_blur",
+            "volumetric_4d": True,
+            "remove_text": True,
+            "paper": "baryta",
+            "policy_safe": True,
+        }
+        body = json.dumps(payload).encode("utf-8")
+        status, headers, resp_body = self._execute_request("POST", "/api/compile", body)
+        self.assertEqual(status, 200)
+        res_data = json.loads(resp_body.decode("utf-8"))
+        self.assertEqual(res_data["target_engine"], "gpt_images")
+        prompt = res_data["positive_prompt"]
+        self.assertIn("Policy-Safe Compliance Recovery Directive", prompt)
+        self.assertIn("4D Volumetric & Premium Material Engine", prompt)
+        self.assertIn("Proportional Volume Calibration", prompt)
+        self.assertIn("Print-calibrated exhibition prepress specification", prompt)
+        self.assertIn("Text removal engine", prompt)
+        self.assertTrue(res_data["metadata"]["policy_safe"])
+
     def test_options_cors(self) -> None:
         """Verify OPTIONS request returns CORS headers for external frontends like Lovable."""
         status, headers, _ = self._execute_request("OPTIONS", "/api/compile")

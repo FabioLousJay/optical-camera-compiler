@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from ..models import (
     AdSafeZone,
+    BackgroundStyle,
     CameraProfile,
     CompiledPayload,
     CopySpace,
+    MaterialStyle,
+    PaperProfile,
     ReferenceMode,
     SceneInput,
     TargetEngine,
@@ -108,6 +111,26 @@ class SDXLAdapter(BaseAdapter):
                 "distinct knuckles and PIP joints, contact blanching, translucent nail beds, lunula crescents"
             )
 
+        if scene.is_policy_safe:
+            pos_chunks.append("dignified tasteful portrait, safe ethical fine-art photography, fully clothed subject")
+
+        if scene.has_body_morphology:
+            regions = scene.body_volume or (", ".join(scene.body_morphology.volume_regions) if scene.body_morphology and scene.body_morphology.volume_regions else "biceps, chest, gut")
+            wt = f" {scene.weight_lb}lbs" if scene.weight_lb else ""
+            pos_chunks.append(
+                f"proportional {regions} volume calibration{wt}, natural bilateral asymmetry, realistic soft-tissue gravity and seated compression, authentic weight distribution"
+            )
+
+        if scene.has_material_style:
+            mat_desc = scene.material_style.value.replace("_", " ") if scene.material_style and scene.material_style != MaterialStyle.NONE else "dimensional volumetric finish"
+            pos_chunks.append(f"4D volumetric depth, {mat_desc}, contour rim lighting, controlled specular highlights, deep tonal separation")
+            if scene.background_style and scene.background_style != BackgroundStyle.DEFAULT:
+                pos_chunks.append(f"{scene.background_style.value.replace('_', ' ')} background")
+
+        if scene.is_print_calibrated:
+            paper_name = scene.paper_profile.value.replace("_", " ") if scene.paper_profile and scene.paper_profile != PaperProfile.NONE else (scene.print_spec.paper.value.replace("_", " ") if scene.print_spec and scene.print_spec.paper != PaperProfile.NONE else "exhibition fine art paper")
+            pos_chunks.append(f"print-calibrated exhibition prepress {paper_name}")
+
         # Hardware & Optics
         hardware_tokens = [
             f"raw photograph captured on {optics.camera_system}",
@@ -208,9 +231,20 @@ class SDXLAdapter(BaseAdapter):
             include_skin_realism=scene.human_skin_realism,
             include_product_drift=is_product_lock,
             include_hand_drift=scene.has_hand_lock,
+            include_body_distortion=scene.has_body_morphology,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
+
+        if scene.has_body_morphology:
+            all_negatives.extend([
+                "extreme bodybuilding", "comic book muscles", "balloon muscles", "impossible muscle insertions",
+                "hyper-vascularity", "body distortion", "grotesque proportions",
+            ])
+        if scene.remove_text_when_present:
+            all_negatives.extend(["text", "typography", "letters", "writing", "words", "captions"])
+        if scene.is_policy_safe:
+            all_negatives.extend(["provocative", "inappropriate", "revealing", "nudity", "nsfw"])
 
         if scene.has_hand_lock:
             all_negatives.extend(
@@ -241,6 +275,8 @@ class SDXLAdapter(BaseAdapter):
 
         # Resolution mapping based on aspect ratio
         ar_to_res = {
+            "5:5": (1024, 1024),
+            "9:12": (864, 1152),
             "9:11": (896, 1088),
             "4:5": (896, 1152),
             "1:1": (1024, 1024),

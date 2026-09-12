@@ -805,6 +805,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <option value="hollywood_anamorphic">Hollywood Cinema Anamorphic // 2.0x Oval Bokeh & Blue Streak Flare (ARRI Alexa 35)</option>
           <option value="commercial_billboard_copy_space">Commercial Advertising Hero // Venetian Gobo & Copy-Space (Phase One IQ4 150MP)</option>
         </optgroup>
+
+        <optgroup label="✨ GenAI Photography Mastery Suite (v3.4)">
+          <option value="hyperrealistic_latex_character">4D Liquid Glass & Latex High-Fashion Editorial // Contour Rim Light (Hasselblad X2D II)</option>
+          <option value="heavyweight_editorial_portrait">Calibrated Heavyweight Body Morphology // 240 lbs Frame-Proportional (Sony a1 II)</option>
+          <option value="gallery_baryta_print">Print-Calibrated Exhibition Prepress // Baryta Fine Art 16x24@300 (Phase One IQ4)</option>
+        </optgroup>
       </select>
 
       <button class="btn-surprise" onclick="clearToSurprise()" title="Wipe scene fields to let the prompt surprise you freely">
@@ -1326,10 +1332,111 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- 06. BRUTAL SHARPNESS & QUALITY ENFORCEMENT -->
+      <!-- 06. BODY MORPHOLOGY & VOLUME CALIBRATION -->
       <div class="panel-section">
         <div class="section-header">
-          <div class="section-title">06. Brutal Sharpness & Quality Shields</div>
+          <div class="section-title">06. Body Morphology & Volume Engine</div>
+          <div class="section-meta" style="color: var(--accent-amber);">Proportional Volume • Bilateral Asymmetry</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
+          <div>
+            <label class="field-label" for="bodyVolumeInput">Enlarged Volume Target Regions</label>
+            <input type="text" class="text-input" id="bodyVolumeInput" placeholder="e.g. biceps, chest, gut (or leave empty)" oninput="debounceCompile()">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div>
+              <label class="field-label" for="weightLbInput">Target Body Mass (lbs)</label>
+              <input type="number" class="text-input" id="weightLbInput" placeholder="e.g. 240" min="0" max="500" oninput="debounceCompile()">
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+              <div style="font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono); line-height: 1.3;">
+                Locks frame proportionality, soft-tissue gravity compression, and clothing tension.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 07. 4D VOLUMETRIC & PREMIUM MATERIAL ENGINE -->
+      <div class="panel-section">
+        <div class="section-header">
+          <div class="section-title">07. 4D Volumetric & Material Engine</div>
+          <div class="section-meta" style="color: var(--accent-cyan);">Contour Rim Light • Dielectric Refraction</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div>
+              <label class="field-label" for="materialStyleSelect">Premium Material Finish</label>
+              <select class="custom-select" id="materialStyleSelect" onchange="debounceCompile()">
+                <option value="none" selected>Default Material Physics</option>
+                <option value="glossy_latex">Glossy Latex (High-Contrast Specular Highlights)</option>
+                <option value="liquid_glass">Liquid Glass (Subsurface Refraction & Caustics)</option>
+                <option value="dielectric_acrylic">Dielectric Acrylic (High Abbe Number Dispersion)</option>
+                <option value="brushed_titanium">Brushed Titanium (Anisotropic Reflection)</option>
+                <option value="matte_silicone">Matte Silicone (Soft Dermal Sheen)</option>
+                <option value="translucent_resin">Translucent Resin (Deep Volumetric Absorption)</option>
+                <option value="volumetric_4d">Volumetric 4D (Maximum Tonal Isolation)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="bgStyleSelect">Background Style</label>
+              <select class="custom-select" id="bgStyleSelect" onchange="debounceCompile()">
+                <option value="default" selected>Default Scene Background</option>
+                <option value="opaque_black_blur">Opaque Softly Blurred Black</option>
+                <option value="pure_black_matte">Pure Black Matte Void</option>
+                <option value="studio_cyclorama">Studio Infinity Cyclorama</option>
+                <option value="negative_void">High-Fashion Negative Void</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; gap: 1.25rem; margin-top: 0.2rem; flex-wrap: wrap;">
+            <label class="check-item" style="font-weight: 600;">
+              <input type="checkbox" id="chkVolumetric4D" onchange="debounceCompile()"> 
+              <span>✨ 4D Volumetric Depth & Rim Lighting</span>
+            </label>
+            <label class="check-item" style="font-weight: 600;">
+              <input type="checkbox" id="chkRemoveText" onchange="debounceCompile()"> 
+              <span>✂️ Conditional Text Removal</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 08. PRINT-CALIBRATED PREPRESS & EXHIBITION LAB MATRIX -->
+      <div class="panel-section">
+        <div class="section-header">
+          <div class="section-title">08. Exhibition Prepress Matrix</div>
+          <div class="section-meta" style="color: var(--accent-rose);">300 PPI • Fine Art Substrates</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;">
+          <div>
+            <label class="field-label" for="paperProfileSelect">Fine Art Paper Profile</label>
+            <select class="custom-select" id="paperProfileSelect" onchange="debounceCompile()">
+              <option value="none" selected>Standard Digital Output</option>
+              <option value="baryta">Baryta Fine Art (Dmax 2.4, Satin High Dynamic Range)</option>
+              <option value="matte_cotton">100% Cotton Rag (Dmax 1.7, Zero Glare Velvet Finish)</option>
+              <option value="luster">Premium Luster (Dmax 2.2, Fine Micro-Stipple Texture)</option>
+              <option value="glossy">High-Gloss Metallic (Dmax 2.5, Mirror Specular Acutance)</option>
+              <option value="canvas">Exhibition Canvas (Woven Matte Texture)</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="printSizeSelect">Exhibition Print Size & Density</label>
+            <select class="custom-select" id="printSizeSelect" onchange="debounceCompile()">
+              <option value="default" selected>Native Sensor Pixel Grid</option>
+              <option value="16x24@300">16" x 24" @ 300 PPI (4800 x 7200 px — Gallery Master)</option>
+              <option value="24x36@240">24" x 36" @ 240 PPI (5760 x 8640 px — Museum Large Format)</option>
+              <option value="9x12@640">9" x 12" @ 640 PPI (5760 x 7680 px — 8K Precision Proof)</option>
+              <option value="20x30@300">20" x 30" @ 300 PPI (6000 x 9000 px — 54MP Exhibition Ultra)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 09. BRUTAL SHARPNESS & QUALITY ENFORCEMENT -->
+      <div class="panel-section">
+        <div class="section-header">
+          <div class="section-title">09. Brutal Sharpness, Safety & Shields</div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.2rem;">
           <label class="check-item" style="font-weight: 600;">
@@ -1343,6 +1450,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <label class="check-item" style="font-weight: 600;">
             <input type="checkbox" id="chkMaxQuality" checked onchange="debounceCompile()"> 
             <span>💎 12MP / 8K UHD Lossless Bitrate Enforcer (Zero JPEG compression, uncompressed 16-bit raster)</span>
+          </label>
+          <label class="check-item" style="font-weight: 600; color: var(--accent-cyan);">
+            <input type="checkbox" id="chkPolicySafe" onchange="debounceCompile()"> 
+            <span>🛡️ Policy-Safe Compliance Layer (Non-destructive safety transform preventing refusal loops)</span>
           </label>
         </div>
       </div>
@@ -1971,6 +2082,62 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         materialFinish: "Satin frosted cosmetic glass, 12% specular roughness",
         seamGeometry: "Seamless polished base rim",
         approvalGate: true
+      },
+      hyperrealistic_latex_character: {
+        profile: "hasselblad_x2d_ii_100c",
+        subject: "Avant-garde couture model wearing sculpted liquid-glass and glossy latex bodysuit, piercing calm gaze",
+        framing: "three-quarter editorial high-fashion framing",
+        environment: "deep opaque black softly blurred studio void with controlled rim glow",
+        wardrobe: "bespoke black liquid-glass and latex bodysuit with contoured structural paneling",
+        mood: "hypnotic avant-garde editorial, pristine optical precision",
+        aperture: "f/4.0",
+        timeWeather: "auto",
+        cityVibe: "none",
+        lighting: "strobe_para",
+        filmStock: "digital_raw",
+        filter: "none",
+        aspectRatio: "9:12",
+        materialStyle: "glossy_latex",
+        bgStyle: "opaque_black_blur",
+        volumetric4D: true,
+        removeText: true,
+        policySafe: true
+      },
+      heavyweight_editorial_portrait: {
+        profile: "sony_a1_ii",
+        subject: "Heavyweight athlete seated in quiet contemplation, authentic skin pores and fine vellus hair",
+        framing: "medium seated editorial portrait",
+        environment: "minimalist concrete locker pavilion, raking directional skylight",
+        wardrobe: "ribbed athletic compression tank conforming naturally to enlarged chest and waist",
+        mood: "dignified power, quiet rebellion, calm intensity",
+        aperture: "f/2.8",
+        timeWeather: "auto",
+        cityVibe: "none",
+        lighting: "window_rake",
+        filmStock: "digital_raw",
+        filter: "none",
+        aspectRatio: "4:5",
+        bodyVolume: "biceps, chest, gut",
+        weightLb: 240,
+        policySafe: true
+      },
+      gallery_baryta_print: {
+        profile: "phase_one_iq4",
+        subject: "Master ceramicist holding unglazed stoneware vessel, intense tactile micro-relief",
+        framing: "intimate chest-level craftsman portrait",
+        environment: "Kyoto pottery atelier, clay dust suspended in directional sunlight",
+        wardrobe: "indigo dyed heavy linen smock",
+        mood: "timeless artisanal presence, exhibition fine art acutance",
+        aperture: "f/8.0",
+        timeWeather: "auto",
+        cityVibe: "none",
+        lighting: "daylight_diffuse",
+        filmStock: "digital_raw",
+        filter: "none",
+        aspectRatio: "4:5",
+        paperProfile: "baryta",
+        printSize: "16x24@300",
+        policySafe: true
       }
     };
 
@@ -2247,6 +2414,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (s.adSafeZone && document.getElementById('adSafeZoneSelect')) document.getElementById('adSafeZoneSelect').value = s.adSafeZone;
       if (s.aspectRatio && document.getElementById('aspectSelect')) document.getElementById('aspectSelect').value = s.aspectRatio;
 
+      if (document.getElementById('bodyVolumeInput')) document.getElementById('bodyVolumeInput').value = s.bodyVolume || '';
+      if (document.getElementById('weightLbInput')) document.getElementById('weightLbInput').value = s.weightLb || '';
+      if (document.getElementById('materialStyleSelect')) document.getElementById('materialStyleSelect').value = s.materialStyle || 'none';
+      if (document.getElementById('bgStyleSelect')) document.getElementById('bgStyleSelect').value = s.bgStyle || 'default';
+      if (document.getElementById('chkVolumetric4D')) document.getElementById('chkVolumetric4D').checked = !!s.volumetric4D;
+      if (document.getElementById('chkRemoveText')) document.getElementById('chkRemoveText').checked = !!s.removeText;
+      if (document.getElementById('paperProfileSelect')) document.getElementById('paperProfileSelect').value = s.paperProfile || 'none';
+      if (document.getElementById('printSizeSelect')) document.getElementById('printSizeSelect').value = s.printSize || 'default';
+      if (document.getElementById('chkPolicySafe')) document.getElementById('chkPolicySafe').checked = !!s.policySafe;
+
       setAperture(s.aperture || 'f/2.8');
       debounceCompile();
     }
@@ -2281,6 +2458,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (document.getElementById('lightingRatioSelect')) document.getElementById('lightingRatioSelect').value = 'default';
       if (document.getElementById('copySpaceSelect')) document.getElementById('copySpaceSelect').value = 'none';
       if (document.getElementById('adSafeZoneSelect')) document.getElementById('adSafeZoneSelect').value = 'none';
+
+      if (document.getElementById('bodyVolumeInput')) document.getElementById('bodyVolumeInput').value = '';
+      if (document.getElementById('weightLbInput')) document.getElementById('weightLbInput').value = '';
+      if (document.getElementById('materialStyleSelect')) document.getElementById('materialStyleSelect').value = 'none';
+      if (document.getElementById('bgStyleSelect')) document.getElementById('bgStyleSelect').value = 'default';
+      if (document.getElementById('chkVolumetric4D')) document.getElementById('chkVolumetric4D').checked = false;
+      if (document.getElementById('chkRemoveText')) document.getElementById('chkRemoveText').checked = false;
+      if (document.getElementById('paperProfileSelect')) document.getElementById('paperProfileSelect').value = 'none';
+      if (document.getElementById('printSizeSelect')) document.getElementById('printSizeSelect').value = 'default';
+      if (document.getElementById('chkPolicySafe')) document.getElementById('chkPolicySafe').checked = false;
 
       document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
       
@@ -2570,6 +2757,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         lighting_ratio: (document.getElementById('lightingRatioSelect') && document.getElementById('lightingRatioSelect').value !== 'default') ? document.getElementById('lightingRatioSelect').value : null,
         copy_space: (document.getElementById('copySpaceSelect') && document.getElementById('copySpaceSelect').value !== 'none') ? document.getElementById('copySpaceSelect').value : null,
         ad_safe_zone: (document.getElementById('adSafeZoneSelect') && document.getElementById('adSafeZoneSelect').value !== 'none') ? document.getElementById('adSafeZoneSelect').value : null,
+        body_volume: document.getElementById('bodyVolumeInput') ? document.getElementById('bodyVolumeInput').value.trim() : null,
+        weight_lb: document.getElementById('weightLbInput') ? (parseInt(document.getElementById('weightLbInput').value, 10) || null) : null,
+        material: (document.getElementById('materialStyleSelect') && document.getElementById('materialStyleSelect').value !== 'none') ? document.getElementById('materialStyleSelect').value : null,
+        background_style: (document.getElementById('bgStyleSelect') && document.getElementById('bgStyleSelect').value !== 'default') ? document.getElementById('bgStyleSelect').value : null,
+        volumetric_4d: document.getElementById('chkVolumetric4D') ? document.getElementById('chkVolumetric4D').checked : false,
+        remove_text: document.getElementById('chkRemoveText') ? document.getElementById('chkRemoveText').checked : false,
+        paper: (document.getElementById('paperProfileSelect') && document.getElementById('paperProfileSelect').value !== 'none') ? document.getElementById('paperProfileSelect').value : null,
+        policy_safe: document.getElementById('chkPolicySafe') ? document.getElementById('chkPolicySafe').checked : false,
       };
 
       try {
@@ -3177,6 +3372,14 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 lighting_ratio=body.get("lighting_ratio"),
                 copy_space=body.get("copy_space"),
                 ad_safe_zone=body.get("ad_safe_zone"),
+                body_volume=body.get("body_volume"),
+                weight_lb=body.get("weight_lb"),
+                material_style=body.get("material_style") or body.get("material"),
+                background_style=body.get("background_style"),
+                is_4d_volumetric=bool(body.get("is_4d_volumetric") or body.get("volumetric_4d", False)),
+                remove_text_when_present=bool(body.get("remove_text_when_present") or body.get("remove_text", False)),
+                paper_profile=body.get("paper_profile") or body.get("paper"),
+                policy_safe=bool(body.get("policy_safe", False)),
             )
             self._send_json(payload.to_dict())
         except Exception as err:

@@ -37,6 +37,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Creative description of the subject or scene (e.g., 'Portrait of a master sculptor in a sunlit atelier').",
     )
     parser.add_argument(
+        "--scene",
+        dest="scene_flag",
+        help="Creative description of the subject or scene (flag alternative).",
+    )
+    parser.add_argument(
         "-t",
         "--target",
         default="flux",
@@ -256,6 +261,92 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Social media ad UI safe-zone exclusion overlay.",
     )
+    # --- Tool 4: Body Morphology & Proportional Volume Calibration Engine ---
+    parser.add_argument(
+        "--body-volume",
+        dest="body_volume",
+        default=None,
+        help="Body volume enhancement regions (e.g. 'biceps, chest, gut' or 'legs, waist').",
+    )
+    parser.add_argument(
+        "--weight-lb",
+        dest="weight_lb",
+        type=int,
+        default=None,
+        help="Calibrated target body mass in pounds (e.g. 240).",
+    )
+    # --- Tool 5: 4D Volumetric & Premium Material Engine ---
+    parser.add_argument(
+        "--material",
+        dest="material",
+        choices=[
+            "latex_gloss",
+            "glossy_latex",
+            "liquid_glass",
+            "dielectric_acrylic",
+            "polished_vinyl",
+            "anodized_aluminum",
+            "brushed_titanium",
+            "matte_silicone",
+            "high_gloss_plastic",
+            "metallic_flake",
+            "translucent_resin",
+            "volumetric_4d",
+        ],
+        default=None,
+        help="Premium material finish for 4D volumetric rendering.",
+    )
+    parser.add_argument(
+        "--background-style",
+        dest="background_style",
+        choices=[
+            "default",
+            "pure_black_blur",
+            "opaque_black_blur",
+            "opaque_black_blurred",
+            "minimalist_studio_grey",
+            "clean_high_key_white",
+            "pure_black_matte",
+            "studio_cyclorama",
+            "negative_void",
+            "environmental_natural",
+        ],
+        default=None,
+        help="Background isolation style for dimensional foreground separation.",
+    )
+    parser.add_argument(
+        "--volumetric-4d",
+        dest="volumetric_4d",
+        action="store_true",
+        help="Activate 4D volumetric rendering with contour rim lighting and deep tonal separation.",
+    )
+    parser.add_argument(
+        "--remove-text",
+        dest="remove_text",
+        action="store_true",
+        help="Activate conditional text removal engine when letters or captions are present in reference.",
+    )
+    # --- Tool 6: Print-Calibrated Prepress & Exhibition Lab Matrix ---
+    parser.add_argument(
+        "--paper",
+        dest="paper",
+        choices=["matte_cotton", "luster", "glossy", "baryta", "canvas"],
+        default=None,
+        help="Fine art exhibition paper profile for print calibration.",
+    )
+    parser.add_argument(
+        "--print-size",
+        dest="print_size",
+        default=None,
+        help="Target physical print dimension and resolution (e.g. '16x24@300', '24x36@240', '9x12@640').",
+    )
+    # --- Tool 7: Policy-Safe Compliance Recovery Layer ---
+    parser.add_argument(
+        "--policy-safe",
+        dest="policy_safe",
+        action="store_true",
+        help="Enforce policy-safe compliance layer preventing refusal loops while locking camera physics and anatomy.",
+    )
     parser.add_argument(
         "--content-type",
         dest="content_type",
@@ -395,6 +486,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             sys.stderr.write(f"102MP Upscale Error: {err}\n")
             return 1
 
+    if not args.scene and getattr(args, "scene_flag", None):
+        args.scene = args.scene_flag
+
     if not args.scene:
         parser.print_help()
         return 1
@@ -475,7 +569,34 @@ def main(argv: Optional[list[str]] = None) -> int:
         "lighting_ratio": getattr(args, "lighting_ratio", None),
         "copy_space": getattr(args, "copy_space", None),
         "ad_safe_zone": getattr(args, "ad_safe_zone", None),
+        "body_volume": getattr(args, "body_volume", None),
+        "weight_lb": getattr(args, "weight_lb", None),
+        "material_style": getattr(args, "material", None),
+        "background_style": getattr(args, "background_style", None),
+        "is_4d_volumetric": getattr(args, "volumetric_4d", False),
+        "remove_text_when_present": getattr(args, "remove_text", False),
+        "paper_profile": getattr(args, "paper", None),
+        "print_spec": None,
+        "policy_safe": getattr(args, "policy_safe", False),
     }
+
+    if getattr(args, "print_size", None):
+        ps = args.print_size
+        from .restoration import STANDARD_PRINT_SIZES
+        from .models import PaperProfile, PrintSpec
+        if ps in STANDARD_PRINT_SIZES:
+            w, h, ppi = STANDARD_PRINT_SIZES[ps]
+        elif "x" in ps and "@" in ps:
+            dims, ppi_str = ps.split("@")
+            w_str, h_str = dims.split("x")
+            w, h, ppi = float(w_str), float(h_str), int(ppi_str)
+        elif "x" in ps:
+            w_str, h_str = ps.split("x")
+            w, h, ppi = float(w_str), float(h_str), 300
+        else:
+            w, h, ppi = 16.0, 24.0, 300
+        paper_enum = PaperProfile.from_str(getattr(args, "paper", None)) if getattr(args, "paper", None) else PaperProfile.LUSTER
+        common_kwargs["print_spec"] = PrintSpec(width_in=w, height_in=h, ppi=ppi, paper=paper_enum)
 
     profile_title = (
         compiler.base_profile.title
