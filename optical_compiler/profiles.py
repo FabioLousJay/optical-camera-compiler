@@ -5,7 +5,8 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
-from typing import Optional
+import re
+from typing import Optional, Union
 
 from .models import (
     CameraProfile,
@@ -230,7 +231,8 @@ def auto_select_profile(scene: Union[str, SceneInput]) -> str:
 
     for profile_id, keywords in CAMERA_ROUTER_RULES:
         for kw in keywords:
-            if kw in text:
+            pattern = r"(?<!\w)" + re.escape(kw) + r"(?!\w)"
+            if re.search(pattern, text):
                 return profile_id
 
     # Default fallback to flagship 150MP Trichromatic medium format reference
