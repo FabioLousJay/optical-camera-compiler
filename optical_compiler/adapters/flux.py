@@ -39,6 +39,7 @@ class FluxAdapter(BaseAdapter):
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
         is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
+        is_png_lock = bool((ref and ref.mode == ReferenceMode.UNIVERSAL_PNG_LOCK) or scene.has_png_lock)
 
         # 1. Subject & Scene
         if scene.is_policy_safe:
@@ -116,6 +117,16 @@ class FluxAdapter(BaseAdapter):
                 f"Photo of {subject_desc} with strict linear raster scaling (4X linear, 16X pixel area). "
                 f"Absolute source lock: zero generative hallucination, rock strata distortion, or terrain drift. "
                 f"Reconstructed via {b_val} (denoise {dn_val}, selective detail blend {bl_val}) with protected smooth sky and haze gradients."
+            )
+        elif is_png_lock:
+            png_s = scene.png_lock
+            mb_v = png_s.target_min_mb if png_s else 12.0
+            sections.append(
+                f"Universal High-Resolution PNG Output Lock v1.0. "
+                f"Photo of {subject_desc} rendered at maximum visual fidelity with high acutance, crisp micro-detail, clear edge separation. "
+                f"True full-color RGB output with zero forced palette reduction and zero indexed-color quantization. "
+                f"Minimum uncompressed raster target ~{mb_v:.0f} MB. "
+                f"Mandatory delivery rule: Apply 4× full-color RGB PNG Lanczos upscale post-process before final completion."
             )
         elif is_restore:
             sections.append(
@@ -326,7 +337,7 @@ class FluxAdapter(BaseAdapter):
         positive_prompt = " ".join(sections)
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock or is_recon_4x)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock or is_recon_4x or is_png_lock)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding and not is_product_lock,
@@ -337,6 +348,7 @@ class FluxAdapter(BaseAdapter):
             include_hand_drift=scene.has_hand_lock,
             include_body_distortion=scene.has_body_morphology,
             include_reconstruction_drift=is_recon_4x,
+            include_png_lock=is_png_lock,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
@@ -349,6 +361,13 @@ class FluxAdapter(BaseAdapter):
             "num_inference_steps": 28,
         }
 
+        if is_png_lock:
+            parameters.update({
+                "png_output_lock": True,
+                "color_mode": "RGB",
+                "compress_level": 0,
+                "linear_scale": 4,
+            })
         if is_outpaint:
             parameters.update({
                 "reference_mode": "outpaint_full_body",

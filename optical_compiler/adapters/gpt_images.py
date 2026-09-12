@@ -118,6 +118,22 @@ class GPTImagesAdapter(BaseAdapter):
             if scene.environment:
                 base_instr += f" Environment: {scene.environment}."
             sections.append(base_instr)
+        elif ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK or scene.has_png_lock:
+            png_s = scene.png_lock
+            min_mb_val = png_s.target_min_mb if png_s else 12.0
+            base_instr = (
+                "Base instruction (Universal High-Resolution PNG Output Lock v1.0): "
+                "Render at maximum practical visual fidelity with high resolution, high sharpness, and a true full-color PNG output. "
+                "Preserve natural detail, fine texture, clean edges, and realistic tonal transitions. "
+                "True full-color rendering: zero forced palette reduction, zero indexed-color quantization. "
+                "Preferred resolution: 11648 x 6552, 7680 x 4320, or highest available equivalent. "
+                f"Export format: True high-resolution full-color PNG, compress_level=0, minimum file size ~{min_mb_val:.0f} MB uncompressed. "
+                "Mandatory delivery rule: Apply internal 4× full-color RGB PNG upscale post-process before final completion. "
+                f"Subject: {scene.subject}."
+            )
+            if scene.environment:
+                base_instr += f" Environment: {scene.environment}."
+            sections.append(base_instr)
         elif ref_mode == ReferenceMode.TRANSFORM_ADAPT:
             base_instr = (
                 f"Base instruction: Photographic adaptation with biometric character lock. "
@@ -434,6 +450,20 @@ class GPTImagesAdapter(BaseAdapter):
                 "- Strict Source Geometry Lock: Prohibit generative hallucination, geological mutation, or terrain drift."
             )
 
+        # Universal High-Resolution PNG Output Lock Directives
+        if scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK:
+            png_s = scene.png_lock
+            mb_target = png_s.target_min_mb if png_s else 12.0
+            sections.append(
+                "Universal High-Resolution PNG Output Lock Directives:\n"
+                "- Output Format: True full-color RGB PNG (no forced palette reduction, no indexed color).\n"
+                "- Resolution Policy: Highest available practical resolution (11648x6552, 7680x4320, or highest equivalent).\n"
+                "- Sharpness Policy: High acutance, crisp micro-detail, clear edge separation, no mushy surfaces, no painterly artifacts.\n"
+                f"- File Size Target: Approximately {mb_target:.0f} MB or higher without quality sacrifice.\n"
+                "- Mandatory 4X Upscale Post-Process: Generate/restore, then execute 4× full-color RGB PNG Lanczos upscale with subtle acuity restoration (r=1.1, p=85, th=3).\n"
+                "- Standard Delivery Callout: 'Done ✅ 4× full-color PNG upscale: [width] × [height] px, RGB PNG, [file size] MB.'"
+            )
+
         # PFEP Diagnostic Stress Probe
         if scene.has_stress_probe and scene.stress_probe:
             sections.append(scene.stress_probe.directive_text)
@@ -473,6 +503,7 @@ class GPTImagesAdapter(BaseAdapter):
             include_hand_drift=scene.has_hand_lock,
             include_body_distortion=scene.has_body_morphology,
             include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X),
+            include_png_lock=bool(scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK),
         )
         if scene.custom_negatives:
             neg_tokens.extend(scene.custom_negatives)
@@ -487,19 +518,28 @@ class GPTImagesAdapter(BaseAdapter):
         positive_prompt = "\n\n".join(sections)
         negative_prompt = ", ".join(neg_tokens)
 
+        payload_params = {
+            "aspect_ratio": scene.aspect_ratio,
+            "resolution": res,
+            "camera": cam.camera_system,
+            "lens": cam.lens,
+            "aperture": cam.aperture_sweet_spot,
+            "shutter": cam.shutter,
+            "iso": cam.iso_base,
+        }
+        if scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK:
+            payload_params.update({
+                "png_output_lock": True,
+                "color_mode": "RGB",
+                "compress_level": 0,
+                "linear_scale": 4,
+            })
+
         return CompiledPayload(
             target_engine=self.target_engine,
             positive_prompt=positive_prompt,
             negative_prompt=negative_prompt,
-            parameters={
-                "aspect_ratio": scene.aspect_ratio,
-                "resolution": res,
-                "camera": cam.camera_system,
-                "lens": cam.lens,
-                "aperture": cam.aperture_sweet_spot,
-                "shutter": cam.shutter,
-                "iso": cam.iso_base,
-            },
+            parameters=payload_params,
             metadata={
                 "profile_id": profile.profile_id,
                 "protocol": "Brutally Sharp Portrait Prompt Kit (Page 17 Master Execution)",

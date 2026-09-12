@@ -58,6 +58,7 @@ class JSONAllInOneAdapter(BaseAdapter):
             include_hand_drift=scene.has_hand_lock,
             include_body_distortion=scene.has_body_morphology,
             include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X),
+            include_png_lock=bool(scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK),
         )
         if scene.custom_negatives:
             all_neg_tokens.extend(scene.custom_negatives)
@@ -67,11 +68,15 @@ class JSONAllInOneAdapter(BaseAdapter):
             resolution_str = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution)"
         elif ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X or scene.has_reconstruction_lock_4x:
             resolution_str = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area)"
+        elif ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK or scene.has_png_lock:
+            resolution_str = scene.output_resolution or "Highest Practical Resolution (11648 x 6552, 7680 x 4320, or equivalent full-color PNG)"
         else:
             resolution_str = scene.output_resolution or f"12MP PNG, {scene.aspect_ratio}"
 
         # 4. Build master All-in-One JSON dictionary
-        if scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X:
+        if scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK:
+            protocol_name = "Universal High-Resolution PNG Output Lock v1.0 & Mandatory 4X Upscale Protocol"
+        elif scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X:
             protocol_name = "Professional 4X Reconstruction Lock Protocol (Linear Expansion + High-Fidelity Multi-Model Blend)"
         elif scene.has_stress_probe:
             probe_name = scene.stress_probe.name if scene.stress_probe else "NONE"
@@ -101,6 +106,10 @@ class JSONAllInOneAdapter(BaseAdapter):
         else:
             protocol_name = "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
 
+        is_schema_3_7 = bool(
+            scene.has_png_lock
+            or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK
+        )
         is_schema_3_6 = bool(
             scene.has_reconstruction_lock_4x
             or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X
@@ -124,7 +133,7 @@ class JSONAllInOneAdapter(BaseAdapter):
             or scene.has_copy_space
             or scene.has_gobo
         )
-        schema_ver = "3.6" if is_schema_3_6 else ("3.5" if is_schema_3_5 else ("3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2")))
+        schema_ver = "3.7" if is_schema_3_7 else ("3.6" if is_schema_3_6 else ("3.5" if is_schema_3_5 else ("3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2"))))
 
         all_in_one_data: dict[str, Any] = {
             "$schema": "https://raw.githubusercontent.com/FabioLousJay/optical-camera-compiler/main/schemas/all_in_one_prompt.json",
@@ -310,6 +319,34 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "prohibit_diffusion_hallucination": True,
                 "target_verification": "shasum -a 256 output_file",
             },
+            "universal_png_output_lock": {
+                "active": bool(scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK),
+                "format": "PNG",
+                "color_mode": "RGB",
+                "zero_palette_reduction": True,
+                "zero_indexed_quantization": True,
+                "preferred_resolutions": ["11648 x 6552", "7680 x 4320"],
+                "acuity_restoration": {
+                    "filter": "UnsharpMask",
+                    "radius": 1.1,
+                    "percent": 85,
+                    "threshold": 3,
+                },
+                "compress_level": 0,
+                "optimize": False,
+                "target_min_mb": scene.png_lock.target_min_mb if scene.png_lock else 12.0,
+                "upscale_multiplier": 4,
+                "mandatory_workflow": [
+                    "Generate or edit the image",
+                    "Check output dimensions",
+                    "Apply 4× pixel upscale post-process",
+                    "Export as full-color RGB PNG (compress_level=0, optimize=False)",
+                    "Provide final downloadable file",
+                    "Report final dimensions, color mode, and file size",
+                ],
+                "delivery_callout": "Done ✅ 4× full-color PNG upscale: [width] × [height] px, RGB PNG, [file size] MB.",
+                "correction_verbiage": scene.png_lock.correction_verbiage if scene.png_lock else "You missed the locked delivery workflow. Apply the internal 4× full-color RGB PNG upscale now, export the final PNG, and report the final pixel dimensions, color mode, and file size.",
+            },
             "content_classification": {
                 "type": scene.content_type.value if scene.content_type else "photograph",
                 "is_flat_reproduction": bool(scene.content_type and scene.content_type.is_flat_reproduction),
@@ -397,6 +434,7 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "hand_drift": shield.hand_drift if scene.has_hand_lock else [],
                 "body_distortion": shield.body_distortion if scene.has_body_morphology else [],
                 "reconstruction_drift": shield.reconstruction_drift if (scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) else [],
+                "png_degradation": shield.png_degradation if (scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK) else [],
                 "all_negative_tokens": all_neg_tokens,
             },
             "compiled_prompts": {

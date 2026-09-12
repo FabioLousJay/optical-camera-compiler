@@ -36,6 +36,7 @@ class ImagenAdapter(BaseAdapter):
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
         is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
+        is_png_lock = bool((ref and ref.mode == ReferenceMode.UNIVERSAL_PNG_LOCK) or scene.has_png_lock)
 
         # 1. Subject & Scene foundation
         scene_elements = []
@@ -98,6 +99,18 @@ class ImagenAdapter(BaseAdapter):
                 scene_elements.append(f"rendered as a {scene.framing} of {scene.subject}")
             else:
                 scene_elements.append(f"preserving source framing of {scene.subject}")
+        elif is_png_lock:
+            png_s = scene.png_lock
+            min_mb_v = png_s.target_min_mb if png_s else 12.0
+            scene_elements.append(
+                "Universal High-Resolution PNG Output Lock v1.0 of the scene rendered at maximum visual fidelity with true full-color RGB output. "
+                "Zero forced palette reduction, zero indexed-color quantization, high acutance, crisp micro-detail, and clear edge separation. "
+                f"Exported as uncompressed PNG raster (~{min_mb_v:.0f} MB target) via mandatory 4× full-color RGB Lanczos upscale post-process"
+            )
+            if scene.framing:
+                scene_elements.append(f"rendered as a {scene.framing} of {scene.subject}")
+            else:
+                scene_elements.append(f"focusing faithfully on {scene.subject}")
         elif is_restore:
             scene_elements.append(f"Master optical remaster and high-resolution restoration of the reference photograph")
             if scene.framing:
@@ -325,7 +338,7 @@ class ImagenAdapter(BaseAdapter):
 
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock or is_recon_4x)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock or is_recon_4x or is_png_lock)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding and not is_product_lock,
@@ -336,6 +349,7 @@ class ImagenAdapter(BaseAdapter):
             include_hand_drift=scene.has_hand_lock,
             include_body_distortion=scene.has_body_morphology,
             include_reconstruction_drift=is_recon_4x,
+            include_png_lock=is_png_lock,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
@@ -347,6 +361,13 @@ class ImagenAdapter(BaseAdapter):
             "safety_filter_level": "block_medium_and_above",
             "person_generation": "allow_adult",
         }
+        if is_png_lock:
+            parameters.update({
+                "png_output_lock": True,
+                "color_mode": "RGB",
+                "compress_level": 0,
+                "linear_scale": 4,
+            })
         if is_outpaint:
             parameters.update({
                 "reference_mode": "outpaint_full_body",

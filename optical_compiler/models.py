@@ -640,6 +640,7 @@ class ReferenceMode(str, Enum):
     IDENTITY_LOCK = "identity_lock"  # Strict anatomical and biometric identity lock (zero gender, age, mass, or bone drift)
     PRODUCT_LOCK = "product_lock"  # 100% Commercial SKU lock (cap geometry, label kerning, seams, material finish, SKU color)
     RECONSTRUCTION_LOCK_4X = "reconstruction_lock_4x"  # Professional 4X Reconstruction Lock (source-locked deep SR, anti-hallucination)
+    UNIVERSAL_PNG_LOCK = "universal_png_lock"  # Universal High-Resolution PNG Output Lock v1.0 (true full-color RGB PNG, 4X upscale)
 
     @classmethod
     def from_str(cls, value: Optional[str]) -> ReferenceMode:
@@ -677,6 +678,12 @@ class ReferenceMode(str, Enum):
             "reconstruction_lock": cls.RECONSTRUCTION_LOCK_4X,
             "professional_4x": cls.RECONSTRUCTION_LOCK_4X,
             "p4x_lock": cls.RECONSTRUCTION_LOCK_4X,
+            "universal_png_lock": cls.UNIVERSAL_PNG_LOCK,
+            "png_lock": cls.UNIVERSAL_PNG_LOCK,
+            "high_res_png_lock": cls.UNIVERSAL_PNG_LOCK,
+            "full_color_png": cls.UNIVERSAL_PNG_LOCK,
+            "universal_png_output_lock": cls.UNIVERSAL_PNG_LOCK,
+            "png_output_lock": cls.UNIVERSAL_PNG_LOCK,
         }
         if normalized in alias_map:
             return alias_map[normalized]
@@ -756,6 +763,142 @@ class ReconstructionLock4XSpec:
             "protect_sky_haze": self.protect_sky_haze,
             "anti_model_stacking": self.anti_model_stacking,
             "linear_scale": self.linear_scale,
+        }
+
+
+@dataclass
+class HighResPNGOutputLockSpec:
+    """Specification for Universal High-Resolution PNG Output Lock v1.0."""
+
+    title: str = "Universal High-Resolution PNG Output Lock v1.0"
+    mode: str = "Append this JSON after the user's creative prompt and any attached reference image"
+    core_objective: str = (
+        "Generate or regenerate the requested image at maximum practical visual fidelity with high resolution, "
+        "high sharpness, and a true full-color PNG output. The result must preserve natural detail, fine texture, "
+        "clean edges, and realistic tonal transitions. Prioritize a premium high-resolution look over aggressive "
+        "compression or simplified color encoding."
+    )
+    preferred_resolutions: list[str] = field(
+        default_factory=lambda: ["11648 x 6552", "7680 x 4320"]
+    )
+    target_min_mb: float = 12.0
+    color_mode: str = "RGB"  # Strictly full-color 24-bit/48-bit RGB, no forced palette reduction
+    compress_level: int = 0  # Uncompressed PNG for maximum visual acutance and zero lossy artifacts
+    optimize: bool = False
+    unsharp_radius: float = 1.1
+    unsharp_percent: int = 85
+    unsharp_threshold: int = 3
+    linear_scale: int = 4
+    correction_verbiage: str = (
+        "You missed the locked delivery workflow. Apply the internal 4× full-color RGB PNG upscale now, "
+        "export the final PNG, and report the final pixel dimensions, color mode, and file size."
+    )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "title": self.title,
+            "type": "reference-guided or text-guided high-resolution image generation",
+            "mode": self.mode,
+            "core_objective": self.core_objective,
+            "reference_usage": {
+                "priority": "absolute when an image is attached",
+                "instructions": [
+                    "Use the attached image as the primary visual source of truth when applicable",
+                    "Preserve the subject identity, composition, scene structure, and intended style unless the user explicitly requests changes",
+                    "If no image is attached, generate from the user's text prompt while following all output and quality constraints below",
+                ],
+            },
+            "rendering_requirements": {
+                "resolution_policy": {
+                    "instruction": "Render at the highest practical resolution available for the requested aspect ratio",
+                    "preferred_resolutions": self.preferred_resolutions + ["or the highest available equivalent for the requested aspect ratio"],
+                    "minimum_standard": "Do not generate a low-resolution or visibly compressed result",
+                },
+                "sharpness_policy": {
+                    "instruction": "High-resolution, high-acutance output with crisp micro-detail",
+                    "requirements": [
+                        "fine texture preserved",
+                        "clear edge separation",
+                        "subtle unsharp-detail feel without halos",
+                        "no softness from low-resolution rendering",
+                        "no mushy surfaces",
+                        "no painterly artifacting",
+                    ],
+                },
+                "image_quality_policy": {
+                    "instruction": "Deliver a premium, clean, ultra-detailed image with strong fidelity",
+                    "requirements": [
+                        "no visible degradation",
+                        "no banding",
+                        "no posterization",
+                        "no muddy gradients",
+                        "no compression artifacts",
+                        "no blockiness",
+                        "no color simplification",
+                    ],
+                },
+                "color_and_tone_policy": {
+                    "instruction": "Preserve full tonal range and natural color depth",
+                    "requirements": [
+                        "true full-color rendering",
+                        "smooth tonal transitions",
+                        "natural contrast",
+                        "high dynamic range feel when appropriate",
+                        "no forced palette reduction",
+                        "no indexed-color look",
+                    ],
+                },
+            },
+            "export_requirements": {
+                "format": "PNG",
+                "png_mode": "True high-resolution PNG, full-color, no forced palette reduction",
+                "compression_policy": "Optimize the PNG only if optimization does not reduce visual quality, tonal fidelity, or color depth",
+                "file_size_target": {
+                    "instruction": f"Target a minimum file size of approximately {self.target_min_mb:.0f} MB or higher only if achievable without any visible quality loss and without palette reduction",
+                    "preferred_range": f"~{self.target_min_mb:.0f} MB or higher",
+                    "strict_rule": "Never reduce actual visual quality merely to hit a file-size target",
+                },
+                "fallback_rule": "If the platform cannot guarantee the requested file size while preserving full-quality PNG output, prioritize maximum image fidelity, true full-color PNG export, and highest practical resolution",
+            },
+            "negative_constraints": [
+                "no forced palette reduction",
+                "no indexed-color PNG if it reduces fidelity",
+                "no low-resolution export",
+                "no soft or blurry rendering",
+                "no painterly reinterpretation unless explicitly requested",
+                "no watercolor-like smearing",
+                "no compression damage",
+                "no flattened textures",
+                "no fake oversharpening halos",
+                "no visible artifacting",
+            ],
+            "validation_logic": {
+                "pass_conditions": [
+                    "image is visibly high-resolution and sharp",
+                    "PNG output is requested as the final format",
+                    "full-color fidelity is preserved",
+                    "no palette-reduction look is visible",
+                    "image quality is prioritized over arbitrary file compression",
+                ],
+                "fail_conditions": [
+                    "output looks low-resolution",
+                    "output looks heavily compressed",
+                    "output shows posterization or indexed-color artifacts",
+                    "output sacrifices fidelity to reach a file-size target",
+                    "output is soft, muddy, painterly, or visibly degraded",
+                ],
+            },
+            "execution_instruction": "Apply all constraints above as non-negotiable quality rules. If any constraint conflicts with export limitations of the platform, prioritize maximum visual fidelity, true full-color PNG behavior, and highest available resolution.",
+            "delivery_workflow": {
+                "step_1": "Generate or edit the image",
+                "step_2": "Check output dimensions",
+                "step_3": "Apply 4× pixel upscale post-process (Lanczos + UnsharpMask(r=1.1, p=85, th=3))",
+                "step_4": "Export as full-color RGB PNG (no palette conversion, compress_level=0)",
+                "step_5": "Provide final downloadable file",
+                "step_6": "Report final dimensions, color mode, and file size",
+                "standard_delivery_pattern": "Done ✅ 4× full-color PNG upscale: [width] × [height] px, RGB PNG, [file size] MB.",
+                "correction_verbiage": self.correction_verbiage,
+            },
         }
 
 
@@ -1684,6 +1827,22 @@ class NegativeShield:
             "model stacking artifacts",
         ]
     )
+    png_degradation: list[str] = field(
+        default_factory=lambda: [
+            "forced palette reduction",
+            "indexed-color PNG",
+            "palette quantization",
+            "color simplification",
+            "mushy surfaces",
+            "watercolor-like smearing",
+            "fake oversharpening halos",
+            "muddy gradients",
+            "posterization",
+            "lossy PNG compression",
+            "flattened textures",
+            "compression damage",
+        ]
+    )
 
     def all_tokens(
         self,
@@ -1696,6 +1855,7 @@ class NegativeShield:
         include_hand_drift: bool = False,
         include_body_distortion: bool = False,
         include_reconstruction_drift: bool = False,
+        include_png_lock: bool = False,
     ) -> list[str]:
         """Return a flat list of all negative tokens across selected categories."""
         tokens = list(self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift)
@@ -1762,6 +1922,11 @@ class NegativeShield:
                     seen.add(t)
         if include_reconstruction_drift:
             for t in self.reconstruction_drift:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
+        if include_png_lock:
+            for t in self.png_degradation:
                 if t not in seen:
                     tokens.append(t)
                     seen.add(t)
@@ -1887,6 +2052,7 @@ class SceneInput:
     lighting_environment: Optional[LightingEnvironmentSpec] = None
     series_cohesion: Optional[SeriesCohesionSpec] = None
     reconstruction_lock: Optional[ReconstructionLock4XSpec] = None
+    png_lock: Optional[HighResPNGOutputLockSpec] = None
 
     @property
     def has_product_lock(self) -> bool:
@@ -2062,6 +2228,13 @@ class SceneInput:
         if self.reference and self.reference.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X:
             return True
         return self.reconstruction_lock is not None
+
+    @property
+    def has_png_lock(self) -> bool:
+        """Return True if Universal High-Resolution PNG Output Lock v1.0 is active."""
+        if self.reference and self.reference.mode == ReferenceMode.UNIVERSAL_PNG_LOCK:
+            return True
+        return self.png_lock is not None
 
 
 

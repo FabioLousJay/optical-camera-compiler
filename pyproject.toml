@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "optical-camera-compiler"
-version = "3.6.0"
+version = "3.7.0"
 description = "Deterministic camera and optical compiler for zero-artifact photorealism in AI image generation"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -37,6 +37,7 @@ optical-compiler = "optical_compiler.cli:main"
 optical-studio = "optical_compiler.web:main"
 optical-upscaler = "optical_compiler.cli:upscaler_main"
 optical-recon-4x = "optical_compiler.cli:recon_4x_main"
+optical-png-lock = "optical_compiler.cli:png_lock_main"
 
 [tool.setuptools.packages.find]
 where = ["."]

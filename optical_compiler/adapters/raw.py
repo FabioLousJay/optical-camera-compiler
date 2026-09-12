@@ -195,6 +195,21 @@ class RawSpecAdapter(BaseAdapter):
                 "Source-Lock Integrity: Zero generative hallucination, geological mutation, or terrain drift",
             ])
 
+        if scene.has_png_lock or (scene.reference and scene.reference.mode == ReferenceMode.UNIVERSAL_PNG_LOCK):
+            png_s = scene.png_lock
+            mb_t = png_s.target_min_mb if png_s else 12.0
+            lines.extend([
+                "",
+                "--- Universal High-Resolution PNG Output Lock v1.0 ---",
+                "Lock Standard: True full-color RGB PNG (strictly zero forced palette reduction, zero indexed-color)",
+                "Resolution Policy: 11648 x 6552, 7680 x 4320, or highest available equivalent",
+                "Sharpness Policy: High acutance, crisp micro-detail, clear edge separation, no mushy surfaces",
+                f"Export Target: PNG format, compress_level=0, optimize=False, ~{mb_t:.0f} MB minimum uncompressed raster",
+                "Mandatory 4X Upscale Workflow: Generate/restore -> Lanczos 4X resize -> UnsharpMask(r=1.1, p=85, th=3) -> RGB PNG export",
+                "Standard Delivery Callout: Done ✅ 4× full-color PNG upscale: [width] × [height] px, RGB PNG, [file size] MB.",
+                "Correction Verbiage: You missed the locked delivery workflow. Apply the internal 4× full-color RGB PNG upscale now, export the final PNG, and report the final pixel dimensions, color mode, and file size.",
+            ])
+
         positive_prompt = "\n".join(lines)
 
         negative_prompt = ", ".join(
@@ -203,6 +218,7 @@ class RawSpecAdapter(BaseAdapter):
                 include_hand_drift=scene.has_hand_lock,
                 include_body_distortion=scene.has_body_morphology,
                 include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or (scene.reference and scene.reference.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X)),
+                include_png_lock=bool(scene.has_png_lock or (scene.reference and scene.reference.mode == ReferenceMode.UNIVERSAL_PNG_LOCK)),
             )
         )
 

@@ -17,6 +17,7 @@ from .models import (
     GoboPattern,
     GripModifier,
     GripType,
+    HighResPNGOutputLockSpec,
     IrisBladeCount,
     LightingEnvironmentSpec,
     LightingRatio,
@@ -130,6 +131,8 @@ class OpticalCompiler:
         sr_denoise: Optional[float] = None,
         sr_blend: Optional[float] = None,
         protect_sky_haze: bool = True,
+        png_lock: Optional[Union[bool, dict, HighResPNGOutputLockSpec]] = None,
+        png_min_mb: Optional[float] = None,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -312,6 +315,17 @@ class OpticalCompiler:
                 protect_sky_haze=protect_sky_haze,
             )
 
+        png_lock_obj: Optional[HighResPNGOutputLockSpec] = None
+        is_png_ref = bool(ref_obj and ref_obj.mode == ReferenceMode.UNIVERSAL_PNG_LOCK)
+        if isinstance(png_lock, HighResPNGOutputLockSpec):
+            png_lock_obj = png_lock
+        elif isinstance(png_lock, dict):
+            png_lock_obj = HighResPNGOutputLockSpec(**png_lock)
+        elif png_lock is True or is_png_ref:
+            png_lock_obj = HighResPNGOutputLockSpec(target_min_mb=png_min_mb if png_min_mb is not None else 12.0)
+        elif png_min_mb is not None and bool(png_lock):
+            png_lock_obj = HighResPNGOutputLockSpec(target_min_mb=png_min_mb)
+
         # 2. Build SceneInput
         if isinstance(scene, str):
             scene_input = SceneInput(
@@ -375,6 +389,7 @@ class OpticalCompiler:
                 lighting_environment=le_obj,
                 series_cohesion=sc_obj,
                 reconstruction_lock=recon_obj,
+                png_lock=png_lock_obj,
             )
 
         else:
@@ -493,6 +508,8 @@ class OpticalCompiler:
                 scene_input.series_cohesion = sc_obj
             if recon_obj is not None:
                 scene_input.reconstruction_lock = recon_obj
+            if png_lock_obj is not None:
+                scene_input.png_lock = png_lock_obj
 
         # 3. Parse target engine
         engine = (

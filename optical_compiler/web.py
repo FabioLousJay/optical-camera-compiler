@@ -3342,7 +3342,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
         """Handle compilation requests via REST API."""
         parsed_path = self.path.split("?")[0]
 
-        if parsed_path not in ("/api/compile", "/api/upscale-102mp", "/api/export-closed-loop", "/api/recon-4x"):
+        if parsed_path not in ("/api/compile", "/api/upscale-102mp", "/api/export-closed-loop", "/api/recon-4x", "/api/png-lock-upscale"):
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
             return
 
@@ -3352,6 +3352,45 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             body = json.loads(body_bytes.decode("utf-8"))
         except Exception as err:
             self._send_json({"error": f"Invalid JSON payload: {err}"}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/png-lock-upscale":
+            input_path = body.get("input_path") or body.get("image_path")
+            if not input_path:
+                self._send_json({"error": "Missing required field 'input_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+
+            try:
+                from .restoration import PILLOW_AVAILABLE, execute_4x_full_color_png_upscale
+            except ImportError:
+                self._send_json({"error": "Restoration module could not be imported."}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+                return
+
+            if not PILLOW_AVAILABLE:
+                self._send_json({"error": "Pillow is not installed."}, status=HTTPStatus.BAD_REQUEST)
+                return
+
+            try:
+                output_path = body.get("output_path") or None
+                unsharp_radius = float(body.get("unsharp_radius", 1.1))
+                unsharp_percent = int(body.get("unsharp_percent", 85))
+                unsharp_threshold = int(body.get("unsharp_threshold", 3))
+                compress_level = int(body.get("compress_level", 0))
+                min_mb = float(body.get("min_mb", 12.0))
+
+                rep, rep_dict = execute_4x_full_color_png_upscale(
+                    input_path=input_path,
+                    output_path=output_path,
+                    unsharp_radius=unsharp_radius,
+                    unsharp_percent=unsharp_percent,
+                    unsharp_threshold=unsharp_threshold,
+                    compress_level=compress_level,
+                    min_mb=min_mb,
+                    generate_report=True,
+                )
+                self._send_json(rep_dict)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
             return
 
         if parsed_path == "/api/recon-4x":
@@ -3542,6 +3581,8 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 sr_denoise=float(body["sr_denoise"]) if body.get("sr_denoise") is not None else None,
                 sr_blend=float(body["sr_blend"]) if body.get("sr_blend") is not None else None,
                 protect_sky_haze=bool(body.get("protect_sky_haze", True)),
+                png_lock=body.get("png_lock") or body.get("png_output_lock", False),
+                png_min_mb=float(body["png_min_mb"]) if body.get("png_min_mb") is not None else None,
             )
             self._send_json(payload.to_dict())
         except Exception as err:

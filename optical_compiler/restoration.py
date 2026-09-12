@@ -1212,3 +1212,230 @@ def execute_4x_reconstruction_lock(
 
     return report, report_dict
 
+
+@dataclass
+class PNGUpscaleReport:
+    """Audit report and delivery record for Universal High-Resolution PNG Output Lock & 4X Upscale."""
+
+    input_path: str
+    output_path: str
+    source_dimensions: tuple[int, int]
+    output_dimensions: tuple[int, int]
+    color_mode: str
+    file_size_bytes: int
+    file_size_mb: float
+    linear_multiplier: int = 4
+    area_multiplier: int = 16
+    compress_level: int = 0
+    unsharp_params: dict[str, Any] = field(default_factory=dict)
+    sha256: str = ""
+    execution_seconds: float = 0.0
+    validation_passed: bool = True
+    validation_failures: list[str] = field(default_factory=list)
+    delivery_string: str = ""
+    correction_verbiage: str = (
+        "You missed the locked delivery workflow. Apply the internal 4× full-color RGB PNG upscale now, "
+        "export the final PNG, and report the final pixel dimensions, color mode, and file size."
+    )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "pipeline": "Universal High-Resolution PNG Output Lock v1.0 (4X Full-Color RGB PNG)",
+            "input_path": self.input_path,
+            "output_path": self.output_path,
+            "source_dimensions": list(self.source_dimensions),
+            "output_dimensions": list(self.output_dimensions),
+            "color_mode": self.color_mode,
+            "file_size_bytes": self.file_size_bytes,
+            "file_size_mb": self.file_size_mb,
+            "linear_multiplier": self.linear_multiplier,
+            "area_multiplier": self.area_multiplier,
+            "compress_level": self.compress_level,
+            "unsharp_params": self.unsharp_params,
+            "sha256": self.sha256,
+            "execution_seconds": self.execution_seconds,
+            "validation_passed": self.validation_passed,
+            "validation_failures": self.validation_failures,
+            "delivery_string": self.delivery_string,
+            "correction_verbiage": self.correction_verbiage,
+        }
+
+    def to_markdown(self) -> str:
+        status_line = "✅ PASSED" if self.validation_passed else "❌ FAILED"
+        failures_md = ""
+        if self.validation_failures:
+            failures_md = "\n### Validation Failures\n" + "\n".join(f"- {f}" for f in self.validation_failures)
+
+        return f"""# Universal High-Resolution PNG Output Lock Report
+
+**Status:** {status_line}  
+**Pipeline:** Universal High-Resolution PNG Output Lock v1.0  
+**Delivery Verification:** `{self.delivery_string}`
+
+---
+
+## 1. Geometric & Raster Scaling
+- **Input Dimensions:** {self.source_dimensions[0]} x {self.source_dimensions[1]} px
+- **Output Dimensions:** {self.output_dimensions[0]} x {self.output_dimensions[1]} px
+- **Linear Multiplier:** {self.linear_multiplier}X linear expansion
+- **Area Multiplier:** {self.area_multiplier}X pixel expansion
+
+---
+
+## 2. Color & Encoding Integrity
+- **Color Mode:** {self.color_mode} (True full-color, zero palette reduction, zero indexed-color)
+- **PNG Compression Level:** {self.compress_level} (lossless uncompressed raster)
+- **Acuity Restoration Filter:** UnsharpMask (radius={self.unsharp_params.get('radius', 1.1)}, percent={self.unsharp_params.get('percent', 85)}%, threshold={self.unsharp_params.get('threshold', 3)})
+- **File Size:** {self.file_size_mb:.2f} MB ({self.file_size_bytes:,} bytes)
+- **Execution Time:** {self.execution_seconds:.4f}s
+
+---
+
+## 3. Cryptographic Provenance
+- **Output SHA-256:** `{self.sha256}`
+- **Standard Delivery Callout:**
+  > `{self.delivery_string}`
+- **Correction Verbiage (if workflow is missed):**
+  > "{self.correction_verbiage}"
+{failures_md}
+"""
+
+
+def execute_4x_full_color_png_upscale(
+    input_path: Union[str, Path],
+    output_path: Optional[Union[str, Path]] = None,
+    unsharp_radius: float = 1.1,
+    unsharp_percent: int = 85,
+    unsharp_threshold: int = 3,
+    compress_level: int = 0,
+    optimize: bool = False,
+    min_mb: Optional[float] = 12.0,
+    spec: Optional[Any] = None,
+    generate_report: bool = True,
+) -> tuple[PNGUpscaleReport, dict[str, Any]]:
+    """Execute the Universal High-Resolution PNG Output Lock & 4X Upscale Workflow.
+
+    Workflow:
+      1. Verify input image exists and is readable.
+      2. Convert any indexed, palette, or grayscale images to true full-color RGB (or RGBA).
+      3. Apply 4X linear pixel expansion using high-quality Lanczos resampling.
+      4. Apply subtle acuity restoration (UnsharpMask r=1.1, p=85, th=3) without harsh halos.
+      5. Export as full-color PNG with compress_level=0 and optimize=False (zero compression loss).
+      6. Calculate SHA-256 cryptographic provenance and verification metrics.
+      7. Format standard deliverable string:
+         'Done ✅ 4× full-color PNG upscale: [width] × [height] px, RGB PNG, [file size] MB.'
+    """
+    if spec is not None:
+        unsharp_radius = getattr(spec, "unsharp_radius", unsharp_radius)
+        unsharp_percent = getattr(spec, "unsharp_percent", unsharp_percent)
+        unsharp_threshold = getattr(spec, "unsharp_threshold", unsharp_threshold)
+        compress_level = getattr(spec, "compress_level", compress_level)
+        optimize = getattr(spec, "optimize", optimize)
+        if hasattr(spec, "target_min_mb"):
+            min_mb = spec.target_min_mb
+
+    if not PILLOW_AVAILABLE:
+        raise RuntimeError("Pillow is required for execute_4x_full_color_png_upscale.")
+
+    start_time = time.time()
+    in_p = Path(input_path).resolve()
+    if not in_p.exists():
+        raise FileNotFoundError(f"Source image not found: {in_p}")
+
+    with Image.open(in_p) as src:
+        w0, h0 = src.size
+        has_alpha = (src.mode == "RGBA" or "transparency" in src.info)
+        # Enforce true full-color: convert palette (P) or grayscale (L) to RGB / RGBA
+        working_img = src.convert("RGBA" if has_alpha else "RGB")
+
+    target_w = w0 * 4
+    target_h = h0 * 4
+
+    # Resolve output path
+    if output_path:
+        out_p = Path(output_path).resolve()
+        if not out_p.suffix.lower() == ".png":
+            out_p = out_p.with_suffix(".png")
+    else:
+        out_p = in_p.parent / f"{in_p.stem}_4x_full_color_upscale.png"
+
+    out_p.parent.mkdir(parents=True, exist_ok=True)
+
+    # 4X Lanczos resampling
+    resample_filter = getattr(Image, "Resampling", Image).LANCZOS
+    upscaled = working_img.resize((target_w, target_h), resample=resample_filter)
+    working_img.close()
+
+    # Subtle acuity restoration
+    acuity_filter = ImageFilter.UnsharpMask(
+        radius=unsharp_radius,
+        percent=unsharp_percent,
+        threshold=unsharp_threshold,
+    )
+    final_img = upscaled.filter(acuity_filter)
+    upscaled.close()
+
+    # Save as true full-color PNG
+    final_mode = final_img.mode
+    final_img.save(
+        out_p,
+        format="PNG",
+        optimize=optimize,
+        compress_level=compress_level,
+    )
+    final_img.close()
+
+    out_bytes = out_p.stat().st_size
+    out_mb = round(out_bytes / 1_000_000.0, 2)
+    sha_digest = sha256_file(out_p)
+    exec_sec = round(time.time() - start_time, 4)
+
+    delivery_str = f"Done ✅ 4× full-color PNG upscale: {target_w} × {target_h} px, {final_mode} PNG, {out_mb:.2f} MB."
+    correction_verbiage = (
+        "You missed the locked delivery workflow. Apply the internal 4× full-color RGB PNG upscale now, "
+        "export the final PNG, and report the final pixel dimensions, color mode, and file size."
+    )
+
+    failures = []
+    with Image.open(out_p) as verified:
+        saved_w, saved_h = verified.size
+        saved_mode = verified.mode
+    if saved_w != target_w or saved_h != target_h:
+        failures.append(f"Dimensions mismatch: expected {target_w}x{target_h}, got {saved_w}x{saved_h}.")
+    if saved_mode not in ("RGB", "RGBA"):
+        failures.append(f"Color mode violation: expected RGB/RGBA, got {saved_mode} (palette reduction detected).")
+
+    report = PNGUpscaleReport(
+        input_path=str(in_p),
+        output_path=str(out_p),
+        source_dimensions=(w0, h0),
+        output_dimensions=(target_w, target_h),
+        color_mode=final_mode,
+        file_size_bytes=out_bytes,
+        file_size_mb=out_mb,
+        linear_multiplier=4,
+        area_multiplier=16,
+        compress_level=compress_level,
+        unsharp_params={
+            "radius": unsharp_radius,
+            "percent": unsharp_percent,
+            "threshold": unsharp_threshold,
+        },
+        sha256=sha_digest,
+        execution_seconds=exec_sec,
+        validation_passed=len(failures) == 0,
+        validation_failures=failures,
+        delivery_string=delivery_str,
+        correction_verbiage=correction_verbiage,
+    )
+
+    report_dict = report.to_dict()
+
+    if generate_report:
+        rep_md_p = out_p.parent / "PNG_UPSCALE_REPORT.md"
+        rep_md_p.write_text(report.to_markdown(), encoding="utf-8")
+        prov_json_p = out_p.parent / "PROVENANCE.json"
+        prov_json_p.write_text(json.dumps(report_dict, indent=2), encoding="utf-8")
+
+    return report, report_dict
+

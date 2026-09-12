@@ -8,6 +8,7 @@ from .models import (
     CaptureMode,
     CompiledPayload,
     ContentType,
+    HighResPNGOutputLockSpec,
     LightingEnvironmentSpec,
     LightingPreset,
     LightingSetup,
@@ -32,12 +33,14 @@ from .pfep import (
 from .profiles import apply_overrides, auto_select_profile, load_profile
 from .restoration import (
     EXPORT_PROFILES,
+    PNGUpscaleReport,
     PrintSpec,
     ReconstructionReport,
     RestorationConfig,
     RunReport,
     add_micro_noise,
     calculate_exact_ratio_102mp_dimensions,
+    execute_4x_full_color_png_upscale,
     execute_4x_reconstruction_lock,
     export_closed_loop,
     inches_to_pixels,
@@ -47,7 +50,7 @@ from .restoration import (
     viewing_distance_inches,
 )
 
-__version__ = "3.6.0"
+__version__ = "3.7.0"
 
 __all__ = [
     "OpticalCompiler",
@@ -89,6 +92,9 @@ __all__ = [
     "SuperResolutionBackend",
     "ReconstructionReport",
     "execute_4x_reconstruction_lock",
+    "HighResPNGOutputLockSpec",
+    "PNGUpscaleReport",
+    "execute_4x_full_color_png_upscale",
     "init_pfep_project",
     "PROMPT_TEMPLATES",
     "RUN_LOG_TEMPLATE",

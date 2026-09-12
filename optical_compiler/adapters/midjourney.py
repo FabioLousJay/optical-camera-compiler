@@ -37,6 +37,7 @@ class MidjourneyAdapter(BaseAdapter):
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
         is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
+        is_png_lock = bool((ref and ref.mode == ReferenceMode.UNIVERSAL_PNG_LOCK) or scene.has_png_lock)
 
         # 1. Subject description
         core_elements = []
@@ -66,6 +67,13 @@ class MidjourneyAdapter(BaseAdapter):
             b_val = recon.backend.value if recon else "realesrnet_x4plus"
             core_elements.append(
                 f"Professional 4X Reconstruction Lock, 4X linear expansion 16X area, {b_val} backend, protected sky haze gradients, source-locked geometry, zero hallucination"
+            )
+        elif is_png_lock:
+            png_s = scene.png_lock
+            mb_v = png_s.target_min_mb if png_s else 12.0
+            core_elements.append(
+                f"Universal High-Resolution PNG Output Lock v1.0, true full-color RGB PNG, zero forced palette reduction, "
+                f"zero indexed color, high acutance, crisp micro-detail, clear edge separation, ~{mb_v:.0f}MB target, mandatory 4X Lanczos upscale workflow"
             )
         elif is_identity_lock:
             core_elements.append(
@@ -345,6 +353,21 @@ class MidjourneyAdapter(BaseAdapter):
             banned_mj.extend(["text", "typography", "letters", "writing", "words", "captions"])
         if scene.is_policy_safe:
             banned_mj.extend(["provocative", "inappropriate", "revealing", "gratuitous"])
+        if is_png_lock:
+            banned_mj.extend([
+                "forced palette reduction",
+                "indexed-color PNG",
+                "palette quantization",
+                "color simplification",
+                "mushy surfaces",
+                "watercolor-like smearing",
+                "fake oversharpening halos",
+                "muddy gradients",
+                "posterization",
+                "lossy PNG compression",
+                "flattened textures",
+                "compression damage",
+            ])
         if scene.custom_negatives:
             banned_mj.extend(scene.custom_negatives)
 
@@ -364,6 +387,13 @@ class MidjourneyAdapter(BaseAdapter):
             "version": "8.2",
             "no": banned_mj,
         }
+        if is_png_lock:
+            parameters.update({
+                "png_output_lock": True,
+                "color_mode": "RGB",
+                "compress_level": 0,
+                "linear_scale": 4,
+            })
         if is_restore:
             parameters.update({
                 "reference_mode": "restore_upscale",

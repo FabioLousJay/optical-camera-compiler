@@ -125,6 +125,7 @@ class OpticalCameraCompilerNode:
                         "product_lock",
                         "depixelate_gfx100rf",
                         "reconstruction_lock_4x",
+                        "universal_png_lock",
                         "outpaint_full_body",
                     ],
                     {"default": "disabled"},
@@ -690,11 +691,72 @@ class Optical4XReconstructionLockNode:
         )
 
 
+class Optical4XFullColorPNGUpscaleNode:
+    """ComfyUI node executing Universal High-Resolution PNG Output Lock v1.0 & 4X Upscale Workflow."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image_path": ("STRING", {"default": "input_image.png"}),
+                "unsharp_radius": ("FLOAT", {"default": 1.1, "min": 0.1, "max": 10.0, "step": 0.1}),
+                "unsharp_percent": ("INT", {"default": 85, "min": 0, "max": 500, "step": 5}),
+                "unsharp_threshold": ("INT", {"default": 3, "min": 0, "max": 50, "step": 1}),
+                "compress_level": ("INT", {"default": 0, "min": 0, "max": 9, "step": 1}),
+                "target_min_mb": ("FLOAT", {"default": 12.0, "min": 1.0, "max": 500.0, "step": 1.0}),
+            },
+            "optional": {
+                "output_path": ("STRING", {"default": ""}),
+            },
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "FLOAT", "STRING", "BOOLEAN")
+    RETURN_NAMES = ("output_path", "sha256", "report_markdown", "file_mb", "delivery_string", "validation_passed")
+    FUNCTION = "upscale_png_4x"
+    CATEGORY = "image/upscaling"
+
+    def upscale_png_4x(
+        self,
+        image_path: str,
+        unsharp_radius: float = 1.1,
+        unsharp_percent: int = 85,
+        unsharp_threshold: int = 3,
+        compress_level: int = 0,
+        target_min_mb: float = 12.0,
+        output_path: str = "",
+    ) -> tuple[str, str, str, float, str, bool]:
+        from .restoration import execute_4x_full_color_png_upscale
+
+        in_p = image_path.strip()
+        out_p = output_path.strip() if output_path.strip() else None
+
+        report, _ = execute_4x_full_color_png_upscale(
+            input_path=in_p,
+            output_path=out_p,
+            unsharp_radius=unsharp_radius,
+            unsharp_percent=unsharp_percent,
+            unsharp_threshold=unsharp_threshold,
+            compress_level=compress_level,
+            min_mb=target_min_mb,
+            generate_report=True,
+        )
+
+        return (
+            report.output_path,
+            report.sha256,
+            report.to_markdown(),
+            report.file_size_mb,
+            report.delivery_string,
+            report.validation_passed,
+        )
+
+
 NODE_CLASS_MAPPINGS = {
     "OpticalCameraCompiler": OpticalCameraCompilerNode,
     "OpticalConservative102MPUpscaler": OpticalConservative102MPUpscalerNode,
     "OpticalClosedLoopExporter": OpticalClosedLoopExporterNode,
     "Optical4XReconstructionLock": Optical4XReconstructionLockNode,
+    "Optical4XFullColorPNGUpscale": Optical4XFullColorPNGUpscaleNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -702,4 +764,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "OpticalConservative102MPUpscaler": "🔬 PIL Conservative 102MP Upscaler Lock",
     "OpticalClosedLoopExporter": "🔒 Closed-Loop Resolution Engine & Provenance",
     "Optical4XReconstructionLock": "🚀 4X Reconstruction Lock Engine",
+    "Optical4XFullColorPNGUpscale": "💎 4X Full-Color PNG Output Lock Upscaler",
 }

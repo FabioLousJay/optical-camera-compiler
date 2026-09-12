@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Version: 3.6.0](https://img.shields.io/badge/version-3.6.0-blue.svg)](pyproject.toml)
+[![Version: 3.7.0](https://img.shields.io/badge/version-3.7.0-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 167 Passing](https://img.shields.io/badge/tests-167%20passing-brightgreen.svg)](tests/)
+[![Tests: 181 Passing](https://img.shields.io/badge/tests-181%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -55,9 +55,9 @@ Standard AI generations often suffer from JPEG block compression, chroma subsamp
 
 ---
 
-## Reference Image Pipeline (Modes A, B, C, D, & E)
+## Reference Image Pipeline (Modes A, B, C, D, E, F, G, & H)
 
-Attach any reference image from your **local hardware** (drag & drop or file select) into the compiler to unlock five production workflows:
+Attach any reference image from your **local hardware** (drag & drop or file select) into the compiler to unlock eight production workflows:
 
 ### 🔬 Mode A: Optical Re-Master & Max-Fidelity Upscale (`restore_upscale`)
 Elevates existing low-resolution or AI-distorted photos to medium-format camera quality (**Phase One IQ4 150MP**, **Hasselblad H6D-100c**) while preserving 100% of the original subject identity, composition, and physical details.
@@ -118,6 +118,25 @@ Delivers defensible, museum-grade 4X super-resolution upscaling and reconstructi
   ```bash
   optical-compiler "Sandstone ridges at sunset" --recon-4x inputs/landscape.png --sr-backend swinir_m_x4 --sr-denoise 0.15 --sr-blend 0.20
   ```
+
+### 💎 Mode H: Universal High-Resolution PNG Output Lock v1.0 & 4× Upscale Workflow (`universal_png_lock` / `--png-lock` / `optical-png-lock`)
+Eliminates synthetic palette reduction, indexed-color quantization, and compression damage by locking generators and post-processors into true full-color uncompressed RGB raster pipelines:
+* **Zero Forced Palette Reduction**: Strictly prohibits 8-bit palette degradation, color quantization, color simplification, muddy gradient banding, posterization, and watercolor-like smearing.
+* **Master High-Resolution Enforcements**: Directs models toward ultra-high pixel grids (`11648 x 6552`, `7680 x 4320`) with crisp micro-detail, clear edge separation, and full tonal dynamic range.
+* **Uncompressed Full-Color Raster Export**: Pure RGB PNG output saved with `compress_level=0` and `optimize=False`, targeting minimum uncompressed file footprints ($\ge 12\,\text{MB}$ raster baseline; never sacrificing visual acutance to hit a target).
+* **Mandatory 6-Step 4× Upscale Pipeline**:
+  1. Generate or edit the base visual.
+  2. Inspect output dimensions and color space.
+  3. Apply 4× pixel upscale post-process (Lanczos resampling + subtle acuity restoration: `ImageFilter.UnsharpMask(radius=1.1, percent=85, threshold=3)`).
+  4. Export as uncompressed full-color RGB PNG (`compress_level=0`, `optimize=False`).
+  5. Provide final downloadable file.
+  6. Standard delivery confirmation callout:
+     ```text
+     Done ✅ 4× full-color PNG upscale: [width] × [height] px, RGB PNG, [file size] MB.
+     ```
+* **Strict Correction Verbiage**: Automatically deploys failure-recovery prompts if a generator attempts to bypass the locked delivery:
+  > *"You missed the locked delivery workflow. Apply the internal 4× full-color RGB PNG upscale now, export the final PNG, and report the final pixel dimensions, color mode, and file size."*
+* **Layered Negative Shield Suppression**: Hard suppresses `forced palette reduction`, `indexed-color PNG`, `palette quantization`, `color simplification`, `mushy surfaces`, `watercolor-like smearing`, `fake oversharpening halos`, `muddy gradients`, `posterization`, `lossy PNG compression`, `flattened textures`, and `compression damage`.
 
 ---
 
@@ -526,11 +545,15 @@ Restart ComfyUI, then right-click on the graph canvas:
   * `positive_prompt` ➔ Pipe directly into `CLIP Text Encode (Prompt)`
   * `negative_prompt` ➔ Pipe into `CLIP Text Encode (Negative)`
   * `unified_payload` ➔ Full prompt with negative shield for single-prompt nodes (GPT / Flux.1 / Midjourney)
-  * Controls: `camera_rig` (19 systems or `auto`), `model_target`, `reference_mode` (`disabled`, `transform_adapt`, `restore_upscale`, `outpaint_full_body`, `depixelate_gfx100rf`, `product_lock`, `reconstruction_lock_4x`), `content_type`, `human_skin_realism`, `aspect_ratio`.
+  * Controls: `camera_rig` (19 systems or `auto`), `model_target`, `reference_mode` (`disabled`, `transform_adapt`, `restore_upscale`, `outpaint_full_body`, `depixelate_gfx100rf`, `product_lock`, `reconstruction_lock_4x`, `universal_png_lock`), `content_type`, `human_skin_realism`, `aspect_ratio`.
 * **Add Node ➔ upscale/optical ➔ 🔬 Optical 4X Reconstruction Lock**
   * Dedicated high-fidelity image super-resolution execution node.
   * Inputs: `image_path`, `backend` (`realesrnet_x4plus`, `swinir_m_x4`, `realesrgan_x4v3`, `hat_s_x4`), `denoise_strength`, `blend_ratio`, `protect_sky_haze`, `output_format`.
   * Outputs: `output_image_path`, `reconstruction_report_md`.
+* **Add Node ➔ upscale/optical ➔ 💎 4X Full-Color PNG Output Lock Upscaler**
+  * Native 4× full-color uncompressed RGB PNG upscale node (`Optical4XFullColorPNGUpscaleNode`).
+  * Inputs: `image_path`, `unsharp_radius` (default 1.1), `unsharp_percent` (default 85), `unsharp_threshold` (default 3), `compress_level` (default 0), `target_min_mb` (default 12.0), `output_path`.
+  * Outputs: `output_image_path`, `upscale_report_md`, `delivery_callout`.
 ---
 
 ## Quickstart & Installation
@@ -673,6 +696,45 @@ python3 -m optical_compiler "Elegantly sculpted perfume bottle standing on polis
   -c
 ```
 
+### 10. Mode H: Universal High-Resolution PNG Output Lock & Standalone 4X Upscaler
+Compile a prompt with full-color uncompressed PNG output lock and negative palette suppression:
+```bash
+python3 -m optical_compiler "Architectural interior of a minimalist brutalist villa" \
+  --png-lock \
+  --target gpt_images \
+  -c
+```
+
+Or execute the standalone 4× full-color RGB PNG upscale workflow directly on any existing render or photo:
+```bash
+# Using the dedicated entrypoint
+optical-png-lock input_render.png
+
+# Or via the compiler CLI flag
+python3 -m optical_compiler --png-upscale-4x input_render.png
+```
+Outputs an uncompressed 4× upscale ($4W \times 4H$), writes `PNG_UPSCALE_REPORT.md` and `PROVENANCE.json`, and delivers the standard confirmation callout:
+```text
+Done ✅ 4× full-color PNG upscale: 4096 × 4096 px, RGB PNG, 48.00 MB.
+```
+
+### 11. Studio Web API: PNG Lock Upscale Endpoint
+Run the optical compiler local studio:
+```bash
+python3 -m optical_compiler.web --port 8000
+```
+POST to `/api/png-lock-upscale`:
+```json
+{
+  "image_path": "path/to/image.png",
+  "unsharp_radius": 1.1,
+  "unsharp_percent": 85,
+  "unsharp_threshold": 3,
+  "compress_level": 0,
+  "target_min_mb": 12.0
+}
+```
+Returns `{ "status": "success", "report": { ... }, "delivery_callout": "Done ✅ ..." }`.
 
 ---
 

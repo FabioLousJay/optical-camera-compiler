@@ -100,10 +100,33 @@ def build_parser() -> argparse.ArgumentParser:
         dest="ref_mode",
         choices=[
             "restore", "transform", "depixelate", "depixelate_gfx100rf", "identity", "identity_lock",
-            "product", "product_lock", "product_crop", "recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock"
+            "product", "product_lock", "product_crop", "recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock",
+            "universal_png_lock", "png_lock", "high_res_png_lock", "full_color_png", "universal_png_output_lock", "png_output_lock",
         ],
         default="restore",
-        help="Reference mode: 'restore', 'transform', 'identity_lock', 'depixelate_gfx100rf', 'product_lock', or 'recon_4x' (4X Reconstruction Lock).",
+        help="Reference mode: 'restore', 'transform', 'identity_lock', 'depixelate_gfx100rf', 'product_lock', 'recon_4x', or 'universal_png_lock' (Universal PNG Output Lock).",
+    )
+    parser.add_argument(
+        "--png-lock",
+        "--high-res-png-lock",
+        dest="png_lock",
+        action="store_true",
+        help="Activate Universal High-Resolution PNG Output Lock v1.0 (true full-color RGB PNG, zero palette reduction, mandatory 4X upscale).",
+    )
+    parser.add_argument(
+        "--png-min-mb",
+        dest="png_min_mb",
+        type=float,
+        default=None,
+        help="Target minimum file size in MB for PNG Output Lock (default: 12.0).",
+    )
+    parser.add_argument(
+        "--png-upscale-4x",
+        dest="png_upscale_4x",
+        nargs="?",
+        const=True,
+        default=None,
+        help="Execute the Universal 4X Full-Color RGB PNG upscale directly on an image path.",
     )
     parser.add_argument(
         "--depixelate",
@@ -771,6 +794,38 @@ def main(argv: Optional[list[str]] = None) -> int:
             sys.stderr.write(f"4X Reconstruction Error: {err}\n")
             return 1
 
+    # 1d. Handle direct 4X full-color PNG upscale request if provided
+    if getattr(args, "png_upscale_4x", None):
+        target_img = args.png_upscale_4x if isinstance(args.png_upscale_4x, str) else args.scene
+        try:
+            from .restoration import execute_4x_full_color_png_upscale
+            rep, rep_d = execute_4x_full_color_png_upscale(
+                target_img,
+                min_mb=getattr(args, "png_min_mb", 12.0),
+                generate_report=True,
+            )
+            if args.json:
+                print(json.dumps(rep_d, indent=2))
+            else:
+                print("=" * 80)
+                print("UNIVERSAL HIGH-RESOLUTION PNG OUTPUT LOCK v1.0 (4X FULL-COLOR RGB PNG)")
+                print("=" * 80)
+                print(f"Status:       {'PASSED (Verified full-color RGB PNG)' if rep.validation_passed else 'FAILED'}")
+                print(f"Input:        {rep.input_path} ({rep.source_dimensions[0]}x{rep.source_dimensions[1]} px)")
+                print(f"Output:       {rep.output_path} ({rep.output_dimensions[0]}x{rep.output_dimensions[1]} px)")
+                print(f"Multiplier:   {rep.linear_multiplier}X linear ({rep.area_multiplier}X area)")
+                print(f"Color Mode:   {rep.color_mode} (Zero palette reduction, zero indexed quantization)")
+                print(f"File Size:    {rep.file_size_mb:.2f} MB ({rep.file_size_bytes:,} bytes)")
+                print(f"SHA-256:      {rep.sha256}")
+                print("-" * 80)
+                print(f"Delivery:     {rep.delivery_string}")
+                if rep.validation_failures:
+                    print(f"Failures:     {', '.join(rep.validation_failures)}")
+            return 0 if rep.validation_passed else 1
+        except Exception as err:
+            sys.stderr.write(f"4X PNG Upscale Error: {err}\n")
+            return 1
+
     if not args.scene and getattr(args, "scene_flag", None):
         args.scene = args.scene_flag
 
@@ -791,10 +846,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         ref_mode_choice = "product_lock"
     elif getattr(args, "recon_4x", None) is not None:
         ref_mode_choice = "recon_4x"
+    elif getattr(args, "png_lock", False) or ref_mode_choice in ("universal_png_lock", "png_lock", "high_res_png_lock", "full_color_png", "universal_png_output_lock", "png_output_lock"):
+        ref_mode_choice = "universal_png_lock"
 
     ref_dict = None
     ref_path = args.reference or getattr(args, "product_crop", None)
-    if ref_path or ref_mode_choice in ("product_lock", "product", "product_crop", "recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock"):
+    if ref_path or ref_mode_choice in ("product_lock", "product", "product_crop", "recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock", "universal_png_lock"):
         if ref_mode_choice in ("depixelate", "depixelate_gfx100rf"):
             mode_str = "depixelate_gfx100rf"
             default_denoise = 0.25
@@ -807,6 +864,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         elif ref_mode_choice in ("recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock"):
             mode_str = "reconstruction_lock_4x"
             default_denoise = getattr(args, "sr_denoise", 0.15)
+        elif ref_mode_choice == "universal_png_lock":
+            mode_str = "universal_png_lock"
+            default_denoise = 0.15
         elif ref_mode_choice == "restore":
             mode_str = "restore_upscale"
             default_denoise = 0.35
@@ -881,6 +941,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         "wall_surround": getattr(args, "wall_surround", None),
         "gallery_zone": getattr(args, "gallery_zone", None),
         "anchor_image_id": getattr(args, "anchor_image_id", None),
+        "png_lock": getattr(args, "png_lock", False) or ref_mode_choice == "universal_png_lock",
+        "png_min_mb": getattr(args, "png_min_mb", None),
     }
 
     if getattr(args, "print_size", None):
@@ -1071,6 +1133,60 @@ def recon_4x_main(argv: Optional[list[str]] = None) -> int:
         return 0 if rep.validation_passed else 1
     except Exception as err:
         sys.stderr.write(f"4X Reconstruction Error: {err}\n")
+        return 1
+
+
+def png_lock_main(argv: Optional[list[str]] = None) -> int:
+    """Dedicated CLI entrypoint for Universal High-Resolution PNG Output Lock & 4X Upscale Workflow."""
+    parser = argparse.ArgumentParser(
+        prog="optical-png-lock",
+        description="Universal High-Resolution PNG Output Lock v1.0 and Mandatory 4X Full-Color RGB PNG Upscaler.",
+    )
+    parser.add_argument("image", help="Path to input image file.")
+    parser.add_argument("-o", "--output", help="Optional destination output path.")
+    parser.add_argument("--unsharp-radius", type=float, default=1.1, help="UnsharpMask radius (default: 1.1).")
+    parser.add_argument("--unsharp-percent", type=int, default=85, help="UnsharpMask percent (default: 85).")
+    parser.add_argument("--unsharp-threshold", type=int, default=3, help="UnsharpMask threshold (default: 3).")
+    parser.add_argument("--compress-level", type=int, default=0, help="PNG compression level 0-9 (default: 0 for uncompressed raster).")
+    parser.add_argument("--min-mb", type=float, default=12.0, help="Target minimum MB warning threshold (default: 12.0).")
+    parser.add_argument("--json", action="store_true", help="Output raw JSON execution report.")
+    args = parser.parse_args(argv)
+
+    try:
+        from .restoration import execute_4x_full_color_png_upscale
+        rep, rep_d = execute_4x_full_color_png_upscale(
+            args.image,
+            output_path=args.output,
+            unsharp_radius=args.unsharp_radius,
+            unsharp_percent=args.unsharp_percent,
+            unsharp_threshold=args.unsharp_threshold,
+            compress_level=args.compress_level,
+            min_mb=args.min_mb,
+            generate_report=True,
+        )
+        if args.json:
+            print(json.dumps(rep_d, indent=2))
+        else:
+            print("=" * 80)
+            print("UNIVERSAL HIGH-RESOLUTION PNG OUTPUT LOCK v1.0 (4X FULL-COLOR RGB PNG)")
+            print("=" * 80)
+            print(f"Status:       {'PASSED (Verified full-color RGB PNG)' if rep.validation_passed else 'FAILED'}")
+            print(f"Input:        {rep.input_path} ({rep.source_dimensions[0]}x{rep.source_dimensions[1]} px)")
+            print(f"Output:       {rep.output_path} ({rep.output_dimensions[0]}x{rep.output_dimensions[1]} px)")
+            print(f"Multiplier:   {rep.linear_multiplier}X linear ({rep.area_multiplier}X pixel area)")
+            print(f"Color Mode:   {rep.color_mode} (Zero palette reduction, zero indexed quantization)")
+            print(f"Compression:  Level {rep.compress_level} (lossless uncompressed raster)")
+            print(f"Acuity:       UnsharpMask(radius={rep.unsharp_params['radius']}, percent={rep.unsharp_params['percent']}%, threshold={rep.unsharp_params['threshold']})")
+            print(f"File Size:    {rep.file_size_mb:.2f} MB ({rep.file_size_bytes:,} bytes)")
+            print(f"SHA-256:      {rep.sha256}")
+            print(f"Time:         {rep.execution_seconds:.4f}s")
+            print("-" * 80)
+            print(f"Delivery:     {rep.delivery_string}")
+            if rep.validation_failures:
+                print(f"Failures:     {', '.join(rep.validation_failures)}")
+        return 0 if rep.validation_passed else 1
+    except Exception as err:
+        sys.stderr.write(f"PNG Lock Upscale Error: {err}\n")
         return 1
 
 
