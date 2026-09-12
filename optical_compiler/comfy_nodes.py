@@ -17,6 +17,7 @@ RIG_NAMES = [
     "Canon EOS R5 Mark II Stacked Full-Frame",
     "Nikon Z 9 Stacked Flagship Full-Frame",
     "Leica SL3-P Full-Frame Mirrorless (Maestro IV)",
+    "Leica SL2 Full-Frame (50mm Summilux f/2.8)",
     "Panasonic LUMIX S1RII High-Resolution Mirrorless",
     "Sony FX Cinema Line Full-Frame (Venice S-Log3)",
     "Hasselblad H6D-100c Studio Medium Format",
@@ -40,6 +41,7 @@ RIG_NAME_TO_ID = {
     "Canon EOS R5 Mark II Stacked Full-Frame": "canon_eos_r5_ii",
     "Nikon Z 9 Stacked Flagship Full-Frame": "nikon_z9",
     "Leica SL3-P Full-Frame Mirrorless (Maestro IV)": "leica_sl3_p",
+    "Leica SL2 Full-Frame (50mm Summilux f/2.8)": "leica_sl2",
     "Panasonic LUMIX S1RII High-Resolution Mirrorless": "panasonic_lumix_s1rii",
     "Sony FX Cinema Line Full-Frame (Venice S-Log3)": "sony_fx_series",
     "Hasselblad H6D-100c Studio Medium Format": "hasselblad_h6d",
@@ -98,6 +100,7 @@ class OpticalCameraCompilerNode:
                         "disabled",
                         "transform_adapt",
                         "restore_upscale",
+                        "identity_lock",
                         "depixelate_gfx100rf",
                         "outpaint_full_body",
                     ],
@@ -129,6 +132,7 @@ class OpticalCameraCompilerNode:
                         "action_max_detail",
                         "macro_max_detail",
                         "landscape_architecture_max_detail",
+                        "slow_shutter_crowd_motion",
                     ],
                     {"default": "default"},
                 ),
@@ -141,6 +145,7 @@ class OpticalCameraCompilerNode:
                         "studio_hard",
                         "flash_freeze",
                         "overcast",
+                        "flat_overcast",
                         "dramatic",
                         "neon",
                     ],
@@ -180,10 +185,11 @@ class OpticalCameraCompilerNode:
         profile_id = RIG_NAME_TO_ID.get(camera_rig, "auto")
 
         ref_input = None
-        if reference_mode in ("transform_adapt", "restore_upscale", "depixelate_gfx100rf", "outpaint_full_body"):
+        if reference_mode in ("transform_adapt", "restore_upscale", "identity_lock", "depixelate_gfx100rf", "outpaint_full_body"):
             mode_map = {
                 "transform_adapt": ReferenceMode.TRANSFORM_ADAPT,
                 "restore_upscale": ReferenceMode.RESTORE_UPSCALE,
+                "identity_lock": ReferenceMode.IDENTITY_LOCK,
                 "depixelate_gfx100rf": ReferenceMode.DEPIXELATE_GFX100RF,
                 "outpaint_full_body": ReferenceMode.OUTPAINT_FULL_BODY,
             }

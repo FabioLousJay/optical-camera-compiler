@@ -64,6 +64,9 @@ class OpticalCompiler:
         human_skin_realism: bool = True,
         content_type: Optional[Union[str, ContentType]] = None,
         text_preservation: bool = True,
+        camera_angle: Optional[str] = None,
+        color_mode: Optional[str] = None,
+        crowd_action: Optional[str] = None,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -157,6 +160,9 @@ class OpticalCompiler:
                 human_skin_realism=human_skin_realism,
                 content_type=c_type,
                 text_preservation=text_preservation,
+                camera_angle=camera_angle,
+                color_mode=color_mode,
+                crowd_action=crowd_action,
             )
         else:
             scene_input = scene
@@ -203,6 +209,12 @@ class OpticalCompiler:
             if c_type:
                 scene_input.content_type = c_type
             scene_input.text_preservation = text_preservation
+            if camera_angle:
+                scene_input.camera_angle = camera_angle
+            if color_mode:
+                scene_input.color_mode = color_mode
+            if crowd_action:
+                scene_input.crowd_action = crowd_action
 
         # 3. Parse target engine
         engine = (

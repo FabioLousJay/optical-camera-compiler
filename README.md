@@ -3,7 +3,7 @@
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 62 Passing](https://img.shields.io/badge/tests-62%20passing-brightgreen.svg)](tests/)
+[![Tests: 73 Passing](https://img.shields.io/badge/tests-73%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -54,9 +54,9 @@ Standard AI generations often suffer from JPEG block compression, chroma subsamp
 
 ---
 
-## Reference Image Pipeline (Modes A, B, C, & D)
+## Reference Image Pipeline (Modes A, B, C, D, & E)
 
-Attach any reference image from your **local hardware** (drag & drop or file select) into the compiler to unlock four production workflows:
+Attach any reference image from your **local hardware** (drag & drop or file select) into the compiler to unlock five production workflows:
 
 ### 🔬 Mode A: Optical Re-Master & Max-Fidelity Upscale (`restore_upscale`)
 Elevates existing low-resolution or AI-distorted photos to medium-format camera quality (**Phase One IQ4 150MP**, **Hasselblad H6D-100c**) while preserving 100% of the original subject identity, composition, and physical details.
@@ -81,6 +81,12 @@ Whenever human skin is present in the image, skin realism takes absolute priorit
 The compiler classifies content into 8 domain archetypes (`photograph`, `portrait`, `product_photo`, `document_scan`, `poster_or_flyer`, `meme_or_infographic`, `ui_or_screenshot`, `mixed_content`):
 * **Flat Reproduction Enforcement**: For document scans, UI screenshots, infographics, posters, and memes, optical depth-of-field falloff, background defocus bokeh, chromatic aberration, lens vignetting, and analog grain are strictly suppressed.
 * **Strict Text & Structured Content Preservation**: Enforces character-for-character typographic accuracy, font weights, tabular alignments, and diagram connectors without hallucinated glyphs or drift.
+
+### 🔒 Mode E: Editorial Documentary Identity Lock (`identity_lock` / `--ref-mode identity_lock`)
+Reference-faithful documentary and editorial portraits with absolute anatomical and biometric locking:
+* **Anatomical & Bone Geometry Preservation**: Locks skull structure, eye spacing, nose bridge, jawline contour, lip fullness, hairline pattern, and beard pattern.
+* **Strict Anti-Drift Prohibitions**: Hard suppression of gender reinterpretation, age alteration, body slimming, facial reshaping, feature feminization/masculinization, and synthetic skin smoothing.
+* **Independent Environmental Flow**: Allows surrounding scene, lighting, and dynamic crowds to move freely while the reference subject remains immutably anchored.
 
 ---
 
@@ -142,12 +148,13 @@ print(harness["module_b"].positive_prompt)
 
 ---
 
-## Hardware Profile Library (19 Elite Camera Systems)
+## Hardware Profile Library (20 Elite Camera Systems)
 
 The compiler includes calibrated optical profiles across stacked full-frame, medium format, large format, 35mm rangefinders, cinema cameras, and analog film:
 
 ### 🧠 Intelligent Auto Camera Router (`profile="auto"`)
 When `profile="auto"` is specified (default in ComfyUI), the compiler inspects your scene intent and automatically routes it to the optimal hardware profile:
+* **Motion-Blur Crowds & Editorial Contrast** $\rightarrow$ `leica_sl2` (47.3MP full-frame CMOS, Summilux-SL 50mm $f/2.8$, slow shutter motion trails, tack-sharp still subject)
 * **Wildlife & Fauna** $\rightarrow$ `sony_a1_ii` (Ultra-high-speed AF tracking, 50.1MP reach, $1/400\,\text{s}$ freeze)
 * **Sports & Decisive Action** $\rightarrow$ `canon_eos_r1` (40 fps burst, zero rolling shutter, high-speed sports primes)
 * **Macro & Specimen Science** $\rightarrow$ `panasonic_lumix_s1rii` (1:1 reproduction ratio, micro-relief acutance, diffraction suppression)
@@ -207,44 +214,49 @@ When `profile="auto"` is specified (default in ComfyUI), the compiler inspects y
     * *Optics*: Schneider Apo-Symmar 150mm f/5.6 L, Rodenstock Grandagon-N 90mm f/4.5.
     * *Physics*: Scheimpflug optical plane alignment, zero vertical keystoning, Kodak Ektar 100 resolution.
 
-### Rangefinders, Reportage & Micro-Science
-11. **Leica SL3-P Mirrorless Maestro IV (`leica_sl3_p`)**:
+### Rangefinders, Reportage, Motion Blur & Micro-Science
+11. **Leica SL2 Full-Frame Mirrorless (`leica_sl2`)**:
+    * *Sensor*: $36.0 \times 24.0\,\text{mm}$ 47.3MP CMOS full-frame sensor, Maestro III processor, Dual Base ISO 50/400.
+    * *Optics*: Leica Summilux-SL 50mm f/1.4 ASPH stopped down to $f/2.8$ sweet spot, APO-Summicron-SL 35mm f/2 ASPH, APO-Summicron-SL 75mm f/2 ASPH.
+    * *Physics*: Slow shutter motion-blur aesthetic ($1/4\text{--}1/8\,\text{s}$ equivalent), smooth wrapping crowd motion blur trails around stationary tack-sharp subject, restrained indie-cinema monochrome tonal curve, gentle highlight roll-off, clean midtones, zero ghost faces or melted bodies.
+12. **Leica SL3-P Mirrorless Maestro IV (`leica_sl3_p`)**:
     * *Sensor*: $36.0 \times 24.0\,\text{mm}$ 44.9MP BSI CMOS, Maestro IV processor with L-Mount optics.
     * *Optics*: Leica APO-Summicron-SL 50mm f/2 ASPH, APO-Summicron-SL 75mm f/2 ASPH.
     * *Physics*: Benchmark apochromatic acutance, zero color fringing, prestige documentary reportage.
-12. **Panasonic LUMIX S1RII Micro-Science Master (`panasonic_lumix_s1rii`)**:
+13. **Panasonic LUMIX S1RII Micro-Science Master (`panasonic_lumix_s1rii`)**:
     * *Sensor*: $35.9 \times 23.9\,\text{mm}$ 44.3MP CMOS with Dual Native ISO (100/640).
     * *Optics*: Lumix S PRO 50mm f/1.4 (Certified by Leica), Lumix S 100mm f/2.8 Macro.
     * *Physics*: 1:1 macro reproduction ratio, micro-relief diffraction suppression, scientific fidelity.
-13. **Leica M11 60MP Rangefinder (`leica_m11`)**:
+14. **Leica M11 60MP Rangefinder (`leica_m11`)**:
     * *Sensor*: Full-frame 35mm BSI CMOS, zero optical low-pass filter (no AA filter).
     * *Optics*: Leica Summilux-M 35mm f/1.4 ASPH FLE II, Noctilux-M 50mm f/0.95, APO-Summicron 50mm f/2.
     * *Physics*: German aspherical acutance, extreme optical micro-contrast, street reportage realism.
-14. **Sony Alpha A7R V 61MP High-Resolution (`sony_a7rv`)**:
+15. **Sony Alpha A7R V 61MP High-Resolution (`sony_a7rv`)**:
     * *Sensor*: Full-frame 61MP Exmor R BSI CMOS.
     * *Optics*: Sony FE 50mm f/1.2 GM, FE 85mm f/1.4 GM II, FE 135mm f/1.8 GM.
     * *Physics*: Modern commercial resolution, razor-sharp G-Master optical acutance.
 
 ### Cinema Production & Venice Color Science
-15. **Sony FX Cinema Line Full-Frame (`sony_fx_series`)**:
+16. **Sony FX Cinema Line Full-Frame (`sony_fx_series`)**:
     * *Format*: $35.6 \times 23.8\,\text{mm}$ full-frame cinema 4K Exmor R BSI CMOS, 15+ stops dynamic range.
     * *Optics*: Sony FE 50mm f/1.2 GM stopped down to $f/2.8$ cinematic sweet spot, FE 24-70mm f/2.8 GM II, FE 85mm f/1.4 GM II.
     * *Physics*: Venice color science highlight rolloff, $180^\circ$ cinema shutter angle ($1/48\,\text{s}$ cadence), Dual Base ISO 800/12800, 10-bit 4:2:2 All-Intra S-Log3/S-Gamut3.Cine.
-16. **ARRI Alexa 35 Cinema Large-Sensor (`arri_alexa_35`)**:
+17. **ARRI Alexa 35 Cinema Large-Sensor (`arri_alexa_35`)**:
     * *Format*: Super 35 Native 4K ALEV 4 sensor, Cooke S4/i 50mm T2.0 Prime, ARRI LogC4.
 
 ### Analog Film Classics
-17. **Hasselblad 500C/M 6x6 Analog Medium Format (`hasselblad_500cm`)**:
+18. **Hasselblad 500C/M 6x6 Analog Medium Format (`hasselblad_500cm`)**:
     * *Format*: $56 \times 56\,\text{mm}$ square 120 film gate, Carl Zeiss Planar T* 80mm f/2.8 CF.
-18. **Pentax 67 II 6x7 Medium Format Film (`pentax_67ii`)**:
+19. **Pentax 67 II 6x7 Medium Format Film (`pentax_67ii`)**:
     * *Format*: $56 \times 70\,\text{mm}$ oversized negative, SMC Pentax 67 105mm f/2.4 Reference Lens.
-19. **Leica M6 Classic 35mm Analog Rangefinder (`leica_m6_analog`)**:
+20. **Leica M6 Classic 35mm Analog Rangefinder (`leica_m6_analog`)**:
     * *Format*: 35mm silver halide film gate, Leica Summicron-M 50mm f/2 Dual-Range, Kodak Tri-X 400.
 
 ---
 
 ## 💡 Master Photographic Lighting Presets
 Apply physical lighting recipes via `--lighting-preset` or in the Studio UI:
+* **`flat_overcast`**: Soft diffused overcast daylight acting as a massive natural softbox, low contrast, gentle highlight roll-off without specular blowouts, perfectly balanced for long blur trails.
 * **`golden_hour`**: Low-angle directional golden sunlight (3200K–3800K), warm specular edge wrap, soft atmospheric glow.
 * **`blue_hour`**: Deep twilight ambient sky illumination (7500K–9000K), cool soft fill balanced against 2700K tungsten practical lights.
 * **`studio_soft`**: Large parabolic softbox key at $45^\circ$, subtle negative fill, diffused wrap-around illumination.
@@ -258,6 +270,7 @@ Apply physical lighting recipes via `--lighting-preset` or in the Studio UI:
 
 ## 🎯 Modular Capture Modes
 Enforce physical camera discipline via `--capture-mode`:
+* **`slow_shutter_crowd_motion`**: Slow shutter motion-blur aesthetic; stationary subject completely still and tack-sharp at eye level while commuters flow in multi-directional motion blur trails (left-to-right, right-to-left, diagonal); zero ghost faces, zero duplicated people, zero melted bodies.
 * **`static_max_detail`**: Tripod-mounted lock, zero sensor shake, base ISO, maximum MTF optical acutance.
 * **`portrait_max_detail`**: Focus locked on the near eye, iris and eyelashes tack sharp, resolved epidermal skin pores.
 * **`action_max_detail`**: Decisive-moment freeze, high-speed shutter, zero motion smear, dynamic muscle tension.
@@ -430,6 +443,23 @@ python3 -m optical_compiler "Historical document archive" \
   --reference path/to/scanned_map.png \
   --content-type document_scan \
   --target json \
+  -c
+```
+
+### 5. Mode E: Editorial Calm vs Chaos (Leica SL2 Motion Blur & Identity Lock)
+Compile a reference-locked black-and-white portrait with surrounding slow-shutter motion-blurred crowd trails:
+```bash
+python3 -m optical_compiler "Editorial portrait of a solitary person standing calm and still amid rush-hour chaos" \
+  --profile leica_sl2 \
+  --reference path/to/person.jpg \
+  --ref-mode identity_lock \
+  --lighting-preset flat_overcast \
+  --capture-mode slow_shutter_crowd_motion \
+  --camera-angle "chest-level frontal angle" \
+  --crowd-action "hundreds of commuters rushing past in all directions creating smooth motion-blur trails" \
+  --bw \
+  --ar 4:5 \
+  --target gpt_images \
   -c
 ```
 

@@ -22,6 +22,7 @@ class ImagenAdapter(BaseAdapter):
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
+        is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
 
         # 1. Subject & Scene foundation
         scene_elements = []
@@ -32,6 +33,16 @@ class ImagenAdapter(BaseAdapter):
                 "Keep the same wardrobe, colors, fabric texture, and wrinkles. Maintain the same camera height and perspective. "
                 f"No wide-angle distortion. Full body head-to-toe visible including shoes. Depicting {scene.subject}"
             )
+        elif is_identity_lock:
+            scene_elements.append(
+                "Documentary editorial portrait with strict reference identity lock, preserving exact facial architecture, bone geometry, mass, body proportions, hair, and beard pattern without alteration"
+            )
+            if scene.camera_angle:
+                scene_elements.append(f"captured from a {scene.camera_angle}")
+            if scene.framing:
+                scene_elements.append(f"in a {scene.framing} of {scene.subject}")
+            else:
+                scene_elements.append(f"focusing on {scene.subject}")
         elif is_depixelate:
             scene_elements.append(
                 "Universal De-Pixelate and Upscale Restoration of the attached reference image rendered with a fixed Fujifilm GFX100RF 102MP signature. "
@@ -71,6 +82,12 @@ class ImagenAdapter(BaseAdapter):
         if scene.mood:
             scene_elements.append(f"evoking {scene.mood}")
 
+        if scene.crowd_action:
+            scene_elements.append(f"surrounded by {scene.crowd_action}")
+
+        if scene.is_monochrome:
+            scene_elements.append("restrained black-and-white indie-cinema monochrome with gentle highlight roll-off and clean midtones without HDR")
+
         scene_core = ", ".join(scene_elements) + "."
 
         # Reference-specific anchor instructions
@@ -83,6 +100,12 @@ class ImagenAdapter(BaseAdapter):
             )
             if scene.content_type and scene.content_type.is_flat_reproduction:
                 ref_directives.append("Render as flat reproduction capture suppressing optical falloff, vignetting, and grain.")
+        elif is_identity_lock and ref:
+            ref_directives.append(
+                f"Strict anatomical identity lock ({int(ref.fidelity_lock * 100)}% lock): "
+                f"Subject must strictly preserve facial geometry, bone structure, body proportions, mass, "
+                f"hair, and beard pattern from reference image with zero morphological drift or alteration."
+            )
         elif is_restore and ref:
             ref_directives.append(
                 f"Strict optical preservation directive ({int(ref.fidelity_lock * 100)}% identity lock): "
@@ -119,7 +142,17 @@ class ImagenAdapter(BaseAdapter):
             f"{micro.surface_rendering[1]}.",
             f"{micro.depth_and_optics[0]}.",
         ]
-        if scene.sharpness_protocol:
+        is_slow_shutter = (
+            scene.capture_mode == "slow_shutter_crowd_motion"
+            or (hasattr(scene.capture_mode, "value") and scene.capture_mode.value == "slow_shutter_crowd_motion")
+            or bool(scene.crowd_action)
+            or (profile.profile_id == "leica_sl2" and "motion" in scene.subject.lower())
+        )
+        if is_slow_shutter:
+            micro_parts.append(
+                "Focus discipline: focus locked on near eye with eyelashes and iris tack sharp, subject completely stationary with zero subject motion blur while crowd flows with smooth motion blur trails."
+            )
+        elif scene.sharpness_protocol:
             micro_parts.append(
                 "Focus discipline: focus locked on the near eye with eyelashes and iris tack sharp, zero motion blur."
             )
@@ -138,13 +171,13 @@ class ImagenAdapter(BaseAdapter):
         )
         if scene.suppress_text_branding:
             style_prose += " Strictly eliminate all text, watermarks, logos, brand names, and typography."
-        if is_restore or is_transform or is_outpaint or is_depixelate:
+        if is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock:
             style_prose += " Eliminate facial morphing, feature drift, identity loss, and warped geometry."
 
         positive_prompt = f"{scene_core}{ref_prose} {optical_prose} {lighting_prose} {micro_prose} {style_prose}"
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding,

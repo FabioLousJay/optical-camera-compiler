@@ -54,6 +54,21 @@ class GPTImagesAdapter(BaseAdapter):
                 f"Subject: {scene.subject}."
             )
             sections.append(base_instr)
+        elif ref_mode == ReferenceMode.IDENTITY_LOCK:
+            base_instr = (
+                "Base instruction (Identity-Locked Editorial Portrait): "
+                "Subject must strictly follow the anatomical structure, facial geometry, body proportions, mass, "
+                "hair pattern, beard pattern (if present), and physical presence from the attached reference image. "
+                "Strictly prohibits gender reinterpretation, age alteration, body type modification, body slimming, "
+                "body reshaping, facial restructuring, jawline softening, feature feminization or masculinization, "
+                "weight redistribution, and skin smoothing beyond realism. "
+                f"Subject: {scene.subject}."
+            )
+            if scene.wardrobe:
+                base_instr += f" Wardrobe: {scene.wardrobe}."
+            if scene.environment:
+                base_instr += f" Environment: {scene.environment}."
+            sections.append(base_instr)
         elif ref_mode == ReferenceMode.RESTORE_UPSCALE:
             base_instr = (
                 f"Base instruction: Using the provided image as the base. "
@@ -82,6 +97,20 @@ class GPTImagesAdapter(BaseAdapter):
             if scene.framing:
                 base_instr += f" Framing: {scene.framing}."
             sections.append(base_instr)
+
+        # Camera angle & framing block
+        if scene.camera_angle:
+            angle_block = f"Camera angle & perspective: {scene.camera_angle}. Framing: {scene.framing or 'Subject centered'}."
+            sections.append(angle_block)
+
+        # Crowd action and motion physics
+        if scene.crowd_action:
+            crowd_block = (
+                f"Crowd action and motion physics: {scene.crowd_action}. "
+                "Motion blur wraps around the still subject without deforming subject anatomy. "
+                "Zero readable faces in blurred crowd, zero duplicated people, zero melted bodies, zero uniform smear wall."
+            )
+            sections.append(crowd_block)
 
         # 2. Human skin realism override protocol
         if scene.human_skin_realism or ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
@@ -117,15 +146,28 @@ class GPTImagesAdapter(BaseAdapter):
             sections.append(text_block)
 
         # 5. Focus discipline & Surface rendering
-        focus_block = (
-            "Focus discipline: Focus locked on the near eye. Iris and eyelashes tack sharp. "
-            "Absolute zero motion blur."
+        is_slow_shutter = (
+            scene.capture_mode == "slow_shutter_crowd_motion"
+            or (hasattr(scene.capture_mode, "value") and scene.capture_mode.value == "slow_shutter_crowd_motion")
+            or bool(scene.crowd_action)
+            or (profile.profile_id == "leica_sl2" and "motion" in scene.subject.lower())
         )
-        if scene.sharpness_protocol:
-            focus_block += (
-                " Subject stability cues: seated, feet planted, exhale and hold 1 second, capture during the hold. "
-                "Chin slightly forward and down for stabilized head position and defined jawline."
+        if is_slow_shutter:
+            focus_block = (
+                "Focus discipline: Focus locked on the near eye. Iris and eyelashes tack sharp. "
+                "Visible facial pores and authentic skin texture. Subject stands completely still, centered, with tack-sharp presence. "
+                "Absolute zero subject motion blur. Camera steady relative to subject; blur originates solely from surrounding crowd motion."
             )
+        else:
+            focus_block = (
+                "Focus discipline: Focus locked on the near eye. Iris and eyelashes tack sharp. "
+                "Absolute zero motion blur."
+            )
+            if scene.sharpness_protocol:
+                focus_block += (
+                    " Subject stability cues: seated, feet planted, exhale and hold 1 second, capture during the hold. "
+                    "Chin slightly forward and down for stabilized head position and defined jawline."
+                )
         sections.append(focus_block)
 
         surface_directives = ". ".join(profile.micro_detail_and_physics.surface_rendering)
@@ -151,6 +193,14 @@ class GPTImagesAdapter(BaseAdapter):
             f"Background kept controlled to prevent spill. Contrast is editorial, not cinematic."
         )
         sections.append(lighting_block)
+
+        # Color tone / Monochrome
+        if scene.is_monochrome:
+            mono_block = (
+                "Color tone: Restrained black-and-white, inspired by indie-cinema monochrome; "
+                "gentle highlight roll-off; clean midtones; no HDR; fine, subtle, consistent organic film grain."
+            )
+            sections.append(mono_block)
 
         # 7. Camera Hardware & Lens Module
         cam = profile.sensor_and_optics

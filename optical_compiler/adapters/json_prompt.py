@@ -71,12 +71,19 @@ class JSONAllInOneAdapter(BaseAdapter):
             "protocol": (
                 "Universal De-Pixelate + Upscale Restoration (GFX100RF 102MP + Skin Realism Override)"
                 if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF
-                else "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
+                else (
+                    "Identity-Locked Reference Portrait (Editorial Calm vs Chaos & Slow-Shutter Physics)"
+                    if ref_mode == ReferenceMode.IDENTITY_LOCK
+                    else "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
+                )
             ),
             "target_engine": "json",
             "scene": {
                 "subject": scene.subject,
                 "framing": scene.framing or "Not specified",
+                "camera_angle": scene.camera_angle or "Not specified",
+                "color_mode": "monochrome" if scene.is_monochrome else "color",
+                "crowd_action": scene.crowd_action,
                 "environment": scene.environment or "Studio / Controlled",
                 "wardrobe": scene.wardrobe or "Not specified",
                 "mood": scene.mood or "Editorial / Photorealistic",
@@ -148,6 +155,18 @@ class JSONAllInOneAdapter(BaseAdapter):
                     "fidelity_lock": scene.reference.fidelity_lock,
                     "denoise_strength": scene.reference.denoise_strength,
                     "preserved_elements": scene.reference.preserved_elements,
+                    "prohibited_drift": [
+                        "gender reinterpretation",
+                        "age alteration",
+                        "body type modification",
+                        "body slimming",
+                        "body reshaping",
+                        "facial restructuring",
+                        "jawline softening",
+                        "feature feminization or masculinization",
+                        "weight redistribution",
+                        "skin smoothing beyond realism",
+                    ] if (ref_mode == ReferenceMode.IDENTITY_LOCK or is_ref) else [],
                 }
                 if is_ref and scene.reference
                 else None

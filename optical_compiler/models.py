@@ -111,6 +111,7 @@ class LightingPreset(str, Enum):
     STUDIO_HARD = "studio_hard"
     FLASH_FREEZE = "flash_freeze"
     OVERCAST = "overcast"
+    FLAT_OVERCAST = "flat_overcast"
     DRAMATIC = "dramatic"
     NEON = "neon"
 
@@ -119,6 +120,12 @@ class LightingPreset(str, Enum):
         if not value:
             return None
         norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "flat_overcast_daylight": cls.FLAT_OVERCAST,
+            "flat_overcast": cls.FLAT_OVERCAST,
+        }
+        if norm in aliases:
+            return aliases[norm]
         for member in cls:
             if member.value == norm or member.name.lower() == norm:
                 return member
@@ -150,6 +157,10 @@ LIGHTING_PRESET_DESCRIPTIONS: dict[LightingPreset, tuple[str, str]] = {
         "Giant natural atmospheric softbox, diffused neutral daylight (5500K-6000K), zero harsh cast shadows",
         "Even hemispherical cloud diffusion, gentle top-down natural light wrap, subtle linear shadow gradient under jaw and chin",
     ),
+    LightingPreset.FLAT_OVERCAST: (
+        "Flat overcast daylight acting as soft natural diffusion, low contrast, gentle highlight roll-off, zero harsh cast shadows",
+        "Even diffuse natural daylight, soft highlight transitions, clean midtones, zero harsh contrast, allowing long motion blur trails without specular blowouts or clipping",
+    ),
     LightingPreset.DRAMATIC: (
         "Chiaroscuro high-contrast lighting, single directional key, deep unlit negative space, emotive rim light",
         "Single focused spotlight from steep side angle, 8:1 contrast ratio, deep true black shadows, razor specular cheek highlight",
@@ -169,12 +180,25 @@ class CaptureMode(str, Enum):
     ACTION_MAX_DETAIL = "action_max_detail"
     MACRO_MAX_DETAIL = "macro_max_detail"
     LANDSCAPE_ARCHITECTURE_MAX_DETAIL = "landscape_architecture_max_detail"
+    SLOW_SHUTTER_CROWD_MOTION = "slow_shutter_crowd_motion"
 
     @classmethod
     def from_str(cls, value: Optional[str]) -> Optional[CaptureMode]:
         if not value:
             return None
         norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "slow_shutter": cls.SLOW_SHUTTER_CROWD_MOTION,
+            "slow_shutter_motion": cls.SLOW_SHUTTER_CROWD_MOTION,
+            "slow_shutter_crowd_motion": cls.SLOW_SHUTTER_CROWD_MOTION,
+            "crowd_motion": cls.SLOW_SHUTTER_CROWD_MOTION,
+            "calm_vs_chaos": cls.SLOW_SHUTTER_CROWD_MOTION,
+            "motion_blur": cls.SLOW_SHUTTER_CROWD_MOTION,
+            "motion_blur_crowd": cls.SLOW_SHUTTER_CROWD_MOTION,
+            "motion_blur_photography": cls.SLOW_SHUTTER_CROWD_MOTION,
+        }
+        if norm in aliases:
+            return aliases[norm]
         for member in cls:
             if member.value == norm or member.name.lower() == norm:
                 return member
@@ -187,6 +211,7 @@ CAPTURE_MODE_DIRECTIVES: dict[CaptureMode, str] = {
     CaptureMode.ACTION_MAX_DETAIL: "Decisive-moment freeze, high-speed shutter, zero motion smear, dynamic muscle tension, tack-sharp trajectory",
     CaptureMode.MACRO_MAX_DETAIL: "1:1 reproduction ratio, extreme micro-plane depth slicing, razor micro-ridges, diffraction-suppressed optical plane",
     CaptureMode.LANDSCAPE_ARCHITECTURE_MAX_DETAIL: "Rectilinear zero-distortion geometry, infinite optical hyperfocal plane, level horizon, corner-to-corner tack sharpness",
+    CaptureMode.SLOW_SHUTTER_CROWD_MOTION: "Slow shutter motion-blur aesthetic (editorial calm vs. chaos): subject stands completely still and centered, locked tack-sharp (near-eye focus, iris and eyelash acutance, visible pores, natural beard texture); surrounding crowd rushes past with smooth multi-directional motion blur trails (left-to-right, right-to-left, toward/away from camera, diagonal crossings); clean streak physics wrapping around subject without anatomical deformation; zero ghost faces, melted bodies, or uniform smear wall",
 }
 
 
@@ -231,6 +256,7 @@ class ReferenceMode(str, Enum):
     TRANSFORM_ADAPT = "transform_adapt"  # Aesthetic/scene adaptation with biometric subject lock
     OUTPAINT_FULL_BODY = "outpaint_full_body"  # Outpaint medium shot to full body head-to-toe
     DEPIXELATE_GFX100RF = "depixelate_gfx100rf"  # Universal De-Pixelate + Upscale Restoration (GFX100RF 102MP + Skin Realism Override)
+    IDENTITY_LOCK = "identity_lock"  # Strict anatomical and biometric identity lock (zero gender, age, mass, or bone drift)
 
     @classmethod
     def from_str(cls, value: Optional[str]) -> ReferenceMode:
@@ -250,6 +276,10 @@ class ReferenceMode(str, Enum):
             "transform_adapt": cls.TRANSFORM_ADAPT,
             "outpaint": cls.OUTPAINT_FULL_BODY,
             "outpaint_full_body": cls.OUTPAINT_FULL_BODY,
+            "identity_lock": cls.IDENTITY_LOCK,
+            "identity": cls.IDENTITY_LOCK,
+            "id_lock": cls.IDENTITY_LOCK,
+            "reference_lock": cls.IDENTITY_LOCK,
         }
         if normalized in alias_map:
             return alias_map[normalized]
@@ -304,6 +334,18 @@ class NegativeShield:
             "unmotivated bokeh",
             "fake shallow depth of field",
             "tilted horizon",
+            "ghost faces in crowd",
+            "duplicated people",
+            "melted bodies",
+            "melted limbs",
+            "uniform smear wall",
+            "blur deforming subject anatomy",
+            "single-direction blur",
+            "soft subject face",
+            "blurred eyes",
+            "smudged features",
+            "glow",
+            "halation bloom",
         ]
     )
     skin_and_lighting_drift: list[str] = field(
@@ -348,6 +390,20 @@ class NegativeShield:
             "structural divergence",
             "identity drift",
             "facial reconstruction artifacts",
+            "gender reinterpretation",
+            "age alteration",
+            "body type modification",
+            "body slimming",
+            "body reshaping",
+            "facial restructuring",
+            "jawline softening",
+            "feature feminization or masculinization",
+            "weight redistribution",
+            "skin smoothing beyond realism",
+            "costume styling",
+            "flashy accessories",
+            "fashion reinterpretation",
+            "beard pattern alteration",
         ]
     )
 
@@ -581,6 +637,30 @@ class SceneInput:
     human_skin_realism: bool = True
     content_type: Optional[ContentType] = None
     text_preservation: bool = True
+    camera_angle: Optional[str] = None
+    color_mode: Optional[str] = None
+    crowd_action: Optional[str] = None
+
+    @property
+    def is_monochrome(self) -> bool:
+        """Return True if black-and-white or monochrome rendering is requested."""
+        if self.color_mode:
+            cm = self.color_mode.strip().lower()
+            if any(k in cm for k in ("mono", "black_and_white", "b&w", "bw", "grayscale")):
+                return True
+        check_text = f"{self.subject} {self.mood or ''} {self.film_stock or ''}".lower()
+        return any(
+            k in check_text
+            for k in (
+                "black-and-white",
+                "black and white",
+                "monochrome",
+                " b&w ",
+                " bw ",
+                "indie-cinema monochrome",
+                "restrained monochrome",
+            )
+        )
 
 
 @dataclass

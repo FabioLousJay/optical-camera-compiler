@@ -5,8 +5,10 @@ from __future__ import annotations
 from .compiler import OpticalCompiler, compile_ab_harness, compile_scene
 from .models import (
     CameraProfile,
+    CaptureMode,
     CompiledPayload,
     ContentType,
+    LightingPreset,
     LightingSetup,
     MicroPhysics,
     NegativeShield,
@@ -16,7 +18,7 @@ from .models import (
     SensorOptics,
     TargetEngine,
 )
-from .profiles import apply_overrides, load_profile
+from .profiles import apply_overrides, auto_select_profile, load_profile
 from .restoration import (
     RestorationConfig,
     calculate_exact_ratio_102mp_dimensions,
@@ -40,6 +42,9 @@ __all__ = [
     "ReferenceMode",
     "ReferenceImageInput",
     "TargetEngine",
+    "CaptureMode",
+    "LightingPreset",
+    "auto_select_profile",
     "load_profile",
     "apply_overrides",
     "restore_and_upscale_102mp",

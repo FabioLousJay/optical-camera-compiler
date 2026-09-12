@@ -2555,6 +2555,11 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 human_skin_realism=body.get("human_skin_realism", True),
                 content_type=body.get("content_type", "photograph"),
                 text_preservation=body.get("text_preservation", True),
+                camera_angle=body.get("camera_angle"),
+                color_mode=body.get("color_mode"),
+                crowd_action=body.get("crowd_action"),
+                capture_mode=body.get("capture_mode"),
+                lighting_preset=body.get("lighting_preset"),
             )
             self._send_json(payload.to_dict())
         except Exception as err:

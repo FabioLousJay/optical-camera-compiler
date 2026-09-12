@@ -20,6 +20,7 @@ class SDXLAdapter(BaseAdapter):
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
+        is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
 
         # 1. Positive Prompt (Weighted camera and texture tokens)
         pos_chunks = []
@@ -28,6 +29,11 @@ class SDXLAdapter(BaseAdapter):
             pos_chunks.append(
                 "full body downward outpaint extension of reference photo head-to-toe with shoes, "
                 "preserving exact facial identity, expression, wardrobe fabric, and wrinkles"
+            )
+        elif is_identity_lock:
+            pos_chunks.append(
+                "strict identity-locked reference portrait, exact anatomical presence, "
+                "biometric facial geometry, mass, body proportions, hair, and beard pattern preserved without alteration"
             )
         elif is_depixelate:
             pos_chunks.append(
@@ -56,6 +62,12 @@ class SDXLAdapter(BaseAdapter):
             scene_str += f", wearing {scene.wardrobe}"
         if scene.mood:
             scene_str += f", {scene.mood}"
+        if scene.camera_angle:
+            scene_str += f", {scene.camera_angle}"
+        if scene.crowd_action:
+            scene_str += f", {scene.crowd_action}"
+        if scene.is_monochrome:
+            scene_str += ", restrained black-and-white indie-cinema monochrome, fine organic film grain"
         pos_chunks.append(scene_str)
 
         # Hardware & Optics
@@ -91,7 +103,20 @@ class SDXLAdapter(BaseAdapter):
             "natural large-sensor f/4 depth of field falloff" if is_depixelate else "natural large-sensor f/8 depth of field falloff",
             "rectilinear optical projection",
         ]
-        if scene.sharpness_protocol:
+        is_slow_shutter = (
+            scene.capture_mode == "slow_shutter_crowd_motion"
+            or (hasattr(scene.capture_mode, "value") and scene.capture_mode.value == "slow_shutter_crowd_motion")
+            or bool(scene.crowd_action)
+            or (profile.profile_id == "leica_sl2" and "motion" in scene.subject.lower())
+        )
+        if is_slow_shutter:
+            texture_tokens.extend([
+                "focus locked on near eye",
+                "iris and eyelashes tack sharp",
+                "subject completely stationary with zero subject motion blur",
+                "surrounding crowd motion blur trails",
+            ])
+        elif scene.sharpness_protocol:
             texture_tokens.extend([
                 "focus locked on near eye",
                 "iris and eyelashes tack sharp",
@@ -110,7 +135,7 @@ class SDXLAdapter(BaseAdapter):
         positive_prompt = ", ".join(pos_chunks)
 
         # 2. Negative Prompt (Comprehensive artifact suppression)
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding,

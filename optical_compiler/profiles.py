@@ -177,6 +177,25 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
         ],
     ),
     (
+        "leica_sl2",
+        [
+            "leica sl2",
+            "sl2",
+            "50mm summilux",
+            "summilux-sl",
+            "summilux",
+            "motion-blur crowd",
+            "motion blur",
+            "crowd motion",
+            "calm vs chaos",
+            "slow shutter motion-blur",
+            "slow shutter",
+            "commuters rushing past",
+            "indie-cinema monochrome",
+            "chest-level",
+        ],
+    ),
+    (
         "leica_sl3_p",
         [
             "reportage",
@@ -233,15 +252,23 @@ def auto_select_profile(scene: Union[str, SceneInput]) -> str:
     if isinstance(scene, SceneInput):
         if scene.reference and scene.reference.mode == ReferenceMode.DEPIXELATE_GFX100RF:
             return "fujifilm_gfx100rf"
-        text = f"{scene.subject} {scene.framing or ''} {scene.environment or ''} {scene.mood or ''}".lower()
+        text = f"{scene.subject} {scene.framing or ''} {scene.environment or ''} {scene.mood or ''} {scene.camera_angle or ''} {scene.crowd_action or ''}".lower()
     else:
         text = str(scene).lower()
+
+    best_profile: Optional[str] = None
+    longest_match_len = 0
 
     for profile_id, keywords in CAMERA_ROUTER_RULES:
         for kw in keywords:
             pattern = r"(?<!\w)" + re.escape(kw) + r"(?!\w)"
             if re.search(pattern, text):
-                return profile_id
+                if len(kw) > longest_match_len:
+                    longest_match_len = len(kw)
+                    best_profile = profile_id
+
+    if best_profile:
+        return best_profile
 
     # Default fallback to flagship 150MP Trichromatic medium format reference
     return "phase_one_iq4"
@@ -399,6 +426,17 @@ def apply_overrides(profile: CameraProfile, scene: SceneInput) -> CameraProfile:
 
     if scene.custom_negatives:
         p.negative_embeddings.render_defects.extend(scene.custom_negatives)
+
+    if scene.camera_angle:
+        p.micro_detail_and_physics.depth_and_optics.insert(0, f"Camera angle: {scene.camera_angle}")
+
+    if scene.crowd_action:
+        p.micro_detail_and_physics.surface_rendering.append(f"Crowd action: {scene.crowd_action}")
+
+    if scene.is_monochrome:
+        mono_text = "Restrained black-and-white, indie-cinema monochrome, gentle highlight roll-off, clean midtones, no HDR, fine consistent organic film grain"
+        if mono_text not in p.sensor_and_optics.dynamic_range:
+            p.sensor_and_optics.dynamic_range = f"{p.sensor_and_optics.dynamic_range}, {mono_text}"
 
     return p
 

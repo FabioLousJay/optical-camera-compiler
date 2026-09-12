@@ -92,14 +92,39 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--ref-mode",
         dest="ref_mode",
-        choices=["restore", "transform", "depixelate", "depixelate_gfx100rf"],
+        choices=["restore", "transform", "depixelate", "depixelate_gfx100rf", "identity", "identity_lock"],
         default="restore",
-        help="Reference mode: 'restore' (optical remaster), 'transform' (re-shoot/adapt), or 'depixelate_gfx100rf' (v3.1 102MP lock).",
+        help="Reference mode: 'restore' (optical remaster), 'transform' (re-shoot/adapt), 'identity_lock' (strict anatomical lock), or 'depixelate_gfx100rf' (v3.1 102MP lock).",
     )
     parser.add_argument(
         "--depixelate",
         action="store_true",
         help="Shortcut for --ref-mode depixelate_gfx100rf (Universal De-Pixelate & 102MP Upscale Restoration).",
+    )
+    parser.add_argument(
+        "--camera-angle",
+        dest="camera_angle",
+        default=None,
+        help="Camera perspective angle (e.g. 'chest-level frontal angle', 'eye-level', 'low-angle').",
+    )
+    parser.add_argument(
+        "--color-mode",
+        dest="color_mode",
+        default=None,
+        help="Color mode / tonality (e.g. 'monochrome', 'black_and_white', 'indie_bw').",
+    )
+    parser.add_argument(
+        "--bw",
+        "--monochrome",
+        dest="monochrome",
+        action="store_true",
+        help="Shortcut to force black-and-white indie-cinema monochrome tonality.",
+    )
+    parser.add_argument(
+        "--crowd-action",
+        dest="crowd_action",
+        default=None,
+        help="Crowd action description for multi-directional slow shutter motion-blur dynamics.",
     )
     parser.add_argument(
         "--content-type",
@@ -259,6 +284,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         if ref_mode_choice in ("depixelate", "depixelate_gfx100rf"):
             mode_str = "depixelate_gfx100rf"
             default_denoise = 0.25
+        elif ref_mode_choice in ("identity", "identity_lock"):
+            mode_str = "identity_lock"
+            default_denoise = 0.30
         elif ref_mode_choice == "restore":
             mode_str = "restore_upscale"
             default_denoise = 0.35
@@ -289,6 +317,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         "human_skin_realism": not args.no_skin_realism,
         "content_type": args.content_type,
         "text_preservation": not args.no_text_preservation,
+        "camera_angle": args.camera_angle,
+        "color_mode": "monochrome" if args.monochrome else args.color_mode,
+        "crowd_action": args.crowd_action,
     }
 
     profile_title = (

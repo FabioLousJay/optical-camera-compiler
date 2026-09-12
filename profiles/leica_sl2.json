@@ -1,0 +1,95 @@
+{
+  "profile_id": "leica_sl2",
+  "title": "Leica SL2 Full-Frame Mirrorless (50mm Summilux f/2.8)",
+  "schema_version": "2.0",
+  "purpose": "Cinematic slow-shutter motion-blur and editorial calm vs. chaos photography with Maestro III processing, tack-sharp subject plane, and restrained indie-cinema monochrome.",
+  "sensor_and_optics": {
+    "camera_system": "Leica SL2 Full-Frame Mirrorless (Maestro III Processor)",
+    "sensor_type": "36.0x24.0mm Full-Frame CMOS (47.3MP, Maestro III)",
+    "sensor_dimensions": "36.0x24.0mm full-frame sensor (47.3MP)",
+    "full_frame_equivalent": "50mm normal field of view",
+    "lens": "Leica Summilux-SL 50mm f/1.4 ASPH stopped down to f/2.8",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "ISO 50 base sensor sensitivity with 14-bit DNG uncompressed raw",
+    "dynamic_range": "14 stops dynamic range with restrained German tonal curve and indie-cinema monochrome",
+    "shutter": "Focal-plane shutter with slow shutter motion-blur aesthetic (steady camera relative to subject)"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Flat overcast natural daylight acting as soft diffusion, low contrast, gentle highlight roll-off",
+    "light_transport": "Even diffuse daylight, soft highlight transitions, clean midtones, zero harsh contrast, allowing long crowd motion blur trails without specular blowouts"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Authentic Leica Summilux optical acutance at f/2.8: tack-sharp near-eye pupil, iris detail, eyelashes, and resolved natural facial pores",
+      "Subject standing completely still, centered, with tack-sharp anatomical presence",
+      "Hundreds of commuters rushing past in all directions (left-to-right, right-to-left, toward/away from camera, diagonal crossings), stretched into smooth multi-directional motion-blur trails",
+      "Clean motion streak physics wrapping around the still subject without deforming subject anatomy",
+      "Fine, subtle, consistent organic film grain"
+    ],
+    "depth_and_optics": [
+      "Chest-level frontal angle with natural 50mm perspective",
+      "Tack-sharp subject facial plane contrasted against dynamic multi-vector crowd blur",
+      "Readable urban transit concourse background dominated by motion blur without collapsing into a uniform smear wall"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "focus miss",
+      "oversharpening",
+      "crunchy HDR",
+      "glow",
+      "halation bloom",
+      "single-direction blur",
+      "uniform smear wall"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "beauty filter glow",
+      "artificial lighting",
+      "studio lighting",
+      "spotlight",
+      "rim light",
+      "dramatic harsh shadows",
+      "unmotivated teal-orange grading"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "ghost faces in crowd",
+      "duplicated people",
+      "duplicated limbs",
+      "extra faces",
+      "melted bodies",
+      "melted limbs",
+      "blur deforming subject anatomy",
+      "soft subject face",
+      "blurred eyes",
+      "smudged features"
+    ],
+    "anti_drift_tokens": [
+      "gender reinterpretation",
+      "age alteration",
+      "body type modification",
+      "body slimming",
+      "body reshaping",
+      "facial restructuring",
+      "jawline softening",
+      "feature feminization or masculinization",
+      "weight redistribution",
+      "skin smoothing beyond realism",
+      "costume styling",
+      "flashy accessories",
+      "fashion reinterpretation",
+      "beard pattern alteration"
+    ]
+  },
+  "execution_directive": "Enforce Leica SL2 47.3MP full-frame documentary realism with 50mm Summilux at f/2.8. Maintain tack-sharp still subject with resolved pores and iris detail amidst multi-directional slow-shutter crowd motion blur trails in restrained indie-cinema monochrome."
+}

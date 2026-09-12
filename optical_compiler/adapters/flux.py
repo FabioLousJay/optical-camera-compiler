@@ -25,6 +25,7 @@ class FluxAdapter(BaseAdapter):
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
+        is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
 
         # 1. Subject & Scene
         subject_desc = scene.subject
@@ -43,6 +44,13 @@ class FluxAdapter(BaseAdapter):
                 "Preserve the subject's face, identity, expression, hair, and skin texture exactly as in the input image. "
                 "Keep the same wardrobe, colors, fabric texture, and wrinkles. Maintain the same camera height and perspective. "
                 f"No wide-angle distortion. Full body head-to-toe visible including shoes. Depicting {subject_desc}."
+            )
+        elif is_identity_lock:
+            sections.append(
+                f"Documentary editorial portrait with strict reference identity lock. "
+                f"Photo of {subject_desc}. Subject must strictly follow the anatomical structure, facial geometry, "
+                f"body proportions, mass, hair, and beard pattern from reference image. "
+                f"Prohibit gender reinterpretation, age alteration, body slimming, facial restructuring, and skin smoothing."
             )
         elif is_depixelate:
             sections.append(
@@ -87,6 +95,16 @@ class FluxAdapter(BaseAdapter):
             )
         else:
             sections.append(f"Photo of {subject_desc}.")
+        if scene.camera_angle:
+            sections.append(f"Angle and perspective: {scene.camera_angle}.")
+        if scene.crowd_action:
+            sections.append(
+                f"Crowd dynamics: {scene.crowd_action}. Smooth multi-directional motion blur trails wrapping around still subject without anatomical deformation."
+            )
+        if scene.is_monochrome:
+            sections.append(
+                "Tonal response: Restrained black-and-white indie-cinema monochrome, gentle highlight roll-off, clean midtones, no HDR, fine subtle organic film grain."
+            )
 
         # 2. Exact physical camera rig
         camera_parts = [
@@ -112,7 +130,17 @@ class FluxAdapter(BaseAdapter):
             f"{micro.surface_rendering[2]}.",
             f"{micro.depth_and_optics[0]} and {micro.depth_and_optics[1].lower()}."
         ]
-        if scene.sharpness_protocol:
+        is_slow_shutter = (
+            scene.capture_mode == "slow_shutter_crowd_motion"
+            or (hasattr(scene.capture_mode, "value") and scene.capture_mode.value == "slow_shutter_crowd_motion")
+            or bool(scene.crowd_action)
+            or (profile.profile_id == "leica_sl2" and "motion" in scene.subject.lower())
+        )
+        if is_slow_shutter:
+            micro_parts.append(
+                "Focus discipline: focus locked on near eye with eyelashes and iris tack sharp, subject completely stationary with zero subject motion blur while crowd flows with smooth motion blur trails."
+            )
+        elif scene.sharpness_protocol:
             micro_parts.append(
                 "Focus discipline: focus locked on near eye with eyelashes and iris tack sharp, zero motion blur."
             )
@@ -144,11 +172,13 @@ class FluxAdapter(BaseAdapter):
             )
         if scene.suppress_text_branding:
             banned_tropes += " Eliminate all text, watermarks, logos, brand names, and typography."
-        if is_restore or is_transform or is_outpaint or is_depixelate:
+        if is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock:
             banned_tropes += (
                 " Eliminate facial morphing, identity loss, altered bone structure, "
                 "warped geometry, and hallucinated anatomical features."
             )
+        if is_slow_shutter:
+            banned_tropes += " Eliminate ghost faces, melted bodies, duplicated people, uniform smear wall, and blur on the subject."
         if is_outpaint:
             banned_tropes += " Eliminate mismatched shoes, twisted legs, floating feet, and distorted scale."
         sections.append(banned_tropes)
@@ -156,7 +186,7 @@ class FluxAdapter(BaseAdapter):
         positive_prompt = " ".join(sections)
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding,

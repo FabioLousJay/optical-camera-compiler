@@ -29,6 +29,7 @@ class MidjourneyAdapter(BaseAdapter):
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
+        is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
 
         # 1. Subject description
         core_elements = []
@@ -40,10 +41,21 @@ class MidjourneyAdapter(BaseAdapter):
             core_elements.append(
                 "Universal De-Pixelate and 102MP upscale restoration of reference photo, Fujinon 35mm f/4 leaf shutter, Reala Ace color response"
             )
+        elif is_identity_lock:
+            core_elements.append(
+                "reference-locked identity portrait, exact facial structure, bone geometry, body mass, and proportions"
+            )
         elif is_restore:
             core_elements.append("optical remaster and high-resolution restoration of reference image")
         elif is_transform:
             core_elements.append("reference-guided photographic adaptation with biometric character lock")
+
+        if scene.camera_angle:
+            core_elements.append(scene.camera_angle)
+        if scene.crowd_action:
+            core_elements.append(scene.crowd_action)
+        if scene.is_monochrome:
+            core_elements.append("restrained black-and-white indie-cinema monochrome, fine organic film grain")
 
         if scene.framing:
             core_elements.append(f"{scene.framing} of {scene.subject}")
@@ -84,7 +96,19 @@ class MidjourneyAdapter(BaseAdapter):
             "subsurface scattering",
             "natural material micro-relief",
         ]
-        if scene.sharpness_protocol:
+        is_slow_shutter = (
+            scene.capture_mode == "slow_shutter_crowd_motion"
+            or (hasattr(scene.capture_mode, "value") and scene.capture_mode.value == "slow_shutter_crowd_motion")
+            or bool(scene.crowd_action)
+            or (profile.profile_id == "leica_sl2" and "motion" in scene.subject.lower())
+        )
+        if is_slow_shutter:
+            lighting_tokens.extend([
+                "standing completely still subject, tack-sharp eyes, iris crisp detail",
+                "surrounded by multi-directional motion blur crowd trails",
+                "zero subject motion blur",
+            ])
+        elif scene.sharpness_protocol:
             lighting_tokens.extend([
                 "focus locked on near eye",
                 "eyelashes tack sharp",
@@ -103,7 +127,7 @@ class MidjourneyAdapter(BaseAdapter):
             "--v 8.2",
         ]
 
-        if is_depixelate:
+        if is_depixelate or is_identity_lock:
             ref_target = ref.filename if (ref and ref.filename) else "[REFERENCE_IMAGE_URL]"
             flags.extend([f"--sref {ref_target}", "--iw 2.0", "--cw 100"])
         elif is_restore:
@@ -160,14 +184,21 @@ class MidjourneyAdapter(BaseAdapter):
                 "signature",
                 "label",
             ])
-        if is_restore or is_transform or is_outpaint or is_depixelate:
+        if is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock:
             banned_mj.extend([
                 "facial morphing",
                 "identity drift",
                 "feature distortion",
                 "warped face",
                 "altered bone structure",
+                "gender alteration",
+                "body slimming",
+                "facial reshaping",
             ])
+        if scene.is_monochrome:
+            banned_mj.extend(["color", "sepia", "warm tint"])
+        if is_slow_shutter:
+            banned_mj.extend(["ghost faces", "melted bodies", "duplicated people", "uniform smear wall", "blur on subject"])
         if is_outpaint:
             banned_mj.extend([
                 "mismatched shoes",
