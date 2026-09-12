@@ -49,7 +49,7 @@ class OpticalCameraCompilerNode:
             "required": {
                 "camera_rig": (RIG_NAMES, {"default": RIG_NAMES[0]}),
                 "model_target": (
-                    ["gpt_images", "imagen", "midjourney", "flux", "sdxl"],
+                    ["gpt_images", "imagen", "midjourney", "flux", "sdxl", "raw", "json"],
                     {"default": "gpt_images"},
                 ),
                 "subject": (

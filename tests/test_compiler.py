@@ -129,14 +129,49 @@ class TestOpticalCompiler(unittest.TestCase):
         self.assertIn("Phase One XF IQ4 150MP", payload.positive_prompt)
         self.assertIn("Sensor & Optics", payload.positive_prompt)
 
+    def test_json_all_in_one_compilation(self) -> None:
+        """Verify JSON All-in-One adapter produces valid parsed JSON with all model prompts and specs."""
+        payload = self.compiler.compile(
+            "Ceramist at pottery wheel with clay on apron",
+            target="json",
+            aspect_ratio="9:11",
+            output_resolution="12MP PNG (3132x3828, 9:11)",
+            sharpness_protocol=True,
+            suppress_text_branding=True,
+        )
+
+        self.assertEqual(payload.target_engine, TargetEngine.JSON_PROMPT)
+        data = json.loads(payload.positive_prompt)
+        self.assertEqual(data["generator"], "Optical Camera Compiler")
+        self.assertEqual(data["target_engine"], "json")
+        self.assertIn("scene", data)
+        self.assertIn("camera_hardware", data)
+        self.assertIn("compiled_prompts", data)
+        self.assertIn("negative_shield", data)
+
+        prompts = data["compiled_prompts"]
+        self.assertIn("gpt_images", prompts)
+        self.assertIn("gemini_imagen3", prompts)
+        self.assertIn("midjourney_v8_2", prompts)
+        self.assertIn("flux", prompts)
+        self.assertIn("sdxl", prompts)
+        self.assertIn("unified_master_prompt", prompts)
+
+        self.assertIn("Subject: Ceramist", prompts["gpt_images"])
+        self.assertIn("--v 8.2", prompts["midjourney_v8_2"])
+
     def test_compile_all(self) -> None:
-        """Verify compile_all generates payloads for all four major target engines."""
+        """Verify compile_all generates payloads for all major target engines."""
         results = self.compiler.compile_all("Surgeon in sterile scrub room")
+        self.assertIn("gpt_images", results)
         self.assertIn("imagen", results)
         self.assertIn("flux", results)
         self.assertIn("sdxl", results)
         self.assertIn("midjourney", results)
+        self.assertIn("raw", results)
+        self.assertIn("json", results)
         self.assertEqual(results["flux"].target_engine, TargetEngine.FLUX)
+        self.assertEqual(results["json"].target_engine, TargetEngine.JSON_PROMPT)
 
     def test_cli_execution(self) -> None:
         """Verify CLI outputs expected JSON and text formatted results."""

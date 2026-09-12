@@ -196,6 +196,7 @@ class OpticalCompiler:
             TargetEngine.FLUX,
             TargetEngine.SDXL,
             TargetEngine.RAW,
+            TargetEngine.JSON_PROMPT,
         ]:
             results[engine.value] = self.compile(scene, target=engine, **kwargs)
         return results

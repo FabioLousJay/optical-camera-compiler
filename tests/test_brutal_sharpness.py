@@ -56,6 +56,7 @@ class TestBrutalSharpnessKit(unittest.TestCase):
             TargetEngine.FLUX,
             TargetEngine.SDXL,
             TargetEngine.RAW,
+            TargetEngine.JSON_PROMPT,
         ]
 
         for p_id in profile_ids:
@@ -228,6 +229,7 @@ class TestBrutalSharpnessKit(unittest.TestCase):
         self.assertEqual(target_list[0], "gpt_images")
         self.assertIn("imagen", target_list)
         self.assertIn("midjourney", target_list)
+        self.assertIn("json", target_list)
 
         ref_mode_list = optional["reference_mode"][0]
         self.assertIn("outpaint_full_body", ref_mode_list)

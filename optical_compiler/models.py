@@ -17,6 +17,7 @@ class TargetEngine(str, Enum):
     FLUX = "flux"
     SDXL = "sdxl"
     RAW = "raw"
+    JSON_PROMPT = "json"
 
     @classmethod
     def from_str(cls, value: str) -> TargetEngine:
@@ -30,8 +31,19 @@ class TargetEngine(str, Enum):
             "dalle3": cls.GPT_IMAGES,
             "gpt4o": cls.GPT_IMAGES,
             "gemini": cls.IMAGEN,
+            "imagen": cls.IMAGEN,
             "imagen3": cls.IMAGEN,
             "mj": cls.MIDJOURNEY,
+            "midjourney": cls.MIDJOURNEY,
+            "flux": cls.FLUX,
+            "sdxl": cls.SDXL,
+            "raw": cls.RAW,
+            "json": cls.JSON_PROMPT,
+            "json_all": cls.JSON_PROMPT,
+            "json_all_in_one": cls.JSON_PROMPT,
+            "all_in_one": cls.JSON_PROMPT,
+            "all_in_one_json": cls.JSON_PROMPT,
+            "json_prompt": cls.JSON_PROMPT,
         }
         if normalized in alias_map:
             return alias_map[normalized]
@@ -336,7 +348,12 @@ class CompiledPayload:
     @property
     def unified_prompt(self) -> str:
         """Return the combined prompt payload with the anti-artifact negative shield appended."""
-        if self.target_engine in (TargetEngine.MIDJOURNEY, TargetEngine.GPT_IMAGES, TargetEngine.RAW):
+        if self.target_engine in (
+            TargetEngine.MIDJOURNEY,
+            TargetEngine.GPT_IMAGES,
+            TargetEngine.RAW,
+            TargetEngine.JSON_PROMPT,
+        ):
             return self.positive_prompt
         if self.target_engine == TargetEngine.SDXL:
             return f"{self.positive_prompt}\n\nNegative prompt: {self.negative_prompt}"

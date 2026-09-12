@@ -3,7 +3,7 @@
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 35 Passing](https://img.shields.io/badge/tests-35%20passing-brightgreen.svg)](tests/)
+[![Tests: 36 Passing](https://img.shields.io/badge/tests-36%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL-orange.svg)](#supported-target-adapters)
@@ -83,6 +83,8 @@ Extends a medium-shot or tight headshot downward into a full-length head-to-toe 
    Dual-channel positive/negative payloads with exact resolution mapping based on aspect ratio.
 6. **Raw Spec**:
    Complete structured hardware audit view for inspection, EXIF metadata generation, and Custom GPT system instructions.
+7. **JSON All-in-One Prompt (`json`)**:
+   Unified, machine-readable JSON specification containing the complete hardware profile, lighting geometry, micro-physics, negative shield, and cross-compiled prompts for **GPT Images**, **Gemini**, **Midjourney v8.2**, **Flux.1**, and **SDXL** in a single structured payload. Ideal for developer pipelines, API webhooks, and automation workflows.
 
 ---
 

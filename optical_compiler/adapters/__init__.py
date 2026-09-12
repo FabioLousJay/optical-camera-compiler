@@ -9,6 +9,7 @@ from .base import BaseAdapter
 from .flux import FluxAdapter
 from .gpt_images import GPTImagesAdapter
 from .imagen import ImagenAdapter
+from .json_prompt import JSONAllInOneAdapter
 from .midjourney import MidjourneyAdapter
 from .raw import RawSpecAdapter
 from .sdxl import SDXLAdapter
@@ -20,6 +21,7 @@ ADAPTER_REGISTRY: dict[TargetEngine, Type[BaseAdapter]] = {
     TargetEngine.FLUX: FluxAdapter,
     TargetEngine.SDXL: SDXLAdapter,
     TargetEngine.RAW: RawSpecAdapter,
+    TargetEngine.JSON_PROMPT: JSONAllInOneAdapter,
 }
 
 
@@ -43,6 +45,7 @@ __all__ = [
     "SDXLAdapter",
     "MidjourneyAdapter",
     "RawSpecAdapter",
+    "JSONAllInOneAdapter",
     "get_adapter",
     "ADAPTER_REGISTRY",
 ]
