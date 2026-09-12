@@ -169,6 +169,10 @@ class NegativeShield:
             "beauty filter glow",
             "blown highlights",
             "crushed shadows",
+            "broadcast video sharpness",
+            "clipped digital highlights",
+            "crushed blacks",
+            "oversaturated rec709 tint",
         ]
     )
     anatomical_drift: list[str] = field(
@@ -228,6 +232,9 @@ class NegativeShield:
             "pixelation",
             "digital noise smearing",
             "posterization",
+            "compression banding",
+            "chroma subsampling artifacts",
+            "video noise clipping",
         ]
     )
     outpaint_drift: list[str] = field(

@@ -1208,6 +1208,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         "Sony FE 85mm f/1.4 GM II (Portrait Specialist)",
         "Sony FE 135mm f/1.8 GM (Razor-Sharp Background Dissolution)",
         "Sony FE 24-70mm f/2.8 GM II (Versatile Commercial Standard)"
+      ],
+      sony_fx_series: [
+        "Sony FE 50mm f/1.2 GM @ f/2.8 (Venice Cine Sweet Spot)",
+        "Sony FE 24-70mm f/2.8 GM II (Versatile Cine Zoom)",
+        "Sony FE 85mm f/1.4 GM II (Cinematic Portrait Prime)",
+        "Sony FE 135mm f/1.8 GM (Cinematic Separation Prime)",
+        "Sony FE 16-35mm f/2.8 GM II (Wide Cine Master)"
       ]
     };
 

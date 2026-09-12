@@ -23,7 +23,15 @@ class TestBrutalSharpnessKit(unittest.TestCase):
         self.assertIn("sony_a1_ii", profile_ids)
         self.assertIn("canon_eos_r5_ii", profile_ids)
         self.assertIn("nikon_z9", profile_ids)
-        self.assertGreaterEqual(len(available), 13)
+        self.assertIn("sony_fx_series", profile_ids)
+        self.assertGreaterEqual(len(available), 14)
+
+        # Verify Sony FX Cinema Line
+        fx = load_profile("sony_fx_series")
+        self.assertIn("Sony FX Cinema Line", fx.sensor_and_optics.camera_system)
+        self.assertIn("f/2.8", fx.sensor_and_optics.aperture_sweet_spot)
+        self.assertIn("180-degree", fx.sensor_and_optics.shutter)
+        self.assertIn("broadcast video sharpness", fx.negative_embeddings.skin_and_lighting_drift)
 
         # Verify Sony a1 II
         sony = load_profile("sony_a1_ii")
@@ -45,10 +53,10 @@ class TestBrutalSharpnessKit(unittest.TestCase):
         self.assertIn("NIKKOR Z 135mm f/1.8 S Plena", nikon.sensor_and_optics.lens)
 
     def test_all_13_profiles_compile_across_targets(self) -> None:
-        """Verify that all 13 profiles compile without error across all supported engines."""
+        """Verify that all profiles compile without error across all supported engines."""
         available = list_available_profiles()
         profile_ids = [p["id"] for p in available]
-        self.assertEqual(len(profile_ids), 13)
+        self.assertGreaterEqual(len(profile_ids), 14)
         targets = [
             TargetEngine.GPT_IMAGES,
             TargetEngine.IMAGEN,
@@ -224,6 +232,7 @@ class TestBrutalSharpnessKit(unittest.TestCase):
         self.assertIn("Sony a1 II Stacked Full-Frame (ILCE-1M2)", camera_list)
         self.assertIn("Canon EOS R5 Mark II Stacked Full-Frame", camera_list)
         self.assertIn("Nikon Z 9 Stacked Flagship Full-Frame", camera_list)
+        self.assertIn("Sony FX Cinema Line Full-Frame (Venice S-Log3)", camera_list)
 
         target_list = required["model_target"][0]
         self.assertEqual(target_list[0], "gpt_images")

@@ -1,0 +1,63 @@
+{
+  "profile_id": "sony_fx_series",
+  "title": "Sony FX Cinema Line Full-Frame (Venice S-Log3)",
+  "schema_version": "2.0",
+  "purpose": "Hardware-level cinema optical and sensor simulation for zero-artifact cinematic photorealism.",
+  "sensor_and_optics": {
+    "camera_system": "Sony FX Cinema Line Full-Frame 4K Exmor R BSI CMOS",
+    "sensor_type": "35.6x23.8mm full-frame cinema Exmor R BSI CMOS with 15+ stops dynamic range",
+    "sensor_dimensions": "35.6x23.8mm full-frame cinema sensor",
+    "full_frame_equivalent": "50mm full-frame native field of view (native 16:9 framing)",
+    "lens": "Sony FE 50mm f/1.2 GM stopped down to f/2.8 cinematic sweet spot",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "Dual Base ISO 800/12800 with S-Log3/S-Gamut3.Cine",
+    "dynamic_range": "15+ stops dynamic range with 10-bit 4:2:2 All-Intra S-Log3/S-Gamut3.Cine",
+    "shutter": "180-degree cinema shutter angle (1/48s equivalent motion cadence)"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Cinematic lighting setup, 180-degree shutter angle (1/48s), Dual Base ISO 800/12800, 10-bit 4:2:2 All-Intra S-Log3/S-Gamut3.Cine with 15+ stops dynamic range",
+    "light_transport": "Physically accurate highlight rolloff with gradual specular dispersion characteristic of Venice color science, variable ND exposure balance, and lighting contrast"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Organic cinema-grade texture resolving natural skin micro-relief, subtle pores, and soft vellus hair without over-sharpened digital harshness",
+      "Physically accurate highlight rolloff with gradual specular dispersion characteristic of Venice color science",
+      "Clean optical MTF resolution with zero in-camera edge sharpening, digital edge ringing, or artificial clarity boosting"
+    ],
+    "depth_and_optics": [
+      "Cinematic full-frame depth of field with smooth background separation and natural circular bokeh from an 11-blade aperture",
+      "Zero geometric distortion, rectilinear optical projection with subtle cinema lens illumination falloff toward edges",
+      "Physically grounded depth transitions derived from true optical geometry, variable ND exposure balance, and lighting contrast"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression banding",
+      "chroma subsampling artifacts",
+      "video noise clipping"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "broadcast video sharpness",
+      "computational bokeh",
+      "clipped digital highlights",
+      "crushed blacks",
+      "oversaturated rec709 tint"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce authentic full-frame cinema sensor readout with Venice-grade S-Log3 rolloff. Eliminate digital camcorder sharpness, synthetic smoothing, and harsh electronic highlight clipping."
+}

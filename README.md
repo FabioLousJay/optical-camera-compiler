@@ -127,7 +127,7 @@ print(harness["module_b"].positive_prompt)
 
 ---
 
-## Hardware Profile Library (13 Elite Camera Systems)
+## Hardware Profile Library (14 Elite Camera Systems)
 
 The compiler includes calibrated optical profiles across stacked full-frame, medium format, large format, 35mm rangefinders, cinema cameras, and analog film:
 
@@ -182,6 +182,10 @@ The compiler includes calibrated optical profiles across stacked full-frame, med
     * *Format*: 35mm silver halide film gate, Leica Summicron-M 50mm f/2 Dual-Range, Kodak Tri-X 400.
 13. **ARRI Alexa 35 Cinema Large-Sensor (`arri_alexa_35`)**:
     * *Format*: Super 35 Native 4K ALEV 4 sensor, Cooke S4/i 50mm T2.0 Prime, ARRI LogC4.
+14. **Sony FX Cinema Line Full-Frame (`sony_fx_series`)**:
+    * *Format*: $35.6 \times 23.8\,\text{mm}$ full-frame cinema 4K Exmor R BSI CMOS, 15+ stops dynamic range.
+    * *Optics*: Sony FE 50mm f/1.2 GM stopped down to $f/2.8$ cinematic sweet spot, FE 24-70mm f/2.8 GM II, FE 85mm f/1.4 GM II.
+    * *Physics*: Venice color science highlight rolloff, $180^\circ$ cinema shutter angle ($1/48\,\text{s}$ cadence), Dual Base ISO 800/12800, 10-bit 4:2:2 All-Intra S-Log3/S-Gamut3.Cine.
 
 ---
 
@@ -196,7 +200,7 @@ optical-studio
 
 * **Live URL**: `http://localhost:8765`
 * **Features**:
-  * **13 Elite Camera Systems**: Full coverage of all stacked full-frame, medium format, and analog rigs.
+  * **14 Elite Camera Systems**: Full coverage of all stacked full-frame, medium format, cinema, and analog rigs.
   * **GPT Images / ChatGPT Master Execution Tab**: Instant copyable prompts formatted for ChatGPT.
   * **Section 05 Brutal Sharpness Toggles**: Near-eye focus lock, Anti-Brand Shield, and 12MP/8K resolution targets.
   * **Mode C Outpaint UI**: Dedicated full-body vertical outpainting button with reference preview.

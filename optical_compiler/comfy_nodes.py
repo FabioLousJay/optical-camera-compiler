@@ -21,6 +21,7 @@ RIG_NAMES = [
     "Hasselblad 500 C/M Square Analog Medium Format",
     "Leica M6 35mm Rangefinder Analog Film",
     "Linhof Master Technika 4x5 Large Format Sheet Film",
+    "Sony FX Cinema Line Full-Frame (Venice S-Log3)",
 ]
 
 RIG_NAME_TO_ID = {
@@ -37,6 +38,7 @@ RIG_NAME_TO_ID = {
     "Hasselblad 500 C/M Square Analog Medium Format": "hasselblad_500cm",
     "Leica M6 35mm Rangefinder Analog Film": "leica_m6_analog",
     "Linhof Master Technika 4x5 Large Format Sheet Film": "linhof_technika_4x5",
+    "Sony FX Cinema Line Full-Frame (Venice S-Log3)": "sony_fx_series",
 }
 
 
