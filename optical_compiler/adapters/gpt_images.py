@@ -9,8 +9,10 @@ from __future__ import annotations
 from typing import Any
 
 from ..models import (
+    AdSafeZone,
     CameraProfile,
     CompiledPayload,
+    CopySpace,
     ReferenceMode,
     SceneInput,
     TargetEngine,
@@ -113,6 +115,23 @@ class GPTImagesAdapter(BaseAdapter):
             angle_block = f"Camera angle & perspective: {scene.camera_angle}. Framing: {scene.framing or 'Subject centered'}."
             sections.append(angle_block)
 
+        # Commercial Advertising Copy-Space and Ad-Safe Framing
+        if scene.has_copy_space:
+            copy_lines = []
+            if scene.copy_space and scene.copy_space != CopySpace.NONE:
+                cs_desc = scene.copy_space.value.replace("_", " ")
+                copy_lines.append(
+                    f"Commercial Copy-Space: Asymmetric negative space strictly reserved in {cs_desc} of the frame. "
+                    "Background in this zone must remain uncluttered, serene, and calm to accommodate advertising headline typography."
+                )
+            if scene.ad_safe_zone and scene.ad_safe_zone != AdSafeZone.NONE:
+                sz_desc = scene.ad_safe_zone.value.replace("_", " ")
+                copy_lines.append(
+                    f"Advertising Safe-Zone ({sz_desc}): All vital subject matter, products, faces, and hands strictly positioned within safe boundaries, "
+                    "clear of mobile UI overlays and social media navigation bars."
+                )
+            sections.append("\n".join(copy_lines))
+
         # Crowd action and motion physics
         if scene.crowd_action:
             crowd_block = (
@@ -188,6 +207,26 @@ class GPTImagesAdapter(BaseAdapter):
 
             sections.append("\n".join(gate_lines))
 
+        # Biomechanical Hand & Finger Precision Gate (5-Point Grip Lock)
+        if scene.has_hand_lock:
+            grip_desc = scene.grip_type.value.replace("_", " ") if scene.grip_type else "ergonomic contact grip"
+            details = f" ({scene.hand_details})" if scene.hand_details else ""
+            hand_block = (
+                f"Biomechanical Hand & Finger Precision Gate (5-Point Grip Lock - {grip_desc}{details}):\n"
+                "- [GATE H1: 5-RAY METACARPAL ARCHITECTURE]: Exactly five fully articulated digits (thumb, index, middle, ring, pinky) "
+                "with authentic human anatomical proportions (2:3:4:3.5:2.5 length ratio) and distinct metacarpophalangeal (MCP), "
+                "proximal interphalangeal (PIP), and distal interphalangeal (DIP) joints.\n"
+                "- [GATE H2: GRIP PHYSICS & CONTACT BLANCHING]: Natural physical contact with object; authentic micro-capillary blood "
+                "displacement and tissue blanching where skin compresses against surface. Zero clipping, zero digits penetrating solid objects.\n"
+                "- [GATE H3: FLEXION CREASES & THENAR ANATOMY]: Authentic palmar and digital flexion creases, anatomically defined thenar "
+                "and hypothenar eminence musculature, visible wrist tendons.\n"
+                "- [GATE H4: NAIL BED & CUTICLE REALISM]: Translucent nail plates with natural pinkish vascular flush, visible pale lunula "
+                "crescents, micro-cuticles, and clean natural nail margins (no synthetic press-on appearance).\n"
+                "- [GATE H5: ZERO FINGER MUTATION SHIELD]: Zero fused digits, zero clipping, zero extra phalanges, zero rubber knuckles, "
+                "zero dislocated thumbs, zero webbed fingers, zero amorphous fingertip pads."
+            )
+            sections.append(hand_block)
+
         # 6. Focus discipline & Surface rendering
         is_slow_shutter = (
             scene.capture_mode == "slow_shutter_crowd_motion"
@@ -240,13 +279,26 @@ class GPTImagesAdapter(BaseAdapter):
         sections.append(surface_block)
 
         # 7. Lighting Geometry & Light Transport
-        lighting_block = (
-            f"Lighting geometry: {scene.lighting or profile.lighting_and_exposure.primary_lighting}. "
-            f"Directional key light positioned 35–45° off-axis, slightly above eye line for micro-contrast. "
-            f"Minimal fill. Strong black flag negative fill on the shadow side for deep tonal separation. "
-            f"Optional very low-power rim light only for edge separation (no glow, no second key). "
-            f"Background kept controlled to prevent spill. Contrast is editorial, not cinematic."
+        lighting_parts = [
+            f"Lighting geometry: {scene.lighting or profile.lighting_and_exposure.primary_lighting}."
+        ]
+        if scene.lighting_ratio:
+            lighting_parts.append(f"Key-to-fill contrast ratio: {scene.lighting_ratio.value}.")
+        if scene.gobo:
+            gobo_desc = scene.gobo.value.replace("_", " ")
+            lighting_parts.append(
+                f"Optical gobo projection cookie: {gobo_desc} projecting crisp architectural shadow play and dappled light breaks across subject and background."
+            )
+        if scene.grip_modifier:
+            grip_desc = scene.grip_modifier.value.replace("_", " ")
+            lighting_parts.append(f"Studio grip modifier: {grip_desc}.")
+        lighting_parts.append(
+            "Directional key light positioned 35–45° off-axis, slightly above eye line for micro-contrast. "
+            "Minimal fill. Strong black flag negative fill on the shadow side for deep tonal separation. "
+            "Optional very low-power rim light only for edge separation (no glow, no second key). "
+            "Background kept controlled to prevent spill. Contrast is editorial, not cinematic."
         )
+        lighting_block = " ".join(lighting_parts)
         sections.append(lighting_block)
 
         # Color tone / Monochrome
@@ -260,12 +312,24 @@ class GPTImagesAdapter(BaseAdapter):
         # 8. Camera Hardware & Lens Module
         cam = profile.sensor_and_optics
         color_desc = f" Color science: {cam.dynamic_range}." if cam.dynamic_range else ""
+        lens_spec = cam.lens
+        if scene.is_anamorphic:
+            squeeze = scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else "2.0x"
+            flare = scene.streak_flare.value.replace("_", " ") if scene.streak_flare else "cyan/blue"
+            blades = scene.iris_blades.value.replace("_", " ") if scene.iris_blades else "14-blade circular"
+            anamorphic_optics = (
+                f" Optics: Cinema anamorphic lens with {squeeze} squeeze factor, {flare} horizontal streak flares, and {blades} iris. "
+                f"Out-of-focus background highlights render as vertical 2:1 elliptical oval bokeh discs with authentic cylindrical edge astigmatism."
+            )
+        else:
+            anamorphic_optics = " Clean rectilinear projection with zero perspective distortion."
+
         camera_block = (
             f"Camera hardware: Shot on {cam.camera_system}. "
-            f"Lens: {cam.lens} set to {cam.aperture_sweet_spot}. "
+            f"Lens: {lens_spec} set to {cam.aperture_sweet_spot}. "
             f"Sensor: {cam.sensor_dimensions}, {cam.sensor_type}. "
-            f"Exposure: {cam.shutter}, base {cam.iso_base}.{color_desc} "
-            f"Clean rectilinear projection with zero perspective distortion."
+            f"Exposure: {cam.shutter}, base {cam.iso_base}.{color_desc}"
+            f"{anamorphic_optics}"
         )
         sections.append(camera_block)
 
@@ -289,6 +353,7 @@ class GPTImagesAdapter(BaseAdapter):
             include_outpaint=(ref_mode == ReferenceMode.OUTPAINT_FULL_BODY),
             include_skin_realism=scene.human_skin_realism,
             include_product_drift=scene.has_product_lock,
+            include_hand_drift=scene.has_hand_lock,
         )
         if scene.custom_negatives:
             neg_tokens.extend(scene.custom_negatives)

@@ -6,12 +6,21 @@ from typing import Any, Optional, Union
 
 from .adapters import get_adapter
 from .models import (
+    AdSafeZone,
+    AnamorphicSqueeze,
     CameraProfile,
     CompiledPayload,
     ContentType,
+    CopySpace,
+    GoboPattern,
+    GripModifier,
+    GripType,
+    IrisBladeCount,
+    LightingRatio,
     ReferenceImageInput,
     ReferenceMode,
     SceneInput,
+    StreakFlare,
     TargetEngine,
 )
 from .profiles import apply_overrides, auto_select_profile, load_profile
@@ -74,6 +83,18 @@ class OpticalCompiler:
         material_finish: Optional[str] = None,
         seam_geometry: Optional[str] = None,
         approval_gate_100pct: bool = True,
+        hand_lock: bool = False,
+        grip_type: Optional[Union[str, GripType]] = None,
+        hand_details: Optional[str] = None,
+        anamorphic: bool = False,
+        anamorphic_squeeze: Optional[Union[str, AnamorphicSqueeze]] = None,
+        streak_flare: Optional[Union[str, StreakFlare]] = None,
+        iris_blades: Optional[Union[str, IrisBladeCount]] = None,
+        gobo: Optional[Union[str, GoboPattern]] = None,
+        grip_modifier: Optional[Union[str, GripModifier]] = None,
+        lighting_ratio: Optional[Union[str, LightingRatio]] = None,
+        copy_space: Optional[Union[str, CopySpace]] = None,
+        ad_safe_zone: Optional[Union[str, AdSafeZone]] = None,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -103,6 +124,17 @@ class OpticalCompiler:
             human_skin_realism: Enforce human skin realism override protocol.
             content_type: Classification of image content (photograph, portrait, document_scan, etc.).
             text_preservation: Enforce exact OCR safety and text preservation rules.
+            hand_lock: Enforce 5-point biomechanical hand and finger precision gate.
+            grip_type: Physical contact grip geometry (pinch, wrap, palm support, etc.).
+            hand_details: Specific hand/finger anatomical details.
+            anamorphic_squeeze: Cinema anamorphic squeeze ratio (e.g. 2.0x, 1.33x, 1.5x).
+            streak_flare: Chromatic streak flare coating (cyan_blue, warm_gold, neutral_silver, vintage_magenta).
+            iris_blades: Lens aperture blade geometry shaping bokeh discs and starburst spikes.
+            gobo: Optical pattern projection cookie (venetian_blinds, dappled_foliage, etc.).
+            grip_modifier: Professional studio grip modifier (beauty dish, butterfly 8x8 silk, snoot, floppy).
+            lighting_ratio: Key-to-fill lighting contrast ratio (1:1, 2:1, 4:1, 8:1, 16:1).
+            copy_space: Advertising negative copy space reservation (left, right, top, bottom third).
+            ad_safe_zone: Digital and social advertising safe zone format.
 
         Returns:
             CompiledPayload with positive prompt, negative prompt, parameters, and metadata.
@@ -139,6 +171,18 @@ class OpticalCompiler:
             c_type = content_type
         elif isinstance(content_type, str):
             c_type = ContentType.from_str(content_type)
+
+        gt = GripType.from_str(grip_type) if isinstance(grip_type, str) else grip_type
+        asq = AnamorphicSqueeze.from_str(anamorphic_squeeze) if isinstance(anamorphic_squeeze, str) else anamorphic_squeeze
+        if anamorphic and not asq:
+            asq = AnamorphicSqueeze.SQUEEZE_2_0X
+        sf = StreakFlare.from_str(streak_flare) if isinstance(streak_flare, str) else streak_flare
+        ib = IrisBladeCount.from_str(iris_blades) if isinstance(iris_blades, str) else iris_blades
+        gb = GoboPattern.from_str(gobo) if isinstance(gobo, str) else gobo
+        gm = GripModifier.from_str(grip_modifier) if isinstance(grip_modifier, str) else grip_modifier
+        lr = LightingRatio.from_str(lighting_ratio) if isinstance(lighting_ratio, str) else lighting_ratio
+        cs = CopySpace.from_str(copy_space) if isinstance(copy_space, str) else copy_space
+        asz = AdSafeZone.from_str(ad_safe_zone) if isinstance(ad_safe_zone, str) else ad_safe_zone
 
         # 2. Build SceneInput
         if isinstance(scene, str):
@@ -177,6 +221,17 @@ class OpticalCompiler:
                 material_finish=material_finish,
                 seam_geometry=seam_geometry,
                 approval_gate_100pct=approval_gate_100pct,
+                hand_lock=hand_lock,
+                grip_type=gt,
+                hand_details=hand_details,
+                anamorphic_squeeze=asq,
+                streak_flare=sf,
+                iris_blades=ib,
+                gobo=gb,
+                grip_modifier=gm,
+                lighting_ratio=lr,
+                copy_space=cs,
+                ad_safe_zone=asz,
             )
         else:
             scene_input = scene
@@ -242,6 +297,28 @@ class OpticalCompiler:
             if seam_geometry:
                 scene_input.seam_geometry = seam_geometry
             scene_input.approval_gate_100pct = approval_gate_100pct
+            if hand_lock:
+                scene_input.hand_lock = hand_lock
+            if gt:
+                scene_input.grip_type = gt
+            if hand_details:
+                scene_input.hand_details = hand_details
+            if asq:
+                scene_input.anamorphic_squeeze = asq
+            if sf:
+                scene_input.streak_flare = sf
+            if ib:
+                scene_input.iris_blades = ib
+            if gb:
+                scene_input.gobo = gb
+            if gm:
+                scene_input.grip_modifier = gm
+            if lr:
+                scene_input.lighting_ratio = lr
+            if cs:
+                scene_input.copy_space = cs
+            if asz:
+                scene_input.ad_safe_zone = asz
 
         # 3. Parse target engine
         engine = (

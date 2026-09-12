@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from ..models import CameraProfile, CompiledPayload, ReferenceMode, SceneInput, TargetEngine
+from ..models import (
+    AdSafeZone,
+    CameraProfile,
+    CompiledPayload,
+    CopySpace,
+    ReferenceMode,
+    SceneInput,
+    TargetEngine,
+)
 from .base import BaseAdapter
 
 
@@ -119,6 +127,21 @@ class FluxAdapter(BaseAdapter):
             sections.append(f"Photo of {subject_desc}.")
         if scene.camera_angle:
             sections.append(f"Angle and perspective: {scene.camera_angle}.")
+        if scene.has_copy_space:
+            if scene.copy_space and scene.copy_space != CopySpace.NONE:
+                sections.append(
+                    f"Commercial negative copy-space: Reserved in the {scene.copy_space.value.replace('_', ' ')} of the frame with calm, uncluttered background for brand headline typography."
+                )
+            if scene.ad_safe_zone and scene.ad_safe_zone != AdSafeZone.NONE:
+                sections.append(
+                    f"Advertising safe zone: Structured according to {scene.ad_safe_zone.value.replace('_', ' ')} guidelines, keeping subject and hands clear of UI overlays."
+                )
+        if scene.has_hand_lock:
+            grip_desc = scene.grip_type.value.replace("_", " ") if scene.grip_type else "ergonomic contact grip"
+            details = f" ({scene.hand_details})" if scene.hand_details else ""
+            sections.append(
+                f"Biomechanical 5-Point Hand Precision Gate ({grip_desc}{details}): Render five fully articulated human digits with correct metacarpal proportions (2:3:4:3.5:2.5 ratio), distinct knuckles and joints, palmar flexion creases, realistic micro contact blanching where skin presses against objects, translucent nail beds with lunula, and zero finger mutations."
+            )
         if scene.crowd_action:
             sections.append(
                 f"Crowd dynamics: {scene.crowd_action}. Smooth multi-directional motion blur trails wrapping around still subject without anatomical deformation."
@@ -134,6 +157,13 @@ class FluxAdapter(BaseAdapter):
             f"{optics.sensor_dimensions} with {optics.full_frame_equivalent}.",
             f"{optics.iso_base}, {optics.shutter}."
         ]
+        if scene.is_anamorphic:
+            squeeze = scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else "2.0x"
+            flare = scene.streak_flare.value.replace("_", " ") if scene.streak_flare else "cyan/blue"
+            blades = scene.iris_blades.value.replace("_", " ") if scene.iris_blades else "14-blade circular"
+            camera_parts.append(
+                f"Cinema anamorphic optics: {squeeze} cylindrical squeeze, {flare} horizontal streak flare, and {blades} iris yielding vertical 2:1 elliptical oval bokeh discs."
+            )
         if scene.optical_filter:
             camera_parts.append(f"Front optical element: {scene.optical_filter}.")
         if scene.film_stock:
@@ -142,7 +172,16 @@ class FluxAdapter(BaseAdapter):
         sections.append(camera_desc)
 
         # 3. Studio lighting & light transport
-        lighting_desc = f"Lighting: {lighting.primary_lighting}. {lighting.light_transport}."
+        lighting_parts = [f"Lighting: {lighting.primary_lighting}. {lighting.light_transport}."]
+        if scene.lighting_ratio:
+            lighting_parts.append(f"Key-to-fill lighting contrast ratio: {scene.lighting_ratio.value}.")
+        if scene.gobo:
+            gobo_desc = scene.gobo.value.replace("_", " ")
+            lighting_parts.append(f"Optical {gobo_desc} gobo cookie projection casting architectural shadow silhouettes.")
+        if scene.grip_modifier:
+            grip_desc = scene.grip_modifier.value.replace("_", " ")
+            lighting_parts.append(f"Studio grip: {grip_desc}.")
+        lighting_desc = " ".join(lighting_parts)
         sections.append(lighting_desc)
 
         # 4. Micro-texture & physical rendering
@@ -212,6 +251,8 @@ class FluxAdapter(BaseAdapter):
             banned_tropes += " Eliminate ghost faces, melted bodies, duplicated people, uniform smear wall, and blur on the subject."
         if is_outpaint:
             banned_tropes += " Eliminate mismatched shoes, twisted legs, floating feet, and distorted scale."
+        if scene.has_hand_lock:
+            banned_tropes += " Eliminate fused digits, clipping fingers, extra phalanges, rubber knuckles, dislocated thumbs, missing knuckles, and deformed nails."
         sections.append(banned_tropes)
 
         positive_prompt = " ".join(sections)
@@ -225,6 +266,7 @@ class FluxAdapter(BaseAdapter):
             include_outpaint=is_outpaint,
             include_skin_realism=scene.human_skin_realism,
             include_product_drift=is_product_lock,
+            include_hand_drift=scene.has_hand_lock,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)

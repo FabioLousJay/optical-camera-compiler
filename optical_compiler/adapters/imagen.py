@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from ..models import CameraProfile, CompiledPayload, ReferenceMode, SceneInput, TargetEngine
+from ..models import (
+    AdSafeZone,
+    CameraProfile,
+    CompiledPayload,
+    CopySpace,
+    ReferenceMode,
+    SceneInput,
+    TargetEngine,
+)
 from .base import BaseAdapter
 
 
@@ -103,10 +111,29 @@ class ImagenAdapter(BaseAdapter):
         if scene.is_monochrome:
             scene_elements.append("restrained black-and-white indie-cinema monochrome with gentle highlight roll-off and clean midtones without HDR")
 
+        if scene.has_copy_space:
+            if scene.copy_space and scene.copy_space != CopySpace.NONE:
+                scene_elements.append(
+                    f"commercial advertising composition reserving clean, uncluttered negative copy-space in the {scene.copy_space.value.replace('_', ' ')} for typography"
+                )
+            if scene.ad_safe_zone and scene.ad_safe_zone != AdSafeZone.NONE:
+                scene_elements.append(
+                    f"framed strictly within {scene.ad_safe_zone.value.replace('_', ' ')} digital advertising safe-zones to avoid mobile interface occlusion"
+                )
+
         scene_core = ", ".join(scene_elements) + "."
 
         # Reference-specific anchor instructions
         ref_directives = []
+        if scene.has_hand_lock:
+            grip_desc = scene.grip_type.value.replace("_", " ") if scene.grip_type else "ergonomic contact grip"
+            details = f" ({scene.hand_details})" if scene.hand_details else ""
+            ref_directives.append(
+                f"Biomechanical 5-Point Hand Precision Gate ({grip_desc}{details}): "
+                "Render fully articulated human hands with correct 5-digit metacarpal proportions (2:3:4:3.5:2.5 ratio), "
+                "distinct MCP/PIP/DIP joints, palmar flexion creases, authentic tissue blanching under pressure, "
+                "translucent nail beds with lunula crescents, natural cuticles, and absolute zero finger mutations."
+            )
         if is_depixelate and ref:
             ref_directives.append(
                 "Fixed Fujifilm GFX100RF 102MP restoration lock: Use attached image as single source of truth. "
@@ -146,6 +173,13 @@ class ImagenAdapter(BaseAdapter):
             f"Captured with a {optics.camera_system} utilizing a {optics.lens} stopped down to its {optics.aperture_sweet_spot} optical sweet spot.",
             f"Framed with a {optics.sensor_dimensions} ({optics.full_frame_equivalent}), utilizing {optics.shutter} and {optics.iso_base}."
         ]
+        if scene.is_anamorphic:
+            squeeze = scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else "2.0x"
+            flare = scene.streak_flare.value.replace("_", " ") if scene.streak_flare else "cyan/blue"
+            blades = scene.iris_blades.value.replace("_", " ") if scene.iris_blades else "14-blade circular"
+            optical_components.append(
+                f"Cinema anamorphic optics featuring {squeeze} squeeze factor, {flare} horizontal streak flares, and {blades} iris yielding vertical 2:1 elliptical oval bokeh discs."
+            )
         if scene.optical_filter:
             optical_components.append(f"Front-mounted optical element: {scene.optical_filter}.")
         if scene.film_stock:
@@ -153,9 +187,16 @@ class ImagenAdapter(BaseAdapter):
         optical_prose = " ".join(optical_components)
 
         # 3. Lighting & physical transport
-        lighting_prose = (
-            f"Lighting: {lighting.primary_lighting}. {lighting.light_transport}."
-        )
+        lighting_parts = [f"Lighting: {lighting.primary_lighting}. {lighting.light_transport}."]
+        if scene.lighting_ratio:
+            lighting_parts.append(f"Key-to-fill contrast balanced at a precise {scene.lighting_ratio.value} lighting ratio.")
+        if scene.gobo:
+            gobo_desc = scene.gobo.value.replace("_", " ")
+            lighting_parts.append(f"Projected through an optical {gobo_desc} gobo cookie producing crisp architectural shadow patterns.")
+        if scene.grip_modifier:
+            grip_desc = scene.grip_modifier.value.replace("_", " ")
+            lighting_parts.append(f"Shaped with professional {grip_desc} studio grip.")
+        lighting_prose = " ".join(lighting_parts)
 
         # 4. Micro-physics & texture enforcement
         micro_parts = [
@@ -200,6 +241,8 @@ class ImagenAdapter(BaseAdapter):
             style_prose += " Eliminate facial morphing, feature drift, identity loss, and warped geometry."
         if is_product_lock:
             style_prose += " Eliminate wrong cap geometry, incorrect label kerning, sku color drift, missing seams, and packaging distortion."
+        if scene.has_hand_lock:
+            style_prose += " Eliminate fused fingers, missing knuckles, rubber joints, clipping digits, and hand mutations."
 
         positive_prompt = f"{scene_core}{ref_prose} {optical_prose} {lighting_prose} {micro_prose} {style_prose}"
 
@@ -212,6 +255,7 @@ class ImagenAdapter(BaseAdapter):
             include_outpaint=is_outpaint,
             include_skin_realism=scene.human_skin_realism,
             include_product_drift=is_product_lock,
+            include_hand_drift=scene.has_hand_lock,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)

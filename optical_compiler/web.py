@@ -802,6 +802,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <option value="sculptor_atelier">Carrara Marble Sculptor Atelier // Limestone Dust & Directional Sun (Fujifilm GFX)</option>
           <option value="watchmaker_bench">Horologist Micro-Bench // Macro Brass Gears & Focus (Sony A7R V)</option>
           <option value="museum_gallery">Neoclassical Museum Rotunda // Soaring Marble Fluted Columns (Linhof 4x5)</option>
+          <option value="hollywood_anamorphic">Hollywood Cinema Anamorphic // 2.0x Oval Bokeh & Blue Streak Flare (ARRI Alexa 35)</option>
+          <option value="commercial_billboard_copy_space">Commercial Advertising Hero // Venetian Gobo & Copy-Space (Phase One IQ4 150MP)</option>
         </optgroup>
       </select>
 
@@ -1180,10 +1182,154 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- 05. BRUTAL SHARPNESS & QUALITY ENFORCEMENT -->
+      <!-- 05. PIONEER PRECISION SUITES -->
       <div class="panel-section">
         <div class="section-header">
-          <div class="section-title">05. Brutal Sharpness & Quality Shields</div>
+          <div class="section-title">05. Industry-Pioneering Precision Suites</div>
+          <div class="section-meta" style="color: var(--accent-cyan);">Hands • Anamorphic • Advertising</div>
+        </div>
+
+        <!-- Tool 1: Biomechanical Hand & Finger Precision Gate -->
+        <div style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.22); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.65rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+            <span style="font-size: 0.76rem; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.05em;">
+              🖐️ Hand Precision Gate (5-Point Grip Lock)
+            </span>
+            <label class="check-item" style="font-size: 0.70rem; color: var(--accent-cyan); margin-bottom: 0;">
+              <input type="checkbox" id="chkHandLock" onchange="debounceCompile()"> Hand Lock Active
+            </label>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <div class="field-group">
+              <label for="gripTypeSelect" style="font-size: 0.68rem;">Anatomical Grip Type</label>
+              <select id="gripTypeSelect" onchange="debounceCompile()" style="font-size: 0.74rem;">
+                <option value="default" selected>Default / Auto Grip</option>
+                <option value="palm_support">Palm Support (Flat resting, open MCP joints)</option>
+                <option value="precision_pinch">Precision Pinch (Thumb + forefinger pad contact, blanching)</option>
+                <option value="cylindrical_wrap">Cylindrical Wrap (Curling digits 2-5, thumb opposition)</option>
+                <option value="relaxed_rest">Relaxed Rest (Gentle natural finger arc cascade)</option>
+                <option value="open_palm">Open Palm (Extended planar metacarpals & splay)</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="handDetailsInput" style="font-size: 0.68rem;">Micro-Anatomy / Nail Beds / Blanching</label>
+              <input type="text" id="handDetailsInput" placeholder="e.g. visible lunula, natural cuticles, contact blanching..." oninput="debounceCompile()" style="font-size: 0.74rem;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool 2: Cinema Anamorphic Optics & Flare Engine -->
+        <div style="background: rgba(168, 85, 247, 0.04); border: 1px solid rgba(168, 85, 247, 0.22); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.65rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+            <span style="font-size: 0.76rem; font-weight: 700; color: #c084fc; text-transform: uppercase; letter-spacing: 0.05em;">
+              🎬 Cinema Anamorphic Optics & Flare Engine
+            </span>
+            <label class="check-item" style="font-size: 0.70rem; color: #c084fc; margin-bottom: 0;">
+              <input type="checkbox" id="chkAnamorphic" onchange="debounceCompile()"> Anamorphic Engine
+            </label>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+            <div class="field-group">
+              <label for="squeezeSelect" style="font-size: 0.68rem;">Squeeze Factor</label>
+              <select id="squeezeSelect" onchange="debounceCompile()" style="font-size: 0.74rem;">
+                <option value="default" selected>Auto (2.0x Scope)</option>
+                <option value="2.0x">2.0x True Scope</option>
+                <option value="1.8x">1.8x Modern Cinema</option>
+                <option value="1.5x">1.5x Full-Frame</option>
+                <option value="1.33x">1.33x 16:9 Sensor</option>
+                <option value="1.0x">1.0x Spherical</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="streakFlareSelect" style="font-size: 0.68rem;">Streak Flare</label>
+              <select id="streakFlareSelect" onchange="debounceCompile()" style="font-size: 0.74rem;">
+                <option value="none" selected>None (Clean)</option>
+                <option value="cyan_blue">Cyan-Blue Sci-Fi Streak</option>
+                <option value="warm_gold">Warm Amber-Gold Flare</option>
+                <option value="neutral_silver">Neutral Silver Acutance</option>
+                <option value="vintage_magenta">Vintage Magenta Flare</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="irisBladesSelect" style="font-size: 0.68rem;">Aperture Iris</label>
+              <select id="irisBladesSelect" onchange="debounceCompile()" style="font-size: 0.74rem;">
+                <option value="default" selected>Default Iris</option>
+                <option value="14_blade_circular">14-Blade Circular (Smooth 2:1 Ovals)</option>
+                <option value="9_blade_rounded">9-Blade Rounded (18-Point Sunstars)</option>
+                <option value="8_blade_octagonal">8-Blade Octagonal (8-Point Diffraction)</option>
+                <option value="6_blade_hexagonal">6-Blade Hexagonal (Vintage Diffraction)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool 3: Commercial Advertising Suite (Gobo + Grip + Copy-Space + Safe-Zone) -->
+        <div style="background: rgba(245, 158, 11, 0.04); border: 1px solid rgba(245, 158, 11, 0.22); border-radius: 8px; padding: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+            <span style="font-size: 0.76rem; font-weight: 700; color: var(--accent-amber); text-transform: uppercase; letter-spacing: 0.05em;">
+              📐 Commercial Advertising Suite (Gobo & Ad Safe-Zones)
+            </span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <div class="field-group">
+              <label for="goboSelect" style="font-size: 0.68rem;">Gobo Projection Cookie</label>
+              <select id="goboSelect" onchange="debounceCompile()" style="font-size: 0.74rem;">
+                <option value="none" selected>None (Clean Studio Key)</option>
+                <option value="venetian_blinds">Venetian Blinds (Cinematic Slits)</option>
+                <option value="dappled_foliage">Dappled Foliage / Monstera</option>
+                <option value="window_panes">Architectural Window Mullions</option>
+                <option value="geometric_slits">Modern Geometric Slits</option>
+                <option value="prism_fracture">Prism Refraction Shadow</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="gripModifierSelect" style="font-size: 0.68rem;">Studio Grip Modifier</label>
+              <select id="gripModifierSelect" onchange="debounceCompile()" style="font-size: 0.74rem;">
+                <option value="none" selected>None (Standard Reflector)</option>
+                <option value="beauty_dish_honeycomb">Beauty Dish + 20° Honeycomb Grid</option>
+                <option value="butterfly_8x8_silk">8x8ft Butterfly Diffusion Silk</option>
+                <option value="snoot_pinpoint">Conical Snoot (Pinpoint Specular)</option>
+                <option value="solid_black_floppy">Solid Black Floppy Flag (Negative Fill)</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="lightingRatioSelect" style="font-size: 0.68rem;">Lighting Contrast Ratio</label>
+              <select id="lightingRatioSelect" onchange="debounceCompile()" style="font-size: 0.74rem;">
+                <option value="default" selected>Default Studio Contrast</option>
+                <option value="1:1">1:1 Flat Commercial (High-Key)</option>
+                <option value="2:1">2:1 Gentle Subtlety (Catalog)</option>
+                <option value="4:1">4:1 Editorial Modeling (Portrait)</option>
+                <option value="8:1">8:1 Dramatic Noir Chiaroscuro</option>
+                <option value="16:1">16:1 Silhouette Low-Key</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="copySpaceSelect" style="font-size: 0.68rem;">Billboard / Ad Copy-Space</label>
+              <select id="copySpaceSelect" onchange="debounceCompile()" style="font-size: 0.74rem;">
+                <option value="none" selected>None (Centered Layout)</option>
+                <option value="left_third">Left Third Negative Space</option>
+                <option value="right_third">Right Third Negative Space</option>
+                <option value="top_third">Top Third Negative Space (Headline)</option>
+                <option value="bottom_third">Bottom Third Negative Space (CTA)</option>
+              </select>
+            </div>
+            <div class="field-group" style="grid-column: span 2;">
+              <label for="adSafeZoneSelect" style="font-size: 0.68rem;">Social Platform UI Safe-Zone Framing</label>
+              <select id="adSafeZoneSelect" onchange="debounceCompile()" style="font-size: 0.74rem;">
+                <option value="none" selected>None / Full Frame Exposure</option>
+                <option value="tiktok_reels_9_16">TikTok & Instagram Reels (9:16 — Bottom 20% & Right 15% UI Clearance)</option>
+                <option value="instagram_feed_4_5">Instagram Feed (4:5 — 1:1 Center Square Grid Safe Anchor)</option>
+                <option value="ecommerce_catalog_1_1">E-Commerce Catalog (1:1 — Clean 10% Margin Padding Buffer)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 06. BRUTAL SHARPNESS & QUALITY ENFORCEMENT -->
+      <div class="panel-section">
+        <div class="section-header">
+          <div class="section-title">06. Brutal Sharpness & Quality Shields</div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.2rem;">
           <label class="check-item" style="font-weight: 600;">
@@ -1267,6 +1413,45 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <span style="font-size: 0.7rem; color: var(--accent-green); font-family: var(--font-mono); font-weight: 700;" id="gateStatusBadge">ALL GATES LOCKED</span>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; padding: 0.75rem;" id="gateChecklistContainer">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Biomechanical Hand Precision Gate Live Telemetry -->
+      <div class="card" id="handGateCard" style="display: none; border-color: rgba(6, 182, 212, 0.4); background: rgba(6, 182, 212, 0.03);">
+        <div class="card-header">
+          <span class="card-title" style="color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem;">
+            <span>🖐️</span> Biomechanical Hand Precision Gate // 5-Point Grip Lock
+          </span>
+          <span style="font-size: 0.7rem; color: var(--accent-green); font-family: var(--font-mono); font-weight: 700;">ANATOMY LOCKED</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; padding: 0.75rem;" id="handChecklistContainer">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Cinema Anamorphic Optics & Flare Engine Live Telemetry -->
+      <div class="card" id="anamorphicCard" style="display: none; border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.03);">
+        <div class="card-header">
+          <span class="card-title" style="color: #c084fc; display: flex; align-items: center; gap: 0.5rem;">
+            <span>🎬</span> Cinema Anamorphic Optics & Flare Engine // Live Telemetry
+          </span>
+          <span style="font-size: 0.7rem; color: #c084fc; font-family: var(--font-mono); font-weight: 700;">SCOPE RIG ACTIVE</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; padding: 0.75rem;" id="anamorphicContainer">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Commercial Advertising Suite Live Telemetry -->
+      <div class="card" id="advertisingCard" style="display: none; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.03);">
+        <div class="card-header">
+          <span class="card-title" style="color: var(--accent-amber); display: flex; align-items: center; gap: 0.5rem;">
+            <span>📐</span> Commercial Advertising Suite // Light Shaper & Safe-Zone
+          </span>
+          <span style="font-size: 0.7rem; color: var(--accent-amber); font-family: var(--font-mono); font-weight: 700;">STUDIO RIG LOCKED</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; padding: 0.75rem;" id="advertisingContainer">
           <!-- Dynamically populated -->
         </div>
       </div>
@@ -1735,6 +1920,57 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         lighting: "architectural_skylight",
         filmStock: "portra_160",
         filter: "none"
+      },
+      hollywood_anamorphic: {
+        profile: "arri_alexa_35",
+        subject: "Cinematic operative in wet rain-slicked city avenue, intense focused stillness",
+        framing: "widescreen medium cinematic shot",
+        environment: "rain-soaked neon district with reflective wet asphalt and vertical anamorphic light streaks",
+        wardrobe: "dark distressed tactical trench coat",
+        mood: "cinematic tension, atmospheric sci-fi noir",
+        aperture: "f/2.0",
+        timeWeather: "rainy_wet",
+        cityVibe: "tokyo",
+        lighting: "neon",
+        filmStock: "arri_logc4",
+        filter: "anamorphic_streak",
+        aspectRatio: "21:9",
+        anamorphic: true,
+        squeeze: "2.0x",
+        streakFlare: "cyan_blue",
+        irisBlades: "14_blade_circular",
+        gobo: "geometric_slits",
+        lightingRatio: "8:1"
+      },
+      commercial_billboard_copy_space: {
+        profile: "phase_one_iq4",
+        subject: "Luxury skincare essence glass bottle held by elegant hand in precision pinch grip",
+        framing: "asymmetric commercial advertising layout with negative copy space",
+        environment: "architectural limestone studio plinth with sharp raking shadow patterns",
+        wardrobe: "none",
+        mood: "prestigious commercial luxury, pristine high-acutance minimalism",
+        aperture: "f/8.0",
+        timeWeather: "auto",
+        cityVibe: "none",
+        lighting: "strobe_para",
+        filmStock: "digital_raw",
+        filter: "none",
+        aspectRatio: "4:5",
+        handLock: true,
+        gripType: "precision_pinch",
+        handDetails: "slender fingers, visible lunula, natural cuticles, contact tissue blanching on glass",
+        gobo: "venetian_blinds",
+        gripModifier: "beauty_dish_honeycomb",
+        lightingRatio: "4:1",
+        copySpace: "left_third",
+        adSafeZone: "instagram_feed_4_5",
+        productCrop: "essence_bottle_hero.png",
+        skuColor: "Pantone 296 C Deep Navy (#001F3F)",
+        capGeometry: "Brushed aluminum knurled dropper collar",
+        labelKerning: "Optically locked serif tracking +20",
+        materialFinish: "Satin frosted cosmetic glass, 12% specular roughness",
+        seamGeometry: "Seamless polished base rim",
+        approvalGate: true
       }
     };
 
@@ -1995,6 +2231,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         if (s.productCrop && document.getElementById('productCropInput')) document.getElementById('productCropInput').value = s.productCrop;
       }
 
+      if (s.handLock !== undefined && document.getElementById('chkHandLock')) document.getElementById('chkHandLock').checked = !!s.handLock;
+      if (s.gripType && document.getElementById('gripTypeSelect')) document.getElementById('gripTypeSelect').value = s.gripType;
+      if (s.handDetails && document.getElementById('handDetailsInput')) document.getElementById('handDetailsInput').value = s.handDetails;
+
+      if (s.anamorphic !== undefined && document.getElementById('chkAnamorphic')) document.getElementById('chkAnamorphic').checked = !!s.anamorphic;
+      if (s.squeeze && document.getElementById('squeezeSelect')) document.getElementById('squeezeSelect').value = s.squeeze;
+      if (s.streakFlare && document.getElementById('streakFlareSelect')) document.getElementById('streakFlareSelect').value = s.streakFlare;
+      if (s.irisBlades && document.getElementById('irisBladesSelect')) document.getElementById('irisBladesSelect').value = s.irisBlades;
+
+      if (s.gobo && document.getElementById('goboSelect')) document.getElementById('goboSelect').value = s.gobo;
+      if (s.gripModifier && document.getElementById('gripModifierSelect')) document.getElementById('gripModifierSelect').value = s.gripModifier;
+      if (s.lightingRatio && document.getElementById('lightingRatioSelect')) document.getElementById('lightingRatioSelect').value = s.lightingRatio;
+      if (s.copySpace && document.getElementById('copySpaceSelect')) document.getElementById('copySpaceSelect').value = s.copySpace;
+      if (s.adSafeZone && document.getElementById('adSafeZoneSelect')) document.getElementById('adSafeZoneSelect').value = s.adSafeZone;
+      if (s.aspectRatio && document.getElementById('aspectSelect')) document.getElementById('aspectSelect').value = s.aspectRatio;
+
       setAperture(s.aperture || 'f/2.8');
       debounceCompile();
     }
@@ -2014,6 +2266,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (document.getElementById('labelKerningInput')) document.getElementById('labelKerningInput').value = '';
       if (document.getElementById('materialFinishInput')) document.getElementById('materialFinishInput').value = '';
       if (document.getElementById('seamsInput')) document.getElementById('seamsInput').value = '';
+
+      if (document.getElementById('chkHandLock')) document.getElementById('chkHandLock').checked = false;
+      if (document.getElementById('gripTypeSelect')) document.getElementById('gripTypeSelect').value = 'default';
+      if (document.getElementById('handDetailsInput')) document.getElementById('handDetailsInput').value = '';
+
+      if (document.getElementById('chkAnamorphic')) document.getElementById('chkAnamorphic').checked = false;
+      if (document.getElementById('squeezeSelect')) document.getElementById('squeezeSelect').value = 'default';
+      if (document.getElementById('streakFlareSelect')) document.getElementById('streakFlareSelect').value = 'none';
+      if (document.getElementById('irisBladesSelect')) document.getElementById('irisBladesSelect').value = 'default';
+
+      if (document.getElementById('goboSelect')) document.getElementById('goboSelect').value = 'none';
+      if (document.getElementById('gripModifierSelect')) document.getElementById('gripModifierSelect').value = 'none';
+      if (document.getElementById('lightingRatioSelect')) document.getElementById('lightingRatioSelect').value = 'default';
+      if (document.getElementById('copySpaceSelect')) document.getElementById('copySpaceSelect').value = 'none';
+      if (document.getElementById('adSafeZoneSelect')) document.getElementById('adSafeZoneSelect').value = 'none';
+
       document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
       
       showToast("Cleared! Write freely for total element of surprise.");
@@ -2290,6 +2558,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         content_type: document.getElementById('contentTypeSelect') ? document.getElementById('contentTypeSelect').value : 'photograph',
         text_preservation: document.getElementById('chkTextPreserve') ? document.getElementById('chkTextPreserve').checked : true,
         output_resolution: selectedResText,
+        hand_lock: document.getElementById('chkHandLock') ? document.getElementById('chkHandLock').checked : false,
+        grip_type: (document.getElementById('gripTypeSelect') && document.getElementById('gripTypeSelect').value !== 'default') ? document.getElementById('gripTypeSelect').value : null,
+        hand_details: document.getElementById('handDetailsInput') ? document.getElementById('handDetailsInput').value.trim() : null,
+        anamorphic: document.getElementById('chkAnamorphic') ? document.getElementById('chkAnamorphic').checked : false,
+        squeeze: (document.getElementById('squeezeSelect') && document.getElementById('squeezeSelect').value !== 'default') ? document.getElementById('squeezeSelect').value : null,
+        streak_flare: (document.getElementById('streakFlareSelect') && document.getElementById('streakFlareSelect').value !== 'none') ? document.getElementById('streakFlareSelect').value : null,
+        iris_blades: (document.getElementById('irisBladesSelect') && document.getElementById('irisBladesSelect').value !== 'default') ? document.getElementById('irisBladesSelect').value : null,
+        gobo: (document.getElementById('goboSelect') && document.getElementById('goboSelect').value !== 'none') ? document.getElementById('goboSelect').value : null,
+        grip_modifier: (document.getElementById('gripModifierSelect') && document.getElementById('gripModifierSelect').value !== 'none') ? document.getElementById('gripModifierSelect').value : null,
+        lighting_ratio: (document.getElementById('lightingRatioSelect') && document.getElementById('lightingRatioSelect').value !== 'default') ? document.getElementById('lightingRatioSelect').value : null,
+        copy_space: (document.getElementById('copySpaceSelect') && document.getElementById('copySpaceSelect').value !== 'none') ? document.getElementById('copySpaceSelect').value : null,
+        ad_safe_zone: (document.getElementById('adSafeZoneSelect') && document.getElementById('adSafeZoneSelect').value !== 'none') ? document.getElementById('adSafeZoneSelect').value : null,
       };
 
       try {
@@ -2359,6 +2639,123 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           `;
         } else {
           gateCard.style.display = 'none';
+        }
+      }
+
+      // Render Biomechanical Hand Precision Gate Live Telemetry
+      const handCard = document.getElementById('handGateCard');
+      const isHandActive = (document.getElementById('chkHandLock') && document.getElementById('chkHandLock').checked) ||
+                           (data.parameters && data.parameters.hand_biomechanics_gate === true) ||
+                           (data.metadata && data.metadata.hand_lock === true);
+      if (handCard) {
+        if (isHandActive) {
+          handCard.style.display = 'block';
+          const container = document.getElementById('handChecklistContainer');
+          const gripVal = (document.getElementById('gripTypeSelect') && document.getElementById('gripTypeSelect').value !== 'default') ? document.getElementById('gripTypeSelect').value.replace(/_/g, ' ').toUpperCase() : 'PRECISION PINCH / WRAP';
+          const detailsVal = (document.getElementById('handDetailsInput') && document.getElementById('handDetailsInput').value.trim()) || '5-ray metacarpal architecture (2:3:4:3.5:2.5 length ratio)';
+
+          container.innerHTML = `
+            <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-cyan);">✓ Gate H1: Metacarpal Ray Ratio</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">2:3:4:3.5:2.5 Ray Structure Locked (5 distinct rays)</div>
+            </div>
+            <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-cyan);">✓ Gate H2: Articulation Creases</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">DIP, PIP & MCP joint lines under physiological tension</div>
+            </div>
+            <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-cyan);">✓ Gate H3: Ungual & Lunula Beds</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">Translucent nail plates with pale lunula crescents & natural eponychium</div>
+            </div>
+            <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-cyan);">✓ Gate H4: Grip Tissue Blanching</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">${gripVal} — localized capillary ischemia at contact points</div>
+            </div>
+            <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-cyan);">✓ Gate H5: 25+ Mutation Shield</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">${detailsVal}</div>
+            </div>
+          `;
+        } else {
+          handCard.style.display = 'none';
+        }
+      }
+
+      // Render Cinema Anamorphic Optics & Flare Engine Live Telemetry
+      const anaCard = document.getElementById('anamorphicCard');
+      const isAnaActive = (document.getElementById('chkAnamorphic') && document.getElementById('chkAnamorphic').checked) ||
+                          (data.metadata && data.metadata.is_anamorphic === true) ||
+                          (data.parameters && data.parameters.anamorphic_optics_active === true);
+      if (anaCard) {
+        if (isAnaActive) {
+          anaCard.style.display = 'block';
+          const container = document.getElementById('anamorphicContainer');
+          const sqVal = (document.getElementById('squeezeSelect') && document.getElementById('squeezeSelect').value !== 'default') ? document.getElementById('squeezeSelect').value : '2.0x Cinema Scope';
+          const flareVal = (document.getElementById('streakFlareSelect') && document.getElementById('streakFlareSelect').value !== 'none') ? document.getElementById('streakFlareSelect').value.replace(/_/g, ' ').toUpperCase() : 'CYAN-BLUE HORIZONTAL STREAK';
+          const irisVal = (document.getElementById('irisBladesSelect') && document.getElementById('irisBladesSelect').value !== 'default') ? document.getElementById('irisBladesSelect').value.replace(/_/g, ' ') : '14-blade circular diaphragm';
+
+          container.innerHTML = `
+            <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: #c084fc;">Anamorphic Squeeze</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">${sqVal} horizontal compression</div>
+            </div>
+            <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: #c084fc;">Oval Elliptical Bokeh</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">2:1 vertical oval out-of-focus blur discs</div>
+            </div>
+            <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: #c084fc;">Horizontal Streak Flare</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">${flareVal} edge-to-edge ray emission</div>
+            </div>
+            <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: #c084fc;">Diffraction Geometry</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">${irisVal} diffraction spikes</div>
+            </div>
+          `;
+        } else {
+          anaCard.style.display = 'none';
+        }
+      }
+
+      // Render Commercial Advertising Suite Live Telemetry
+      const adCard = document.getElementById('advertisingCard');
+      const hasGobo = (document.getElementById('goboSelect') && document.getElementById('goboSelect').value !== 'none');
+      const hasGrip = (document.getElementById('gripModifierSelect') && document.getElementById('gripModifierSelect').value !== 'none');
+      const hasRatio = (document.getElementById('lightingRatioSelect') && document.getElementById('lightingRatioSelect').value !== 'default');
+      const hasCopy = (document.getElementById('copySpaceSelect') && document.getElementById('copySpaceSelect').value !== 'none');
+      const hasSafe = (document.getElementById('adSafeZoneSelect') && document.getElementById('adSafeZoneSelect').value !== 'none');
+      const isAdActive = hasGobo || hasGrip || hasRatio || hasCopy || hasSafe || (data.metadata && data.metadata.copy_space);
+
+      if (adCard) {
+        if (isAdActive) {
+          adCard.style.display = 'block';
+          const container = document.getElementById('advertisingContainer');
+          const goboText = hasGobo ? document.getElementById('goboSelect').value.replace(/_/g, ' ') : 'Clean unobstructed key';
+          const gripText = hasGrip ? document.getElementById('gripModifierSelect').value.replace(/_/g, ' ') : 'Standard reflector';
+          const ratioText = hasRatio ? document.getElementById('lightingRatioSelect').value : '4:1 contrast';
+          const copyText = hasCopy ? document.getElementById('copySpaceSelect').value.replace(/_/g, ' ') : 'Full frame active subject';
+          const safeText = hasSafe ? document.getElementById('adSafeZoneSelect').value.replace(/_/g, ' ') : 'Standard broadcast framing';
+
+          container.innerHTML = `
+            <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-amber);">Gobo Projection Cookie</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">${goboText}</div>
+            </div>
+            <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-amber);">Studio Grip Modifier</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">${gripText}</div>
+            </div>
+            <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-amber);">Contrast Ratio</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">${ratioText} Key-to-Fill</div>
+            </div>
+            <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; padding: 0.5rem;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--accent-amber);">Copy-Space & Safe-Zone</div>
+              <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px;">${copyText} // ${safeText}</div>
+            </div>
+          `;
+        } else {
+          adCard.style.display = 'none';
         }
       }
 
@@ -2768,6 +3165,18 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 material_finish=body.get("material_finish"),
                 seam_geometry=body.get("seam_geometry"),
                 approval_gate_100pct=body.get("approval_gate_100pct", True),
+                hand_lock=body.get("hand_lock", False),
+                grip_type=body.get("grip_type"),
+                hand_details=body.get("hand_details"),
+                anamorphic=body.get("anamorphic", False),
+                anamorphic_squeeze=body.get("anamorphic_squeeze") or body.get("squeeze"),
+                streak_flare=body.get("streak_flare"),
+                iris_blades=body.get("iris_blades"),
+                gobo=body.get("gobo"),
+                grip_modifier=body.get("grip_modifier") or body.get("grip"),
+                lighting_ratio=body.get("lighting_ratio"),
+                copy_space=body.get("copy_space"),
+                ad_safe_zone=body.get("ad_safe_zone"),
             )
             self._send_json(payload.to_dict())
         except Exception as err:

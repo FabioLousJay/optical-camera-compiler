@@ -58,8 +58,48 @@ class RawSpecAdapter(BaseAdapter):
                 f"100% Approval Gate: {'ENFORCED' if scene.approval_gate_100pct else 'DISABLED'}",
             ])
 
+        if scene.is_anamorphic:
+            lines.extend([
+                "",
+                "--- Cinema Anamorphic Optics & Flare Engine ---",
+                f"Squeeze Factor: {scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else '2.0x'}",
+                f"Streak Flare Coating: {scene.streak_flare.value if scene.streak_flare else 'cyan_blue'}",
+                f"Iris Blades: {scene.iris_blades.value if scene.iris_blades else '14_blade_circular'}",
+                "Bokeh Geometry: 2:1 vertical elliptical oval bokeh discs",
+                "Diffraction Spikes: Symmetric starburst flare spikes derived from iris blade count",
+            ])
+
+        if scene.has_copy_space or scene.gobo or scene.grip_modifier or scene.lighting_ratio:
+            lines.extend([
+                "",
+                "--- Commercial Advertising Framing & Copy-Space ---",
+                f"Negative Copy-Space: {scene.copy_space.value if scene.copy_space else 'none'}",
+                f"Advertising Safe-Zone: {scene.ad_safe_zone.value if scene.ad_safe_zone else 'none'}",
+                f"Gobo Projection Cookie: {scene.gobo.value if scene.gobo else 'none'}",
+                f"Studio Grip Modifier: {scene.grip_modifier.value if scene.grip_modifier else 'none'}",
+                f"Lighting Contrast Ratio: {scene.lighting_ratio.value if scene.lighting_ratio else 'none'}",
+            ])
+
+        if scene.has_hand_lock:
+            lines.extend([
+                "",
+                "--- Biomechanical Hand & Finger Precision Gate ---",
+                f"Grip Type: {scene.grip_type.value if scene.grip_type else 'ergonomic_contact_grip'}",
+                f"Hand Details: {scene.hand_details or 'Natural 5-finger anatomical articulation'}",
+                "Gate H1 (Metacarpal Proportions): 5-ray architecture, 2:3:4:3.5:2.5 length ratio, distinct MCP/PIP/DIP joints",
+                "Gate H2 (Grip Physics): Contact tissue blanching under pressure, zero solid-object clipping",
+                "Gate H3 (Flexion Creases): Authentic palmar lines, defined thenar musculature, wrist tendon tension",
+                "Gate H4 (Nail Bed Realism): Translucent nail plate, pink vascular flush, pale lunula crescent, micro-cuticles",
+                "Gate H5 (Mutation Shield): 100% rejection of fused digits, extra phalanges, rubber knuckles, dislocated thumbs",
+            ])
+
         positive_prompt = "\n".join(lines)
-        negative_prompt = ", ".join(shield.all_tokens(include_product_drift=scene.has_product_lock))
+        negative_prompt = ", ".join(
+            shield.all_tokens(
+                include_product_drift=scene.has_product_lock,
+                include_hand_drift=scene.has_hand_lock,
+            )
+        )
 
         return CompiledPayload(
             target_engine=self.target_engine,

@@ -1,6 +1,14 @@
 from __future__ import annotations
 
-from ..models import CameraProfile, CompiledPayload, ReferenceMode, SceneInput, TargetEngine
+from ..models import (
+    AdSafeZone,
+    CameraProfile,
+    CompiledPayload,
+    CopySpace,
+    ReferenceMode,
+    SceneInput,
+    TargetEngine,
+)
 from .base import BaseAdapter
 
 
@@ -86,6 +94,20 @@ class SDXLAdapter(BaseAdapter):
             scene_str += ", restrained black-and-white indie-cinema monochrome, fine organic film grain"
         pos_chunks.append(scene_str)
 
+        if scene.has_copy_space:
+            if scene.copy_space and scene.copy_space != CopySpace.NONE:
+                pos_chunks.append(f"asymmetric commercial copy space in {scene.copy_space.value.replace('_', ' ')}")
+            if scene.ad_safe_zone and scene.ad_safe_zone != AdSafeZone.NONE:
+                pos_chunks.append(f"{scene.ad_safe_zone.value.replace('_', ' ')} advertising safe zone framing")
+
+        if scene.has_hand_lock:
+            grip_desc = scene.grip_type.value.replace("_", " ") if scene.grip_type else "contact grip"
+            details = f" ({scene.hand_details})" if scene.hand_details else ""
+            pos_chunks.append(
+                f"biomechanical 5-point hand precision lock ({grip_desc}{details}), 5-ray metacarpal architecture, authentic 5-finger anatomy, "
+                "distinct knuckles and PIP joints, contact blanching, translucent nail beds, lunula crescents"
+            )
+
         # Hardware & Optics
         hardware_tokens = [
             f"raw photograph captured on {optics.camera_system}",
@@ -95,6 +117,16 @@ class SDXLAdapter(BaseAdapter):
             optics.iso_base,
             optics.dynamic_range,
         ]
+        if scene.is_anamorphic:
+            squeeze = scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else "2.0x"
+            flare = scene.streak_flare.value.replace("_", " ") if scene.streak_flare else "cyan/blue"
+            blades = scene.iris_blades.value.replace("_", " ") if scene.iris_blades else "14-blade circular"
+            hardware_tokens.extend([
+                f"cinema anamorphic lens {squeeze} squeeze",
+                "vertical 2:1 elliptical oval bokeh discs",
+                f"{flare} horizontal streak flare",
+                f"{blades} iris",
+            ])
         if scene.optical_filter:
             hardware_tokens.append(scene.optical_filter)
         if scene.film_stock:
@@ -102,12 +134,19 @@ class SDXLAdapter(BaseAdapter):
         pos_chunks.extend(hardware_tokens)
 
         # Lighting setup
-        pos_chunks.extend(
-            [
-                lighting.primary_lighting,
-                lighting.light_transport,
-            ]
-        )
+        lighting_chunks = [
+            lighting.primary_lighting,
+            lighting.light_transport,
+        ]
+        if scene.lighting_ratio:
+            lighting_chunks.append(f"{scene.lighting_ratio.value} lighting contrast ratio")
+        if scene.gobo:
+            gobo_desc = scene.gobo.value.replace("_", " ")
+            lighting_chunks.append(f"optical {gobo_desc} gobo cookie projection")
+        if scene.grip_modifier:
+            grip_desc = scene.grip_modifier.value.replace("_", " ")
+            lighting_chunks.append(f"{grip_desc} studio grip")
+        pos_chunks.extend(lighting_chunks)
 
         # Micro-texture & physical optical falloff
         if is_product_lock:
@@ -168,9 +207,22 @@ class SDXLAdapter(BaseAdapter):
             include_outpaint=is_outpaint,
             include_skin_realism=scene.human_skin_realism,
             include_product_drift=is_product_lock,
+            include_hand_drift=scene.has_hand_lock,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
+
+        if scene.has_hand_lock:
+            all_negatives.extend(
+                [
+                    "fused fingers",
+                    "extra digits",
+                    "missing knuckles",
+                    "rubber knuckles",
+                    "clipping fingers",
+                    "deformed nails",
+                ]
+            )
 
         # Extra standard SDXL plastic artifact suppressors
         all_negatives.extend(

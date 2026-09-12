@@ -5,7 +5,21 @@ from __future__ import annotations
 from typing import Any
 
 from .compiler import compile_scene
-from .models import ContentType, ReferenceImageInput, ReferenceMode, SceneInput
+from .models import (
+    AdSafeZone,
+    AnamorphicSqueeze,
+    ContentType,
+    CopySpace,
+    GoboPattern,
+    GripModifier,
+    GripType,
+    IrisBladeCount,
+    LightingRatio,
+    ReferenceImageInput,
+    ReferenceMode,
+    SceneInput,
+    StreakFlare,
+)
 
 RIG_NAMES = [
     "Auto (Intelligent Camera Router)",
@@ -163,6 +177,45 @@ class OpticalCameraCompilerNode:
                 "brutal_sharpness_protocol": (["enabled", "disabled"], {"default": "enabled"}),
                 "suppress_text_branding": (["enabled", "disabled"], {"default": "enabled"}),
                 "append_negative_shield": (["yes", "no"], {"default": "yes"}),
+                "hand_lock": (["disabled", "enabled"], {"default": "disabled"}),
+                "grip_type": (
+                    ["default", "palm_support", "precision_pinch", "cylindrical_wrap", "relaxed_rest", "open_palm"],
+                    {"default": "default"},
+                ),
+                "hand_details": ("STRING", {"default": ""}),
+                "anamorphic": (["disabled", "enabled"], {"default": "disabled"}),
+                "anamorphic_squeeze": (
+                    ["default", "1.0x", "1.33x", "1.5x", "1.8x", "2.0x"],
+                    {"default": "default"},
+                ),
+                "streak_flare": (
+                    ["none", "cyan_blue", "warm_gold", "neutral_silver", "vintage_magenta"],
+                    {"default": "none"},
+                ),
+                "iris_blades": (
+                    ["default", "14_blade_circular", "9_blade_rounded", "8_blade_octagonal", "6_blade_hexagonal"],
+                    {"default": "default"},
+                ),
+                "gobo": (
+                    ["none", "venetian_blinds", "dappled_foliage", "window_panes", "geometric_slits", "prism_fracture"],
+                    {"default": "none"},
+                ),
+                "grip_modifier": (
+                    ["none", "beauty_dish_honeycomb", "butterfly_8x8_silk", "snoot_pinpoint", "solid_black_floppy"],
+                    {"default": "none"},
+                ),
+                "lighting_ratio": (
+                    ["default", "1:1", "2:1", "4:1", "8:1", "16:1"],
+                    {"default": "default"},
+                ),
+                "copy_space": (
+                    ["none", "left_third", "right_third", "top_third", "bottom_third"],
+                    {"default": "none"},
+                ),
+                "ad_safe_zone": (
+                    ["none", "tiktok_reels_9_16", "instagram_feed_4_5", "ecommerce_catalog_1_1"],
+                    {"default": "none"},
+                ),
             },
         }
 
@@ -196,6 +249,18 @@ class OpticalCameraCompilerNode:
         brutal_sharpness_protocol: str = "enabled",
         suppress_text_branding: str = "enabled",
         append_negative_shield: str = "yes",
+        hand_lock: str = "disabled",
+        grip_type: str = "default",
+        hand_details: str = "",
+        anamorphic: str = "disabled",
+        anamorphic_squeeze: str = "default",
+        streak_flare: str = "none",
+        iris_blades: str = "default",
+        gobo: str = "none",
+        grip_modifier: str = "none",
+        lighting_ratio: str = "default",
+        copy_space: str = "none",
+        ad_safe_zone: str = "none",
     ) -> tuple[str, str, str]:
         profile_id = RIG_NAME_TO_ID.get(camera_rig, "auto")
 
@@ -258,6 +323,25 @@ class OpticalCameraCompilerNode:
         except (ValueError, KeyError):
             ct_enum = ContentType.PHOTOGRAPH
 
+        hl_val = (hand_lock == "enabled")
+        gt_val = GripType.from_string(grip_type) if grip_type != "default" else None
+        hd_val = hand_details.strip() if hand_details.strip() else None
+
+        ana_val = (anamorphic == "enabled")
+        sq_val = (
+            AnamorphicSqueeze.from_string(anamorphic_squeeze)
+            if anamorphic_squeeze != "default"
+            else (AnamorphicSqueeze.SQUEEZE_2_0X if ana_val else None)
+        )
+        sf_val = StreakFlare.from_string(streak_flare) if streak_flare != "none" else None
+        ib_val = IrisBladeCount.from_string(iris_blades) if iris_blades != "default" else None
+
+        gobo_val = GoboPattern.from_string(gobo) if gobo != "none" else None
+        grip_val = GripModifier.from_string(grip_modifier) if grip_modifier != "none" else None
+        lr_val = LightingRatio.from_string(lighting_ratio) if lighting_ratio != "default" else None
+        cs_val = CopySpace.from_string(copy_space) if copy_space != "none" else None
+        asz_val = AdSafeZone.from_string(ad_safe_zone) if ad_safe_zone != "none" else None
+
         scene = SceneInput(
             subject=subject.strip(),
             environment=environment.strip() if environment.strip() else None,
@@ -277,6 +361,17 @@ class OpticalCameraCompilerNode:
             suppress_text_branding=(suppress_text_branding == "enabled"),
             human_skin_realism=(human_skin_realism == "enabled"),
             content_type=ct_enum,
+            hand_lock=hl_val,
+            grip_type=gt_val,
+            hand_details=hd_val,
+            anamorphic_squeeze=sq_val,
+            streak_flare=sf_val,
+            iris_blades=ib_val,
+            gobo=gobo_val,
+            grip_modifier=grip_val,
+            lighting_ratio=lr_val,
+            copy_space=cs_val,
+            ad_safe_zone=asz_val,
         )
 
         result = compile_scene(

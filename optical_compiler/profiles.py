@@ -9,17 +9,26 @@ import re
 from typing import Optional, Union
 
 from .models import (
+    AdSafeZone,
+    AnamorphicSqueeze,
     CameraProfile,
     CaptureMode,
     CAPTURE_MODE_DIRECTIVES,
+    CopySpace,
+    GoboPattern,
+    GripModifier,
+    GripType,
+    IrisBladeCount,
     LightingPreset,
     LIGHTING_PRESET_DESCRIPTIONS,
+    LightingRatio,
     LightingSetup,
     MicroPhysics,
     NegativeShield,
     ReferenceMode,
     SceneInput,
     SensorOptics,
+    StreakFlare,
 )
 
 DEFAULT_PROFILES_DIR = Path(__file__).resolve().parent.parent / "profiles"
@@ -37,6 +46,12 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "anamorphic flare",
             "arri signature",
             "cooke look",
+            "anamorphic",
+            "2.0x squeeze",
+            "streak flare",
+            "oval bokeh",
+            "flare engine",
+            "anamorphic lens",
         ],
     ),
     (
@@ -158,6 +173,13 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "perfume bottle",
             "cosmetics bottle",
             "commercial product",
+            "hand lock",
+            "grip lock",
+            "holding product",
+            "precision pinch",
+            "palm support",
+            "commercial advertising",
+            "copy space",
         ],
     ),
     (
@@ -259,6 +281,10 @@ def auto_select_profile(scene: Union[str, SceneInput]) -> str:
         if scene.reference and scene.reference.mode == ReferenceMode.DEPIXELATE_GFX100RF:
             return "fujifilm_gfx100rf"
         if scene.reference and scene.reference.mode == ReferenceMode.PRODUCT_LOCK:
+            return "phase_one_iq4"
+        if scene.is_anamorphic:
+            return "arri_alexa_35"
+        if scene.has_product_lock:
             return "phase_one_iq4"
         text = f"{scene.subject} {scene.framing or ''} {scene.environment or ''} {scene.mood or ''} {scene.camera_angle or ''} {scene.crowd_action or ''} {scene.sku_color or ''} {scene.cap_geometry or ''}".lower()
     else:
@@ -445,6 +471,63 @@ def apply_overrides(profile: CameraProfile, scene: SceneInput) -> CameraProfile:
         mono_text = "Restrained black-and-white, indie-cinema monochrome, gentle highlight roll-off, clean midtones, no HDR, fine consistent organic film grain"
         if mono_text not in p.sensor_and_optics.dynamic_range:
             p.sensor_and_optics.dynamic_range = f"{p.sensor_and_optics.dynamic_range}, {mono_text}"
+
+    # Anamorphic Cinema Optics & Flare Engine
+    if scene.is_anamorphic:
+        squeeze_val = scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else "2.0x"
+        flare_val = scene.streak_flare.value.replace("_", " ") if scene.streak_flare else "cyan/blue"
+        blades_val = scene.iris_blades.value.replace("_", " ") if scene.iris_blades else "14-blade circular"
+        if not scene.lens:
+            p.sensor_and_optics.lens = (
+                f"Cooke Anamorphic /i Full Frame Plus 2x Squeeze ({squeeze_val} cylindrical front element, "
+                f"{flare_val} horizontal streak flare, {blades_val} iris)"
+            )
+        anamorphic_bokeh_directive = (
+            f"Cinema anamorphic optical signature: {squeeze_val} squeeze factor rendering 2:1 vertical elliptical oval bokeh discs, "
+            f"horizontal {flare_val} streak flares on bright specular light sources, subtle edge astigmatism, gentle anamorphic barrel curvature"
+        )
+        p.micro_detail_and_physics.depth_and_optics.insert(0, anamorphic_bokeh_directive)
+
+    # Commercial Advertising Suite: Gobo & Grip Modifiers & Lighting Ratios
+    if scene.gobo:
+        gobo_desc = scene.gobo.value.replace("_", " ")
+        gobo_directive = f"Optical gobo projection cookie: {gobo_desc} casting architectural shadow pattern across subject/background with organic edge diffusion"
+        p.lighting_and_exposure.light_transport = f"{gobo_directive}, {p.lighting_and_exposure.light_transport}"
+
+    if scene.grip_modifier:
+        grip_desc = scene.grip_modifier.value.replace("_", " ")
+        p.lighting_and_exposure.light_transport = f"Studio grip: {grip_desc}, {p.lighting_and_exposure.light_transport}"
+
+    if scene.lighting_ratio:
+        ratio_desc = f"{scene.lighting_ratio.value} key-to-fill lighting contrast ratio"
+        p.lighting_and_exposure.primary_lighting = f"{p.lighting_and_exposure.primary_lighting} ({ratio_desc})"
+
+    # Commercial Advertising Suite: Copy-Space & Ad Safe-Zones
+    if scene.has_copy_space:
+        if scene.copy_space and scene.copy_space != CopySpace.NONE:
+            cs_desc = scene.copy_space.value.replace("_", " ")
+            p.micro_detail_and_physics.depth_and_optics.append(
+                f"Commercial advertising framing: Asymmetric negative copy-space strictly reserved in {cs_desc} with calm, uncluttered background for brand headline and typography"
+            )
+        if scene.ad_safe_zone and scene.ad_safe_zone != AdSafeZone.NONE:
+            sz_desc = scene.ad_safe_zone.value.replace("_", " ")
+            p.micro_detail_and_physics.depth_and_optics.append(
+                f"Social advertising safe-zone: Composition strictly formatted for {sz_desc}, keeping all critical subject matter and focal points safely clear of UI overlay zones"
+            )
+
+    # Biomechanical Hand & Finger Precision Gate
+    if scene.has_hand_lock:
+        grip_desc = scene.grip_type.value.replace("_", " ") if scene.grip_type else "ergonomic contact grip"
+        details = f" ({scene.hand_details})" if scene.hand_details else ""
+        hand_directive = (
+            f"Biomechanical 5-Point Hand Precision Gate ({grip_desc}{details}): "
+            "5-ray metacarpal architecture with correct anatomical proportions (2:3:4:3.5:2.5 length ratio), "
+            "distinct MCP, PIP, and DIP articulation, authentic palmar and digital flexion creases, "
+            "natural contact blanching (micro-capillary blood displacement and tissue compression where skin contacts object), "
+            "translucent nail beds with visible lunula crescents, authentic cuticles, and natural skin pores on thenar eminence. "
+            "Zero missing knuckles, zero fused digits, zero clipping through objects, zero rubber fingers."
+        )
+        p.micro_detail_and_physics.surface_rendering.insert(0, hand_directive)
 
     return p
 

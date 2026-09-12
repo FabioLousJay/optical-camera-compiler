@@ -5,8 +5,10 @@ from __future__ import annotations
 from typing import Any
 
 from ..models import (
+    AdSafeZone,
     CameraProfile,
     CompiledPayload,
+    CopySpace,
     ReferenceMode,
     SceneInput,
     TargetEngine,
@@ -76,6 +78,20 @@ class MidjourneyAdapter(BaseAdapter):
         else:
             core_elements.append(scene.subject)
 
+        if scene.has_hand_lock:
+            grip_desc = scene.grip_type.value.replace("_", " ") if scene.grip_type else "ergonomic grip"
+            details = f" {scene.hand_details}" if scene.hand_details else ""
+            core_elements.append(
+                f"biomechanical 5-point hand precision lock, 5-ray metacarpal architecture, authentic 5-finger anatomy, {grip_desc}{details}, "
+                "distinct knuckles and joints, contact tissue blanching, translucent nail beds with lunula"
+            )
+
+        if scene.has_copy_space:
+            if scene.copy_space and scene.copy_space != CopySpace.NONE:
+                core_elements.append(f"commercial negative copy space in {scene.copy_space.value.replace('_', ' ')}")
+            if scene.ad_safe_zone and scene.ad_safe_zone != AdSafeZone.NONE:
+                core_elements.append(f"{scene.ad_safe_zone.value.replace('_', ' ')} advertising safe zone framing")
+
         if scene.environment:
             core_elements.append(f"in {scene.environment}")
         if scene.wardrobe:
@@ -93,6 +109,16 @@ class MidjourneyAdapter(BaseAdapter):
             f"{optics.shutter}",
             f"{optics.iso_base}",
         ]
+        if scene.is_anamorphic:
+            squeeze = scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else "2.0x"
+            flare = scene.streak_flare.value.replace("_", " ") if scene.streak_flare else "cyan/blue"
+            blades = scene.iris_blades.value.replace("_", " ") if scene.iris_blades else "14-blade circular"
+            camera_tokens.extend([
+                f"cinema anamorphic lens {squeeze} squeeze",
+                "vertical elliptical oval bokeh discs",
+                f"{flare} horizontal streak flare",
+                f"{blades} iris",
+            ])
         if scene.optical_filter:
             camera_tokens.append(scene.optical_filter)
         if scene.film_stock:
@@ -110,6 +136,15 @@ class MidjourneyAdapter(BaseAdapter):
             "subsurface scattering",
             "natural material micro-relief",
         ]
+        if scene.lighting_ratio:
+            lighting_tokens.append(f"{scene.lighting_ratio.value} lighting contrast ratio")
+        if scene.gobo:
+            gobo_desc = scene.gobo.value.replace("_", " ")
+            lighting_tokens.append(f"optical {gobo_desc} gobo cookie projection shadows")
+        if scene.grip_modifier:
+            grip_desc = scene.grip_modifier.value.replace("_", " ")
+            lighting_tokens.append(f"{grip_desc} studio grip modifier")
+
         is_slow_shutter = (
             scene.capture_mode == "slow_shutter_crowd_motion"
             or (hasattr(scene.capture_mode, "value") and scene.capture_mode.value == "slow_shutter_crowd_motion")
@@ -135,8 +170,9 @@ class MidjourneyAdapter(BaseAdapter):
             prompt_parts.extend(scene.custom_positives)
 
         # 4. Midjourney flags
+        effective_ar = "2.39:1" if (scene.is_anamorphic and scene.aspect_ratio in ("4:5", "2.39:1")) else scene.aspect_ratio
         flags = [
-            f"--ar {scene.aspect_ratio}",
+            f"--ar {effective_ar}",
             "--style raw",
             "--v 8.2",
         ]
@@ -220,6 +256,20 @@ class MidjourneyAdapter(BaseAdapter):
                 "plastic finish",
                 "warped bottle",
                 "distorted packaging",
+            ])
+        if scene.has_hand_lock:
+            banned_mj.extend([
+                "fused digits",
+                "clipping fingers",
+                "extra phalanges",
+                "rubber knuckles",
+                "dislocated thumb",
+                "six fingers",
+                "four fingers",
+                "deformed fingernails",
+                "webbed fingers",
+                "missing knuckles",
+                "amorphous fingertip pads",
             ])
         if scene.is_monochrome:
             banned_mj.extend(["color", "sepia", "warm tint"])

@@ -3,7 +3,7 @@
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 73 Passing](https://img.shields.io/badge/tests-73%20passing-brightgreen.svg)](tests/)
+[![Tests: 111 Passing](https://img.shields.io/badge/tests-111%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -99,6 +99,45 @@ Commercial packaging and SKU generation with forensic anti-drift protection for 
   4. **Gate 4: Material Finish & Specular Response (`--material-finish`)**: Matte, satin, gloss, frosted glass, refractive index, and anti-plastic enforcement.
   5. **Gate 5: SKU Color Integrity (`--sku-color`)**: Exact Pantone/hex brand color lock across shifting scene lighting.
 * **Intelligent Camera Routing**: Commercial product locks auto-route to the **Phase One XF IQ4 150MP Trichromatic** digital back with Schneider Kreuznach optics.
+
+---
+
+## 🚀 Industry-Pioneering Precision Suites (v3.3)
+
+Three breakthrough features inspired by professional cinema optics, biomechanical hand anatomy research, and commercial billboard advertising standards:
+
+### 1. 🖐️ Biomechanical Hand & Finger Precision Gate (The 5-Point Grip Lock)
+Solves the quintessential AI image generation failure mode (mutated hands, fused fingers, polydactyly, rubber knuckles, lack of grip physics):
+* **Gate H1: 5-Ray Metacarpal Architecture**: Exactly five articulated digits (thumb, index, middle, ring, pinky) following anatomical human length ratios ($2:3:4:3.5:2.5$) and distinct metacarpophalangeal (MCP), proximal interphalangeal (PIP), and distal interphalangeal (DIP) joints.
+* **Gate H2: Contact Physics & Tissue Blanching**: Micro-vascular capillary displacement and authentic skin blanching where flesh compresses against grasped surfaces under mechanical load. Prohibits clipping or penetration through solid objects.
+* **Gate H3: Flexion Creases & Thenar Musculature**: Authentic palmar and digital flexion creases, distinct thenar and hypothenar eminence musculature, and visible wrist tendon tension.
+* **Gate H4: Ungual Bed & Lunula Precision**: Translucent nail plates with natural pinkish vascular flush, pale lunula crescents, micro-cuticles, and clean natural nail margins.
+* **Gate H5: Anti-Hallucination Hand Negative Lock**: 32+ specialized anti-mutation negative tokens (`extra fingers`, `missing fingers`, `fused digits`, `polydactyly`, `ectrodactyly`, `webbed digits`, `floating knuckles`, `rubber knuckles`, etc.).
+* **Grip Type Taxonomy (`--grip-type`)**: `precision_pinch`, `cylindrical_wrap`, `palm_support`, `relaxed_rest`, `open_palm`.
+* **CLI Flag**: `--hand-lock`, `--grip-type precision_pinch`, `--hand-details "..."`
+
+### 2. 🎬 Cinema Anamorphic Optics & Flare Engine
+Simulates authentic anamorphic cinema primes (Cooke Anamorphic /i Full Frame Plus, ARRI Master Anamorphic):
+* **Auto-Routing to ARRI Alexa 35**: Specifying anamorphic squeeze automatically routes to `arri_alexa_35` Super 35 cinema sensor.
+* **Cylindrical Elements & Squeeze Factors (`--squeeze`)**: `2.0x` (standard cinema scope), `1.8x`, `1.5x`, `1.33x`, `1.0x`.
+* **2:1 Vertical Elliptical Oval Bokeh**: Simulates horizontal optical squeeze where out-of-focus background highlights render as vertical oval discs with subtle edge astigmatism and gentle barrel curvature.
+* **Chromatic Streak Flare Coatings (`--streak-flare`)**:
+  * `cyan_blue`: Classic modern sci-fi / dramatic cinema horizontal streak flares.
+  * `warm_gold`: 1970s Panavision golden hour nostalgia.
+  * `neutral_silver`: Clean, uncolored high-end commercial streaks.
+  * `vintage_magenta`: Retro neon indie aesthetics.
+* **Iris Blade Diffraction Spikes (`--iris-blades`)**: `14_blade_circular` (smooth circular bokeh), `9_blade_rounded`, `8_blade_octagonal` (8-point starburst spikes), `6_blade_hexagonal` (classic 6-point starburst).
+* **Automatic Cinema Framing**: Midjourney outputs `--ar 2.39:1` cinema scope automatically.
+* **CLI Flag**: `--anamorphic`, `--squeeze 2.0x`, `--streak-flare cyan_blue`, `--iris-blades 14_blade_circular`
+
+### 3. 📢 Commercial Advertising Suite (Gobo Light Shapers + Ad-Safe Copy-Space)
+Transforms raw photo generations into ready-to-deploy commercial, print, billboard, and social advertising assets:
+* **Optical Gobo Projection Cookies (`--gobo`)**: Projects crisp architectural and organic shadow patterns: `venetian_blinds`, `dappled_foliage`, `window_panes`, `geometric_slits`, `prism_fracture`.
+* **Professional Studio Grip Modifiers (`--grip`)**: `beauty_dish_honeycomb` (20° directional beauty lighting), `butterfly_8x8_silk` (diffused ambient wrap), `snoot_grid` (pinpoint spotlighting), `floppy_negative_fill` (deep shadow sculpting).
+* **Key-to-Fill Contrast Ratios (`--lighting-ratio`)**: `1:1` (high-key catalog), `2:1` (commercial editorial), `4:1` (classic studio portrait), `8:1` (dramatic chiaroscuro), `16:1` (extreme low-key).
+* **Asymmetric Negative Copy-Space (`--copy-space`)**: `left_third`, `right_third`, `top_third`, `bottom_third`—strictly reserves calm, uncluttered background space for brand headlines, logos, and typographic copy.
+* **Ad-Safe Safe-Zone Framing (`--ad-safe-zone`)**: `tiktok_reels_9_16` (keeps content clear of right-side icons and bottom captions), `instagram_feed_4_5`, `ecommerce_catalog_1_1`.
+* **CLI Flag**: `--gobo venetian_blinds`, `--grip beauty_dish_honeycomb`, `--lighting-ratio 4:1`, `--copy-space left_third`, `--ad-safe-zone instagram_feed_4_5`
 
 ---
 
@@ -489,6 +528,43 @@ python3 -m optical_compiler "Luxury cosmetic serum bottle on polished dark slate
   --target gpt_images \
   -c
 ```
+
+### 7. Biomechanical Hand Precision Gate (5-Point Grip Lock)
+Compile a scene requiring complex hand interaction with strict metacarpal proportions and micro-vascular contact tissue blanching:
+```bash
+python3 -m optical_compiler "Master horologist delicately placing a tourbillon balance wheel with titanium tweezers" \
+  --hand-lock \
+  --grip-type precision_pinch \
+  --hand-details "translucent nail beds with pale lunula, micro contact blanching on fingertips, zero clipping" \
+  --target flux \
+  -c
+```
+
+### 8. Cinema Anamorphic Optics & Flare Engine (2.0x Squeeze & Cyan Streak Flares)
+Compile a cinematic wide frame with ARRI Alexa 35, Cooke Anamorphic glass, vertical oval bokeh, and chromatic streak flares:
+```bash
+python3 -m optical_compiler "Neon-drenched cyberpunk detective gazing through rain-slicked windshield at midnight" \
+  --anamorphic \
+  --squeeze 2.0x \
+  --streak-flare cyan_blue \
+  --iris-blades 14_blade_circular \
+  --target midjourney \
+  -c
+```
+
+### 9. Commercial Advertising Suite (Gobo Cookies, Grip, & Copy-Space Safe-Zone)
+Compile a billboard-ready advertising layout with architectural window gobo shadows, 4:1 key-to-fill ratio, and left-third negative space:
+```bash
+python3 -m optical_compiler "Elegantly sculpted perfume bottle standing on polished travertine marble" \
+  --gobo venetian_blinds \
+  --grip beauty_dish_honeycomb \
+  --lighting-ratio 4:1 \
+  --copy-space left_third \
+  --ad-safe-zone instagram_feed_4_5 \
+  --target gpt_images \
+  -c
+```
+
 
 ---
 

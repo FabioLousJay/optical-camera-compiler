@@ -18,6 +18,7 @@ class TargetEngine(str, Enum):
     SDXL = "sdxl"
     RAW = "raw"
     JSON_PROMPT = "json"
+    JSON = "json"
 
     @classmethod
     def from_str(cls, value: str) -> TargetEngine:
@@ -246,6 +247,386 @@ class ContentType(str, Enum):
             ContentType.MEME_OR_INFOGRAPHIC,
             ContentType.UI_OR_SCREENSHOT,
         )
+
+
+class GripType(str, Enum):
+    """Commercial product grip geometry and contact types."""
+
+    PALM_SUPPORT = "palm_support"
+    PRECISION_PINCH = "precision_pinch"
+    CYLINDRICAL_WRAP = "cylindrical_wrap"
+    RELAXED_REST = "relaxed_rest"
+    OPEN_PALM = "open_palm"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[GripType]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "pinch": cls.PRECISION_PINCH,
+            "pinch_grip": cls.PRECISION_PINCH,
+            "fingertip": cls.PRECISION_PINCH,
+            "precision": cls.PRECISION_PINCH,
+            "precision_pinch": cls.PRECISION_PINCH,
+            "wrap": cls.CYLINDRICAL_WRAP,
+            "cylindrical": cls.CYLINDRICAL_WRAP,
+            "cylindrical_wrap": cls.CYLINDRICAL_WRAP,
+            "bottle_wrap": cls.CYLINDRICAL_WRAP,
+            "power_grip": cls.CYLINDRICAL_WRAP,
+            "support": cls.PALM_SUPPORT,
+            "palm": cls.PALM_SUPPORT,
+            "palm_support": cls.PALM_SUPPORT,
+            "flat_palm": cls.PALM_SUPPORT,
+            "rest": cls.RELAXED_REST,
+            "relaxed": cls.RELAXED_REST,
+            "relaxed_rest": cls.RELAXED_REST,
+            "loose": cls.RELAXED_REST,
+            "open": cls.OPEN_PALM,
+            "open_palm": cls.OPEN_PALM,
+            "splay": cls.OPEN_PALM,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+    from_string = from_str
+
+
+class AnamorphicSqueeze(str, Enum):
+    """Cinema anamorphic squeeze ratios."""
+
+    SPHERICAL = "1.0x"
+    SQUEEZE_1_33X = "1.33x"
+    SQUEEZE_1_5X = "1.5x"
+    SQUEEZE_1_8X = "1.8x"
+    SQUEEZE_2_0X = "2.0x"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[AnamorphicSqueeze]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "spherical": cls.SPHERICAL,
+            "1.0": cls.SPHERICAL,
+            "1.0x": cls.SPHERICAL,
+            "1x": cls.SPHERICAL,
+            "1.33": cls.SQUEEZE_1_33X,
+            "1.33x": cls.SQUEEZE_1_33X,
+            "1.5": cls.SQUEEZE_1_5X,
+            "1.5x": cls.SQUEEZE_1_5X,
+            "1.8": cls.SQUEEZE_1_8X,
+            "1.8x": cls.SQUEEZE_1_8X,
+            "2.0": cls.SQUEEZE_2_0X,
+            "2.0x": cls.SQUEEZE_2_0X,
+            "2x": cls.SQUEEZE_2_0X,
+            "anamorphic": cls.SQUEEZE_2_0X,
+            "cinema_anamorphic": cls.SQUEEZE_2_0X,
+            "2.0x_cinema": cls.SQUEEZE_2_0X,
+            "scope": cls.SQUEEZE_2_0X,
+            "cinema_scope": cls.SQUEEZE_2_0X,
+            "anamorphic_2x": cls.SQUEEZE_2_0X,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+    from_string = from_str
+
+
+class StreakFlare(str, Enum):
+    """Anamorphic cylindrical lens flare coatings and chromatic signatures."""
+
+    CYAN_BLUE = "cyan_blue"
+    WARM_GOLD = "warm_gold"
+    NEUTRAL_SILVER = "neutral_silver"
+    VINTAGE_MAGENTA = "vintage_magenta"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[StreakFlare]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "cyan": cls.CYAN_BLUE,
+            "blue": cls.CYAN_BLUE,
+            "cyan_blue": cls.CYAN_BLUE,
+            "sci_fi": cls.CYAN_BLUE,
+            "gold": cls.WARM_GOLD,
+            "warm_gold": cls.WARM_GOLD,
+            "amber": cls.WARM_GOLD,
+            "vintage_gold": cls.WARM_GOLD,
+            "silver": cls.NEUTRAL_SILVER,
+            "neutral": cls.NEUTRAL_SILVER,
+            "neutral_silver": cls.NEUTRAL_SILVER,
+            "white": cls.NEUTRAL_SILVER,
+            "magenta": cls.VINTAGE_MAGENTA,
+            "vintage": cls.VINTAGE_MAGENTA,
+            "vintage_magenta": cls.VINTAGE_MAGENTA,
+            "purple": cls.VINTAGE_MAGENTA,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+    from_string = from_str
+
+
+class IrisBladeCount(str, Enum):
+    """Lens iris blade geometry shaping out-of-focus bokeh discs and diffraction spikes."""
+
+    CIRCULAR_14 = "14_blade_circular"
+    ROUNDED_9 = "9_blade_rounded"
+    OCTAGONAL_8 = "8_blade_octagonal"
+    HEXAGONAL_6 = "6_blade_hexagonal"
+
+    BLADES_14_CIRCULAR = "14_blade_circular"
+    BLADES_9_ROUNDED = "9_blade_rounded"
+    BLADES_8_OCTAGONAL = "8_blade_octagonal"
+    BLADES_6_HEXAGONAL = "6_blade_hexagonal"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[IrisBladeCount]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "14": cls.CIRCULAR_14,
+            "14_blade": cls.CIRCULAR_14,
+            "14_blade_circular": cls.CIRCULAR_14,
+            "circular": cls.CIRCULAR_14,
+            "9": cls.ROUNDED_9,
+            "9_blade": cls.ROUNDED_9,
+            "9_blade_rounded": cls.ROUNDED_9,
+            "rounded": cls.ROUNDED_9,
+            "8": cls.OCTAGONAL_8,
+            "8_blade": cls.OCTAGONAL_8,
+            "8_blade_octagonal": cls.OCTAGONAL_8,
+            "octagonal": cls.OCTAGONAL_8,
+            "6": cls.HEXAGONAL_6,
+            "6_blade": cls.HEXAGONAL_6,
+            "6_blade_hexagonal": cls.HEXAGONAL_6,
+            "hexagonal": cls.HEXAGONAL_6,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+    from_string = from_str
+
+
+class GoboPattern(str, Enum):
+    """Optical pattern projection cookies / gobos for commercial lighting."""
+
+    VENETIAN_BLINDS = "venetian_blinds"
+    DAPPLED_FOLIAGE = "dappled_foliage"
+    WINDOW_PANES = "window_panes"
+    GEOMETRIC_SLITS = "geometric_slits"
+    PRISM_FRACTURE = "prism_fracture"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[GoboPattern]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "blinds": cls.VENETIAN_BLINDS,
+            "venetian": cls.VENETIAN_BLINDS,
+            "venetian_blinds": cls.VENETIAN_BLINDS,
+            "foliage": cls.DAPPLED_FOLIAGE,
+            "dappled": cls.DAPPLED_FOLIAGE,
+            "dappled_foliage": cls.DAPPLED_FOLIAGE,
+            "leaves": cls.DAPPLED_FOLIAGE,
+            "window": cls.WINDOW_PANES,
+            "windows": cls.WINDOW_PANES,
+            "panes": cls.WINDOW_PANES,
+            "window_panes": cls.WINDOW_PANES,
+            "slits": cls.GEOMETRIC_SLITS,
+            "geometric": cls.GEOMETRIC_SLITS,
+            "geometric_slits": cls.GEOMETRIC_SLITS,
+            "prism": cls.PRISM_FRACTURE,
+            "fracture": cls.PRISM_FRACTURE,
+            "prism_fracture": cls.PRISM_FRACTURE,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+    from_string = from_str
+
+
+class GripModifier(str, Enum):
+    """Professional studio grip modifiers."""
+
+    BEAUTY_DISH_HONEYCOMB = "beauty_dish_honeycomb"
+    BUTTERFLY_8X8_SILK = "butterfly_8x8_silk"
+    SNOOT_PINPOINT = "snoot_pinpoint"
+    SOLID_BLACK_FLOPPY = "solid_black_floppy"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[GripModifier]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "beauty_dish": cls.BEAUTY_DISH_HONEYCOMB,
+            "beauty_dish_honeycomb": cls.BEAUTY_DISH_HONEYCOMB,
+            "honeycomb": cls.BEAUTY_DISH_HONEYCOMB,
+            "grid": cls.BEAUTY_DISH_HONEYCOMB,
+            "butterfly": cls.BUTTERFLY_8X8_SILK,
+            "butterfly_8x8_silk": cls.BUTTERFLY_8X8_SILK,
+            "silk": cls.BUTTERFLY_8X8_SILK,
+            "8x8": cls.BUTTERFLY_8X8_SILK,
+            "scrim": cls.BUTTERFLY_8X8_SILK,
+            "snoot": cls.SNOOT_PINPOINT,
+            "snoot_pinpoint": cls.SNOOT_PINPOINT,
+            "pinpoint": cls.SNOOT_PINPOINT,
+            "floppy": cls.SOLID_BLACK_FLOPPY,
+            "solid_black_floppy": cls.SOLID_BLACK_FLOPPY,
+            "black_flag": cls.SOLID_BLACK_FLOPPY,
+            "negative_fill": cls.SOLID_BLACK_FLOPPY,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+    from_string = from_str
+
+
+class LightingRatio(str, Enum):
+    """Key-to-fill contrast ratios for commercial photography."""
+
+    RATIO_1_1 = "1:1"
+    RATIO_2_1 = "2:1"
+    RATIO_4_1 = "4:1"
+    RATIO_8_1 = "8:1"
+    RATIO_16_1 = "16:1"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[LightingRatio]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "1:1": cls.RATIO_1_1,
+            "flat": cls.RATIO_1_1,
+            "2:1": cls.RATIO_2_1,
+            "beauty": cls.RATIO_2_1,
+            "soft": cls.RATIO_2_1,
+            "4:1": cls.RATIO_4_1,
+            "commercial": cls.RATIO_4_1,
+            "editorial": cls.RATIO_4_1,
+            "8:1": cls.RATIO_8_1,
+            "dramatic": cls.RATIO_8_1,
+            "chiaroscuro": cls.RATIO_8_1,
+            "16:1": cls.RATIO_16_1,
+            "film_noir": cls.RATIO_16_1,
+            "noir": cls.RATIO_16_1,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+    from_string = from_str
+
+
+class CopySpace(str, Enum):
+    """Compositional negative space reserved for graphic design and advertising typography."""
+
+    NONE = "none"
+    LEFT_THIRD = "left_third"
+    RIGHT_THIRD = "right_third"
+    TOP_THIRD = "top_third"
+    BOTTOM_THIRD = "bottom_third"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[CopySpace]:
+        if not value:
+            return cls.NONE
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "left": cls.LEFT_THIRD,
+            "left_third": cls.LEFT_THIRD,
+            "right": cls.RIGHT_THIRD,
+            "right_third": cls.RIGHT_THIRD,
+            "top": cls.TOP_THIRD,
+            "top_third": cls.TOP_THIRD,
+            "header": cls.TOP_THIRD,
+            "bottom": cls.BOTTOM_THIRD,
+            "bottom_third": cls.BOTTOM_THIRD,
+            "footer": cls.BOTTOM_THIRD,
+            "none": cls.NONE,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return cls.NONE
+
+    from_string = from_str
+
+
+class AdSafeZone(str, Enum):
+    """Social and digital advertising safe-zone guidelines."""
+
+    NONE = "none"
+    TIKTOK_REELS_9_16 = "tiktok_reels_9_16"
+    INSTAGRAM_FEED_4_5 = "instagram_feed_4_5"
+    ECOMMERCE_CATALOG_1_1 = "ecommerce_catalog_1_1"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[AdSafeZone]:
+        if not value:
+            return cls.NONE
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "tiktok": cls.TIKTOK_REELS_9_16,
+            "reels": cls.TIKTOK_REELS_9_16,
+            "stories": cls.TIKTOK_REELS_9_16,
+            "9:16": cls.TIKTOK_REELS_9_16,
+            "vertical": cls.TIKTOK_REELS_9_16,
+            "tiktok_reels_9_16": cls.TIKTOK_REELS_9_16,
+            "instagram": cls.INSTAGRAM_FEED_4_5,
+            "feed": cls.INSTAGRAM_FEED_4_5,
+            "4:5": cls.INSTAGRAM_FEED_4_5,
+            "instagram_feed_4_5": cls.INSTAGRAM_FEED_4_5,
+            "catalog": cls.ECOMMERCE_CATALOG_1_1,
+            "ecommerce": cls.ECOMMERCE_CATALOG_1_1,
+            "1:1": cls.ECOMMERCE_CATALOG_1_1,
+            "ecommerce_catalog_1_1": cls.ECOMMERCE_CATALOG_1_1,
+            "none": cls.NONE,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return cls.NONE
+
+    from_string = from_str
 
 
 class ReferenceMode(str, Enum):
@@ -530,6 +911,42 @@ class NegativeShield:
             "missing neck threads",
         ]
     )
+    hand_drift: list[str] = field(
+        default_factory=lambda: [
+            "fused digits",
+            "clipping fingers",
+            "extra phalanges",
+            "rubber knuckles",
+            "dislocated thumb",
+            "webbed fingers",
+            "missing joints",
+            "deformed fingernails",
+            "backwards thumb",
+            "six fingers",
+            "four fingers",
+            "floating fingers",
+            "amorphous fingertip pads",
+            "plastic hand texture",
+            "unconnected thumb base",
+            "missing knuckles",
+            "finger through solid object",
+            "fingers passing through object",
+            "deformed thenar eminence",
+            "missing lunula",
+            "press-on plastic nails",
+            "fused finger flesh",
+            "noodle fingers",
+            "missing fingernails",
+            "elongated alien fingers",
+            "extra fingers",
+            "missing fingers",
+            "fused fingers",
+            "polydactyly",
+            "ectrodactyly",
+            "webbed digits",
+            "floating knuckles",
+        ]
+    )
 
     def all_tokens(
         self,
@@ -539,6 +956,7 @@ class NegativeShield:
         include_outpaint: bool = False,
         include_skin_realism: bool = True,
         include_product_drift: bool = False,
+        include_hand_drift: bool = False,
     ) -> list[str]:
         """Return a flat list of all negative tokens across selected categories."""
         tokens = list(self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift)
@@ -590,6 +1008,11 @@ class NegativeShield:
                     seen.add(t)
         if include_product_drift:
             for t in self.product_drift:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
+        if include_hand_drift:
+            for t in self.hand_drift:
                 if t not in seen:
                     tokens.append(t)
                     seen.add(t)
@@ -689,6 +1112,17 @@ class SceneInput:
     material_finish: Optional[str] = None
     seam_geometry: Optional[str] = None
     approval_gate_100pct: bool = True
+    hand_lock: bool = False
+    grip_type: Optional[GripType] = None
+    hand_details: Optional[str] = None
+    anamorphic_squeeze: Optional[AnamorphicSqueeze] = None
+    streak_flare: Optional[StreakFlare] = None
+    iris_blades: Optional[IrisBladeCount] = None
+    gobo: Optional[GoboPattern] = None
+    grip_modifier: Optional[GripModifier] = None
+    lighting_ratio: Optional[LightingRatio] = None
+    copy_space: Optional[CopySpace] = None
+    ad_safe_zone: Optional[AdSafeZone] = None
 
     @property
     def has_product_lock(self) -> bool:
@@ -702,6 +1136,63 @@ class SceneInput:
             or self.label_kerning
             or self.material_finish
             or self.seam_geometry
+        )
+
+    @property
+    def has_hand_lock(self) -> bool:
+        """Return True if hand & finger precision gate is requested or implied by subject action."""
+        if self.hand_lock or self.grip_type or self.hand_details:
+            return True
+        check_text = f"{self.subject} {self.framing or ''}".lower()
+        return any(
+            k in check_text
+            for k in (
+                "holding",
+                "holds",
+                "held",
+                "hand",
+                "hands",
+                "finger",
+                "fingers",
+                "grip",
+                "gripping",
+                "clutching",
+                "pinching",
+                "grasping",
+                "fingertips",
+            )
+        )
+
+    @property
+    def is_anamorphic(self) -> bool:
+        """Return True if cinema anamorphic optics or streak flares are active."""
+        if self.anamorphic_squeeze and self.anamorphic_squeeze != AnamorphicSqueeze.SPHERICAL:
+            return True
+        if self.streak_flare or self.iris_blades:
+            return True
+        check_text = f"{self.lens or ''} {self.subject} {self.framing or ''} {self.optical_filter or ''}".lower()
+        return any(
+            k in check_text
+            for k in ("anamorphic", "oval bokeh", "streak flare", "cylindrical flare", "2.0x squeeze")
+        )
+
+    @property
+    def has_gobo(self) -> bool:
+        """Return True if gobo pattern cookies or specialized grip modifiers are active."""
+        if self.gobo or self.grip_modifier or self.lighting_ratio:
+            return True
+        check_text = f"{self.lighting or ''} {self.lighting_modifier or ''}".lower()
+        return any(
+            k in check_text
+            for k in ("gobo", "cookie", "venetian", "foliage", "slits", "honeycomb", "snoot", "floppy")
+        )
+
+    @property
+    def has_copy_space(self) -> bool:
+        """Return True if commercial copy-space or ad safe-zones are specified."""
+        return bool(
+            (self.copy_space and self.copy_space != CopySpace.NONE)
+            or (self.ad_safe_zone and self.ad_safe_zone != AdSafeZone.NONE)
         )
 
     @property

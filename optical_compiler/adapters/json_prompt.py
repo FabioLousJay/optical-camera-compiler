@@ -47,6 +47,7 @@ class JSONAllInOneAdapter(BaseAdapter):
         sdxl_payload = SDXLAdapter().compile(scene, profile)
 
         # 2. Extract resolved negative tokens
+        # 2. Extract resolved negative tokens
         all_neg_tokens = shield.all_tokens(
             include_anti_drift=is_ref,
             include_branding=scene.suppress_text_branding and not scene.has_product_lock,
@@ -54,6 +55,7 @@ class JSONAllInOneAdapter(BaseAdapter):
             include_outpaint=(ref_mode == ReferenceMode.OUTPAINT_FULL_BODY),
             include_skin_realism=scene.human_skin_realism,
             include_product_drift=scene.has_product_lock,
+            include_hand_drift=scene.has_hand_lock,
         )
         if scene.custom_negatives:
             all_neg_tokens.extend(scene.custom_negatives)
@@ -65,23 +67,34 @@ class JSONAllInOneAdapter(BaseAdapter):
             resolution_str = scene.output_resolution or f"12MP PNG, {scene.aspect_ratio}"
 
         # 4. Build master All-in-One JSON dictionary
+        if scene.has_hand_lock and scene.has_product_lock:
+            protocol_name = "Commercial Product SKU & Biomechanical 5-Point Hand Precision Gate Protocol"
+        elif scene.is_anamorphic:
+            protocol_name = "Cinema Anamorphic Optics & Flare Engine Master Specification"
+        elif ref_mode == ReferenceMode.PRODUCT_LOCK or scene.has_product_lock:
+            protocol_name = "Commercial Product SKU Lock & 100% Approval Gate"
+        elif scene.has_hand_lock:
+            protocol_name = "Biomechanical Hand & Finger Precision Gate Protocol"
+        elif ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
+            protocol_name = "Universal De-Pixelate + Upscale Restoration (GFX100RF 102MP + Skin Realism Override)"
+        elif ref_mode == ReferenceMode.IDENTITY_LOCK:
+            protocol_name = "Identity-Locked Reference Portrait (Editorial Calm vs Chaos & Slow-Shutter Physics)"
+        else:
+            protocol_name = "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
+
+        is_schema_3_3 = bool(
+            scene.has_hand_lock
+            or scene.is_anamorphic
+            or scene.has_copy_space
+            or scene.has_gobo
+        )
+        schema_ver = "3.3" if is_schema_3_3 else "3.2"
+
         all_in_one_data: dict[str, Any] = {
             "$schema": "https://raw.githubusercontent.com/FabioLousJay/optical-camera-compiler/main/schemas/all_in_one_prompt.json",
             "generator": "Optical Camera Compiler",
-            "schema_version": "3.2",
-            "protocol": (
-                "Commercial Product SKU Lock & 100% Approval Gate"
-                if (ref_mode == ReferenceMode.PRODUCT_LOCK or scene.has_product_lock)
-                else (
-                    "Universal De-Pixelate + Upscale Restoration (GFX100RF 102MP + Skin Realism Override)"
-                    if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF
-                    else (
-                        "Identity-Locked Reference Portrait (Editorial Calm vs Chaos & Slow-Shutter Physics)"
-                        if ref_mode == ReferenceMode.IDENTITY_LOCK
-                        else "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
-                    )
-                )
-            ),
+            "schema_version": schema_ver,
+            "protocol": protocol_name,
             "target_engine": "json",
             "scene": {
                 "subject": scene.subject,
@@ -106,6 +119,17 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "material_finish": scene.material_finish,
                 "seam_geometry": scene.seam_geometry,
                 "approval_gate_100pct": scene.approval_gate_100pct,
+                "hand_lock": scene.hand_lock,
+                "grip_type": scene.grip_type.value if scene.grip_type else None,
+                "hand_details": scene.hand_details,
+                "anamorphic_squeeze": scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else None,
+                "streak_flare": scene.streak_flare.value if scene.streak_flare else None,
+                "iris_blades": scene.iris_blades.value if scene.iris_blades else None,
+                "gobo": scene.gobo.value if scene.gobo else None,
+                "grip_modifier": scene.grip_modifier.value if scene.grip_modifier else None,
+                "lighting_ratio": scene.lighting_ratio.value if scene.lighting_ratio else None,
+                "copy_space": scene.copy_space.value if scene.copy_space else None,
+                "ad_safe_zone": scene.ad_safe_zone.value if scene.ad_safe_zone else None,
             },
             "product_fidelity": {
                 "active": scene.has_product_lock,
@@ -124,6 +148,38 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "gate_4_material_finish": scene.material_finish or "Locked to product crop 100%",
                 "gate_5_sku_color": scene.sku_color or "Locked to product crop 100%",
                 "acceptance_threshold": "100% physical and typographic fidelity required; zero tolerance for drift or hallucination",
+            },
+            "hand_biomechanics": {
+                "active": scene.has_hand_lock,
+                "grip_type": scene.grip_type.value if scene.grip_type else "ergonomic_contact_grip",
+                "hand_details": scene.hand_details or "Natural 5-finger anatomical articulation",
+                "metacarpal_ratio": "2:3:4:3.5:2.5",
+                "contact_tissue_blanching": True,
+                "gate_h1_metacarpal_architecture": "Thumb, index, middle, ring, pinky with 2:3:4:3.5:2.5 length ratio and distinct MCP, PIP, DIP joints",
+                "gate_h2_grip_physics_contact_blanching": "Authentic micro-capillary tissue blanching under pressure, zero solid clipping",
+                "gate_h3_flexion_creases_thenar": "Authentic palmar lines, defined thenar and hypothenar eminence musculature, visible wrist tendons",
+                "gate_h4_nail_bed_realism": "Translucent nail plates, pink vascular flush, visible lunula crescents, micro-cuticles",
+                "gate_h5_zero_mutation_shield": "100% rejection of fused digits, extra phalanges, rubber knuckles, dislocated thumbs",
+            },
+            "anamorphic_optics": {
+                "active": scene.is_anamorphic,
+                "squeeze_factor": scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else "2.0x",
+                "streak_flare": scene.streak_flare.value if scene.streak_flare else "cyan_blue",
+                "streak_flare_coating": scene.streak_flare.value if scene.streak_flare else "cyan_blue",
+                "iris_blade_count": scene.iris_blades.value if scene.iris_blades else "14_blade_circular",
+                "bokeh_geometry": "2:1 vertical elliptical oval bokeh discs with cylindrical edge astigmatism",
+                "diffraction_signature": "Symmetric starburst diffraction spikes on high-luminance point sources",
+            },
+            "lighting_grip": {
+                "gobo_cookie_pattern": scene.gobo.value if scene.gobo else None,
+                "gobo_pattern": scene.gobo.value if scene.gobo else None,
+                "grip_modifier": scene.grip_modifier.value if scene.grip_modifier else None,
+                "lighting_ratio": scene.lighting_ratio.value if scene.lighting_ratio else None,
+            },
+            "advertising_framing": {
+                "active": scene.has_copy_space,
+                "copy_space": scene.copy_space.value if scene.copy_space else "none",
+                "ad_safe_zone": scene.ad_safe_zone.value if scene.ad_safe_zone else "none",
             },
             "content_classification": {
                 "type": scene.content_type.value if scene.content_type else "photograph",
@@ -209,6 +265,7 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "compression_and_quality": shield.compression_and_quality,
                 "anti_drift": shield.anti_drift_tokens if is_ref else [],
                 "product_drift": shield.product_drift if scene.has_product_lock else [],
+                "hand_drift": shield.hand_drift if scene.has_hand_lock else [],
                 "all_negative_tokens": all_neg_tokens,
             },
             "compiled_prompts": {

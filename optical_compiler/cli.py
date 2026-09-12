@@ -174,6 +174,88 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Crowd action description for multi-directional slow shutter motion-blur dynamics.",
     )
+    # --- Tool 1: Biomechanical Hand & Finger Precision Gate ---
+    parser.add_argument(
+        "--hand-lock",
+        action="store_true",
+        help="Activate 5-Point Grip Lock and Biomechanical Hand Precision Gate (enforces 5-ray metacarpals, joint creases, cuticle beds, contact tissue blanching).",
+    )
+    parser.add_argument(
+        "--grip-type",
+        dest="grip_type",
+        choices=["palm_support", "precision_pinch", "cylindrical_wrap", "relaxed_rest", "open_palm"],
+        default=None,
+        help="Grip type for biomechanical hand lock.",
+    )
+    parser.add_argument(
+        "--hand-details",
+        dest="hand_details",
+        default=None,
+        help="Specific hand/finger anatomical details or grip description.",
+    )
+    # --- Tool 2: Cinema Anamorphic Optics & Flare Engine ---
+    parser.add_argument(
+        "--anamorphic",
+        action="store_true",
+        help="Activate Cinema Anamorphic Optics & Flare Engine (forces 2:1 elliptical oval bokeh and widescreen ratio).",
+    )
+    parser.add_argument(
+        "--squeeze",
+        dest="squeeze",
+        choices=["1.0x", "1.33x", "1.5x", "1.8x", "2.0x"],
+        default=None,
+        help="Anamorphic horizontal squeeze factor.",
+    )
+    parser.add_argument(
+        "--streak-flare",
+        dest="streak_flare",
+        choices=["cyan_blue", "warm_gold", "neutral_silver", "vintage_magenta"],
+        default=None,
+        help="Anamorphic horizontal streak flare color profile.",
+    )
+    parser.add_argument(
+        "--iris-blades",
+        dest="iris_blades",
+        choices=["14_blade_circular", "9_blade_rounded", "8_blade_octagonal", "6_blade_hexagonal"],
+        default=None,
+        help="Aperture diaphragm iris blade count and diffraction geometry.",
+    )
+    # --- Tool 3: Commercial Advertising Suite ---
+    parser.add_argument(
+        "--gobo",
+        dest="gobo",
+        choices=["venetian_blinds", "dappled_foliage", "window_panes", "geometric_slits", "prism_fracture"],
+        default=None,
+        help="Gobo projection mask / cookie pattern.",
+    )
+    parser.add_argument(
+        "--grip",
+        dest="grip_modifier",
+        choices=["beauty_dish_honeycomb", "butterfly_8x8_silk", "snoot_pinpoint", "solid_black_floppy"],
+        default=None,
+        help="Professional studio grip modifier.",
+    )
+    parser.add_argument(
+        "--lighting-ratio",
+        dest="lighting_ratio",
+        choices=["1:1", "2:1", "4:1", "8:1", "16:1"],
+        default=None,
+        help="Key-to-fill lighting contrast ratio.",
+    )
+    parser.add_argument(
+        "--copy-space",
+        dest="copy_space",
+        choices=["left_third", "right_third", "top_third", "bottom_third"],
+        default=None,
+        help="Ad-safe copy-space negative space placement for typography/billboard.",
+    )
+    parser.add_argument(
+        "--ad-safe-zone",
+        dest="ad_safe_zone",
+        choices=["tiktok_reels_9_16", "instagram_feed_4_5", "ecommerce_catalog_1_1"],
+        default=None,
+        help="Social media ad UI safe-zone exclusion overlay.",
+    )
     parser.add_argument(
         "--content-type",
         dest="content_type",
@@ -381,6 +463,18 @@ def main(argv: Optional[list[str]] = None) -> int:
         "camera_angle": args.camera_angle,
         "color_mode": "monochrome" if args.monochrome else args.color_mode,
         "crowd_action": args.crowd_action,
+        "hand_lock": getattr(args, "hand_lock", False),
+        "grip_type": getattr(args, "grip_type", None),
+        "hand_details": getattr(args, "hand_details", None),
+        "anamorphic": getattr(args, "anamorphic", False),
+        "anamorphic_squeeze": getattr(args, "squeeze", None),
+        "streak_flare": getattr(args, "streak_flare", None),
+        "iris_blades": getattr(args, "iris_blades", None),
+        "gobo": getattr(args, "gobo", None),
+        "grip_modifier": getattr(args, "grip_modifier", None),
+        "lighting_ratio": getattr(args, "lighting_ratio", None),
+        "copy_space": getattr(args, "copy_space", None),
+        "ad_safe_zone": getattr(args, "ad_safe_zone", None),
     }
 
     profile_title = (
