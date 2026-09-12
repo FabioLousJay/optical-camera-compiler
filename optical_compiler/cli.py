@@ -135,6 +135,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Photographic capture intent mode enforcing physical sensor/stability directives.",
     )
     parser.add_argument(
+        "--upscale-102mp",
+        metavar="IMAGE_PATH",
+        help="Execute the PIL Conservative 102MP Restoration and Upscale Lock on the given image.",
+    )
+    parser.add_argument(
+        "--upscale-out",
+        metavar="OUTPUT_PATH",
+        help="Output filepath for 102MP upscale.",
+    )
+    parser.add_argument(
+        "--upscale-format",
+        choices=["jpeg", "jpg", "png", "tiff", "tif"],
+        help="Output format for 102MP upscale (default: PNG if alpha, JPEG otherwise).",
+    )
+    parser.add_argument(
         "--json",
         action="store_true",
         help="Output raw JSON payload.",
@@ -163,6 +178,33 @@ def main(argv: Optional[list[str]] = None) -> int:
     """CLI entrypoint."""
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    # 1. Handle direct 102MP upscale request if provided
+    if args.upscale_102mp:
+        try:
+            from .restoration import restore_and_upscale_102mp
+            report = restore_and_upscale_102mp(
+                args.upscale_102mp,
+                output_path=args.upscale_out,
+                output_format=args.upscale_format,
+            )
+            if args.json:
+                print(json.dumps(report, indent=2))
+            else:
+                print("=" * 80)
+                print("PIL CONSERVATIVE 102MP RESTORATION AND UPSCALE LOCK")
+                print(f"Profile: {report['profile']} (v{report['version']})")
+                print("=" * 80)
+                print(f"Input:       {report['input_path']} ({report['source_width']}x{report['source_height']}, {report['source_megapixels']} MP)")
+                print(f"Output:      {report['output_path']} ({report['output_width']}x{report['output_height']}, {report['output_megapixels']} MP)")
+                print(f"Ratio Lock:  Exact rational ratio preserved = {report['exact_aspect_ratio_preserved']}")
+                print(f"Stages:      {' -> '.join(report['upscale_stages'])}")
+                print(f"File Size:   {report['file_size_mib_standard']} MiB ({report['file_size_bytes']} bytes)")
+                print(f"Validation:  {'PASSED (Zero-drift verified)' if report['validation_passed'] else 'FAILED'}")
+            return 0 if report["validation_passed"] else 1
+        except Exception as err:
+            sys.stderr.write(f"102MP Upscale Error: {err}\n")
+            return 1
 
     if not args.scene:
         parser.print_help()
@@ -266,6 +308,55 @@ def main(argv: Optional[list[str]] = None) -> int:
             sys.stderr.write("\n[Warning: Unable to copy to clipboard]\n")
 
     return 0
+
+
+def upscaler_main(argv: Optional[list[str]] = None) -> int:
+    """Dedicated CLI entrypoint for PIL Conservative 102MP Restoration and Upscale Lock."""
+    parser = argparse.ArgumentParser(
+        prog="optical-upscaler",
+        description="PIL Conservative 102MP Restoration and Upscale Lock (PLATINUM_NO_DRIFT).",
+    )
+    parser.add_argument("image", help="Path to input image file.")
+    parser.add_argument("-o", "--output", help="Optional destination output path.")
+    parser.add_argument(
+        "-f",
+        "--format",
+        choices=["jpeg", "jpg", "png", "tiff", "tif"],
+        help="Target output format.",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output raw JSON execution report.",
+    )
+    args = parser.parse_args(argv)
+
+    try:
+        from .restoration import restore_and_upscale_102mp
+        report = restore_and_upscale_102mp(
+            args.image,
+            output_path=args.output,
+            output_format=args.format,
+        )
+        if args.json:
+            print(json.dumps(report, indent=2))
+        else:
+            print("=" * 80)
+            print("PIL CONSERVATIVE 102MP RESTORATION AND UPSCALE LOCK")
+            print(f"Profile: {report['profile']} (v{report['version']})")
+            print("=" * 80)
+            print(f"Input:       {report['input_path']} ({report['source_width']}x{report['source_height']}, {report['source_megapixels']} MP)")
+            print(f"Output:      {report['output_path']} ({report['output_width']}x{report['output_height']}, {report['output_megapixels']} MP)")
+            print(f"Ratio Lock:  Exact rational ratio preserved = {report['exact_aspect_ratio_preserved']}")
+            print(f"Stages:      {' -> '.join(report['upscale_stages'])}")
+            print(f"File Size:   {report['file_size_mib_standard']} MiB ({report['file_size_bytes']} bytes)")
+            print(f"Validation:  {'PASSED (Zero-drift verified)' if report['validation_passed'] else 'FAILED'}")
+            if report.get("validation_failures"):
+                print(f"Failures:    {report['validation_failures']}")
+        return 0 if report["validation_passed"] else 1
+    except Exception as err:
+        sys.stderr.write(f"102MP Upscale Error: {err}\n")
+        return 1
 
 
 if __name__ == "__main__":

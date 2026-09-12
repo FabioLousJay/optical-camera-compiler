@@ -662,6 +662,73 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       transform: translateY(0);
       opacity: 1;
     }
+
+    /* 102MP Upscaler Modal & Trigger */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+    .btn-upscaler-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(59, 130, 246, 0.15));
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: var(--accent-cyan);
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 0.32rem 0.85rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-upscaler-trigger:hover {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      color: #000;
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+    }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 960px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 1.1rem 1.6rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0b0e14;
+    }
+    .modal-body {
+      padding: 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
   </style>
 </head>
 <body>
@@ -679,6 +746,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       </div>
     </div>
     <div class="header-actions">
+      <button class="btn-upscaler-trigger" onclick="openUpscalerModal()" title="Open PIL Conservative 102MP Restoration and Upscale Lock">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+        <span>102MP Upscaler Lock</span>
+      </button>
       <div class="status-badge">
         <div class="pulse-dot"></div>
         <span id="rigStatusReadout">10 HARDWARE RIGS ACTIVE</span>
@@ -2105,8 +2176,191 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
+    let lastUpscaleReport = null;
+
+    function openUpscalerModal() {
+      document.getElementById('upscalerModal').classList.add('active');
+    }
+
+    function closeUpscalerModal() {
+      document.getElementById('upscalerModal').classList.remove('active');
+    }
+
+    async function run102mpUpscale() {
+      const inputPath = document.getElementById('upscaleInputPath').value.trim();
+      if (!inputPath) {
+        alert('Please provide a valid source image path.');
+        return;
+      }
+      const outputPath = document.getElementById('upscaleOutputPath').value.trim() || null;
+      const format = document.getElementById('upscaleFormat').value;
+      const cleanup = document.getElementById('upscaleCleanup').checked;
+      const sharpen = document.getElementById('upscaleSharpen').checked;
+
+      const btn = document.getElementById('btnExecuteUpscale');
+      const box = document.getElementById('upscaleStatusBox');
+      const copyBtn = document.getElementById('btnCopyUpscaleReport');
+
+      btn.disabled = true;
+      btn.textContent = 'EXECUTING CONSERVATIVE 102MP RESTORATION...';
+      box.innerHTML = '<div style="color: var(--accent-cyan);"><div class="pulse-dot" style="display:inline-block; margin-right: 6px;"></div> Staged Lanczos Upscaling & Neutral Micro-Softening in Progress...</div>';
+
+      try {
+        const resp = await fetch('/api/upscale-102mp', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            input_path: inputPath,
+            output_path: outputPath,
+            output_format: format,
+            cleanup: cleanup,
+            sharpening: sharpen
+          })
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          throw new Error(data.error || 'Upscale failed');
+        }
+
+        lastUpscaleReport = data;
+        copyBtn.style.display = 'inline-block';
+
+        const exactRatio = data.exact_aspect_ratio_preserved;
+        const validPass = data.validation_passed;
+
+        box.innerHTML = `
+          <div style="width: 100%; text-align: left; display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+              <span style="font-weight: bold; color: ${validPass ? 'var(--accent-green)' : 'var(--accent-rose)'};">
+                ${validPass ? '✅ RESTORATION & 102MP UPSCALE VERIFIED' : '⚠️ VALIDATION FAILED'}
+              </span>
+              <span class="brand-tag">${data.profile}</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.75rem;">
+              <div><strong>Source:</strong> ${data.source_width}x${data.source_height} (${data.source_megapixels} MP)</div>
+              <div><strong>Output:</strong> ${data.output_width}x${data.output_height} (${data.output_megapixels} MP)</div>
+              <div><strong>Ratio Preservation:</strong> <span style="color: ${exactRatio ? 'var(--accent-green)' : 'var(--accent-rose)'}; font-weight: bold;">${exactRatio ? 'Exact Rational GCD Lock (Zero Drift)' : 'Drifted'}</span></div>
+              <div><strong>File Size:</strong> ${data.file_size_mib_standard} MiB (${data.file_size_mb_custom_2048_divisor} MB_2048)</div>
+              <div><strong>Stages:</strong> ${data.upscale_stages.length} staged passes</div>
+              <div><strong>Format / Mode:</strong> ${data.output_format} (${data.output_mode})</div>
+            </div>
+
+            <div style="background: var(--bg-surface); padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border-subtle); word-break: break-all; font-size: 0.72rem;">
+              <strong>Saved:</strong> <code>${data.output_path}</code>
+            </div>
+
+            <div style="font-size: 0.68rem; color: var(--text-muted); max-height: 120px; overflow-y: auto; background: #000; padding: 0.5rem; border-radius: 4px;">
+              <pre style="margin: 0; white-space: pre-wrap;">${JSON.stringify(data, null, 2)}</pre>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'EXECUTE 102MP RESTORATION & UPSCALE';
+      }
+    }
+
+    function copyUpscaleReport() {
+      if (lastUpscaleReport) {
+        navigator.clipboard.writeText(JSON.stringify(lastUpscaleReport, null, 2));
+        showToast('Copied 102MP Audit JSON!');
+      }
+    }
+
     window.onload = init;
   </script>
+
+  <!-- 102MP CONSERVATIVE RESTORATION MODAL -->
+  <div class="modal-overlay" id="upscalerModal" onclick="if(event.target===this) closeUpscalerModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 28px; height: 28px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 0.85rem;">🔬</div>
+          <div>
+            <div style="font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+              <span>PIL CONSERVATIVE 102MP RESTORATION LOCK</span>
+              <span class="brand-tag">PLATINUM_NO_DRIFT</span>
+            </div>
+            <div style="font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono);">
+              Hardware-Locked 102,000,000 Px Conservative Resampling • PIL_ONLY No-Drift Architecture
+            </div>
+          </div>
+        </div>
+        <button onclick="closeUpscalerModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; padding: 0.2rem 0.5rem;">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+          <!-- Controls Column -->
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <label class="spec-label" style="display: block; margin-bottom: 0.35rem;">Source Image File Path *</label>
+              <input type="text" id="upscaleInputPath" placeholder="/path/to/source_image.jpg or png" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.6rem 0.8rem; color: var(--text-primary); font-family: var(--font-mono); font-size: 0.75rem;">
+            </div>
+
+            <div>
+              <label class="spec-label" style="display: block; margin-bottom: 0.35rem;">Output Destination Path (Optional)</label>
+              <input type="text" id="upscaleOutputPath" placeholder="Leave blank for auto-named output next to source" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.6rem 0.8rem; color: var(--text-primary); font-family: var(--font-mono); font-size: 0.75rem;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div>
+                <label class="spec-label" style="display: block; margin-bottom: 0.35rem;">Target Format</label>
+                <select id="upscaleFormat" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.55rem 0.7rem; color: var(--text-primary); font-family: var(--font-mono); font-size: 0.75rem;">
+                  <option value="JPEG">JPEG (4:4:4 Chroma, Q96)</option>
+                  <option value="PNG">PNG (Level 6 Lossless)</option>
+                  <option value="TIFF">TIFF (LZW Lossless)</option>
+                </select>
+              </div>
+              <div>
+                <label class="spec-label" style="display: block; margin-bottom: 0.35rem;">Target Megapixels</label>
+                <input type="text" value="102.0 MP (Locked)" disabled style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.55rem 0.7rem; color: var(--accent-cyan); font-family: var(--font-mono); font-size: 0.75rem;">
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.85rem;">
+              <div style="font-size: 0.68rem; font-family: var(--font-mono); color: var(--accent-cyan); font-weight: 600; text-transform: uppercase;">🔒 Strict Policy Locks:</div>
+              <label class="check-item">
+                <input type="checkbox" id="upscaleCleanup" checked>
+                <span>Region-neutral micro-softening (Gaussian blend 0.08)</span>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" id="upscaleSharpen" checked>
+                <span>Single-pass UnsharpMask (r=0.75, p=42, th=5)</span>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" checked disabled>
+                <span>Staged Lanczos Scaling (&le; 2.0x linear growth/stage)</span>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" checked disabled>
+                <span>Exact GCD Rational Aspect Ratio (w*h0 == h*w0)</span>
+              </label>
+            </div>
+
+            <button id="btnExecuteUpscale" onclick="run102mpUpscale()" style="width: 100%; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); border: none; border-radius: 6px; padding: 0.75rem; color: #000; font-weight: 700; font-family: var(--font-sans); font-size: 0.85rem; cursor: pointer; letter-spacing: 0.04em; transition: all 0.2s;">
+              EXECUTE 102MP RESTORATION & UPSCALE
+            </button>
+          </div>
+
+          <!-- Audit & Output Column -->
+          <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="spec-label">Audit & Quality Control Telemetry</span>
+              <button class="btn-action" onclick="copyUpscaleReport()" id="btnCopyUpscaleReport" style="display: none; padding: 0.25rem 0.6rem; font-size: 0.7rem;">Copy Audit JSON</button>
+            </div>
+
+            <div id="upscaleStatusBox" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem; min-height: 280px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.78rem; font-family: var(--font-mono);">
+              Ready to process. Enter source image path and click Execute.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 """
@@ -2175,7 +2429,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
         """Handle compilation requests via REST API."""
         parsed_path = self.path.split("?")[0]
 
-        if parsed_path != "/api/compile":
+        if parsed_path not in ("/api/compile", "/api/upscale-102mp"):
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
             return
 
@@ -2187,6 +2441,43 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             self._send_json({"error": f"Invalid JSON payload: {err}"}, status=HTTPStatus.BAD_REQUEST)
             return
 
+        if parsed_path == "/api/upscale-102mp":
+            input_path = body.get("input_path") or body.get("image_path")
+            if not input_path:
+                self._send_json({"error": "Missing required field 'input_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+
+            try:
+                from .restoration import PILLOW_AVAILABLE, RestorationConfig, restore_and_upscale_102mp
+            except ImportError:
+                self._send_json({"error": "Restoration module could not be imported."}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+                return
+
+            if not PILLOW_AVAILABLE:
+                self._send_json({
+                    "error": "Pillow is not installed. Run: pip install Pillow (or pip install 'optical-camera-compiler[upscale]')"
+                }, status=HTTPStatus.BAD_REQUEST)
+                return
+
+            try:
+                config = RestorationConfig(
+                    cleanup_enabled=bool(body.get("cleanup", True)),
+                    sharpening_enabled=bool(body.get("sharpening", True)),
+                )
+                output_path = body.get("output_path") or None
+                output_format = body.get("output_format") or None
+                report = restore_and_upscale_102mp(
+                    input_path=input_path,
+                    output_path=output_path,
+                    config=config,
+                    output_format=output_format,
+                )
+                self._send_json(report)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            return
+
+        # /api/compile
         scene_text = body.get("scene", "")
         target_engine = body.get("target", "flux")
         profile_name = body.get("profile", "phase_one_iq4")

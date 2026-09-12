@@ -3,7 +3,7 @@
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 43 Passing](https://img.shields.io/badge/tests-43%20passing-brightgreen.svg)](tests/)
+[![Tests: 51 Passing](https://img.shields.io/badge/tests-51%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -268,7 +268,53 @@ optical-studio
   * **Mode C Outpaint UI**: Dedicated full-body vertical outpainting button with reference preview.
   * **Local Hardware Image Uploader**: Drag & drop reference photos directly from your machine with client-side resolution & aspect ratio autodetection.
   * **Interactive Aperture Ring**: `f/2.8`, `f/4`, `f/5.6`, `f/8 [SWEET SPOT]`, `f/11`, `f/16`.
-  * **Embedded REST API**: `/api/compile`, `/api/profiles`, `/api/health` with full CORS support for external frontends.
+  * **102MP Upscaler Lock Modal**: Interactive hardware restoration console with staged Lanczos scaling and 1-click JSON audit copy.
+  * **Embedded REST API**: `/api/compile`, `/api/upscale-102mp`, `/api/profiles`, `/api/health` with full CORS support for external frontends.
+
+---
+
+## 🔬 PIL Conservative 102MP Restoration and Upscale Lock
+
+Profile: **`PLATINUM_NO_DRIFT`** (v1.0.0)
+
+A zero-hallucination, reference-faithful hardware-locked restoration and 102MP upscaler built with a pure **`PIL_ONLY`** architecture (strictly prohibiting generative deep learning models, OpenCV, PyTorch, diffusion models, or external hallucination APIs).
+
+### Mathematical & Engineering Guarantees:
+* **Exact Rational Aspect Ratio Lock**: Reduces width and height via Greatest Common Divisor ($w_0 / \gcd(w_0, h_0)$) and selects optimal scaling multiplier $k$ to guarantee $w_{\text{out}} \cdot h_0 == h_{\text{out}} \cdot w_0$ (0.000% aspect ratio drift).
+* **102 Megapixel Target**: Hits $\approx 102,000,000$ pixels within a strict $\le 1.5\%$ tolerance window (e.g., 4:3 $\rightarrow$ `11660x8745` [101.97MP], 3:2 $\rightarrow$ `12369x8246` [101.99MP], 1:1 $\rightarrow$ `10100x10100` [102.01MP], 16:9 $\rightarrow$ `13472x7578` [102.09MP], 9:11 $\rightarrow$ `9135x11165` [101.99MP]).
+* **Staged Conservative Lanczos Resampling**: Executes staged geometric resampling enforcing a maximum linear growth limit of $\le 2.0\times$ per pass to eliminate ringing and sampling distortion.
+* **Neutral Micro-Softening & Tonal Cohesion**: Applies conservative Gaussian softening (radius 0.60, blend 0.08) and mild tonal flattening ($\le 0.12$) to suppress JPEG block artifacts and digital noise without altering facial anatomy.
+* **Anchored Refinement & Single-Pass UnsharpMask**: Anchored contrast ($1.015\times$) and color ($1.010\times$) with single-pass low-radius UnsharpMask ($r=0.75, p=42, th=5$).
+* **Alpha Channel Separation**: Decouples RGBA transparency before scaling, resamples alpha independently via Lanczos, and re-attaches to prevent dark edge fringing.
+* **Mandatory Post-Save Verification & 18-Field Audit**: Decodes the written file from disk, verifies byte integrity, validates dimensions, and generates a structured 18-field JSON report.
+
+### CLI Usage:
+```bash
+# Dedicated entrypoint:
+optical-upscaler path/to/my_photo.jpg --format JPEG
+
+# Or via the compiler CLI:
+python3 -m optical_compiler --upscale-102mp path/to/my_photo.png --upscale-format PNG
+```
+
+### Python API Usage:
+```python
+from optical_compiler import restore_and_upscale_102mp, calculate_exact_ratio_102mp_dimensions
+
+# Compute exact dimensions
+w_out, h_out, total_px, within_tol = calculate_exact_ratio_102mp_dimensions(4000, 3000)
+print(f"Target dimensions: {w_out}x{h_out} ({total_px / 1e6:.2f} MP)")
+
+# Run complete 102MP restoration
+report = restore_and_upscale_102mp(
+    input_path="portrait.jpg",
+    output_format="JPEG", # or "PNG", "TIFF"
+)
+print("102MP Audit Report:", report)
+```
+
+### ComfyUI Node:
+Includes native node **`🔬 PIL Conservative 102MP Upscaler Lock`** (`OpticalConservative102MPUpscaler`) producing output paths and 18-field telemetry for high-resolution post-processing pipelines.
 
 ---
 

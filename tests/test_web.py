@@ -121,6 +121,50 @@ class TestWebStudioHandler(unittest.TestCase):
         self.assertEqual(status, 204)
         self.assertEqual(headers.get("access-control-allow-origin"), "*")
 
+    def test_post_upscale_102mp_missing_input(self) -> None:
+        """Verify /api/upscale-102mp returns 400 when input_path is missing."""
+        payload = {"output_format": "JPEG"}
+        body = json.dumps(payload).encode("utf-8")
+        status, headers, resp_body = self._execute_request("POST", "/api/upscale-102mp", body)
+        self.assertEqual(status, 400)
+        res_data = json.loads(resp_body.decode("utf-8"))
+        self.assertIn("error", res_data)
+        self.assertIn("input_path", res_data["error"])
+
+    def test_post_upscale_102mp_success(self) -> None:
+        """Verify /api/upscale-102mp executes and returns 18-field report."""
+        try:
+            from optical_compiler.restoration import PILLOW_AVAILABLE
+            if not PILLOW_AVAILABLE:
+                self.skipTest("Pillow is not installed")
+        except ImportError:
+            self.skipTest("Restoration module could not be imported")
+
+        import tempfile
+        from PIL import Image
+
+        with tempfile.TemporaryDirectory() as td:
+            in_file = f"{td}/web_sample.png"
+            out_file = f"{td}/web_sample_out.png"
+            img = Image.new("RGB", (60, 40), color=(100, 150, 200))
+            img.save(in_file)
+
+            payload = {
+                "input_path": in_file,
+                "output_path": out_file,
+                "output_format": "PNG",
+                "cleanup": True,
+                "sharpening": True,
+            }
+            body = json.dumps(payload).encode("utf-8")
+            status, headers, resp_body = self._execute_request("POST", "/api/upscale-102mp", body)
+            self.assertEqual(status, 200)
+            res_data = json.loads(resp_body.decode("utf-8"))
+            self.assertEqual(res_data["profile"], "PLATINUM_NO_DRIFT")
+            self.assertTrue(res_data["validation_passed"])
+            self.assertTrue(res_data["exact_aspect_ratio_preserved"])
+            self.assertEqual(res_data["output_format"], "PNG")
+
 
 if __name__ == "__main__":
     unittest.main()

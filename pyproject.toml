@@ -24,10 +24,18 @@ dependencies = []
 dev = [
     "pytest>=7.0",
 ]
+upscale = [
+    "Pillow>=9.0",
+]
+all = [
+    "Pillow>=9.0",
+    "pytest>=7.0",
+]
 
 [project.scripts]
 optical-compiler = "optical_compiler.cli:main"
 optical-studio = "optical_compiler.web:main"
+optical-upscaler = "optical_compiler.cli:upscaler_main"
 
 [tool.setuptools.packages.find]
 where = ["."]

@@ -212,10 +212,68 @@ class OpticalCameraCompilerNode:
         return (pos, neg, unified)
 
 
+class OpticalConservative102MPUpscalerNode:
+    """ComfyUI node executing the PIL Conservative 102MP Restoration and Upscale Lock (PLATINUM_NO_DRIFT)."""
+
+    @classmethod
+    def INPUT_TYPES(cls) -> dict[str, Any]:
+        return {
+            "required": {
+                "image_path": ("STRING", {"default": ""}),
+            },
+            "optional": {
+                "output_path": ("STRING", {"default": ""}),
+                "format": (["auto", "jpeg", "png", "tiff"], {"default": "auto"}),
+                "cleanup_enabled": (["enabled", "disabled"], {"default": "enabled"}),
+                "sharpening_enabled": (["enabled", "disabled"], {"default": "enabled"}),
+            },
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "INT", "INT", "FLOAT")
+    RETURN_NAMES = ("output_path", "report_json", "output_width", "output_height", "output_megapixels")
+    FUNCTION = "execute_102mp_upscale"
+    CATEGORY = "image/upscaling"
+
+    def execute_102mp_upscale(
+        self,
+        image_path: str,
+        output_path: str = "",
+        format: str = "auto",
+        cleanup_enabled: str = "enabled",
+        sharpening_enabled: str = "enabled",
+    ) -> tuple[str, str, int, int, float]:
+        import json
+        from .restoration import restore_and_upscale_102mp, RestorationConfig
+
+        cfg = RestorationConfig(
+            cleanup_enabled=(cleanup_enabled == "enabled"),
+            sharpening_enabled=(sharpening_enabled == "enabled"),
+        )
+        out_fmt = None if format == "auto" else format.upper()
+        out_p = output_path.strip() if output_path.strip() else None
+
+        report = restore_and_upscale_102mp(
+            input_path=image_path.strip(),
+            output_path=out_p,
+            config=cfg,
+            output_format=out_fmt,
+        )
+
+        return (
+            report["output_path"],
+            json.dumps(report, indent=2),
+            int(report["output_width"]),
+            int(report["output_height"]),
+            float(report["output_megapixels"]),
+        )
+
+
 NODE_CLASS_MAPPINGS = {
     "OpticalCameraCompiler": OpticalCameraCompilerNode,
+    "OpticalConservative102MPUpscaler": OpticalConservative102MPUpscalerNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "OpticalCameraCompiler": "📷 Optical Camera Compiler",
+    "OpticalConservative102MPUpscaler": "🔬 PIL Conservative 102MP Upscaler Lock",
 }

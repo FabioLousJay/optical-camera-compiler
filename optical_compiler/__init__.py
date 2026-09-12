@@ -14,6 +14,11 @@ from .models import (
     TargetEngine,
 )
 from .profiles import apply_overrides, load_profile
+from .restoration import (
+    RestorationConfig,
+    calculate_exact_ratio_102mp_dimensions,
+    restore_and_upscale_102mp,
+)
 
 __version__ = "0.1.0"
 
@@ -31,4 +36,7 @@ __all__ = [
     "TargetEngine",
     "load_profile",
     "apply_overrides",
+    "restore_and_upscale_102mp",
+    "calculate_exact_ratio_102mp_dimensions",
+    "RestorationConfig",
 ]
