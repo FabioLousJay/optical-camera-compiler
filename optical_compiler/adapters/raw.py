@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ..models import CameraProfile, CompiledPayload, PaperProfile, SceneInput, TargetEngine
+from ..models import CameraProfile, CompiledPayload, PaperProfile, ReferenceMode, SceneInput, TargetEngine
 from .base import BaseAdapter
 
 
@@ -210,6 +210,27 @@ class RawSpecAdapter(BaseAdapter):
                 "Correction Verbiage: You missed the locked delivery workflow. Apply the internal 4× full-color RGB PNG upscale now, export the final PNG, and report the final pixel dimensions, color mode, and file size.",
             ])
 
+        if scene.has_depixelate_v2 or (scene.reference and scene.reference.mode == ReferenceMode.DEPIXELATE_V2):
+            spec = scene.depixelate_v2
+            ctype = spec.content_type if spec else "photograph"
+            cam_sel = spec.selected_camera if (spec and spec.selected_camera) else optics.camera_system
+            lens_sel = spec.selected_lens if (spec and spec.selected_lens) else optics.lens
+            res_target = spec.target_resolution if spec else "60MP Ultra-High Resolution Capture"
+            lines.extend([
+                "",
+                "--- Universal De-Pixelate + Upscale Restoration Prompt v2.0 ---",
+                "Core Objective: Restore and upscale attached image by removing pixelation, compression, blockiness, aliasing, and mosquito noise",
+                "Reference Usage Priority: Absolute (single source of truth)",
+                f"Detected/Assigned Content Type: {ctype}",
+                f"Approved Camera Profile: {cam_sel}",
+                f"Approved Optical System: {lens_sel}",
+                f"Target Resolution: {res_target}",
+                f"OCR & Text Preservation Mode: {spec.ocr_safety_mode if spec else 'strict_preserve'}",
+                f"Confidence Reconstruction Mode: {spec.confidence_mode if spec else 'evidence_anchored'}",
+                "Hard Constraints: Identity, composition, proportions, materials, colors, lighting logic strictly preserved",
+                "Failure Prevention: Zero restyling, zero rewriting, zero AI gloss, zero text invention",
+            ])
+
         positive_prompt = "\n".join(lines)
 
         negative_prompt = ", ".join(
@@ -219,6 +240,7 @@ class RawSpecAdapter(BaseAdapter):
                 include_body_distortion=scene.has_body_morphology,
                 include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or (scene.reference and scene.reference.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X)),
                 include_png_lock=bool(scene.has_png_lock or (scene.reference and scene.reference.mode == ReferenceMode.UNIVERSAL_PNG_LOCK)),
+                include_depixelate_v2=bool(scene.has_depixelate_v2 or (scene.reference and scene.reference.mode == ReferenceMode.DEPIXELATE_V2)),
             )
         )
 

@@ -19,6 +19,7 @@ from ..models import (
     ReferenceMode,
     SceneInput,
     TargetEngine,
+    IMAGE_REPAIR_PRIORITIES_BY_TYPE,
 )
 from .base import BaseAdapter
 
@@ -62,6 +63,23 @@ class GPTImagesAdapter(BaseAdapter):
                 "lighting logic, text content, and scene integrity. The final output must read as a high-resolution "
                 "Fujifilm GFX100RF capture of the same scene, not a reimagined, rewritten, beautified, stylized, or regenerated version. "
                 "Do not add, remove, beautify, stylize, paraphrase, rewrite, redesign, or reinterpret any element. "
+                f"Subject: {scene.subject}."
+            )
+            sections.append(base_instr)
+        elif ref_mode == ReferenceMode.DEPIXELATE_V2 or scene.has_depixelate_v2:
+            ct = scene.content_type.value if scene.content_type else "photograph"
+            priorities = IMAGE_REPAIR_PRIORITIES_BY_TYPE.get(ct, IMAGE_REPAIR_PRIORITIES_BY_TYPE["photograph"])
+            priorities_str = "; ".join(f"({i+1}) {p}" for i, p in enumerate(priorities))
+            base_instr = (
+                "Base instruction (Universal De-Pixelate + Upscale Restoration Prompt v2.0): "
+                "Use the attached image as the mandatory single source of truth. Restore and upscale the attached image "
+                "by removing pixelation, blockiness, compression damage, aliasing, mosquito noise, softness from low resolution, "
+                "and digital degradation while preserving the source image's true identity, composition, proportions, colors, "
+                "materials, lighting logic, text content, and scene integrity. The result must look like a plausibly higher-resolution "
+                "original capture, scan, or export of the same image, not a reimagined, rewritten, or restyled version. "
+                "Preserve original subject identity exactly. Preserve framing, pose, composition, layout, wardrobe, and color relationships. "
+                "Do not add, remove, beautify, stylize, paraphrase, rewrite, redesign, or reinterpret any element not clearly supported by the reference. "
+                f"Classified primary content type: '{ct}'. Repair priorities: {priorities_str}. "
                 f"Subject: {scene.subject}."
             )
             sections.append(base_instr)
@@ -208,14 +226,45 @@ class GPTImagesAdapter(BaseAdapter):
             sections.append(repro_block)
 
         # 4. Text and structured graphics preservation protocol
-        if scene.text_preservation or ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
-            text_block = (
-                "Text and structured content preservation: All visible text must be preserved exactly as in the source image. "
-                "Do not paraphrase, rewrite, correct grammar, fix punctuation, or reinterpret text. "
-                "Maintain original line breaks, font style, stroke weight, alignment, hierarchy, and placement. "
-                "Preserve all arrows, connectors, boxes, icons, and diagram relationships exactly."
-            )
+        if scene.text_preservation or ref_mode in (ReferenceMode.DEPIXELATE_GFX100RF, ReferenceMode.DEPIXELATE_V2) or scene.has_depixelate_v2:
+            if ref_mode == ReferenceMode.DEPIXELATE_V2 or scene.has_depixelate_v2:
+                text_block = (
+                    "Text preservation & OCR safety protocol (Critical Priority): "
+                    "All visible text must be preserved exactly as in the source image. "
+                    "Do not paraphrase, rewrite, correct grammar, fix punctuation, or reinterpret text. "
+                    "Do not replace text with semantically similar wording, and do not translate text. "
+                    "Maintain original line breaks, spacing logic, alignment, hierarchy, stroke weight, and serif/sans-serif character. "
+                    "If text reconstruction is uncertain, preserve ambiguity rather than hallucinate a clean but wrong word. "
+                    "Prefer slightly softened but semantically faithful text over crisp but hallucinated text. "
+                    "Structured graphics preservation: Preserve all arrows, connectors, boxes, dividers, icons, symbols, "
+                    "and diagram relationships exactly. Preserve original layout grid, spacing logic, and visual flow. "
+                    "Do not redesign, rebalance, or modernize graphics or UI states."
+                )
+            else:
+                text_block = (
+                    "Text and structured content preservation: All visible text must be preserved exactly as in the source image. "
+                    "Do not paraphrase, rewrite, correct grammar, fix punctuation, or reinterpret text. "
+                    "Maintain original line breaks, font style, stroke weight, alignment, hierarchy, and placement. "
+                    "Preserve all arrows, connectors, boxes, icons, and diagram relationships exactly."
+                )
             sections.append(text_block)
+
+        # Confidence-based detail reconstruction & failure prevention rules (v2.0)
+        if ref_mode == ReferenceMode.DEPIXELATE_V2 or scene.has_depixelate_v2:
+            confidence_block = (
+                "Confidence-based detail reconstruction & failure prevention rules: "
+                "Only reconstruct missing or damaged detail in proportion to visual evidence. "
+                "High confidence: restore cleanly when structure is strongly supported by the reference. "
+                "Medium confidence: restore conservatively with minimal interpretation. "
+                "Low confidence: preserve softened ambiguity and avoid hallucination. "
+                "Never convert low-confidence regions into high-detail inventions. "
+                "Non-negotiable failure prevention laws: (1) A visually cleaner result is invalid if it changes meaning. "
+                "(2) For text-bearing images, semantic fidelity outranks aesthetic enhancement. "
+                "(3) For identity-bearing images, identity fidelity outranks cosmetic enhancement. "
+                "(4) For layout-bearing images, structural fidelity outranks visual modernization. "
+                "(5) When restoration and certainty conflict, choose certainty."
+            )
+            sections.append(confidence_block)
 
         # 5. Product Fidelity & 100% Commercial SKU Approval Gate
         if scene.has_product_lock and scene.approval_gate_100pct:
@@ -423,6 +472,8 @@ class GPTImagesAdapter(BaseAdapter):
         # 9. Output Resolution Target & File Quality
         if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
             res = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution, scaled to source aspect ratio)"
+        elif ref_mode == ReferenceMode.DEPIXELATE_V2 or scene.has_depixelate_v2:
+            res = scene.output_resolution or "Highest Plausible Native-Looking Resolution (Full-Color Uncompressed Raster, Verbatim Scene & Text Integrity)"
         elif ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X or scene.has_reconstruction_lock_4x:
             res = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area, uncompressed master raster)"
         else:
@@ -504,6 +555,7 @@ class GPTImagesAdapter(BaseAdapter):
             include_body_distortion=scene.has_body_morphology,
             include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X),
             include_png_lock=bool(scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK),
+            include_depixelate_v2=bool(scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2),
         )
         if scene.custom_negatives:
             neg_tokens.extend(scene.custom_negatives)
@@ -533,6 +585,13 @@ class GPTImagesAdapter(BaseAdapter):
                 "color_mode": "RGB",
                 "compress_level": 0,
                 "linear_scale": 4,
+            })
+        if scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2:
+            payload_params.update({
+                "depixelate_v2": True,
+                "content_type": scene.content_type.value if scene.content_type else "photograph",
+                "ocr_safety": True,
+                "confidence_mode": "evidence_proportional",
             })
 
         return CompiledPayload(

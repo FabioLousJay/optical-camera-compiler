@@ -49,7 +49,7 @@ class JSONAllInOneAdapter(BaseAdapter):
         # 2. Extract resolved negative tokens
         # 2. Extract resolved negative tokens
         all_neg_tokens = shield.all_tokens(
-            include_anti_drift=is_ref,
+            include_anti_drift=is_ref or scene.has_depixelate_v2,
             include_branding=scene.suppress_text_branding and not scene.has_product_lock,
             include_compression=True,
             include_outpaint=(ref_mode == ReferenceMode.OUTPAINT_FULL_BODY),
@@ -59,12 +59,16 @@ class JSONAllInOneAdapter(BaseAdapter):
             include_body_distortion=scene.has_body_morphology,
             include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X),
             include_png_lock=bool(scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK),
+            include_depixelate_v2=bool(scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2),
         )
         if scene.custom_negatives:
             all_neg_tokens.extend(scene.custom_negatives)
 
         # 3. Resolve resolution
-        if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
+        if ref_mode == ReferenceMode.DEPIXELATE_V2 or scene.has_depixelate_v2:
+            spec = scene.depixelate_v2
+            resolution_str = scene.output_resolution or (spec.target_resolution if spec else "60MP Ultra-High Resolution Capture")
+        elif ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
             resolution_str = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution)"
         elif ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X or scene.has_reconstruction_lock_4x:
             resolution_str = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area)"
@@ -74,7 +78,9 @@ class JSONAllInOneAdapter(BaseAdapter):
             resolution_str = scene.output_resolution or f"12MP PNG, {scene.aspect_ratio}"
 
         # 4. Build master All-in-One JSON dictionary
-        if scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK:
+        if scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2:
+            protocol_name = "Universal De-Pixelate + Upscale Restoration Prompt v2.0"
+        elif scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK:
             protocol_name = "Universal High-Resolution PNG Output Lock v1.0 & Mandatory 4X Upscale Protocol"
         elif scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X:
             protocol_name = "Professional 4X Reconstruction Lock Protocol (Linear Expansion + High-Fidelity Multi-Model Blend)"
@@ -106,6 +112,10 @@ class JSONAllInOneAdapter(BaseAdapter):
         else:
             protocol_name = "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
 
+        is_schema_3_8 = bool(
+            scene.has_depixelate_v2
+            or ref_mode == ReferenceMode.DEPIXELATE_V2
+        )
         is_schema_3_7 = bool(
             scene.has_png_lock
             or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK
@@ -133,7 +143,7 @@ class JSONAllInOneAdapter(BaseAdapter):
             or scene.has_copy_space
             or scene.has_gobo
         )
-        schema_ver = "3.7" if is_schema_3_7 else ("3.6" if is_schema_3_6 else ("3.5" if is_schema_3_5 else ("3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2"))))
+        schema_ver = "3.8" if is_schema_3_8 else ("3.7" if is_schema_3_7 else ("3.6" if is_schema_3_6 else ("3.5" if is_schema_3_5 else ("3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2")))))
 
         all_in_one_data: dict[str, Any] = {
             "$schema": "https://raw.githubusercontent.com/FabioLousJay/optical-camera-compiler/main/schemas/all_in_one_prompt.json",
@@ -347,6 +357,34 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "delivery_callout": "Done ✅ 4× full-color PNG upscale: [width] × [height] px, RGB PNG, [file size] MB.",
                 "correction_verbiage": scene.png_lock.correction_verbiage if scene.png_lock else "You missed the locked delivery workflow. Apply the internal 4× full-color RGB PNG upscale now, export the final PNG, and report the final pixel dimensions, color mode, and file size.",
             },
+            "universal_depixelate_v2": {
+                "active": bool(scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2),
+                "title": "Universal De-Pixelate + Upscale Restoration Prompt v2.0",
+                "type": "reference-guided image restoration and resolution enhancement",
+                "mode": "Attach any source image as the mandatory reference input",
+                "core_objective": "Restore and upscale the attached image by removing pixelation, blockiness, compression damage, aliasing, mosquito noise, softness from low resolution, and digital degradation while preserving the source image's true identity, composition, proportions, colors, materials, lighting logic, text content, and scene integrity. The result must look like a plausibly higher-resolution original capture, scan, or export of the same image, not a reimagined, rewritten, or restyled version.",
+                "reference_usage": {
+                    "priority": "absolute",
+                    "instructions": [
+                        "Use the attached image as the single source of truth",
+                        "Preserve the original subject identity, face structure, age, expression, pose, and proportions",
+                        "Preserve the original camera angle, perspective, depth relationships, and composition framing",
+                        "Preserve the original color palette, lighting direction, contrast intent, and atmosphere",
+                        "Preserve the original materials, surface qualities, clothing, hair flow, and environmental layout",
+                        "Preserve all legible text, numbers, symbols, logos, and graphic marks exactly as they appear",
+                        "Do not change backgrounds, do not add new subjects, do not replace objects, and do not modernize vintage elements",
+                        "Do not alter the artistic medium: if the source is a 35mm photo, keep it photographic; if a drawing, keep the stroke logic; if a 3D render, keep the shading logic; if a document, keep the flat scan quality",
+                    ],
+                },
+                "content_type_detection": scene.depixelate_v2.content_type if scene.depixelate_v2 else "photograph",
+                "hardware_profile": {
+                    "approved_camera": scene.depixelate_v2.selected_camera if scene.depixelate_v2 else optics.camera_system,
+                    "approved_lens": scene.depixelate_v2.selected_lens if scene.depixelate_v2 else optics.lens,
+                    "target_resolution": scene.depixelate_v2.target_resolution if scene.depixelate_v2 else "60MP Ultra-High Resolution Capture",
+                },
+                "ocr_safety_mode": scene.depixelate_v2.ocr_safety_mode if scene.depixelate_v2 else "strict_preserve",
+                "confidence_mode": scene.depixelate_v2.confidence_mode if scene.depixelate_v2 else "evidence_anchored",
+            },
             "content_classification": {
                 "type": scene.content_type.value if scene.content_type else "photograph",
                 "is_flat_reproduction": bool(scene.content_type and scene.content_type.is_flat_reproduction),
@@ -435,6 +473,7 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "body_distortion": shield.body_distortion if scene.has_body_morphology else [],
                 "reconstruction_drift": shield.reconstruction_drift if (scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) else [],
                 "png_degradation": shield.png_degradation if (scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK) else [],
+                "v2_restoration": shield.v2_restoration if (scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2) else [],
                 "all_negative_tokens": all_neg_tokens,
             },
             "compiled_prompts": {

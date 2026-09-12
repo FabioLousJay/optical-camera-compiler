@@ -102,9 +102,10 @@ def build_parser() -> argparse.ArgumentParser:
             "restore", "transform", "depixelate", "depixelate_gfx100rf", "identity", "identity_lock",
             "product", "product_lock", "product_crop", "recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock",
             "universal_png_lock", "png_lock", "high_res_png_lock", "full_color_png", "universal_png_output_lock", "png_output_lock",
+            "depixelate_v2", "universal_depixelate", "universal_depixelate_v2", "depix_v2", "restoration_v2",
         ],
         default="restore",
-        help="Reference mode: 'restore', 'transform', 'identity_lock', 'depixelate_gfx100rf', 'product_lock', 'recon_4x', or 'universal_png_lock' (Universal PNG Output Lock).",
+        help="Reference mode: 'restore', 'transform', 'identity_lock', 'depixelate_gfx100rf', 'depixelate_v2', 'product_lock', 'recon_4x', or 'universal_png_lock'.",
     )
     parser.add_argument(
         "--png-lock",
@@ -127,6 +128,25 @@ def build_parser() -> argparse.ArgumentParser:
         const=True,
         default=None,
         help="Execute the Universal 4X Full-Color RGB PNG upscale directly on an image path.",
+    )
+    parser.add_argument(
+        "--depixelate-v2",
+        "--depix-v2",
+        dest="depixelate_v2",
+        action="store_true",
+        help="Activate Universal De-Pixelate + Upscale Restoration Prompt v2.0.",
+    )
+    parser.add_argument(
+        "--depix-camera",
+        dest="depix_camera",
+        default=None,
+        help="Camera override for Universal De-Pixelate v2.0 (Sony Alpha 7R V, Sony a1 II, Leica SL3, Leica Q3 Monochrom).",
+    )
+    parser.add_argument(
+        "--depix-lens",
+        dest="depix_lens",
+        default=None,
+        help="Lens override for Universal De-Pixelate v2.0 from the 19 approved primes/zooms.",
     )
     parser.add_argument(
         "--depixelate",
@@ -840,7 +860,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         return 1
 
     ref_mode_choice = args.ref_mode
-    if args.depixelate:
+    if getattr(args, "depixelate_v2", False):
+        ref_mode_choice = "depixelate_v2"
+    elif args.depixelate:
         ref_mode_choice = "depixelate_gfx100rf"
     elif getattr(args, "product_lock", False):
         ref_mode_choice = "product_lock"
@@ -851,8 +873,11 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     ref_dict = None
     ref_path = args.reference or getattr(args, "product_crop", None)
-    if ref_path or ref_mode_choice in ("product_lock", "product", "product_crop", "recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock", "universal_png_lock"):
-        if ref_mode_choice in ("depixelate", "depixelate_gfx100rf"):
+    if ref_path or ref_mode_choice in ("product_lock", "product", "product_crop", "recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock", "universal_png_lock", "depixelate_v2", "universal_depixelate", "universal_depixelate_v2"):
+        if ref_mode_choice in ("depixelate_v2", "depix_v2", "universal_depixelate", "universal_depixelate_v2", "depixelate_restoration_v2", "v2_depixelate", "restoration_v2"):
+            mode_str = "depixelate_v2"
+            default_denoise = 0.20
+        elif ref_mode_choice in ("depixelate", "depixelate_gfx100rf"):
             mode_str = "depixelate_gfx100rf"
             default_denoise = 0.25
         elif ref_mode_choice in ("identity", "identity_lock"):
@@ -892,6 +917,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         "lighting": args.lighting,
         "aspect_ratio": args.aspect_ratio,
         "reference": ref_dict,
+        "depixelate_v2": getattr(args, "depixelate_v2", False) or ref_mode_choice in ("depixelate_v2", "depix_v2", "universal_depixelate", "universal_depixelate_v2", "restoration_v2"),
+        "depix_camera": getattr(args, "depix_camera", None),
+        "depix_lens": getattr(args, "depix_lens", None),
         "reconstruction_lock": bool(getattr(args, "recon_4x", None) is not None or ref_mode_choice in ("recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock")),
         "sr_backend": getattr(args, "sr_backend", "realesrnet_x4plus"),
         "sr_denoise": getattr(args, "sr_denoise", 0.15),

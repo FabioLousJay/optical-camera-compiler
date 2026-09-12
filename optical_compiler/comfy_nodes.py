@@ -26,6 +26,7 @@ from .models import (
     StreakFlare,
     StressProbe,
     SuperResolutionBackend,
+    UniversalDepixelateV2Spec,
 )
 
 RIG_NAMES = [
@@ -38,6 +39,7 @@ RIG_NAMES = [
     "Canon EOS R5 Mark II Stacked Full-Frame",
     "Nikon Z 9 Stacked Flagship Full-Frame",
     "Leica SL3-P Full-Frame Mirrorless (Maestro IV)",
+    "Leica Q3 Monochrom Full-Frame (Summilux 28mm f/1.7)",
     "Leica SL2 Full-Frame (50mm Summilux f/2.8)",
     "Panasonic LUMIX S1RII High-Resolution Mirrorless",
     "Sony FX Cinema Line Full-Frame (Venice S-Log3)",
@@ -62,6 +64,7 @@ RIG_NAME_TO_ID = {
     "Canon EOS R5 Mark II Stacked Full-Frame": "canon_eos_r5_ii",
     "Nikon Z 9 Stacked Flagship Full-Frame": "nikon_z9",
     "Leica SL3-P Full-Frame Mirrorless (Maestro IV)": "leica_sl3_p",
+    "Leica Q3 Monochrom Full-Frame (Summilux 28mm f/1.7)": "leica_q3_monochrom",
     "Leica SL2 Full-Frame (50mm Summilux f/2.8)": "leica_sl2",
     "Panasonic LUMIX S1RII High-Resolution Mirrorless": "panasonic_lumix_s1rii",
     "Sony FX Cinema Line Full-Frame (Venice S-Log3)": "sony_fx_series",
@@ -124,6 +127,7 @@ class OpticalCameraCompilerNode:
                         "identity_lock",
                         "product_lock",
                         "depixelate_gfx100rf",
+                        "depixelate_v2",
                         "reconstruction_lock_4x",
                         "universal_png_lock",
                         "outpaint_full_body",
@@ -330,8 +334,10 @@ class OpticalCameraCompilerNode:
             "identity_lock",
             "product_lock",
             "depixelate_gfx100rf",
+            "depixelate_v2",
             "outpaint_full_body",
             "reconstruction_lock_4x",
+            "universal_png_lock",
         ) or product_crop.strip():
             mode_map = {
                 "transform_adapt": ReferenceMode.TRANSFORM_ADAPT,
@@ -339,8 +345,10 @@ class OpticalCameraCompilerNode:
                 "identity_lock": ReferenceMode.IDENTITY_LOCK,
                 "product_lock": ReferenceMode.PRODUCT_LOCK,
                 "depixelate_gfx100rf": ReferenceMode.DEPIXELATE_GFX100RF,
+                "depixelate_v2": ReferenceMode.DEPIXELATE_V2,
                 "outpaint_full_body": ReferenceMode.OUTPAINT_FULL_BODY,
                 "reconstruction_lock_4x": ReferenceMode.RECONSTRUCTION_LOCK_4X,
+                "universal_png_lock": ReferenceMode.UNIVERSAL_PNG_LOCK,
             }
             ref_mode = mode_map.get(reference_mode, ReferenceMode.PRODUCT_LOCK if product_crop.strip() else ReferenceMode.NONE)
             if ref_mode == ReferenceMode.PRODUCT_LOCK:
@@ -429,6 +437,12 @@ class OpticalCameraCompilerNode:
                 protect_sky_haze=True,
             )
 
+        depix_v2_spec = None
+        if ref_mode == ReferenceMode.DEPIXELATE_V2:
+            depix_v2_spec = UniversalDepixelateV2Spec(
+                content_type=ct_enum.value if ct_enum else "photograph",
+            )
+
         scene = SceneInput(
             subject=subject.strip(),
             environment=environment.strip() if environment.strip() else None,
@@ -472,6 +486,7 @@ class OpticalCameraCompilerNode:
             lighting_environment=le_spec,
             series_cohesion=sc_spec,
             reconstruction_lock=recon_spec,
+            depixelate_v2=depix_v2_spec,
         )
 
         result = compile_scene(

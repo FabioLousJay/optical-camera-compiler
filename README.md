@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Version: 3.7.0](https://img.shields.io/badge/version-3.7.0-blue.svg)](pyproject.toml)
+[![Version: 3.8.0](https://img.shields.io/badge/version-3.8.0-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 181 Passing](https://img.shields.io/badge/tests-181%20passing-brightgreen.svg)](tests/)
+[![Tests: 197 Passing](https://img.shields.io/badge/tests-197%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -55,9 +55,9 @@ Standard AI generations often suffer from JPEG block compression, chroma subsamp
 
 ---
 
-## Reference Image Pipeline (Modes A, B, C, D, E, F, G, & H)
+## Reference Image Pipeline (Modes A, B, C, D, E, F, G, H, & I)
 
-Attach any reference image from your **local hardware** (drag & drop or file select) into the compiler to unlock eight production workflows:
+Attach any reference image from your **local hardware** (drag & drop or file select) into the compiler to unlock nine production workflows:
 
 ### 🔬 Mode A: Optical Re-Master & Max-Fidelity Upscale (`restore_upscale`)
 Elevates existing low-resolution or AI-distorted photos to medium-format camera quality (**Phase One IQ4 150MP**, **Hasselblad H6D-100c**) while preserving 100% of the original subject identity, composition, and physical details.
@@ -137,6 +137,38 @@ Eliminates synthetic palette reduction, indexed-color quantization, and compress
 * **Strict Correction Verbiage**: Automatically deploys failure-recovery prompts if a generator attempts to bypass the locked delivery:
   > *"You missed the locked delivery workflow. Apply the internal 4× full-color RGB PNG upscale now, export the final PNG, and report the final pixel dimensions, color mode, and file size."*
 * **Layered Negative Shield Suppression**: Hard suppresses `forced palette reduction`, `indexed-color PNG`, `palette quantization`, `color simplification`, `mushy surfaces`, `watercolor-like smearing`, `fake oversharpening halos`, `muddy gradients`, `posterization`, `lossy PNG compression`, `flattened textures`, and `compression damage`.
+
+### 🔍 Mode I: Universal De-Pixelate + Upscale Restoration Protocol v2.0 (`depixelate_v2` / `--depixelate-v2` / `--depix-v2`)
+Reference-guided image restoration and resolution enhancement removing pixelation, compression damage, aliasing, and mosquito noise while preserving authentic identity, typography, structured layouts, and scene integrity:
+* **Reference as Absolute Source of Truth**: Preserves exact subject identity, layout, colors, lighting logic, and materials without reimagining, restyling, or rewriting the scene.
+* **4-Step Content-Specific Repair Chains**:
+  * `photograph` / `portrait`: Geometry & anatomy stabilization $\rightarrow$ Texture recovery $\rightarrow$ Dynamic range restoration $\rightarrow$ Micro-contrast refinement.
+  * `product_photo`: Geometry lock $\rightarrow$ Edge crispness $\rightarrow$ Material finish/sheen $\rightarrow$ Label/specular clarity.
+  * `document_scan` / `ui_or_screenshot`: Grid/layout registration $\rightarrow$ OCR stroke reconstruction $\rightarrow$ High-contrast binarization $\rightarrow$ Artifact removal.
+  * `poster_or_flyer` / `meme_or_infographic`: Composition boundaries $\rightarrow$ Typography legibility $\rightarrow$ Graphic element sharpening $\rightarrow$ Color block de-noising.
+* **Text Preservation & OCR Safety Protocol**:
+  * Text content, capitalization, spelling, font weight, and placement must match the reference exactly.
+  * Prohibits hallucinating new text, translating, rewriting, or substituting decorative glyphs.
+  * Blurry or illegible text must be sharpened into its most probable actual characters; if unresolvable, rendered as authentic low-contrast unreadable text rather than invented nonsense words.
+* **Structured Graphics Preservation**:
+  * Straight lines remain straight and parallel; circles, rounded rects, and geometric curves remain smooth and non-wobbly.
+  * Vector-like shapes, icons, and UI elements render with crisp boundaries, clean fills, and zero bleeding.
+* **Confidence-Based Detail Reconstruction (`evidence_proportional`)**:
+  * High-confidence areas: reconstruct full realistic micro-detail.
+  * Medium-confidence areas: plausible detail consistent with surroundings.
+  * Low-confidence / severely degraded areas: smooth conservative transitions, never hallucinate specific objects, faces, logos, or words.
+* **Layered Anti-Restyling Negative Shield**: Hard negative tokens suppress `restyling`, `rewriting`, `reimagining`, `stylization`, `hallucinated text`, `hallucinated logos`, `AI gloss`, `plastic sheen`, `over-smoothing`, `geometric wobble`, and `cartoonish illustration`.
+* **Hardware Profile Auto-Routing**:
+  * Monochrome / B&W scenes $\rightarrow$ **Leica Q3 Monochrom** (60.3MP zero-CFA sensor + Summilux 28mm f/1.7 ASPH).
+  * Flat graphics, document scans, UI screenshots, infographics, posters $\rightarrow$ **Sony Alpha 7R V** (61MP BSI CMOS + Sony 55mm f/1.8 Sonnar T* FE ZA).
+* **CLI Execution**:
+  ```bash
+  python3 -m optical_compiler "Historical portrait with JPEG compression damage" \
+    --depixelate-v2 \
+    --ref-img vintage_scan.jpg \
+    --target gpt_images \
+    -c
+  ```
 
 ---
 
@@ -420,21 +452,25 @@ When `profile="auto"` is specified (default in ComfyUI), the compiler inspects y
     * *Sensor*: Full-frame 61MP Exmor R BSI CMOS.
     * *Optics*: Sony FE 50mm f/1.2 GM, FE 85mm f/1.4 GM II, FE 135mm f/1.8 GM.
     * *Physics*: Modern commercial resolution, razor-sharp G-Master optical acutance.
+16. **Leica Q3 Monochrom Fixed-Lens Full-Frame (`leica_q3_monochrom`)**:
+    * *Sensor*: $36.0 \times 24.0\,\text{mm}$ 60.3MP BSI CMOS monochrome sensor (zero Color Filter Array / no Bayer matrix, no OLPF), Maestro IV processor, Base ISO 125.
+    * *Optics*: Fixed Leica Summilux 28mm f/1.7 ASPH with integrated macro ring down to 17cm, digital crop modes (28/35/50/75/90mm).
+    * *Physics*: Pure luminance capture with zero demosaicing interpolation, extreme optical micro-contrast, true tonal graduation from deep obsidian black to brilliant specular white, uncompressed 14-bit DNG raw.
 
 ### Cinema Production & Venice Color Science
-16. **Sony FX Cinema Line Full-Frame (`sony_fx_series`)**:
+17. **Sony FX Cinema Line Full-Frame (`sony_fx_series`)**:
     * *Format*: $35.6 \times 23.8\,\text{mm}$ full-frame cinema 4K Exmor R BSI CMOS, 15+ stops dynamic range.
     * *Optics*: Sony FE 50mm f/1.2 GM stopped down to $f/2.8$ cinematic sweet spot, FE 24-70mm f/2.8 GM II, FE 85mm f/1.4 GM II.
     * *Physics*: Venice color science highlight rolloff, $180^\circ$ cinema shutter angle ($1/48\,\text{s}$ cadence), Dual Base ISO 800/12800, 10-bit 4:2:2 All-Intra S-Log3/S-Gamut3.Cine.
-17. **ARRI Alexa 35 Cinema Large-Sensor (`arri_alexa_35`)**:
+18. **ARRI Alexa 35 Cinema Large-Sensor (`arri_alexa_35`)**:
     * *Format*: Super 35 Native 4K ALEV 4 sensor, Cooke S4/i 50mm T2.0 Prime, ARRI LogC4.
 
 ### Analog Film Classics
-18. **Hasselblad 500C/M 6x6 Analog Medium Format (`hasselblad_500cm`)**:
+19. **Hasselblad 500C/M 6x6 Analog Medium Format (`hasselblad_500cm`)**:
     * *Format*: $56 \times 56\,\text{mm}$ square 120 film gate, Carl Zeiss Planar T* 80mm f/2.8 CF.
-19. **Pentax 67 II 6x7 Medium Format Film (`pentax_67ii`)**:
+20. **Pentax 67 II 6x7 Medium Format Film (`pentax_67ii`)**:
     * *Format*: $56 \times 70\,\text{mm}$ oversized negative, SMC Pentax 67 105mm f/2.4 Reference Lens.
-20. **Leica M6 Classic 35mm Analog Rangefinder (`leica_m6_analog`)**:
+21. **Leica M6 Classic 35mm Analog Rangefinder (`leica_m6_analog`)**:
     * *Format*: 35mm silver halide film gate, Leica Summicron-M 50mm f/2 Dual-Range, Kodak Tri-X 400.
 
 ---
@@ -735,6 +771,34 @@ POST to `/api/png-lock-upscale`:
 }
 ```
 Returns `{ "status": "success", "report": { ... }, "delivery_callout": "Done ✅ ..." }`.
+
+### 12. Mode I: Universal De-Pixelate + Upscale Restoration v2.0
+Compile a prompt for reference-guided restoration and resolution enhancement:
+```bash
+# Monochrome restoration with automatic Leica Q3 Monochrom routing
+python3 -m optical_compiler "Restoration of a damaged vintage archive negative" \
+  --depixelate-v2 \
+  --ref-img vintage_scan.jpg \
+  --target gpt_images \
+  -c
+
+# Flat graphic reproduction with automatic Sony Alpha 7R V routing
+python3 -m optical_compiler "High-resolution restoration of a vintage promotional poster" \
+  --depixelate-v2 \
+  --content-type poster_or_flyer \
+  --ref-img poster_lowres.png \
+  --target imagen \
+  -c
+
+# Custom approved camera and lens selection
+python3 -m optical_compiler "De-pixelate damaged product packaging photo" \
+  --depixelate-v2 \
+  --depix-camera "Sony Alpha 7R V" \
+  --depix-lens "Sony 55mm f/1.8 Sonnar T FE ZA" \
+  --ref-img product_blurry.jpg \
+  --target midjourney \
+  -c
+```
 
 ---
 

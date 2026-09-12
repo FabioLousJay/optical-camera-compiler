@@ -24,6 +24,7 @@ from .models import (
     StressProbe,
     SuperResolutionBackend,
     TargetEngine,
+    UniversalDepixelateV2Spec,
 )
 from .pfep import (
     PROMPT_TEMPLATES,
@@ -50,12 +51,13 @@ from .restoration import (
     viewing_distance_inches,
 )
 
-__version__ = "3.7.0"
+__version__ = "3.8.0"
 
 __all__ = [
     "OpticalCompiler",
     "compile_scene",
     "compile_ab_harness",
+    "UniversalDepixelateV2Spec",
     "SceneInput",
     "CameraProfile",
     "SensorOptics",

@@ -31,6 +31,7 @@ class SDXLAdapter(BaseAdapter):
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
+        is_depixelate_v2 = bool((ref and ref.mode == ReferenceMode.DEPIXELATE_V2) or scene.has_depixelate_v2)
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
         is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
@@ -63,6 +64,16 @@ class SDXLAdapter(BaseAdapter):
             pos_chunks.append(
                 "strict identity-locked reference portrait, exact anatomical presence, "
                 "biometric facial geometry, mass, body proportions, hair, and beard pattern preserved without alteration"
+            )
+        elif is_depixelate_v2:
+            spec = scene.depixelate_v2
+            ctype = spec.content_type if spec else "photograph"
+            cam_str = spec.selected_camera if (spec and spec.selected_camera) else optics.camera_system
+            lens_str = spec.selected_lens if (spec and spec.selected_lens) else optics.lens
+            pos_chunks.append(
+                f"universal de-pixelate and upscale restoration v2.0 ({ctype}), "
+                f"absolute source of truth lock to reference image, shot on {cam_str} with {lens_str}, "
+                f"exact text and OCR preservation, evidence-anchored detail reconstruction, zero hallucination"
             )
         elif is_depixelate:
             pos_chunks.append(
@@ -228,7 +239,10 @@ class SDXLAdapter(BaseAdapter):
                 "iris and eyelashes tack sharp",
                 "zero motion blur",
             ])
-        if is_depixelate:
+        if is_depixelate_v2:
+            spec = scene.depixelate_v2
+            res_tag = scene.output_resolution or (spec.target_resolution if spec else "60MP Ultra-High Resolution Capture")
+        elif is_depixelate:
             res_tag = scene.output_resolution or "102MP Medium Format (11648 x 8736)"
         elif is_recon_4x:
             res_tag = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area)"
@@ -253,7 +267,7 @@ class SDXLAdapter(BaseAdapter):
 
 
         # 2. Negative Prompt (Comprehensive artifact suppression)
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock or is_recon_4x or is_png_lock)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_depixelate_v2 or is_identity_lock or is_product_lock or is_recon_4x or is_png_lock)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding and not is_product_lock,
@@ -265,9 +279,25 @@ class SDXLAdapter(BaseAdapter):
             include_body_distortion=scene.has_body_morphology,
             include_reconstruction_drift=is_recon_4x,
             include_png_lock=is_png_lock,
+            include_depixelate_v2=is_depixelate_v2,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
+
+        if is_depixelate_v2:
+            all_negatives.extend([
+                "restyling",
+                "rewriting",
+                "hallucination",
+                "invented text",
+                "invented logos",
+                "AI gloss",
+                "plastic sheen",
+                "over-smoothing",
+                "smearing",
+                "halos",
+                "color shift",
+            ])
 
         if scene.has_body_morphology:
             all_negatives.extend([
@@ -355,7 +385,16 @@ class SDXLAdapter(BaseAdapter):
                 "compress_level": 0,
                 "linear_scale": 4,
             })
-        if is_outpaint:
+        if is_depixelate_v2:
+            spec = scene.depixelate_v2
+            parameters.update({
+                "reference_mode": "depixelate_v2",
+                "content_type": spec.content_type if spec else "photograph",
+                "ocr_safety": spec.ocr_safety_mode if spec else "strict_preserve",
+                "confidence_mode": spec.confidence_mode if spec else "evidence_anchored",
+                "controlnet_tile_weight": 0.85,
+            })
+        elif is_outpaint:
             parameters.update({
                 "reference_mode": "outpaint_full_body",
                 "outpaint_direction": "downward",

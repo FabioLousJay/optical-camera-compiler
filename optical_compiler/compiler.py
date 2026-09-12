@@ -33,6 +33,7 @@ from .models import (
     StressProbe,
     SuperResolutionBackend,
     TargetEngine,
+    UniversalDepixelateV2Spec,
 )
 from .profiles import apply_overrides, auto_select_profile, load_profile
 
@@ -133,6 +134,9 @@ class OpticalCompiler:
         protect_sky_haze: bool = True,
         png_lock: Optional[Union[bool, dict, HighResPNGOutputLockSpec]] = None,
         png_min_mb: Optional[float] = None,
+        depixelate_v2: Optional[Union[bool, dict, UniversalDepixelateV2Spec]] = None,
+        depix_camera: Optional[str] = None,
+        depix_lens: Optional[str] = None,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -326,6 +330,25 @@ class OpticalCompiler:
         elif png_min_mb is not None and bool(png_lock):
             png_lock_obj = HighResPNGOutputLockSpec(target_min_mb=png_min_mb)
 
+        depix_v2_obj: Optional[UniversalDepixelateV2Spec] = None
+        is_depix_v2_ref = bool(ref_obj and ref_obj.mode == ReferenceMode.DEPIXELATE_V2)
+        if isinstance(depixelate_v2, UniversalDepixelateV2Spec):
+            depix_v2_obj = depixelate_v2
+        elif isinstance(depixelate_v2, dict):
+            depix_v2_obj = UniversalDepixelateV2Spec(**depixelate_v2)
+        elif depixelate_v2 is True or is_depix_v2_ref:
+            depix_v2_obj = UniversalDepixelateV2Spec(
+                content_type=c_type,
+                camera_class=depix_camera,
+                lens=depix_lens,
+            )
+        elif depix_camera is not None or depix_lens is not None:
+            depix_v2_obj = UniversalDepixelateV2Spec(
+                content_type=c_type,
+                camera_class=depix_camera,
+                lens=depix_lens,
+            )
+
         # 2. Build SceneInput
         if isinstance(scene, str):
             scene_input = SceneInput(
@@ -390,6 +413,7 @@ class OpticalCompiler:
                 series_cohesion=sc_obj,
                 reconstruction_lock=recon_obj,
                 png_lock=png_lock_obj,
+                depixelate_v2=depix_v2_obj,
             )
 
         else:
@@ -510,6 +534,8 @@ class OpticalCompiler:
                 scene_input.reconstruction_lock = recon_obj
             if png_lock_obj is not None:
                 scene_input.png_lock = png_lock_obj
+            if depix_v2_obj is not None:
+                scene_input.depixelate_v2 = depix_v2_obj
 
         # 3. Parse target engine
         engine = (
@@ -518,14 +544,42 @@ class OpticalCompiler:
             else TargetEngine.from_str(target)
         )
 
-        # 4. Resolve base profile (dynamic auto router, fixed profile, or locked GFX100RF)
+        # 4. Resolve base profile (dynamic auto router, fixed profile, locked GFX100RF, or De-Pixelate v2.0)
         if scene_input.reference and scene_input.reference.mode == ReferenceMode.DEPIXELATE_GFX100RF:
             base = load_profile("fujifilm_gfx100rf")
+        elif scene_input.has_depixelate_v2 or (scene_input.reference and scene_input.reference.mode == ReferenceMode.DEPIXELATE_V2):
+            if scene_input.depixelate_v2 and scene_input.depixelate_v2.camera_class:
+                base = load_profile(scene_input.depixelate_v2.camera_class)
+            elif scene_input.is_monochrome:
+                base = load_profile("leica_q3_monochrom")
+            elif scene_input.content_type and scene_input.content_type.is_flat_reproduction:
+                base = load_profile("sony_a7rv")
+            elif self.is_auto:
+                target_profile_id = auto_select_profile(scene_input)
+                base = load_profile(target_profile_id)
+            else:
+                base = self.base_profile
         elif self.is_auto:
             target_profile_id = auto_select_profile(scene_input)
             base = load_profile(target_profile_id)
         else:
             base = self.base_profile
+
+        if scene_input.has_depixelate_v2:
+            if not scene_input.depixelate_v2:
+                scene_input.depixelate_v2 = UniversalDepixelateV2Spec(content_type=scene_input.content_type)
+            if scene_input.is_monochrome:
+                if not scene_input.depixelate_v2.camera_class:
+                    scene_input.depixelate_v2.camera_class = "Leica Q3 Monochrom"
+                if not scene_input.depixelate_v2.lens and not scene_input.lens:
+                    scene_input.depixelate_v2.lens = "Leica Q3 Monochrom Summilux 28mm f/1.7 ASPH"
+                    scene_input.lens = "Leica Q3 Monochrom Summilux 28mm f/1.7 ASPH"
+            elif scene_input.content_type and scene_input.content_type.is_flat_reproduction:
+                if not scene_input.depixelate_v2.camera_class:
+                    scene_input.depixelate_v2.camera_class = "Sony Alpha 7R V"
+                if not scene_input.depixelate_v2.lens and not scene_input.lens:
+                    scene_input.depixelate_v2.lens = "Sony 55mm f/1.8 Sonnar T FE ZA"
+                    scene_input.lens = "Sony 55mm f/1.8 Sonnar T FE ZA"
 
         # 5. Apply overrides to active profile
         active_profile = apply_overrides(base, scene_input)

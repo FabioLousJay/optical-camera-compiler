@@ -34,6 +34,7 @@ class MidjourneyAdapter(BaseAdapter):
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
+        is_depixelate_v2 = bool((ref and ref.mode == ReferenceMode.DEPIXELATE_V2) or scene.has_depixelate_v2)
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
         is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
@@ -58,6 +59,15 @@ class MidjourneyAdapter(BaseAdapter):
             if scene.label_kerning:
                 prod_tokens.append(f"locked typography {scene.label_kerning}")
             core_elements.append(", ".join(prod_tokens))
+        elif is_depixelate_v2:
+            spec = scene.depixelate_v2
+            ctype = spec.content_type if spec else "photograph"
+            cam_str = spec.selected_camera if (spec and spec.selected_camera) else optics.camera_system
+            lens_str = spec.selected_lens if (spec and spec.selected_lens) else optics.lens
+            core_elements.append(
+                f"Universal De-Pixelate v2.0 restoration, content type {ctype}, single source of truth, "
+                f"strict OCR text and geometry lock, evidence-anchored detail reconstruction, shot on {cam_str} {lens_str}"
+            )
         elif is_depixelate:
             core_elements.append(
                 "Universal De-Pixelate and 102MP upscale restoration of reference photo, Fujinon 35mm f/4 leaf shutter, Reala Ace color response"
@@ -228,6 +238,9 @@ class MidjourneyAdapter(BaseAdapter):
         if is_recon_4x:
             ref_target = ref.filename if (ref and ref.filename) else "[SOURCE_IMAGE_URL]"
             flags.extend([f"--sref {ref_target}", "--iw 2.0", "--cw 100"])
+        elif is_depixelate_v2:
+            ref_target = ref.filename if (ref and ref.filename) else "[REFERENCE_IMAGE_URL]"
+            flags.extend([f"--sref {ref_target}", "--iw 2.0", "--cw 100"])
         elif is_depixelate or is_identity_lock or is_product_lock:
             ref_target = ref.filename if (ref and ref.filename) else (scene.product_crop or "[PRODUCT_CROP_URL]")
             flags.extend([f"--sref {ref_target}", "--iw 2.0", "--cw 100"])
@@ -295,7 +308,23 @@ class MidjourneyAdapter(BaseAdapter):
                 "signature",
                 "label",
             ])
-        if is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock:
+        if is_depixelate_v2:
+            banned_mj.extend([
+                "restyling",
+                "rewriting",
+                "hallucination",
+                "invented text",
+                "invented logos",
+                "AI gloss",
+                "plastic sheen",
+                "over-smoothing",
+                "smearing",
+                "halos",
+                "color shift",
+                "composition alteration",
+                "decorative filtering",
+            ])
+        if is_restore or is_transform or is_outpaint or is_depixelate or is_depixelate_v2 or is_identity_lock:
             banned_mj.extend([
                 "facial morphing",
                 "identity drift",
@@ -374,7 +403,7 @@ class MidjourneyAdapter(BaseAdapter):
         no_flag = f"--no {', '.join(dict.fromkeys(banned_mj))}"
         flags.append(no_flag)
 
-        prefix = "[REFERENCE_IMAGE_URL] " if (is_restore or is_outpaint) else ""
+        prefix = "[REFERENCE_IMAGE_URL] " if (is_restore or is_outpaint or is_depixelate_v2) else ""
         positive_base = prefix + ", ".join(prompt_parts)
         full_mj_prompt = f"{positive_base} {' '.join(flags)}"
 
@@ -394,7 +423,17 @@ class MidjourneyAdapter(BaseAdapter):
                 "compress_level": 0,
                 "linear_scale": 4,
             })
-        if is_restore:
+        if is_depixelate_v2:
+            spec = scene.depixelate_v2
+            ref_target = ref.filename if (ref and ref.filename) else "[REFERENCE_IMAGE_URL]"
+            parameters.update({
+                "reference_mode": "depixelate_v2",
+                "sref": ref_target,
+                "iw": 2.0,
+                "cw": 100,
+                "content_type": spec.content_type if spec else "photograph",
+            })
+        elif is_restore:
             parameters.update({
                 "reference_mode": "restore_upscale",
                 "image_weight": 2.0,

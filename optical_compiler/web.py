@@ -1759,6 +1759,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         "Leica APO-Summicron-SL 35mm f/2 ASPH (Environmental Documentary)",
         "Leica Super-Vario-Elmar-SL 16-35mm f/3.5-4.5 ASPH"
       ],
+      leica_q3_monochrom: [
+        "Leica Summilux 28mm f/1.7 ASPH (Fixed Integrated Lens with Macro Mode)",
+        "Leica Summilux 28mm f/1.7 ASPH @ Macro Mode (17cm close focus)",
+        "Leica Summilux 28mm f/1.7 ASPH (35mm Crop Mode)",
+        "Leica Summilux 28mm f/1.7 ASPH (50mm Crop Mode)"
+      ],
       panasonic_lumix_s1rii: [
         "Lumix S PRO 50mm f/1.4 Leica-Certified (Ultimate Optical Purity)",
         "Lumix S PRO 85mm f/1.8 (Lightweight Portrait Prime)",
@@ -3583,6 +3589,9 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 protect_sky_haze=bool(body.get("protect_sky_haze", True)),
                 png_lock=body.get("png_lock") or body.get("png_output_lock", False),
                 png_min_mb=float(body["png_min_mb"]) if body.get("png_min_mb") is not None else None,
+                depixelate_v2=body.get("depixelate_v2") or body.get("depix_v2", False),
+                depix_camera=body.get("depix_camera"),
+                depix_lens=body.get("depix_lens"),
             )
             self._send_json(payload.to_dict())
         except Exception as err:

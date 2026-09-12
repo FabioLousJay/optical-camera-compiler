@@ -1,0 +1,68 @@
+{
+  "profile_id": "leica_q3_monochrom",
+  "title": "Leica Q3 Monochrom 60MP Full-Frame Compact",
+  "schema_version": "2.0",
+  "purpose": "Dedicated full-frame monochrome capture with pure panchromatic luminance fidelity, class-leading tonal gradation, zero demosaicing artifacts, and legendary Summilux 28mm f/1.7 ASPH optics.",
+  "sensor_and_optics": {
+    "camera_system": "Leica Q3 Monochrom Full-Frame Compact (Maestro IV Processor)",
+    "sensor_type": "36.0x24.0mm Full-Frame BSI CMOS Monochrome Sensor (60.3MP), strictly zero Color Filter Array (no Bayer matrix, no anti-aliasing filter), pure luminance sensels",
+    "sensor_dimensions": "36.0x24.0mm full-frame monochrome sensor (60.3MP)",
+    "full_frame_equivalent": "28mm native wide-angle field of view (with 35mm, 50mm, 75mm, 90mm digital frame lines)",
+    "lens": "Leica Summilux 28mm f/1.7 ASPH with integrated optical image stabilization and dedicated macro mode (down to 17cm)",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "ISO 125 base sensor sensitivity with pure monochromatic grain structure",
+    "dynamic_range": "15+ stops of monochromatic dynamic range with 14-bit uncompressed DNG raw",
+    "shutter": "Leaf shutter up to 1/2000s flash sync, electronic shutter up to 1/16000s"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Pure luminance exposure with nuanced silver halide-like tonal gradient from deep charcoal blacks to luminous highlight roll-off",
+    "light_transport": "True panchromatic light absorption, exceptional midtone separation, authentic micro-contrast pop without digital sharpening or color tinting"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Absolute per-pixel luminance resolution: 100% true photon count per sensel without Bayer demosaicing interpolation or color noise",
+      "Sublime silver halide-like monochromatic acutance with organic shadow micro-textures and luminous specular highlight roll-off",
+      "Pristine tactile surface micro-relief: textile weave, skin pores, hair strands, and architectural textures rendered with tactile micro-contrast"
+    ],
+    "depth_and_optics": [
+      "Apochromatic optical path with zero lateral or longitudinal chromatic aberration, zero purple/green fringing",
+      "Leica Summilux 28mm f/1.7 ASPH optical signature: ultra-sharp center-to-corner definition with gentle natural mechanical vignetting wide open",
+      "Macro mode reproduction fidelity down to 1:2 reproduction ratio with rectilinear edge discipline"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "color fringing",
+      "color noise",
+      "demosaicing artifacts",
+      "denoise smearing",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "color cast",
+      "color tint",
+      "sepia",
+      "cyanotype",
+      "airbrushed skin",
+      "plastic poreless skin",
+      "glamour retouching",
+      "computational bokeh",
+      "beauty filter glow",
+      "blown highlights",
+      "crushed blacks"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce pure panchromatic monochrome capture from a dedicated 60.3MP monochrome sensor. Zero color filter array, zero demosaicing artifacts, authentic silver halide tonal transitions, and tack-sharp Summilux 28mm f/1.7 ASPH optical acutance."
+}

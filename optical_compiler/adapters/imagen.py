@@ -8,6 +8,7 @@ from ..models import (
     CameraProfile,
     CompiledPayload,
     CopySpace,
+    IMAGE_REPAIR_PRIORITIES_BY_TYPE,
     MaterialStyle,
     PaperProfile,
     ReferenceMode,
@@ -33,6 +34,7 @@ class ImagenAdapter(BaseAdapter):
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
+        is_depixelate_v2 = bool((ref and ref.mode == ReferenceMode.DEPIXELATE_V2) or scene.has_depixelate_v2)
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
         is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
@@ -75,6 +77,24 @@ class ImagenAdapter(BaseAdapter):
                 scene_elements.append(f"in a {scene.framing} of {scene.subject}")
             else:
                 scene_elements.append(f"focusing on {scene.subject}")
+        elif is_depixelate_v2:
+            spec = scene.depixelate_v2
+            ctype = spec.content_type if spec else "photograph"
+            repair_chain = " -> ".join(IMAGE_REPAIR_PRIORITIES_BY_TYPE.get(ctype, IMAGE_REPAIR_PRIORITIES_BY_TYPE["photograph"]))
+            cam_str = spec.selected_camera if (spec and spec.selected_camera) else optics.camera_system
+            lens_str = spec.selected_lens if (spec and spec.selected_lens) else optics.lens
+            scene_elements.append(
+                f"Universal De-Pixelate and Upscale Restoration v2.0 of the attached reference image (content type: {ctype}). "
+                f"Absolute reference lock: using the attached image as the single source of truth. "
+                f"Repair priority sequence: [{repair_chain}]. "
+                f"Eliminating pixelation, blockiness, compression damage, aliasing, mosquito noise, and low-resolution softness "
+                f"while preserving exact identity, composition, proportions, materials, lighting logic, and text content without restyling or hallucination. "
+                f"Captured via {cam_str} with {lens_str}"
+            )
+            if scene.framing:
+                scene_elements.append(f"rendered as a {scene.framing} of {scene.subject}")
+            else:
+                scene_elements.append(f"focusing faithfully on {scene.subject}")
         elif is_depixelate:
             scene_elements.append(
                 "Universal De-Pixelate and Upscale Restoration of the attached reference image rendered with a fixed Fujifilm GFX100RF 102MP signature. "
@@ -169,7 +189,15 @@ class ImagenAdapter(BaseAdapter):
                 "distinct MCP/PIP/DIP joints, palmar flexion creases, authentic tissue blanching under pressure, "
                 "translucent nail beds with lunula crescents, natural cuticles, and absolute zero finger mutations."
             )
-        if is_depixelate and ref:
+        if is_depixelate_v2:
+            spec = scene.depixelate_v2
+            ocr_text = "OCR Safety: preserve unambiguous characters exactly; for illegible glyphs, do not invent nonsense text or hallucinated brands."
+            ref_directives.append(
+                f"Universal De-Pixelate v2.0 Protocol: Priority is absolute reference fidelity. {ocr_text} "
+                "Confidence-based detail reconstruction strictly enforced: high-confidence areas restored with micro-acutance, low-confidence areas gently cleaned without artificial invention. "
+                "Preserve all visible text, logos, geometry, and layout without alteration."
+            )
+        elif is_depixelate and ref:
             ref_directives.append(
                 "Fixed Fujifilm GFX100RF 102MP restoration lock: Use attached image as single source of truth. "
                 "Human skin realism strictly overrides sharpness: skin remains naturally soft compared to eyes, hair, teeth, jewelry, and text. "
@@ -292,7 +320,10 @@ class ImagenAdapter(BaseAdapter):
         micro_prose = " ".join(micro_parts)
 
         # 5. Aesthetic directive and final output resolution
-        if is_depixelate:
+        if is_depixelate_v2:
+            spec = scene.depixelate_v2
+            res_text = scene.output_resolution or (spec.target_resolution if spec else "60MP Ultra-High Resolution Capture")
+        elif is_depixelate:
             res_text = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution)"
         elif is_recon_4x:
             res_text = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area)"
@@ -306,8 +337,10 @@ class ImagenAdapter(BaseAdapter):
         )
         if scene.suppress_text_branding and not is_product_lock:
             style_prose += " Strictly eliminate all text, watermarks, logos, brand names, and typography."
-        if is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock:
+        if is_restore or is_transform or is_outpaint or is_depixelate or is_depixelate_v2 or is_identity_lock:
             style_prose += " Eliminate facial morphing, feature drift, identity loss, and warped geometry."
+        if is_depixelate_v2:
+            style_prose += " Strictly eliminate restyling, AI gloss, text drift, logo hallucination, over-smoothing, and synthetic sharpening halos."
         if is_recon_4x:
             style_prose += " Eliminate generative hallucination, altered terrain, rock strata distortion, sky grain, and stacking halos."
         if is_product_lock:
@@ -338,7 +371,7 @@ class ImagenAdapter(BaseAdapter):
 
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock or is_recon_4x or is_png_lock)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_depixelate_v2 or is_identity_lock or is_product_lock or is_recon_4x or is_png_lock)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding and not is_product_lock,
@@ -350,6 +383,7 @@ class ImagenAdapter(BaseAdapter):
             include_body_distortion=scene.has_body_morphology,
             include_reconstruction_drift=is_recon_4x,
             include_png_lock=is_png_lock,
+            include_depixelate_v2=is_depixelate_v2,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
@@ -368,7 +402,15 @@ class ImagenAdapter(BaseAdapter):
                 "compress_level": 0,
                 "linear_scale": 4,
             })
-        if is_outpaint:
+        if is_depixelate_v2:
+            spec = scene.depixelate_v2
+            parameters.update({
+                "reference_mode": "depixelate_v2",
+                "content_type": spec.content_type if spec else "photograph",
+                "ocr_safety": spec.ocr_safety_mode if spec else "strict_preserve",
+                "confidence_mode": spec.confidence_mode if spec else "evidence_anchored",
+            })
+        elif is_outpaint:
             parameters.update({
                 "reference_mode": "outpaint_full_body",
                 "outpaint_direction": "downward",

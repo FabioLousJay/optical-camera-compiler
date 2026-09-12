@@ -641,6 +641,7 @@ class ReferenceMode(str, Enum):
     PRODUCT_LOCK = "product_lock"  # 100% Commercial SKU lock (cap geometry, label kerning, seams, material finish, SKU color)
     RECONSTRUCTION_LOCK_4X = "reconstruction_lock_4x"  # Professional 4X Reconstruction Lock (source-locked deep SR, anti-hallucination)
     UNIVERSAL_PNG_LOCK = "universal_png_lock"  # Universal High-Resolution PNG Output Lock v1.0 (true full-color RGB PNG, 4X upscale)
+    DEPIXELATE_V2 = "depixelate_v2"  # Universal De-Pixelate + Upscale Restoration v2.0 (Sony A7R V / Leica Q3 Monochrom / Multi-Class)
 
     @classmethod
     def from_str(cls, value: Optional[str]) -> ReferenceMode:
@@ -654,6 +655,13 @@ class ReferenceMode(str, Enum):
             "gfx100rf": cls.DEPIXELATE_GFX100RF,
             "gfx100rf_restore": cls.DEPIXELATE_GFX100RF,
             "depixelate_gfx100rf": cls.DEPIXELATE_GFX100RF,
+            "depixelate_v2": cls.DEPIXELATE_V2,
+            "depix_v2": cls.DEPIXELATE_V2,
+            "universal_depixelate": cls.DEPIXELATE_V2,
+            "universal_depixelate_v2": cls.DEPIXELATE_V2,
+            "depixelate_restoration_v2": cls.DEPIXELATE_V2,
+            "v2_depixelate": cls.DEPIXELATE_V2,
+            "restoration_v2": cls.DEPIXELATE_V2,
             "restore": cls.RESTORE_UPSCALE,
             "restore_upscale": cls.RESTORE_UPSCALE,
             "transform": cls.TRANSFORM_ADAPT,
@@ -899,6 +907,306 @@ class HighResPNGOutputLockSpec:
                 "standard_delivery_pattern": "Done ✅ 4× full-color PNG upscale: [width] × [height] px, RGB PNG, [file size] MB.",
                 "correction_verbiage": self.correction_verbiage,
             },
+        }
+
+
+# ==============================================================================
+# Universal De-Pixelate + Upscale Restoration Prompt v2.0 Specifications
+# ==============================================================================
+
+APPROVED_RESTORATION_CAMERAS: list[str] = [
+    "Sony Alpha 7R V",
+    "Sony a1 II",
+    "Leica SL3",
+    "Leica Q3 Monochrom",
+]
+
+APPROVED_RESTORATION_LENSES: list[str] = [
+    "Sony 35mm f/1.4 GM",
+    "Sony 50mm f/1.2 GM",
+    "Sony 55mm f/1.8 Sonnar T FE ZA",
+    "Sigma 85mm f/1.4 DG DN Art",
+    "Sony 135mm f/1.8 GM",
+    "Sony 14mm f/1.8 GM",
+    "Sony 24mm f/1.4 GM",
+    "Sony FE 70-200mm f/2.8 GM II",
+    "Sigma 24-70mm f/2.8 DG DN Art",
+    "Sony FE 16-35mm f/2.8 GM II",
+    "Sony 20-70mm f/4 G",
+    "Sony 24-105mm f/4 G OSS",
+    "Tamron 50-400mm f/4.5-6.3 Di III VC VXD",
+    "Leica APO-Summicron-SL 90mm f/2",
+    "Leica 50mm f/2 Summicron APO ASPH",
+    "Leica 75mm f/1.25 Noctilux",
+    "Leica 90mm f/2 Summicron-M",
+    "Leica 35mm f/1.4 Summilux-M ASPH II",
+    "Leica Q3 Monochrom Summilux 28mm f/1.7 ASPH",
+]
+
+DEFAULT_FLAT_GRAPHIC_SELECTION: dict[str, str] = {
+    "camera_class": "Sony Alpha 7R V",
+    "camera": "Sony Alpha 7R V",
+    "profile_id": "sony_a7rv",
+    "lens": "Sony 55mm f/1.8 Sonnar T FE ZA",
+    "use_case": "flat reproduction of infographics, posters, screenshots, document-like graphics, and meme-style images requiring minimal distortion",
+}
+
+DEFAULT_MONOCHROME_SELECTION: dict[str, str] = {
+    "camera_class": "Leica Q3 Monochrom",
+    "camera": "Leica Q3 Monochrom",
+    "profile_id": "leica_q3_monochrom",
+    "lens": "Leica Summilux 28mm f/1.7 ASPH",
+    "use_case": "dedicated full-frame monochrome capture with pure panchromatic luminance fidelity and zero color filter array artifacts",
+}
+
+IMAGE_REPAIR_PRIORITIES_BY_TYPE: dict[str, list[str]] = {
+    "photograph": [
+        "recover authentic detail from low-resolution structure first",
+        "clean jagged edges and compression artifacts second",
+        "restore natural texture and local contrast third",
+        "preserve original optical character at all times",
+    ],
+    "portrait": [
+        "preserve exact facial geometry and feature placement first",
+        "reduce artifacting without beautifying second",
+        "restore realistic skin, hair, fabric, and tonal transitions third",
+        "preserve age cues, asymmetry, and natural texture at all times",
+    ],
+    "product_photo": [
+        "preserve exact product form factor, dimensions, closures, and seams first",
+        "restore crisp label typography and packaging materials second",
+        "clean compression and reflection noise third",
+        "lock commercial brand color fidelity and specular highlights at all times",
+    ],
+    "document_scan": [
+        "stabilize page geometry and text legibility first",
+        "clean compression, edge ringing, and background contamination second",
+        "preserve print texture and scan realism third",
+        "do not rewrite or typeset-replace content",
+    ],
+    "poster_or_flyer": [
+        "preserve layout, typography, and graphic hierarchy first",
+        "clean edges, gradients, and print artifacts second",
+        "restore color consistency and legibility third",
+        "do not redesign or modernize the original",
+    ],
+    "meme_or_infographic": [
+        "preserve exact text content and graphic structure first",
+        "clean line work, arrows, icons, and edge artifacts second",
+        "restore readable typography and stable composition third",
+        "do not paraphrase or recompose",
+    ],
+    "ui_or_screenshot": [
+        "preserve exact interface structure and wording first",
+        "restore text clarity, icon edges, and panel separations second",
+        "reduce compression and scaling artifacts third",
+        "do not invent interface elements or alter the screen state",
+    ],
+    "mixed_content": [
+        "lock semantic fidelity of all text and structured graphics first",
+        "restore photographic or illustrative regions second",
+        "balance edge cleanup and texture recovery third",
+        "preserve the original relationship between text, graphics, and imagery at all times",
+    ],
+}
+
+FAILURE_PREVENTION_RULES: list[str] = [
+    "A visually cleaner result is invalid if it changes meaning",
+    "For text-bearing images, semantic fidelity outranks aesthetic enhancement",
+    "For identity-bearing images, identity fidelity outranks cosmetic enhancement",
+    "For layout-bearing images, structural fidelity outranks visual modernization",
+    "When restoration and certainty conflict, choose certainty",
+]
+
+TEXT_PRESERVATION_RULES: list[str] = [
+    "All visible text must be preserved exactly as in the source image",
+    "Do not paraphrase, rewrite, correct grammar, fix punctuation, or reinterpret text",
+    "Do not replace text with semantically similar wording",
+    "Do not translate text",
+    "Maintain original line breaks, spacing logic, alignment, hierarchy, and text placement as closely as possible",
+    "Maintain the original font style, stroke weight, serif or sans-serif character, and capitalization pattern as closely as recoverable",
+    "If a character is partially degraded but highly inferable from adjacent structure, restore it conservatively",
+    "If text reconstruction is uncertain, preserve ambiguity rather than hallucinate a clean but wrong word",
+    "If a full word cannot be recovered with high confidence, keep it visually softened or partially degraded rather than inventing a replacement",
+    "Do not introduce new text or remove existing text",
+]
+
+STRUCTURED_GRAPHICS_RULES: list[str] = [
+    "Preserve all arrows, connectors, boxes, dividers, icons, symbols, and diagram relationships exactly unless damage makes minimal repair necessary",
+    "Preserve the original layout grid, spacing logic, object hierarchy, and visual flow",
+    "Do not redesign infographic composition",
+    "Do not rebalance or modernize the graphic",
+    "Do not substitute icons or alter chart geometry",
+    "Keep edges clean and legible without changing the underlying design",
+]
+
+CONFIDENCE_BASED_RULES: dict[str, Any] = {
+    "instruction": "Only reconstruct missing or damaged detail in proportion to visual evidence.",
+    "confidence_levels": {
+        "high_confidence": "restore cleanly when structure is strongly supported by the reference",
+        "medium_confidence": "restore conservatively with minimal interpretation",
+        "low_confidence": "preserve softened ambiguity and avoid hallucination",
+    },
+    "rules": [
+        "Never convert low-confidence regions into high-detail inventions",
+        "For text, symbols, logos, and faces, uncertainty must bias toward preservation of ambiguity rather than confident fabrication",
+        "For repetitive textures, avoid synthetic over-patterning",
+        "For incomplete edges or borders, only perform minimal closure when visually necessary",
+    ],
+}
+
+DETAIL_RECONSTRUCTION_RULES: dict[str, list[str]] = {
+    "faces": [
+        "preserve exact face shape and feature placement",
+        "restore eyes, brows, lips, skin texture, and hairline conservatively",
+        "do not change age cues",
+        "do not make the subject younger, slimmer, cleaner, or more symmetrical",
+    ],
+    "textiles": [
+        "restore weave, seams, folds, and material texture only if supported by the source",
+        "avoid fake hyper-detailed cloth patterns",
+    ],
+    "backgrounds": [
+        "clean noise and recover structure while keeping depth separation natural",
+        "do not invent architecture or foliage detail beyond plausible reconstruction",
+    ],
+    "text_and_logos": [
+        "only restore readable text if the characters are sufficiently inferable from the source",
+        "otherwise keep text softened but plausible rather than hallucinated",
+        "do not redesign logos or wordmarks",
+        "do not sharpen text into a different phrase",
+    ],
+    "ui_elements": [
+        "preserve buttons, tabs, icons, panels, spacing, and labels exactly if visible",
+        "restore edge clarity without changing UI structure",
+        "do not invent hidden states or missing menus",
+    ],
+    "graphics_and_diagrams": [
+        "restore lines, arrows, boxes, and connectors with clean geometry",
+        "preserve the original relationships between labels and graphics",
+        "do not alter chart meaning, directionality, or visual hierarchy",
+    ],
+}
+
+
+@dataclass
+class UniversalDepixelateV2Spec:
+    """Specification for Universal De-Pixelate + Upscale Restoration Prompt v2.0."""
+
+    title: str = "Universal De-Pixelate + Upscale Restoration Prompt v2.0"
+    type: str = "reference-guided image restoration and resolution enhancement"
+    mode: str = "Attach any source image as the mandatory reference input"
+    core_objective: str = (
+        "Restore and upscale the attached image by removing pixelation, blockiness, "
+        "compression damage, aliasing, mosquito noise, softness from low resolution, "
+        "and digital degradation while preserving the source image's true identity, "
+        "composition, proportions, colors, materials, lighting logic, text content, "
+        "and scene integrity. The result must look like a plausibly higher-resolution "
+        "original capture, scan, or export of the same image, not a reimagined, "
+        "rewritten, or restyled version."
+    )
+    content_type: Any = None
+    camera_class: Optional[str] = None
+    lens: Optional[str] = None
+    selected_camera: Optional[str] = None
+    selected_lens: Optional[str] = None
+    target_resolution: str = "60MP Ultra-High Resolution Capture"
+    ocr_safety_mode: str = "strict_preserve"
+    strict_text: bool = True
+    ocr_safety: bool = True
+    preserve_graphics: bool = True
+    confidence_mode: str = "evidence_anchored"
+
+    def __post_init__(self) -> None:
+        if self.selected_camera and not self.camera_class:
+            self.camera_class = self.selected_camera
+        elif self.camera_class and not self.selected_camera:
+            self.selected_camera = self.camera_class
+
+        if self.selected_lens and not self.lens:
+            self.lens = self.selected_lens
+        elif self.lens and not self.selected_lens:
+            self.selected_lens = self.lens
+
+        if hasattr(self.content_type, "value"):
+            self.content_type = self.content_type.value
+        elif self.content_type is None:
+            self.content_type = "photograph"
+
+    def to_dict(self) -> dict[str, Any]:
+        ct = self.content_type if isinstance(self.content_type, str) else (self.content_type.value if self.content_type else "photograph")
+        priorities = IMAGE_REPAIR_PRIORITIES_BY_TYPE.get(ct, IMAGE_REPAIR_PRIORITIES_BY_TYPE["photograph"])
+        return {
+            "title": self.title,
+            "type": self.type,
+            "mode": self.mode,
+            "core_objective": self.core_objective,
+            "reference_usage": {
+                "priority": "absolute",
+                "instructions": [
+                    "Use the attached image as the single source of truth",
+                    "Preserve the original subject identity exactly",
+                    "Preserve the original framing, pose, composition, perspective, and layout unless the image edges are visibly broken and require minimal reconstruction",
+                    "Preserve the original wardrobe, objects, environment, symbols, diagrams, and color relationships",
+                    "Preserve all visible text exactly as shown unless a character is too degraded to be recovered with high confidence",
+                    "Do not add, remove, beautify, stylize, paraphrase, rewrite, redesign, or reinterpret any element not clearly supported by the reference",
+                    "Do not invent facial features, fabric details, jewelry, text, logos, architectural details, infographic labels, UI elements, or background objects that are not plausibly inferable from the source",
+                ],
+            },
+            "content_type_detection": {
+                "instruction": "Before restoration, classify the attached image into one primary content type and follow the corresponding restoration priorities.",
+                "allowed_primary_types": [c.value for c in ContentType],
+                "selected_primary_type": ct,
+            },
+            "image_repair_priorities": {ct: priorities},
+            "text_preservation_protocol": {
+                "priority": "critical whenever any visible text exists",
+                "rules": TEXT_PRESERVATION_RULES,
+            },
+            "structured_graphics_preservation_protocol": {
+                "priority": "critical for posters, memes, infographics, diagrams, UI, and mixed-content images",
+                "rules": STRUCTURED_GRAPHICS_RULES,
+            },
+            "ocr_safety_logic": {
+                "instruction": "Treat text-bearing images as semantic-preservation tasks, not creative-generation tasks.",
+                "rules": [
+                    "When text is central to the image meaning, restoration accuracy is more important than cosmetic perfection",
+                    "If a clean-looking restoration would require guessing missing words, do not guess",
+                    "Prefer slightly softened but semantically faithful text over crisp but hallucinated text",
+                    "For screenshots, preserve UI wording, labels, tabs, numbers, timestamps, and buttons exactly if visible",
+                    "For memes, posters, and infographics, preserve all wording and positional relationships exactly if recoverable",
+                ],
+            },
+            "confidence_based_reconstruction": CONFIDENCE_BASED_RULES,
+            "camera_selection_logic": {
+                "approved_camera_classes": APPROVED_RESTORATION_CAMERAS,
+                "approved_lens_pool": APPROVED_RESTORATION_LENSES,
+                "selected_camera": self.camera_class or "Sony Alpha 7R V",
+                "selected_lens": self.lens or "Sony 55mm f/1.8 Sonnar T FE ZA",
+                "default_flat_graphic_selection": DEFAULT_FLAT_GRAPHIC_SELECTION,
+            },
+            "failure_prevention_rules": FAILURE_PREVENTION_RULES,
+            "negative_constraints": [
+                "cartoon", "illustration", "painting", "3D render", "CGI",
+                "beautified face", "plastic skin", "wax skin", "airbrushed texture",
+                "overprocessed HDR", "oversaturated colors", "fake pores",
+                "invented fabric patterns", "hallucinated text", "paraphrased text",
+                "rewritten caption", "typeset replacement", "identity drift",
+                "warped anatomy", "extra fingers", "extra limbs", "cropping changes",
+                "background inventions", "layout redesign", "changed arrows",
+                "changed labels", "changed interface wording", "glow effects",
+                "dreamy diffusion", "lens dirt effects", "fake film burn", "unwanted vignette",
+            ],
+            "final_instruction_block": [
+                "Restore the attached source image into a clean, high-resolution version of itself",
+                "First classify the image type and apply the correct restoration priorities",
+                "Choose exactly one camera class and exactly one lens from the approved pool based on visual plausibility",
+                "For any image containing visible text, preserve all text exactly and never rewrite it",
+                "For any infographic, poster, screenshot, meme, or UI image, preserve layout and structure exactly",
+                "Extract the maximum plausible quality for that exact image",
+                "Do not creatively reinterpret anything",
+                "The final result must feel like the original image was captured, scanned, or exported at far higher quality, not regenerated from scratch",
+            ],
         }
 
 
@@ -1843,6 +2151,49 @@ class NegativeShield:
             "compression damage",
         ]
     )
+    v2_restoration: list[str] = field(
+        default_factory=lambda: [
+            "restyling",
+            "rewriting",
+            "stylization",
+            "hallucinated logos",
+            "AI gloss",
+            "plastic sheen",
+            "over-smoothing",
+            "cartoon",
+            "illustration",
+            "painting",
+            "3D render",
+            "CGI",
+            "beautified face",
+            "plastic skin",
+            "wax skin",
+            "airbrushed texture",
+            "overprocessed HDR",
+            "oversaturated colors",
+            "fake pores",
+            "invented fabric patterns",
+            "hallucinated text",
+            "paraphrased text",
+            "rewritten caption",
+            "typeset replacement",
+            "identity drift",
+            "warped anatomy",
+            "extra fingers",
+            "extra limbs",
+            "cropping changes",
+            "background inventions",
+            "layout redesign",
+            "changed arrows",
+            "changed labels",
+            "changed interface wording",
+            "glow effects",
+            "dreamy diffusion",
+            "lens dirt effects",
+            "fake film burn",
+            "unwanted vignette",
+        ]
+    )
 
     def all_tokens(
         self,
@@ -1856,6 +2207,7 @@ class NegativeShield:
         include_body_distortion: bool = False,
         include_reconstruction_drift: bool = False,
         include_png_lock: bool = False,
+        include_depixelate_v2: bool = False,
     ) -> list[str]:
         """Return a flat list of all negative tokens across selected categories."""
         tokens = list(self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift)
@@ -1927,6 +2279,11 @@ class NegativeShield:
                     seen.add(t)
         if include_png_lock:
             for t in self.png_degradation:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
+        if include_depixelate_v2:
+            for t in self.v2_restoration:
                 if t not in seen:
                     tokens.append(t)
                     seen.add(t)
@@ -2053,6 +2410,7 @@ class SceneInput:
     series_cohesion: Optional[SeriesCohesionSpec] = None
     reconstruction_lock: Optional[ReconstructionLock4XSpec] = None
     png_lock: Optional[HighResPNGOutputLockSpec] = None
+    depixelate_v2: Optional[UniversalDepixelateV2Spec] = None
 
     @property
     def has_product_lock(self) -> bool:
@@ -2235,6 +2593,13 @@ class SceneInput:
         if self.reference and self.reference.mode == ReferenceMode.UNIVERSAL_PNG_LOCK:
             return True
         return self.png_lock is not None
+
+    @property
+    def has_depixelate_v2(self) -> bool:
+        """Return True if Universal De-Pixelate + Upscale Restoration v2.0 is active."""
+        if self.reference and self.reference.mode == ReferenceMode.DEPIXELATE_V2:
+            return True
+        return self.depixelate_v2 is not None
 
 
 

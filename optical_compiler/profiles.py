@@ -228,6 +228,10 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
     (
         "leica_sl3_p",
         [
+            "leica sl3",
+            "sl3",
+            "leica sl3-p",
+            "sl3-p",
             "reportage",
             "photojournalism",
             "prestige documentary",
@@ -235,6 +239,40 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "leica optics",
             "war correspondent",
             "investigative",
+        ],
+    ),
+    (
+        "leica_q3_monochrom",
+        [
+            "leica q3 monochrom",
+            "q3 monochrom",
+            "leica q3",
+            "q3m",
+            "q3",
+            "panchromatic",
+            "pure monochrome",
+            "monochrom",
+            "summilux 28mm",
+            "monochrome street",
+            "monochrome documentary",
+            "silver halide grain",
+            "monochrome sensor",
+            "black and white street",
+        ],
+    ),
+    (
+        "sony_a7rv",
+        [
+            "sony a7r v",
+            "sony a7rv",
+            "a7rv",
+            "a7r5",
+            "alpha 7r v",
+            "61mp",
+            "flat reproduction",
+            "copy-stand",
+            "infographic reproduction",
+            "document reproduction",
         ],
     ),
     (
@@ -282,6 +320,18 @@ def auto_select_profile(scene: Union[str, SceneInput]) -> str:
     if isinstance(scene, SceneInput):
         if scene.reference and scene.reference.mode == ReferenceMode.DEPIXELATE_GFX100RF:
             return "fujifilm_gfx100rf"
+        if scene.reference and scene.reference.mode == ReferenceMode.DEPIXELATE_V2:
+            if scene.is_monochrome:
+                return "leica_q3_monochrom"
+            if scene.content_type and scene.content_type.is_flat_reproduction:
+                return "sony_a7rv"
+            return "sony_a7rv"
+        if scene.has_depixelate_v2:
+            if scene.is_monochrome:
+                return "leica_q3_monochrom"
+            if scene.content_type and scene.content_type.is_flat_reproduction:
+                return "sony_a7rv"
+            return "sony_a7rv"
         if scene.reference and scene.reference.mode == ReferenceMode.PRODUCT_LOCK:
             return "phase_one_iq4"
         if scene.is_anamorphic:
@@ -391,8 +441,31 @@ def load_profile(
         target_id = auto_select_profile(scene) if scene else "phase_one_iq4"
         return load_profile(target_id)
 
+    PROFILE_ALIASES = {
+        "leica_sl3": "leica_sl3_p",
+        "sl3": "leica_sl3_p",
+        "leica_sl3_p": "leica_sl3_p",
+        "sony_alpha_7r_v": "sony_a7rv",
+        "sony_a7r_v": "sony_a7rv",
+        "sony_a7r5": "sony_a7rv",
+        "a7rv": "sony_a7rv",
+        "a7r5": "sony_a7rv",
+        "sony_a7rv": "sony_a7rv",
+        "sony_a1": "sony_a1_ii",
+        "sony_a1_ii": "sony_a1_ii",
+        "a1_ii": "sony_a1_ii",
+        "a1m2": "sony_a1_ii",
+        "leica_q3_monochrom": "leica_q3_monochrom",
+        "leica_q3": "leica_q3_monochrom",
+        "q3_monochrom": "leica_q3_monochrom",
+        "q3m": "leica_q3_monochrom",
+        "q3": "leica_q3_monochrom",
+    }
+    normalized_key = name_or_path.strip().lower().replace("-", "_").replace(" ", "_")
+    target_name = PROFILE_ALIASES.get(normalized_key, name_or_path)
+
     # 1. Direct path check
-    direct_path = Path(name_or_path)
+    direct_path = Path(target_name)
     if direct_path.is_file():
         with open(direct_path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -400,7 +473,7 @@ def load_profile(
 
     # 2. Check in standard or package profiles directory
     for pdir in (DEFAULT_PROFILES_DIR, PACKAGE_PROFILES_DIR):
-        candidate = pdir / f"{name_or_path}.json"
+        candidate = pdir / f"{target_name}.json"
         if candidate.is_file():
             with open(candidate, "r", encoding="utf-8") as f:
                 data = json.load(f)
