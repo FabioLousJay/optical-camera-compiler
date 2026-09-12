@@ -23,6 +23,7 @@ class ImagenAdapter(BaseAdapter):
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
+        is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
 
         # 1. Subject & Scene foundation
         scene_elements = []
@@ -33,6 +34,20 @@ class ImagenAdapter(BaseAdapter):
                 "Keep the same wardrobe, colors, fabric texture, and wrinkles. Maintain the same camera height and perspective. "
                 f"No wide-angle distortion. Full body head-to-toe visible including shoes. Depicting {scene.subject}"
             )
+        elif is_product_lock:
+            scene_elements.append(
+                f"Commercial studio packshot of {scene.subject} with 100% SKU fidelity lock to reference product crop"
+            )
+            if scene.cap_geometry:
+                scene_elements.append(f"featuring exact {scene.cap_geometry}")
+            if scene.material_finish:
+                scene_elements.append(f"rendered in {scene.material_finish}")
+            if scene.sku_color:
+                scene_elements.append(f"with exact commercial SKU color {scene.sku_color}")
+            if scene.seam_geometry:
+                scene_elements.append(f"with {scene.seam_geometry}")
+            if scene.label_kerning:
+                scene_elements.append(f"label typography and kerning locked to {scene.label_kerning}")
         elif is_identity_lock:
             scene_elements.append(
                 "Documentary editorial portrait with strict reference identity lock, preserving exact facial architecture, bone geometry, mass, body proportions, hair, and beard pattern without alteration"
@@ -118,6 +133,12 @@ class ImagenAdapter(BaseAdapter):
                 f"Strictly preserve {', '.join(ref.preserved_elements)} from reference image, "
                 f"preventing facial drift, altered bone structure, or synthetic distortion while adapting context."
             )
+        elif is_product_lock:
+            ref_directives.append(
+                "Commercial SKU 100% Approval Gate: Sellable object must match attached product crop 100%. "
+                "Cap geometry, closure threading, label kerning, typographic tracking, mold parting seams, and SKU color are locked. "
+                "Reject any distortion, cap substitution, or text hallucination."
+            )
         ref_prose = (" " + " ".join(ref_directives)) if ref_directives else ""
 
         # 2. Optical rig description in natural photography prose
@@ -148,7 +169,11 @@ class ImagenAdapter(BaseAdapter):
             or bool(scene.crowd_action)
             or (profile.profile_id == "leica_sl2" and "motion" in scene.subject.lower())
         )
-        if is_slow_shutter:
+        if is_product_lock:
+            micro_parts.append(
+                "Focus discipline: critical focal plane locked on primary product branding, typography, and container shoulder seam with edge-to-edge optical acutance."
+            )
+        elif is_slow_shutter:
             micro_parts.append(
                 "Focus discipline: focus locked on near eye with eyelashes and iris tack sharp, subject completely stationary with zero subject motion blur while crowd flows with smooth motion blur trails."
             )
@@ -169,21 +194,24 @@ class ImagenAdapter(BaseAdapter):
             f"Completely avoid {', '.join(shield.skin_and_lighting_drift[:4])}, "
             f"and eliminate {', '.join(shield.render_defects[:4])}."
         )
-        if scene.suppress_text_branding:
+        if scene.suppress_text_branding and not is_product_lock:
             style_prose += " Strictly eliminate all text, watermarks, logos, brand names, and typography."
         if is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock:
             style_prose += " Eliminate facial morphing, feature drift, identity loss, and warped geometry."
+        if is_product_lock:
+            style_prose += " Eliminate wrong cap geometry, incorrect label kerning, sku color drift, missing seams, and packaging distortion."
 
         positive_prompt = f"{scene_core}{ref_prose} {optical_prose} {lighting_prose} {micro_prose} {style_prose}"
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
-            include_branding=scene.suppress_text_branding,
+            include_branding=scene.suppress_text_branding and not is_product_lock,
             include_compression=True,
             include_outpaint=is_outpaint,
             include_skin_realism=scene.human_skin_realism,
+            include_product_drift=is_product_lock,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)

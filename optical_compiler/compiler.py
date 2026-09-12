@@ -67,6 +67,13 @@ class OpticalCompiler:
         camera_angle: Optional[str] = None,
         color_mode: Optional[str] = None,
         crowd_action: Optional[str] = None,
+        product_crop: Optional[str] = None,
+        sku_color: Optional[str] = None,
+        cap_geometry: Optional[str] = None,
+        label_kerning: Optional[str] = None,
+        material_finish: Optional[str] = None,
+        seam_geometry: Optional[str] = None,
+        approval_gate_100pct: bool = True,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -163,6 +170,13 @@ class OpticalCompiler:
                 camera_angle=camera_angle,
                 color_mode=color_mode,
                 crowd_action=crowd_action,
+                product_crop=product_crop,
+                sku_color=sku_color,
+                cap_geometry=cap_geometry,
+                label_kerning=label_kerning,
+                material_finish=material_finish,
+                seam_geometry=seam_geometry,
+                approval_gate_100pct=approval_gate_100pct,
             )
         else:
             scene_input = scene
@@ -215,6 +229,19 @@ class OpticalCompiler:
                 scene_input.color_mode = color_mode
             if crowd_action:
                 scene_input.crowd_action = crowd_action
+            if product_crop:
+                scene_input.product_crop = product_crop
+            if sku_color:
+                scene_input.sku_color = sku_color
+            if cap_geometry:
+                scene_input.cap_geometry = cap_geometry
+            if label_kerning:
+                scene_input.label_kerning = label_kerning
+            if material_finish:
+                scene_input.material_finish = material_finish
+            if seam_geometry:
+                scene_input.seam_geometry = seam_geometry
+            scene_input.approval_gate_100pct = approval_gate_100pct
 
         # 3. Parse target engine
         engine = (

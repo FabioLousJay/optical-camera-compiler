@@ -257,6 +257,7 @@ class ReferenceMode(str, Enum):
     OUTPAINT_FULL_BODY = "outpaint_full_body"  # Outpaint medium shot to full body head-to-toe
     DEPIXELATE_GFX100RF = "depixelate_gfx100rf"  # Universal De-Pixelate + Upscale Restoration (GFX100RF 102MP + Skin Realism Override)
     IDENTITY_LOCK = "identity_lock"  # Strict anatomical and biometric identity lock (zero gender, age, mass, or bone drift)
+    PRODUCT_LOCK = "product_lock"  # 100% Commercial SKU lock (cap geometry, label kerning, seams, material finish, SKU color)
 
     @classmethod
     def from_str(cls, value: Optional[str]) -> ReferenceMode:
@@ -280,6 +281,13 @@ class ReferenceMode(str, Enum):
             "identity": cls.IDENTITY_LOCK,
             "id_lock": cls.IDENTITY_LOCK,
             "reference_lock": cls.IDENTITY_LOCK,
+            "product_lock": cls.PRODUCT_LOCK,
+            "product": cls.PRODUCT_LOCK,
+            "product_crop": cls.PRODUCT_LOCK,
+            "product_reference": cls.PRODUCT_LOCK,
+            "sku_lock": cls.PRODUCT_LOCK,
+            "packshot": cls.PRODUCT_LOCK,
+            "commercial_lock": cls.PRODUCT_LOCK,
         }
         if normalized in alias_map:
             return alias_map[normalized]
@@ -287,6 +295,8 @@ class ReferenceMode(str, Enum):
             if member.value == normalized:
                 return member
         return cls.NONE
+
+    from_string = from_str
 
 
 @dataclass
@@ -494,6 +504,32 @@ class NegativeShield:
             "smartphone computational look",
         ]
     )
+    product_drift: list[str] = field(
+        default_factory=lambda: [
+            "wrong cap geometry",
+            "distorted cap",
+            "wrong closure form factor",
+            "incorrect label kerning",
+            "label typography drift",
+            "hallucinated label text",
+            "garbled product text",
+            "wrong sku color",
+            "product color shift",
+            "missing mold seams",
+            "distorted parting lines",
+            "incorrect material finish",
+            "plastic bottle instead of glass",
+            "warped container silhouette",
+            "distorted packaging proportions",
+            "misplaced logo",
+            "floating label",
+            "deformed packaging",
+            "asymmetrical bottle shoulders",
+            "inaccurate container volume",
+            "synthetic label gloss",
+            "missing neck threads",
+        ]
+    )
 
     def all_tokens(
         self,
@@ -502,6 +538,7 @@ class NegativeShield:
         include_compression: bool = True,
         include_outpaint: bool = False,
         include_skin_realism: bool = True,
+        include_product_drift: bool = False,
     ) -> list[str]:
         """Return a flat list of all negative tokens across selected categories."""
         tokens = list(self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift)
@@ -548,6 +585,11 @@ class NegativeShield:
                     seen.add(t)
         if include_outpaint:
             for t in self.outpaint_drift:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
+        if include_product_drift:
+            for t in self.product_drift:
                 if t not in seen:
                     tokens.append(t)
                     seen.add(t)
@@ -640,6 +682,27 @@ class SceneInput:
     camera_angle: Optional[str] = None
     color_mode: Optional[str] = None
     crowd_action: Optional[str] = None
+    product_crop: Optional[str] = None
+    sku_color: Optional[str] = None
+    cap_geometry: Optional[str] = None
+    label_kerning: Optional[str] = None
+    material_finish: Optional[str] = None
+    seam_geometry: Optional[str] = None
+    approval_gate_100pct: bool = True
+
+    @property
+    def has_product_lock(self) -> bool:
+        """Return True if product reference lock or product fidelity specifications are active."""
+        if self.reference and self.reference.mode == ReferenceMode.PRODUCT_LOCK:
+            return True
+        return bool(
+            self.product_crop
+            or self.sku_color
+            or self.cap_geometry
+            or self.label_kerning
+            or self.material_finish
+            or self.seam_geometry
+        )
 
     @property
     def is_monochrome(self) -> bool:

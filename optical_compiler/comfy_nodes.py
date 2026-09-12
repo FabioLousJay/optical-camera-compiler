@@ -101,6 +101,7 @@ class OpticalCameraCompilerNode:
                         "transform_adapt",
                         "restore_upscale",
                         "identity_lock",
+                        "product_lock",
                         "depixelate_gfx100rf",
                         "outpaint_full_body",
                     ],
@@ -124,6 +125,13 @@ class OpticalCameraCompilerNode:
                     "FLOAT",
                     {"default": 0.85, "min": 0.10, "max": 1.0, "step": 0.05, "round": 0.01},
                 ),
+                "product_crop": ("STRING", {"default": ""}),
+                "sku_color": ("STRING", {"default": ""}),
+                "cap_geometry": ("STRING", {"default": ""}),
+                "label_kerning": ("STRING", {"default": ""}),
+                "material_finish": ("STRING", {"default": ""}),
+                "seam_geometry": ("STRING", {"default": ""}),
+                "approval_gate_100pct": (["enabled", "disabled"], {"default": "enabled"}),
                 "capture_mode": (
                     [
                         "default",
@@ -175,6 +183,13 @@ class OpticalCameraCompilerNode:
         content_type: str = "photograph",
         human_skin_realism: str = "enabled",
         fidelity_lock: float = 0.85,
+        product_crop: str = "",
+        sku_color: str = "",
+        cap_geometry: str = "",
+        label_kerning: str = "",
+        material_finish: str = "",
+        seam_geometry: str = "",
+        approval_gate_100pct: str = "enabled",
         capture_mode: str = "default",
         lighting_preset: str = "none",
         anti_drift_biometrics: str = "enabled",
@@ -185,27 +200,49 @@ class OpticalCameraCompilerNode:
         profile_id = RIG_NAME_TO_ID.get(camera_rig, "auto")
 
         ref_input = None
-        if reference_mode in ("transform_adapt", "restore_upscale", "identity_lock", "depixelate_gfx100rf", "outpaint_full_body"):
+        if reference_mode in (
+            "transform_adapt",
+            "restore_upscale",
+            "identity_lock",
+            "product_lock",
+            "depixelate_gfx100rf",
+            "outpaint_full_body",
+        ) or product_crop.strip():
             mode_map = {
                 "transform_adapt": ReferenceMode.TRANSFORM_ADAPT,
                 "restore_upscale": ReferenceMode.RESTORE_UPSCALE,
                 "identity_lock": ReferenceMode.IDENTITY_LOCK,
+                "product_lock": ReferenceMode.PRODUCT_LOCK,
                 "depixelate_gfx100rf": ReferenceMode.DEPIXELATE_GFX100RF,
                 "outpaint_full_body": ReferenceMode.OUTPAINT_FULL_BODY,
             }
-            ref_mode = mode_map.get(reference_mode, ReferenceMode.NONE)
-            elements = (
-                [
-                    "facial geometry",
-                    "eye structure and gaze",
-                    "facial bone structure",
-                    "biometric identity",
-                    "anatomical proportions",
-                ]
-                if anti_drift_biometrics == "enabled"
-                else []
-            )
+            ref_mode = mode_map.get(reference_mode, ReferenceMode.PRODUCT_LOCK if product_crop.strip() else ReferenceMode.NONE)
+            if ref_mode == ReferenceMode.PRODUCT_LOCK:
+                elements = (
+                    [
+                        "cap closure geometry",
+                        "label kerning and typography",
+                        "manufacturing parting seams",
+                        "material surface finish",
+                        "exact SKU color",
+                    ]
+                    if anti_drift_biometrics == "enabled"
+                    else []
+                )
+            else:
+                elements = (
+                    [
+                        "facial geometry",
+                        "eye structure and gaze",
+                        "facial bone structure",
+                        "biometric identity",
+                        "anatomical proportions",
+                    ]
+                    if anti_drift_biometrics == "enabled"
+                    else []
+                )
             ref_input = ReferenceImageInput(
+                filename=product_crop.strip() if product_crop.strip() else None,
                 mode=ref_mode,
                 fidelity_lock=float(fidelity_lock),
                 preserved_elements=elements,
@@ -227,6 +264,13 @@ class OpticalCameraCompilerNode:
             lighting=lighting_override.strip() if lighting_override.strip() else None,
             aspect_ratio=ar_val,
             reference=ref_input,
+            product_crop=product_crop.strip() if product_crop.strip() else None,
+            sku_color=sku_color.strip() if sku_color.strip() else None,
+            cap_geometry=cap_geometry.strip() if cap_geometry.strip() else None,
+            label_kerning=label_kerning.strip() if label_kerning.strip() else None,
+            material_finish=material_finish.strip() if material_finish.strip() else None,
+            seam_geometry=seam_geometry.strip() if seam_geometry.strip() else None,
+            approval_gate_100pct=(approval_gate_100pct == "enabled"),
             capture_mode=cm_val,
             lighting_preset=lp_val,
             sharpness_protocol=(brutal_sharpness_protocol == "enabled"),

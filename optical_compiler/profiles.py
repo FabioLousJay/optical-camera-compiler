@@ -152,6 +152,12 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "gallery",
             "150mp",
             "trichromatic",
+            "packshot",
+            "commercial packshot",
+            "product photography",
+            "perfume bottle",
+            "cosmetics bottle",
+            "commercial product",
         ],
     ),
     (
@@ -252,7 +258,9 @@ def auto_select_profile(scene: Union[str, SceneInput]) -> str:
     if isinstance(scene, SceneInput):
         if scene.reference and scene.reference.mode == ReferenceMode.DEPIXELATE_GFX100RF:
             return "fujifilm_gfx100rf"
-        text = f"{scene.subject} {scene.framing or ''} {scene.environment or ''} {scene.mood or ''} {scene.camera_angle or ''} {scene.crowd_action or ''}".lower()
+        if scene.reference and scene.reference.mode == ReferenceMode.PRODUCT_LOCK:
+            return "phase_one_iq4"
+        text = f"{scene.subject} {scene.framing or ''} {scene.environment or ''} {scene.mood or ''} {scene.camera_angle or ''} {scene.crowd_action or ''} {scene.sku_color or ''} {scene.cap_geometry or ''}".lower()
     else:
         text = str(scene).lower()
 

@@ -88,6 +88,18 @@ Reference-faithful documentary and editorial portraits with absolute anatomical 
 * **Strict Anti-Drift Prohibitions**: Hard suppression of gender reinterpretation, age alteration, body slimming, facial reshaping, feature feminization/masculinization, and synthetic skin smoothing.
 * **Independent Environmental Flow**: Allows surrounding scene, lighting, and dynamic crowds to move freely while the reference subject remains immutably anchored.
 
+### 📦 Mode F: Product-Reference Crop & 100% Commercial SKU Approval Gate (`product_lock` / `--product-lock`)
+Commercial packaging and SKU generation with forensic anti-drift protection for sellable objects:
+* **The Failure Mode Solved**: While optical cues (MTF acutance, specular roll-off, skin texture) make human hands and backdrops hyper-realistic, diffusion models frequently drift the sellable product itself—altering cap closure geometry (e.g. mutating screw caps into droppers), corrupting label kerning/tracking, erasing mold parting seams, and drifting brand Pantone colors.
+* **Product-Reference Crop Anchor (`--product-crop <path>`)**: Isolates and anchors the genuine commercial SKU packaging as an unyielding physical reference.
+* **Mandatory 5-Point Forensic Inspection Gate (`approval_gate_100pct` / `--no-approval-gate`)**:
+  1. **Gate 1: Cap & Closure Geometry (`--cap-geometry`)**: Form factor, diameter, knurling rib count, threading, and closure mechanics locked.
+  2. **Gate 2: Label Kerning & Typography (`--label-kerning`)**: Character-for-character typographic fidelity, letter spacing, font weight, and zero hallucinated text.
+  3. **Gate 3: Manufacturing Seams & Parting Lines (`--seams`)**: Mold lines, glass parting seams, and base rim radiuses preserved.
+  4. **Gate 4: Material Finish & Specular Response (`--material-finish`)**: Matte, satin, gloss, frosted glass, refractive index, and anti-plastic enforcement.
+  5. **Gate 5: SKU Color Integrity (`--sku-color`)**: Exact Pantone/hex brand color lock across shifting scene lighting.
+* **Intelligent Camera Routing**: Commercial product locks auto-route to the **Phase One XF IQ4 150MP Trichromatic** digital back with Schneider Kreuznach optics.
+
 ---
 
 ## Supported Target Adapters (In Priority Order)
@@ -459,6 +471,21 @@ python3 -m optical_compiler "Editorial portrait of a solitary person standing ca
   --crowd-action "hundreds of commuters rushing past in all directions creating smooth motion-blur trails" \
   --bw \
   --ar 4:5 \
+  --target gpt_images \
+  -c
+```
+
+### 6. Mode F: Commercial Packshot (100% SKU Approval Gate & Product-Reference Crop)
+Compile a forensic commercial packaging prompt locking cap closure geometry, label kerning, parting seams, material finish, and SKU Pantone color:
+```bash
+python3 -m optical_compiler "Luxury cosmetic serum bottle on polished dark slate pedestal with natural micro-water droplets" \
+  --product-lock \
+  --product-crop path/to/serum_bottle_crop.png \
+  --cap-geometry "matte black anodized aluminum dropper cap with 48-ridge knurling collar and flush seal" \
+  --sku-color "Amber pharmaceutical glass (#8B4513) with Pantone 116 C gold foil" \
+  --label-kerning "crisp micro-typography, precise character tracking, zero hallucinated micro-text" \
+  --material-finish "heavy-base borosilicate glass, anti-reflective coating, tactile uncoated paper label" \
+  --seams "flawless circular base without mold flash, hairline parting seam along shoulder" \
   --target gpt_images \
   -c
 ```

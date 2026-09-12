@@ -30,6 +30,7 @@ class MidjourneyAdapter(BaseAdapter):
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
+        is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
 
         # 1. Subject description
         core_elements = []
@@ -37,6 +38,19 @@ class MidjourneyAdapter(BaseAdapter):
             core_elements.append(
                 "full body downward outpaint extension of reference photo head-to-toe with shoes, preserving facial identity and clothing"
             )
+        elif is_product_lock:
+            prod_tokens = ["commercial product packshot with 100% SKU lock to reference product crop"]
+            if scene.cap_geometry:
+                prod_tokens.append(f"exact {scene.cap_geometry}")
+            if scene.sku_color:
+                prod_tokens.append(f"SKU color {scene.sku_color}")
+            if scene.material_finish:
+                prod_tokens.append(f"{scene.material_finish}")
+            if scene.seam_geometry:
+                prod_tokens.append(f"{scene.seam_geometry}")
+            if scene.label_kerning:
+                prod_tokens.append(f"locked typography {scene.label_kerning}")
+            core_elements.append(", ".join(prod_tokens))
         elif is_depixelate:
             core_elements.append(
                 "Universal De-Pixelate and 102MP upscale restoration of reference photo, Fujinon 35mm f/4 leaf shutter, Reala Ace color response"
@@ -127,8 +141,8 @@ class MidjourneyAdapter(BaseAdapter):
             "--v 8.2",
         ]
 
-        if is_depixelate or is_identity_lock:
-            ref_target = ref.filename if (ref and ref.filename) else "[REFERENCE_IMAGE_URL]"
+        if is_depixelate or is_identity_lock or is_product_lock:
+            ref_target = ref.filename if (ref and ref.filename) else (scene.product_crop or "[PRODUCT_CROP_URL]")
             flags.extend([f"--sref {ref_target}", "--iw 2.0", "--cw 100"])
         elif is_restore:
             flags.extend(["--iw 2.0", "--cw 100"])
@@ -172,7 +186,7 @@ class MidjourneyAdapter(BaseAdapter):
                 "fake shallow depth of field",
                 "synthetic bokeh balls",
             ])
-        if scene.suppress_text_branding:
+        if scene.suppress_text_branding and not is_product_lock:
             banned_mj.extend([
                 "text",
                 "watermark",
@@ -194,6 +208,18 @@ class MidjourneyAdapter(BaseAdapter):
                 "gender alteration",
                 "body slimming",
                 "facial reshaping",
+            ])
+        if is_product_lock:
+            banned_mj.extend([
+                "wrong cap",
+                "distorted label",
+                "incorrect kerning",
+                "wrong sku color",
+                "color drift",
+                "missing mold seams",
+                "plastic finish",
+                "warped bottle",
+                "distorted packaging",
             ])
         if scene.is_monochrome:
             banned_mj.extend(["color", "sepia", "warm tint"])

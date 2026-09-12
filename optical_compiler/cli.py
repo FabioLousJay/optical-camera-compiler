@@ -92,14 +92,62 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--ref-mode",
         dest="ref_mode",
-        choices=["restore", "transform", "depixelate", "depixelate_gfx100rf", "identity", "identity_lock"],
+        choices=["restore", "transform", "depixelate", "depixelate_gfx100rf", "identity", "identity_lock", "product", "product_lock", "product_crop"],
         default="restore",
-        help="Reference mode: 'restore' (optical remaster), 'transform' (re-shoot/adapt), 'identity_lock' (strict anatomical lock), or 'depixelate_gfx100rf' (v3.1 102MP lock).",
+        help="Reference mode: 'restore' (optical remaster), 'transform' (re-shoot/adapt), 'identity_lock' (strict anatomical lock), 'depixelate_gfx100rf' (v3.1 102MP lock), or 'product_lock' (100%% SKU lock).",
     )
     parser.add_argument(
         "--depixelate",
         action="store_true",
         help="Shortcut for --ref-mode depixelate_gfx100rf (Universal De-Pixelate & 102MP Upscale Restoration).",
+    )
+    parser.add_argument(
+        "--product-lock",
+        action="store_true",
+        help="Shortcut for --ref-mode product_lock (Commercial Product SKU & Packaging Fidelity Lock).",
+    )
+    parser.add_argument(
+        "--product-crop",
+        dest="product_crop",
+        default=None,
+        help="Path or identifier for the isolated product-reference crop image.",
+    )
+    parser.add_argument(
+        "--sku-color",
+        dest="sku_color",
+        default=None,
+        help="Commercial product SKU color (e.g. 'Pantone 19-4052 Classic Blue', '#0F4C81', 'Amber Glass').",
+    )
+    parser.add_argument(
+        "--cap-geometry",
+        dest="cap_geometry",
+        default=None,
+        help="Cap and closure form factor (e.g. 'Fluted 28mm black phenolic cap with 32 vertical knurling ribs').",
+    )
+    parser.add_argument(
+        "--label-kerning",
+        dest="label_kerning",
+        default=None,
+        help="Label typography and tracking lock (e.g. 'Helvetica Neue 75 Bold, letter tracking +15, zero typographic hallucination').",
+    )
+    parser.add_argument(
+        "--material-finish",
+        dest="material_finish",
+        default=None,
+        help="Product material finish (e.g. 'Frosted borosilicate glass, satin finish, 15%% specular roughness').",
+    )
+    parser.add_argument(
+        "--seams",
+        dest="seam_geometry",
+        default=None,
+        help="Manufacturing seams and mold parting lines (e.g. 'Dual vertical mold parting seams along container sides').",
+    )
+    parser.add_argument(
+        "--no-approval-gate",
+        dest="approval_gate",
+        action="store_false",
+        default=True,
+        help="Disable the 100%% Commercial SKU Approval Gate.",
     )
     parser.add_argument(
         "--camera-angle",
@@ -278,15 +326,21 @@ def main(argv: Optional[list[str]] = None) -> int:
     ref_mode_choice = args.ref_mode
     if args.depixelate:
         ref_mode_choice = "depixelate_gfx100rf"
+    elif getattr(args, "product_lock", False):
+        ref_mode_choice = "product_lock"
 
     ref_dict = None
-    if args.reference:
+    ref_path = args.reference or getattr(args, "product_crop", None)
+    if ref_path or ref_mode_choice in ("product_lock", "product", "product_crop"):
         if ref_mode_choice in ("depixelate", "depixelate_gfx100rf"):
             mode_str = "depixelate_gfx100rf"
             default_denoise = 0.25
         elif ref_mode_choice in ("identity", "identity_lock"):
             mode_str = "identity_lock"
             default_denoise = 0.30
+        elif ref_mode_choice in ("product_lock", "product", "product_crop", "sku_lock", "packshot"):
+            mode_str = "product_lock"
+            default_denoise = 0.20
         elif ref_mode_choice == "restore":
             mode_str = "restore_upscale"
             default_denoise = 0.35
@@ -296,7 +350,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 
         denoise_val = args.denoise if args.denoise is not None else default_denoise
         ref_dict = {
-            "filename": args.reference,
+            "filename": ref_path or "product_reference_crop.png",
             "mode": mode_str,
             "fidelity_lock": args.fidelity_lock,
             "denoise_strength": denoise_val,
@@ -312,6 +366,13 @@ def main(argv: Optional[list[str]] = None) -> int:
         "lighting": args.lighting,
         "aspect_ratio": args.aspect_ratio,
         "reference": ref_dict,
+        "product_crop": getattr(args, "product_crop", None),
+        "sku_color": getattr(args, "sku_color", None),
+        "cap_geometry": getattr(args, "cap_geometry", None),
+        "label_kerning": getattr(args, "label_kerning", None),
+        "material_finish": getattr(args, "material_finish", None),
+        "seam_geometry": getattr(args, "seams", None),
+        "approval_gate_100pct": not getattr(args, "no_approval_gate", False),
         "lighting_preset": args.lighting_preset,
         "capture_mode": args.capture_mode,
         "human_skin_realism": not args.no_skin_realism,

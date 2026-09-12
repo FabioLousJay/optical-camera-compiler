@@ -26,6 +26,7 @@ class FluxAdapter(BaseAdapter):
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
+        is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
 
         # 1. Subject & Scene
         subject_desc = scene.subject
@@ -45,6 +46,27 @@ class FluxAdapter(BaseAdapter):
                 "Keep the same wardrobe, colors, fabric texture, and wrinkles. Maintain the same camera height and perspective. "
                 f"No wide-angle distortion. Full body head-to-toe visible including shoes. Depicting {subject_desc}."
             )
+        elif is_product_lock:
+            sections.append(
+                f"Commercial studio packshot with 100% SKU lock to reference product crop. "
+                f"Photo of {subject_desc}. The sellable commercial object must strictly match the product crop in geometry, "
+                f"proportions, closure mechanics, label typography, and color without drift or redesign."
+            )
+            if scene.cap_geometry:
+                sections.append(f"Cap and closure geometry: {scene.cap_geometry}.")
+            if scene.label_kerning:
+                sections.append(f"Label typography and kerning: {scene.label_kerning}.")
+            if scene.seam_geometry:
+                sections.append(f"Manufacturing seams: {scene.seam_geometry}.")
+            if scene.material_finish:
+                sections.append(f"Material finish: {scene.material_finish}.")
+            if scene.sku_color:
+                sections.append(f"SKU color: {scene.sku_color}.")
+            if scene.approval_gate_100pct:
+                sections.append(
+                    "100% Commercial SKU Approval Gate: Reject any render with incorrect cap geometry, altered label kerning, "
+                    "missing mold seams, shifted SKU color, or synthetic material finish."
+                )
         elif is_identity_lock:
             sections.append(
                 f"Documentary editorial portrait with strict reference identity lock. "
@@ -136,7 +158,11 @@ class FluxAdapter(BaseAdapter):
             or bool(scene.crowd_action)
             or (profile.profile_id == "leica_sl2" and "motion" in scene.subject.lower())
         )
-        if is_slow_shutter:
+        if is_product_lock:
+            micro_parts.append(
+                "Focus discipline: critical focal plane locked on primary product branding label and container shoulder seam with edge-to-edge optical acutance."
+            )
+        elif is_slow_shutter:
             micro_parts.append(
                 "Focus discipline: focus locked on near eye with eyelashes and iris tack sharp, subject completely stationary with zero subject motion blur while crowd flows with smooth motion blur trails."
             )
@@ -170,12 +196,17 @@ class FluxAdapter(BaseAdapter):
                 " Strictly eliminate pore stamping, engraved skin, carved skin, swirl texture, "
                 "repeating micro-patterns, lace-like facial texture, worm-like texture, and AI skin grain."
             )
-        if scene.suppress_text_branding:
+        if scene.suppress_text_branding and not is_product_lock:
             banned_tropes += " Eliminate all text, watermarks, logos, brand names, and typography."
         if is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock:
             banned_tropes += (
                 " Eliminate facial morphing, identity loss, altered bone structure, "
                 "warped geometry, and hallucinated anatomical features."
+            )
+        if is_product_lock:
+            banned_tropes += (
+                " Eliminate wrong cap geometry, distorted cap, incorrect label kerning, "
+                "hallucinated text, wrong sku color, color drift, missing seams, and packaging distortion."
             )
         if is_slow_shutter:
             banned_tropes += " Eliminate ghost faces, melted bodies, duplicated people, uniform smear wall, and blur on the subject."
@@ -186,13 +217,14 @@ class FluxAdapter(BaseAdapter):
         positive_prompt = " ".join(sections)
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
-            include_branding=scene.suppress_text_branding,
+            include_branding=scene.suppress_text_branding and not is_product_lock,
             include_compression=True,
             include_outpaint=is_outpaint,
             include_skin_realism=scene.human_skin_realism,
+            include_product_drift=is_product_lock,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)

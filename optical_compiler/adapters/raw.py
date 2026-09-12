@@ -45,8 +45,21 @@ class RawSpecAdapter(BaseAdapter):
             profile.execution_directive,
         ]
 
+        if scene.has_product_lock:
+            lines.extend([
+                "",
+                "--- Commercial Product Fidelity & 100% Approval Gate ---",
+                f"Product Crop Reference: {scene.product_crop or 'Attached reference crop'}",
+                f"SKU Color: {scene.sku_color or 'Locked to reference'}",
+                f"Cap & Closure Geometry: {scene.cap_geometry or 'Locked to reference'}",
+                f"Label Kerning & Typography: {scene.label_kerning or 'Locked to reference'}",
+                f"Manufacturing Seams: {scene.seam_geometry or 'Locked to reference'}",
+                f"Material Finish: {scene.material_finish or 'Locked to reference'}",
+                f"100% Approval Gate: {'ENFORCED' if scene.approval_gate_100pct else 'DISABLED'}",
+            ])
+
         positive_prompt = "\n".join(lines)
-        negative_prompt = ", ".join(shield.all_tokens())
+        negative_prompt = ", ".join(shield.all_tokens(include_product_drift=scene.has_product_lock))
 
         return CompiledPayload(
             target_engine=self.target_engine,

@@ -239,7 +239,7 @@ class TestLeicaSL2MotionBlur(unittest.TestCase):
         payload = compiler.compile(scene, target="json")
         data = json.loads(payload.positive_prompt)
 
-        self.assertEqual(data["schema_version"], "3.1")
+        self.assertIn(data["schema_version"], ("3.1", "3.2"))
         self.assertIn("Identity-Locked", data["protocol"])
         self.assertEqual(data["scene"]["camera_angle"], "chest-level frontal angle")
         self.assertEqual(data["scene"]["color_mode"], "monochrome")

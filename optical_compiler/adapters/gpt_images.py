@@ -69,6 +69,16 @@ class GPTImagesAdapter(BaseAdapter):
             if scene.environment:
                 base_instr += f" Environment: {scene.environment}."
             sections.append(base_instr)
+        elif ref_mode == ReferenceMode.PRODUCT_LOCK or (ref_mode == ReferenceMode.NONE and scene.has_product_lock):
+            base_instr = (
+                "Base instruction (Commercial Product SKU Lock & Packaging Fidelity Protocol): "
+                "The sellable commercial product depicted must match the product-reference crop with 100% engineering and aesthetic fidelity. "
+                "Do not redesign, reinterpret, restyle, smooth, warp, or drift any aspect of the product geometry, closure, label, or branding. "
+                f"Sellable Object / Subject: {scene.subject}."
+            )
+            if scene.environment:
+                base_instr += f" Environment / Commercial Set: {scene.environment}."
+            sections.append(base_instr)
         elif ref_mode == ReferenceMode.RESTORE_UPSCALE:
             base_instr = (
                 f"Base instruction: Using the provided image as the base. "
@@ -145,14 +155,52 @@ class GPTImagesAdapter(BaseAdapter):
             )
             sections.append(text_block)
 
-        # 5. Focus discipline & Surface rendering
+        # 5. Product Fidelity & 100% Commercial SKU Approval Gate
+        if scene.has_product_lock and scene.approval_gate_100pct:
+            gate_lines = [
+                "100% Commercial SKU Approval Gate (Mandatory 5-Point Forensic Inspection):",
+                "Any render failing any of the following 5 commercial criteria is defective and rejected:",
+            ]
+            if scene.cap_geometry:
+                gate_lines.append(f"- [GATE 1: CAP & CLOSURE GEOMETRY]: Exact physical form factor, diameter, height, knurling count, threading, and closure mechanics. Strictly locked to: {scene.cap_geometry}.")
+            else:
+                gate_lines.append("- [GATE 1: CAP & CLOSURE GEOMETRY]: Exact physical form factor, diameter, height, knurling count, threading, and closure mechanics matching reference crop 100%. Zero cap substitution, zero missing threads, zero pump/dropper hallucination.")
+
+            if scene.label_kerning:
+                gate_lines.append(f"- [GATE 2: LABEL KERNING & TYPOGRAPHY]: Character-for-character typography, font weight, tracking, and letter kerning locked to: {scene.label_kerning}. Zero typographic hallucination, zero warped glyphs.")
+            else:
+                gate_lines.append("- [GATE 2: LABEL KERNING & TYPOGRAPHY]: Character-for-character typography, font weight, tracking, and letter kerning matching reference crop 100%. Zero typographic hallucination, zero warped glyphs, zero garbled text.")
+
+            if scene.seam_geometry:
+                gate_lines.append(f"- [GATE 3: PARTING SEAMS & MOLD LINES]: Exact manufacturing seams, mold parting lines, and edge radiuses locked to: {scene.seam_geometry}.")
+            else:
+                gate_lines.append("- [GATE 3: PARTING SEAMS & MOLD LINES]: Exact manufacturing seams, mold parting lines, can rims, and edge radiuses matching physical manufacturing.")
+
+            if scene.material_finish:
+                gate_lines.append(f"- [GATE 4: MATERIAL FINISH & SPECULAR RESPONSE]: Surface roughness, coating, gloss/satin/matte reflectance, and tactile texture locked to: {scene.material_finish}.")
+            else:
+                gate_lines.append("- [GATE 4: MATERIAL FINISH & SPECULAR RESPONSE]: Authentic material physics (matte vs satin vs gloss, refractive index, transparency/opacity) matching reference crop 100%. No plastic substitution for glass or metal.")
+
+            if scene.sku_color:
+                gate_lines.append(f"- [GATE 5: SKU COLOR & CHROMATIC FIDELITY]: Exact commercial product color locked to: {scene.sku_color}. Zero tint shift, zero lighting contamination on brand color.")
+            else:
+                gate_lines.append("- [GATE 5: SKU COLOR & CHROMATIC FIDELITY]: Exact commercial product color matching reference crop 100%. Zero tint shift, zero lighting contamination on brand color.")
+
+            sections.append("\n".join(gate_lines))
+
+        # 6. Focus discipline & Surface rendering
         is_slow_shutter = (
             scene.capture_mode == "slow_shutter_crowd_motion"
             or (hasattr(scene.capture_mode, "value") and scene.capture_mode.value == "slow_shutter_crowd_motion")
             or bool(scene.crowd_action)
             or (profile.profile_id == "leica_sl2" and "motion" in scene.subject.lower())
         )
-        if is_slow_shutter:
+        if scene.has_product_lock:
+            focus_block = (
+                "Focus discipline: Critical focal plane locked on the product's primary brand label, typography, and container shoulder seam. "
+                "Tack-sharp edge acutance across the entire packaging silhouette. Absolute zero optical drift, zero motion blur, zero depth-of-field averaging."
+            )
+        elif is_slow_shutter:
             focus_block = (
                 "Focus discipline: Focus locked on the near eye. Iris and eyelashes tack sharp. "
                 "Visible facial pores and authentic skin texture. Subject stands completely still, centered, with tack-sharp presence. "
@@ -171,20 +219,27 @@ class GPTImagesAdapter(BaseAdapter):
         sections.append(focus_block)
 
         surface_directives = ". ".join(profile.micro_detail_and_physics.surface_rendering)
-        surface_block = (
-            "Surface rendering: Natural human skin with visible pores and micro texture. "
-            + (
-                "Human skin realism prioritized over artificial clarity. Natural organic skin softer than hard edges, eyes, hair, and textiles. "
-                if (scene.human_skin_realism and ref_mode == ReferenceMode.DEPIXELATE_GFX100RF)
-                else ""
+        if scene.has_product_lock:
+            surface_block = (
+                "Surface rendering: Authentic commercial product material physics. "
+                + (f"Material finish: {scene.material_finish}. " if scene.material_finish else "Natural material texture without artificial plastic gloss. ")
+                + f"{surface_directives}. Crisp product edges, uncompressed specular highlight falloff, zero haze."
             )
-            + f"{surface_directives}. "
-            + "Accurate dermal subsurface scattering without waxy specularities or artificial blur. "
-            + "High micro-contrast on hair, fabric, eyes, and environment. Crisp edges. No haze. No diffusion."
-        )
+        else:
+            surface_block = (
+                "Surface rendering: Natural human skin with visible pores and micro texture. "
+                + (
+                    "Human skin realism prioritized over artificial clarity. Natural organic skin softer than hard edges, eyes, hair, and textiles. "
+                    if (scene.human_skin_realism and ref_mode == ReferenceMode.DEPIXELATE_GFX100RF)
+                    else ""
+                )
+                + f"{surface_directives}. "
+                + "Accurate dermal subsurface scattering without waxy specularities or artificial blur. "
+                + "High micro-contrast on hair, fabric, eyes, and environment. Crisp edges. No haze. No diffusion."
+            )
         sections.append(surface_block)
 
-        # 6. Lighting Geometry & Light Transport
+        # 7. Lighting Geometry & Light Transport
         lighting_block = (
             f"Lighting geometry: {scene.lighting or profile.lighting_and_exposure.primary_lighting}. "
             f"Directional key light positioned 35–45° off-axis, slightly above eye line for micro-contrast. "
@@ -202,7 +257,7 @@ class GPTImagesAdapter(BaseAdapter):
             )
             sections.append(mono_block)
 
-        # 7. Camera Hardware & Lens Module
+        # 8. Camera Hardware & Lens Module
         cam = profile.sensor_and_optics
         color_desc = f" Color science: {cam.dynamic_range}." if cam.dynamic_range else ""
         camera_block = (
@@ -214,7 +269,7 @@ class GPTImagesAdapter(BaseAdapter):
         )
         sections.append(camera_block)
 
-        # 8. Output Resolution Target & File Quality
+        # 9. Output Resolution Target & File Quality
         if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
             res = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution, scaled to source aspect ratio)"
         else:
@@ -226,13 +281,14 @@ class GPTImagesAdapter(BaseAdapter):
         )
         sections.append(res_block)
 
-        # 9. Negative constraints embedded in natural language
+        # 10. Negative constraints embedded in natural language
         neg_tokens = profile.negative_embeddings.all_tokens(
             include_anti_drift=is_ref,
-            include_branding=scene.suppress_text_branding,
+            include_branding=scene.suppress_text_branding and not scene.has_product_lock,
             include_compression=True,
             include_outpaint=(ref_mode == ReferenceMode.OUTPAINT_FULL_BODY),
             include_skin_realism=scene.human_skin_realism,
+            include_product_drift=scene.has_product_lock,
         )
         if scene.custom_negatives:
             neg_tokens.extend(scene.custom_negatives)

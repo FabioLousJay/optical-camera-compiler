@@ -21,6 +21,7 @@ class SDXLAdapter(BaseAdapter):
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
+        is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
 
         # 1. Positive Prompt (Weighted camera and texture tokens)
         pos_chunks = []
@@ -30,6 +31,21 @@ class SDXLAdapter(BaseAdapter):
                 "full body downward outpaint extension of reference photo head-to-toe with shoes, "
                 "preserving exact facial identity, expression, wardrobe fabric, and wrinkles"
             )
+        elif is_product_lock:
+            pos_chunks.append(
+                "commercial product packshot, 100% SKU lock to reference product crop, "
+                "exact container geometry, locked label typography and kerning, authentic material finish"
+            )
+            if scene.cap_geometry:
+                pos_chunks.append(f"exact cap geometry ({scene.cap_geometry})")
+            if scene.sku_color:
+                pos_chunks.append(f"exact SKU color ({scene.sku_color})")
+            if scene.seam_geometry:
+                pos_chunks.append(f"manufacturing seams ({scene.seam_geometry})")
+            if scene.material_finish:
+                pos_chunks.append(f"material finish ({scene.material_finish})")
+            if scene.label_kerning:
+                pos_chunks.append(f"label kerning ({scene.label_kerning})")
         elif is_identity_lock:
             pos_chunks.append(
                 "strict identity-locked reference portrait, exact anatomical presence, "
@@ -94,15 +110,24 @@ class SDXLAdapter(BaseAdapter):
         )
 
         # Micro-texture & physical optical falloff
-        texture_tokens = [
-            "organic human skin realism overriding perceived sharpness" if is_depixelate else "resolved epidermal skin pores",
-            "fine vellus facial hair",
-            "subsurface dermal scattering",
-            "natural material micro-relief and micro-abrasions",
-            "high MTF optical acutance",
-            "natural large-sensor f/4 depth of field falloff" if is_depixelate else "natural large-sensor f/8 depth of field falloff",
-            "rectilinear optical projection",
-        ]
+        if is_product_lock:
+            texture_tokens = [
+                "critical focus on primary brand label and shoulder seam",
+                "authentic product material reflectance",
+                "uncompressed specular highlights",
+                "high MTF optical acutance",
+                "rectilinear optical projection",
+            ]
+        else:
+            texture_tokens = [
+                "organic human skin realism overriding perceived sharpness" if is_depixelate else "resolved epidermal skin pores",
+                "fine vellus facial hair",
+                "subsurface dermal scattering",
+                "natural material micro-relief and micro-abrasions",
+                "high MTF optical acutance",
+                "natural large-sensor f/4 depth of field falloff" if is_depixelate else "natural large-sensor f/8 depth of field falloff",
+                "rectilinear optical projection",
+            ]
         is_slow_shutter = (
             scene.capture_mode == "slow_shutter_crowd_motion"
             or (hasattr(scene.capture_mode, "value") and scene.capture_mode.value == "slow_shutter_crowd_motion")
@@ -116,7 +141,7 @@ class SDXLAdapter(BaseAdapter):
                 "subject completely stationary with zero subject motion blur",
                 "surrounding crowd motion blur trails",
             ])
-        elif scene.sharpness_protocol:
+        elif scene.sharpness_protocol and not is_product_lock:
             texture_tokens.extend([
                 "focus locked on near eye",
                 "iris and eyelashes tack sharp",
@@ -135,13 +160,14 @@ class SDXLAdapter(BaseAdapter):
         positive_prompt = ", ".join(pos_chunks)
 
         # 2. Negative Prompt (Comprehensive artifact suppression)
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
-            include_branding=scene.suppress_text_branding,
+            include_branding=scene.suppress_text_branding and not is_product_lock,
             include_compression=True,
             include_outpaint=is_outpaint,
             include_skin_realism=scene.human_skin_realism,
+            include_product_drift=is_product_lock,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)

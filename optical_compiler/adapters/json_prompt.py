@@ -49,10 +49,11 @@ class JSONAllInOneAdapter(BaseAdapter):
         # 2. Extract resolved negative tokens
         all_neg_tokens = shield.all_tokens(
             include_anti_drift=is_ref,
-            include_branding=scene.suppress_text_branding,
+            include_branding=scene.suppress_text_branding and not scene.has_product_lock,
             include_compression=True,
             include_outpaint=(ref_mode == ReferenceMode.OUTPAINT_FULL_BODY),
             include_skin_realism=scene.human_skin_realism,
+            include_product_drift=scene.has_product_lock,
         )
         if scene.custom_negatives:
             all_neg_tokens.extend(scene.custom_negatives)
@@ -67,14 +68,18 @@ class JSONAllInOneAdapter(BaseAdapter):
         all_in_one_data: dict[str, Any] = {
             "$schema": "https://raw.githubusercontent.com/FabioLousJay/optical-camera-compiler/main/schemas/all_in_one_prompt.json",
             "generator": "Optical Camera Compiler",
-            "schema_version": "3.1",
+            "schema_version": "3.2",
             "protocol": (
-                "Universal De-Pixelate + Upscale Restoration (GFX100RF 102MP + Skin Realism Override)"
-                if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF
+                "Commercial Product SKU Lock & 100% Approval Gate"
+                if (ref_mode == ReferenceMode.PRODUCT_LOCK or scene.has_product_lock)
                 else (
-                    "Identity-Locked Reference Portrait (Editorial Calm vs Chaos & Slow-Shutter Physics)"
-                    if ref_mode == ReferenceMode.IDENTITY_LOCK
-                    else "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
+                    "Universal De-Pixelate + Upscale Restoration (GFX100RF 102MP + Skin Realism Override)"
+                    if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF
+                    else (
+                        "Identity-Locked Reference Portrait (Editorial Calm vs Chaos & Slow-Shutter Physics)"
+                        if ref_mode == ReferenceMode.IDENTITY_LOCK
+                        else "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
+                    )
                 )
             ),
             "target_engine": "json",
@@ -94,6 +99,31 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "human_skin_realism": scene.human_skin_realism,
                 "content_type": scene.content_type.value if scene.content_type else None,
                 "text_preservation": scene.text_preservation,
+                "product_crop": scene.product_crop,
+                "sku_color": scene.sku_color,
+                "cap_geometry": scene.cap_geometry,
+                "label_kerning": scene.label_kerning,
+                "material_finish": scene.material_finish,
+                "seam_geometry": scene.seam_geometry,
+                "approval_gate_100pct": scene.approval_gate_100pct,
+            },
+            "product_fidelity": {
+                "active": scene.has_product_lock,
+                "product_crop_reference": scene.product_crop or (scene.reference.filename if scene.reference else None),
+                "sku_color": scene.sku_color,
+                "cap_geometry": scene.cap_geometry,
+                "label_kerning": scene.label_kerning,
+                "manufacturing_seams": scene.seam_geometry,
+                "material_finish": scene.material_finish,
+            },
+            "commercial_sku_approval_gate": {
+                "active": scene.has_product_lock and scene.approval_gate_100pct,
+                "gate_1_cap_geometry": scene.cap_geometry or "Locked to product crop 100%",
+                "gate_2_label_kerning": scene.label_kerning or "Locked to product crop 100%",
+                "gate_3_parting_seams": scene.seam_geometry or "Locked to manufacturing specs",
+                "gate_4_material_finish": scene.material_finish or "Locked to product crop 100%",
+                "gate_5_sku_color": scene.sku_color or "Locked to product crop 100%",
+                "acceptance_threshold": "100% physical and typographic fidelity required; zero tolerance for drift or hallucination",
             },
             "content_classification": {
                 "type": scene.content_type.value if scene.content_type else "photograph",
@@ -178,6 +208,7 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "branding_and_text": shield.branding_and_text if scene.suppress_text_branding else [],
                 "compression_and_quality": shield.compression_and_quality,
                 "anti_drift": shield.anti_drift_tokens if is_ref else [],
+                "product_drift": shield.product_drift if scene.has_product_lock else [],
                 "all_negative_tokens": all_neg_tokens,
             },
             "compiled_prompts": {
