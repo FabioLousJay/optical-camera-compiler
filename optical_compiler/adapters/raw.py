@@ -141,7 +141,48 @@ class RawSpecAdapter(BaseAdapter):
                     f"Rendering Intent: {scene.print_spec.rendering_intent.value}",
                 ])
 
+        if scene.has_stress_probe and scene.stress_probe:
+            lines.extend([
+                "",
+                "--- PFEP v1.0 Diagnostic Stress Probe ---",
+                f"Probe: {scene.stress_probe.name} ({scene.stress_probe.value})",
+                f"Directive: {scene.stress_probe.directive_text}",
+                "Evaluation Gate: Identity score == 2 AND total score >= 12 across 8 axes",
+            ])
+
+        if scene.has_lighting_environment and scene.lighting_environment:
+            le = scene.lighting_environment
+            lines.extend([
+                "",
+                "--- Exhibition Lighting Environment & Spectral Calibration ---",
+                f"Illuminance: {le.illuminance_lux} lux",
+                f"Color Temperature: {le.cct_kelvin}K CCT",
+                f"Color Rendering Index: TM-30/CRI {le.spectral_cri}",
+                f"Surround Reflectance: {le.wall_surround}",
+            ])
+
+        if scene.has_series_cohesion and scene.series_cohesion:
+            sc = scene.series_cohesion
+            lines.extend([
+                "",
+                "--- Exhibition Series Visual Cohesion Matrix ---",
+                f"Anchor Image ID: {sc.anchor_image_id or 'master'}",
+                f"Gallery Zone: {sc.gallery_zone or 'primary'}",
+                f"Midtone Density Target: {sc.midtone_density}",
+                f"Shadow Depth Target: {sc.shadow_depth}",
+                f"Highlight Roll-off Target: {sc.highlight_rolloff}",
+            ])
+
+        if scene.min_file_mb:
+            lines.extend([
+                "",
+                "--- Closed-Loop Resolution & Output Constraints ---",
+                f"Minimum File Size: {scene.min_file_mb:.1f} MB (Uncompressed raster)",
+                "Cryptographic Provenance: SHA-256 mandatory digest verification",
+            ])
+
         positive_prompt = "\n".join(lines)
+
         negative_prompt = ", ".join(
             shield.all_tokens(
                 include_product_drift=scene.has_product_lock,

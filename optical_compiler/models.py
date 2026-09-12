@@ -1008,6 +1008,296 @@ class PrintSpec:
     rendering_intent: RenderingIntent = RenderingIntent.RELATIVE_COLORIMETRIC
 
 
+class StressProbe(str, Enum):
+    """PFEP v1.0 canonical stress diagnostic probes for portrait & render fidelity."""
+
+    NONE = "none"
+    MASTER_PORTRAIT_LOCK = "master_portrait_lock"
+    OUTPAINT_LENS_HONEST = "outpaint_lens_honest"
+    STRESS_HARD_KEY = "stress_hard_key"
+    STRESS_CROSS_POLARIZED = "stress_cross_polarized"
+    STRESS_GLASSES_REFLECTIONS = "stress_glasses_reflections"
+    STRESS_SEATED_COMPRESSION = "stress_seated_compression"
+    STRESS_STANDING_COMPRESSION = "stress_standing_compression"
+    STRESS_BACKGROUND_SCALE = "stress_background_scale"
+    STRESS_HAIR_SPECULAR = "stress_hair_specular"
+    STRESS_SHADOW_COLOR = "stress_shadow_color"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> StressProbe:
+        """Parse probe case-insensitively with friendly aliases."""
+        if not value:
+            return cls.NONE
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        alias_map = {
+            "none": cls.NONE,
+            "master": cls.MASTER_PORTRAIT_LOCK,
+            "master_lock": cls.MASTER_PORTRAIT_LOCK,
+            "master_portrait_lock": cls.MASTER_PORTRAIT_LOCK,
+            "outpaint": cls.OUTPAINT_LENS_HONEST,
+            "outpaint_lens": cls.OUTPAINT_LENS_HONEST,
+            "outpaint_lens_honest": cls.OUTPAINT_LENS_HONEST,
+            "lens_honest": cls.OUTPAINT_LENS_HONEST,
+            "hard_key": cls.STRESS_HARD_KEY,
+            "stress_hard_key": cls.STRESS_HARD_KEY,
+            "cross_polarized": cls.STRESS_CROSS_POLARIZED,
+            "cross_polarization": cls.STRESS_CROSS_POLARIZED,
+            "stress_cross_polarized": cls.STRESS_CROSS_POLARIZED,
+            "glasses": cls.STRESS_GLASSES_REFLECTIONS,
+            "glasses_reflections": cls.STRESS_GLASSES_REFLECTIONS,
+            "stress_glasses_reflections": cls.STRESS_GLASSES_REFLECTIONS,
+            "seated": cls.STRESS_SEATED_COMPRESSION,
+            "seated_compression": cls.STRESS_SEATED_COMPRESSION,
+            "stress_seated_compression": cls.STRESS_SEATED_COMPRESSION,
+            "standing": cls.STRESS_STANDING_COMPRESSION,
+            "standing_compression": cls.STRESS_STANDING_COMPRESSION,
+            "stress_standing_compression": cls.STRESS_STANDING_COMPRESSION,
+            "background_scale": cls.STRESS_BACKGROUND_SCALE,
+            "stress_background_scale": cls.STRESS_BACKGROUND_SCALE,
+            "hair_specular": cls.STRESS_HAIR_SPECULAR,
+            "stress_hair_specular": cls.STRESS_HAIR_SPECULAR,
+            "hair": cls.STRESS_HAIR_SPECULAR,
+            "shadow_color": cls.STRESS_SHADOW_COLOR,
+            "stress_shadow_color": cls.STRESS_SHADOW_COLOR,
+            "shadow": cls.STRESS_SHADOW_COLOR,
+        }
+        if norm in alias_map:
+            return alias_map[norm]
+        for m in cls:
+            if m.value == norm or m.name.lower() == norm:
+                return m
+        return cls.NONE
+
+    from_string = from_str
+
+    @property
+    def directive_text(self) -> str:
+        """Photographic directive for the diagnostic probe."""
+        directives = {
+            self.MASTER_PORTRAIT_LOCK: (
+                "PFEP Diagnostic Probe [01: Master Portrait Lock]: Baseline reference anchor. "
+                "Lock exact facial geometry, bone structure, ear morphology, natural skin micro-relief, "
+                "and directional studio lighting fidelity."
+            ),
+            self.OUTPAINT_LENS_HONEST: (
+                "PFEP Diagnostic Probe [02: Lens-Honest Outpaint]: Lock subject absolute scale, camera distance, "
+                "and focal length perspective. Expand frame without wide-angle fish-eye curvature, perspective drift, "
+                "or subject biometric morphing."
+            ),
+            self.STRESS_HARD_KEY: (
+                "PFEP Diagnostic Probe [03: Hard Key Stress]: Harsh 50-60° key light, near-zero fill, deep negative fill. "
+                "Skin pores, epidermal micro-ridges, and fine vellus texture must remain fully resolved inside deep shadow transitions."
+            ),
+            self.STRESS_CROSS_POLARIZED: (
+                "PFEP Diagnostic Probe [04: Cross-Polarized Surface Stress]: Cross-polarized lighting emulation. "
+                "Completely extinguish specular surface glare. Resolve pure subsurface melanin and blood flow micro-chroma without waxy synthetic flattening."
+            ),
+            self.STRESS_GLASSES_REFLECTIONS: (
+                "PFEP Diagnostic Probe [05: Glasses Reflections Stress]: Physically plausible multi-element lens reflections. "
+                "Eyes and pupils must remain sharply resolved and visible through spectacles; zero opaque white rectangle artifacts or floating highlights."
+            ),
+            self.STRESS_SEATED_COMPRESSION: (
+                "PFEP Diagnostic Probe [06: Seated Pose Compression]: Subject seated naturally. Lock camera optical height, "
+                "distance, and telephoto normal compression identically to standing reference; zero perspective stretching."
+            ),
+            self.STRESS_STANDING_COMPRESSION: (
+                "PFEP Diagnostic Probe [07: Standing Pose Compression]: Subject standing upright. Camera distance, "
+                "lens focal compression, and optical perspective locked identically to seated reference."
+            ),
+            self.STRESS_BACKGROUND_SCALE: (
+                "PFEP Diagnostic Probe [08: Background Scale Stress]: Extend environmental framing subtly while locking "
+                "subject scale, foreground-to-background spatial compression, and lens field-of-view without focal widening."
+            ),
+            self.STRESS_HAIR_SPECULAR: (
+                "PFEP Diagnostic Probe [09: Hair Specular Dynamics]: 55-65° directional rim/key lighting. "
+                "Resolve anisotropic specular response across individual hair fibers and follicles without plastic helmet sheen or solid clump artifacts."
+            ),
+            self.STRESS_SHADOW_COLOR: (
+                "PFEP Diagnostic Probe [10: Shadow Color Integrity]: Strong negative fill on unlit cheek. "
+                "Shadow-side skin must retain organic warm undertones, natural melanin, and chromatic integrity without synthetic gray, cyan, or muddy casts."
+            ),
+        }
+        return directives.get(self, "")
+
+
+@dataclass
+class LightingEnvironmentSpec:
+    """Gallery exhibition lighting environment and spectral calibration specification."""
+
+    cct_kelvin: int = 5000  # Color temperature in Kelvin (5000K daylight/gallery standard)
+    illuminance_lux: int = 500  # Gallery illuminance level (400-500 lux standard)
+    spectral_cri: float = 98.0  # TM-30 / CRI spectral fidelity
+    wall_surround: str = "Neutral Gray 18%"  # Surround wall reflectance / color
+
+
+@dataclass
+class SeriesCohesionSpec:
+    """Exhibition series visual cohesion calibration matrix."""
+
+    anchor_image_id: Optional[str] = None
+    gallery_zone: Optional[str] = None
+    midtone_density: float = 1.0
+    shadow_depth: float = 1.0
+    highlight_rolloff: float = 1.0
+
+
+@dataclass
+class RendererScorecard:
+    """PFEP v1.0 8-Axis Renderer Diagnostic Scorecard with Identity hard gating.
+
+    8 Canonical Axes (0-2 each, max 16):
+      1. identity: 0=drift, 1=minor deviation, 2=locked (HARD GATE: must be 2 to pass)
+      2. focus: 0=soft, 1=acceptable, 2=tack sharp
+      3. skin_texture: 0=plastic, 1=mixed, 2=natural pores
+      4. lighting_honesty: 0=fake, 1=passable, 2=physically coherent
+      5. glasses: 0=broken, 1=acceptable, 2=plausible
+      6. hair: 0=helmet-like, 1=mixed, 2=strand/specular breakup
+      7. geometry: 0=warped, 1=minor errors, 2=correct
+      8. background_scale: 0=drifting, 1=minor drift, 2=invariant
+    """
+
+    def __init__(
+        self,
+        identity: int = 0,
+        focus: int = 0,
+        skin_texture: int = 0,
+        lighting_honesty: int = 0,
+        glasses: int = 0,
+        hair: int = 0,
+        geometry: int = 0,
+        background_scale: int = 0,
+        notes: str = "",
+        **kwargs: Any,
+    ):
+        self.identity = identity
+        self.focus = kwargs.get("material_acutance", focus)
+        self.skin_texture = kwargs.get("skin_micro_texture", skin_texture)
+        self.lighting_honesty = kwargs.get("lighting", lighting_honesty)
+        self.glasses = kwargs.get("optical_physics", glasses)
+        self.hair = kwargs.get("hair_dynamics", hair)
+        self.geometry = geometry
+        self.background_scale = kwargs.get("color_fidelity", background_scale)
+        self.notes = notes
+
+    # Backward compatibility aliases
+    @property
+    def skin_micro_texture(self) -> int:
+        return self.skin_texture
+
+    @skin_micro_texture.setter
+    def skin_micro_texture(self, val: int) -> None:
+        self.skin_texture = val
+
+    @property
+    def lighting(self) -> int:
+        return self.lighting_honesty
+
+    @lighting.setter
+    def lighting(self, val: int) -> None:
+        self.lighting_honesty = val
+
+    @property
+    def optical_physics(self) -> int:
+        return self.glasses
+
+    @optical_physics.setter
+    def optical_physics(self, val: int) -> None:
+        self.glasses = val
+
+    @property
+    def hair_dynamics(self) -> int:
+        return self.hair
+
+    @hair_dynamics.setter
+    def hair_dynamics(self, val: int) -> None:
+        self.hair = val
+
+    @property
+    def material_acutance(self) -> int:
+        return self.focus
+
+    @material_acutance.setter
+    def material_acutance(self, val: int) -> None:
+        self.focus = val
+
+    @property
+    def color_fidelity(self) -> int:
+        return self.background_scale
+
+    @color_fidelity.setter
+    def color_fidelity(self, val: int) -> None:
+        self.background_scale = val
+
+    @property
+    def total_score(self) -> int:
+        """Sum of all 8 evaluation axes (max 16)."""
+        return (
+            self.identity
+            + self.focus
+            + self.skin_texture
+            + self.lighting_honesty
+            + self.glasses
+            + self.hair
+            + self.geometry
+            + self.background_scale
+        )
+
+    @property
+    def passed(self) -> bool:
+        """PFEP v1.0 Pass Gate: Identity == 2 AND total_score >= 12."""
+        return self.identity == 2 and self.total_score >= 12
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert scorecard to dictionary with pass/fail evaluation."""
+        return {
+            "identity": self.identity,
+            "focus": self.focus,
+            "skin_texture": self.skin_texture,
+            "lighting_honesty": self.lighting_honesty,
+            "glasses": self.glasses,
+            "hair": self.hair,
+            "geometry": self.geometry,
+            "background_scale": self.background_scale,
+            "total_score": self.total_score,
+            "max_score": 16,
+            "identity_gate_passed": self.identity == 2,
+            "passed": self.passed,
+            "notes": self.notes,
+        }
+
+    def to_markdown(self) -> str:
+        """Render scorecard as Markdown table."""
+        status = "**PASSED**" if self.passed else "**FAILED**"
+        gate = "PASSED" if self.identity == 2 else "FAILED (Hard Gate Violation: must be 2)"
+        id_labels = ["Drift", "Minor Deviation", "Locked (PASS)"]
+        focus_labels = ["Soft", "Acceptable", "Tack Sharp"]
+        skin_labels = ["Plastic", "Mixed", "Natural Pores"]
+        light_labels = ["Fake", "Passable", "Physically Coherent"]
+        glasses_labels = ["Broken", "Acceptable", "Plausible"]
+        hair_labels = ["Helmet-like", "Mixed", "Strand/Specular Breakup"]
+        geo_labels = ["Warped", "Minor Errors", "Correct"]
+        bg_labels = ["Drifting", "Minor Drift", "Invariant"]
+
+        return f"""### PFEP v1.0 Renderer Scorecard: {status}
+- **Total Score**: {self.total_score} / 16
+- **Identity Hard Gate**: {gate}
+
+| Axis | Score | Rating |
+| :--- | :--- | :--- |
+| Identity | {self.identity}/2 | {id_labels[min(2, max(0, self.identity))]} |
+| Focus | {self.focus}/2 | {focus_labels[min(2, max(0, self.focus))]} |
+| Skin Texture | {self.skin_texture}/2 | {skin_labels[min(2, max(0, self.skin_texture))]} |
+| Lighting Honesty | {self.lighting_honesty}/2 | {light_labels[min(2, max(0, self.lighting_honesty))]} |
+| Glasses | {self.glasses}/2 | {glasses_labels[min(2, max(0, self.glasses))]} |
+| Hair | {self.hair}/2 | {hair_labels[min(2, max(0, self.hair))]} |
+| Geometry | {self.geometry}/2 | {geo_labels[min(2, max(0, self.geometry))]} |
+| Background Scale | {self.background_scale}/2 | {bg_labels[min(2, max(0, self.background_scale))]} |
+
+**Notes**: {self.notes or 'None'}
+"""
+
+
+
 @dataclass
 class ReferenceImageInput:
     """Metadata and controls for reference-guided generation and anti-drift locks."""
@@ -1491,6 +1781,10 @@ class SceneInput:
     paper_profile: Optional[PaperProfile] = None
     print_spec: Optional[PrintSpec] = None
     policy_safe: bool = False
+    stress_probe: Optional[StressProbe] = None
+    min_file_mb: Optional[float] = None
+    lighting_environment: Optional[LightingEnvironmentSpec] = None
+    series_cohesion: Optional[SeriesCohesionSpec] = None
 
     @property
     def has_product_lock(self) -> bool:
@@ -1635,6 +1929,31 @@ class SceneInput:
     def is_4d(self) -> bool:
         """Return True if 4D volumetric rendering is active."""
         return self.is_4d_volumetric or "4d" in self.subject.lower()
+
+    @property
+    def has_stress_probe(self) -> bool:
+        """Return True if a PFEP diagnostic stress probe is configured."""
+        return bool(self.stress_probe and self.stress_probe != StressProbe.NONE)
+
+    @property
+    def has_lighting_environment(self) -> bool:
+        """Return True if exhibition lighting environment is configured."""
+        return self.lighting_environment is not None
+
+    @property
+    def has_series_cohesion(self) -> bool:
+        """Return True if series cohesion calibration is configured."""
+        return self.series_cohesion is not None
+
+    @property
+    def has_closed_loop_constraints(self) -> bool:
+        """Return True if closed-loop resolution or file size constraints are specified."""
+        return bool(
+            self.output_resolution
+            or self.min_file_mb
+            or (self.print_spec and (self.print_spec.width_in > 0 or self.print_spec.height_in > 0))
+        )
+
 
 
 @dataclass

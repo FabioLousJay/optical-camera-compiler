@@ -398,6 +398,34 @@ class GPTImagesAdapter(BaseAdapter):
         )
         sections.append(res_block)
 
+        # PFEP Diagnostic Stress Probe
+        if scene.has_stress_probe and scene.stress_probe:
+            sections.append(scene.stress_probe.directive_text)
+
+        # Exhibition Lighting Environment
+        if scene.has_lighting_environment and scene.lighting_environment:
+            le = scene.lighting_environment
+            sections.append(
+                f"Exhibition Lighting Calibration: Tuned for gallery presentation at {le.illuminance_lux} lux, "
+                f"{le.cct_kelvin}K CCT, with TM-30/CRI {le.spectral_cri} spectral fidelity against {le.wall_surround} surround."
+            )
+
+        # Series Visual Cohesion
+        if scene.has_series_cohesion and scene.series_cohesion:
+            sc = scene.series_cohesion
+            sections.append(
+                f"Series Cohesion Protocol: Visual cohesion locked to anchor '{sc.anchor_image_id or 'master'}' "
+                f"in gallery zone '{sc.gallery_zone or 'primary'}', midtone density target {sc.midtone_density}, "
+                f"shadow depth {sc.shadow_depth}, highlight roll-off {sc.highlight_rolloff}."
+            )
+
+        # Closed-Loop File Size Constraint
+        if scene.min_file_mb:
+            sections.append(
+                f"Closed-Loop Output Constraint: Non-negotiable minimum file size of {scene.min_file_mb:.1f} MB uncompressed raster."
+            )
+
+
         # 10. Negative constraints embedded in natural language
         neg_tokens = profile.negative_embeddings.all_tokens(
             include_anti_drift=is_ref,

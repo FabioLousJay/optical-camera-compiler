@@ -1,0 +1,66 @@
+name: Closed-Loop Resolution & Export Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      input_path:
+        description: "Path to source input image"
+        required: true
+        default: "sample.png"
+      print_width:
+        description: "Target physical print width (inches)"
+        required: false
+        default: "16.0"
+      print_height:
+        description: "Target physical print height (inches)"
+        required: false
+        default: "24.0"
+      ppi:
+        description: "Target raster resolution (PPI)"
+        required: false
+        default: "300"
+      min_mb:
+        description: "Non-negotiable minimum file size (MB)"
+        required: false
+        default: "30.0"
+      format:
+        description: "Export format (png, tiff, jpeg)"
+        required: false
+        default: "png"
+
+jobs:
+  export:
+    name: Execute Closed-Loop Export & Provenance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install Pillow
+
+      - name: Execute Closed-Loop Super-Resolution Export
+        run: |
+          python -m optical_compiler.cli \
+            --export-closed-loop "${{ github.event.inputs.input_path }}" \
+            --export-out "dist/export.${{ github.event.inputs.format }}" \
+            --export-format "${{ github.event.inputs.format }}" \
+            --print-width "${{ github.event.inputs.print_width }}" \
+            --print-height "${{ github.event.inputs.print_height }}" \
+            --ppi "${{ github.event.inputs.ppi }}" \
+            --min-mb "${{ github.event.inputs.min_mb }}" \
+            --report-md "dist/EXPORT_REPORT.md"
+
+      - name: Publish Export Artifacts & Provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: exhibition-export-package
+          path: dist/

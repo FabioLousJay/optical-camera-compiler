@@ -219,7 +219,17 @@ class SDXLAdapter(BaseAdapter):
         if scene.custom_positives:
             pos_chunks.extend(scene.custom_positives)
 
+        if scene.has_stress_probe and scene.stress_probe:
+            pos_chunks.append(scene.stress_probe.directive_text)
+        if scene.has_lighting_environment and scene.lighting_environment:
+            le = scene.lighting_environment
+            pos_chunks.append(f"gallery lighting {le.illuminance_lux} lux, {le.cct_kelvin}K CCT, CRI {le.spectral_cri}")
+        if scene.has_series_cohesion and scene.series_cohesion:
+            sc = scene.series_cohesion
+            pos_chunks.append(f"series cohesion anchor {sc.anchor_image_id or 'master'}")
+
         positive_prompt = ", ".join(pos_chunks)
+
 
         # 2. Negative Prompt (Comprehensive artifact suppression)
         include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock)

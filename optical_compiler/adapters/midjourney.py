@@ -192,7 +192,17 @@ class MidjourneyAdapter(BaseAdapter):
         if scene.custom_positives:
             prompt_parts.extend(scene.custom_positives)
 
+        if scene.has_stress_probe and scene.stress_probe:
+            prompt_parts.append(scene.stress_probe.directive_text)
+        if scene.has_lighting_environment and scene.lighting_environment:
+            le = scene.lighting_environment
+            prompt_parts.append(f"gallery exhibition lighting {le.illuminance_lux} lux {le.cct_kelvin}K CRI {le.spectral_cri}")
+        if scene.has_series_cohesion and scene.series_cohesion:
+            sc = scene.series_cohesion
+            prompt_parts.append(f"series cohesion anchor {sc.anchor_image_id or 'master'} zone {sc.gallery_zone or 'gallery'}")
+
         # 4. Midjourney flags
+
         effective_ar = "2.39:1" if (scene.is_anamorphic and scene.aspect_ratio in ("4:5", "2.39:1")) else scene.aspect_ratio
         flags = [
             f"--ar {effective_ar}",

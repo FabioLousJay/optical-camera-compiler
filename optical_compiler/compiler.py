@@ -18,6 +18,7 @@ from .models import (
     GripModifier,
     GripType,
     IrisBladeCount,
+    LightingEnvironmentSpec,
     LightingRatio,
     MaterialStyle,
     PaperProfile,
@@ -25,7 +26,9 @@ from .models import (
     ReferenceImageInput,
     ReferenceMode,
     SceneInput,
+    SeriesCohesionSpec,
     StreakFlare,
+    StressProbe,
     TargetEngine,
 )
 from .profiles import apply_overrides, auto_select_profile, load_profile
@@ -110,6 +113,16 @@ class OpticalCompiler:
         paper_profile: Optional[Union[str, PaperProfile]] = None,
         print_spec: Optional[PrintSpec] = None,
         policy_safe: bool = False,
+        stress_probe: Optional[Union[str, StressProbe]] = None,
+        min_mb: Optional[float] = None,
+        lighting_environment: Optional[LightingEnvironmentSpec] = None,
+        cct_kelvin: Optional[int] = None,
+        illuminance_lux: Optional[int] = None,
+        spectral_cri: Optional[float] = None,
+        wall_surround: Optional[str] = None,
+        series_cohesion: Optional[SeriesCohesionSpec] = None,
+        gallery_zone: Optional[str] = None,
+        anchor_image_id: Optional[str] = None,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -231,6 +244,40 @@ class OpticalCompiler:
         elif body_morphology and weight_lb and body_morphology.weight_lb is None:
             body_morphology.weight_lb = weight_lb
 
+        # Stress probe normalization
+        sp: Optional[StressProbe] = None
+        if isinstance(stress_probe, StressProbe):
+            sp = stress_probe
+        elif isinstance(stress_probe, str):
+            sp = StressProbe.from_str(stress_probe)
+
+        # Lighting environment normalization
+        le_obj: Optional[LightingEnvironmentSpec] = None
+        if isinstance(lighting_environment, LightingEnvironmentSpec):
+            le_obj = lighting_environment
+        elif (
+            cct_kelvin is not None
+            or illuminance_lux is not None
+            or spectral_cri is not None
+            or wall_surround is not None
+        ):
+            le_obj = LightingEnvironmentSpec(
+                cct_kelvin=cct_kelvin if cct_kelvin is not None else 5000,
+                illuminance_lux=illuminance_lux if illuminance_lux is not None else 500,
+                spectral_cri=spectral_cri if spectral_cri is not None else 98.0,
+                wall_surround=wall_surround or "Neutral Gray 18%",
+            )
+
+        # Series cohesion normalization
+        sc_obj: Optional[SeriesCohesionSpec] = None
+        if isinstance(series_cohesion, SeriesCohesionSpec):
+            sc_obj = series_cohesion
+        elif gallery_zone is not None or anchor_image_id is not None:
+            sc_obj = SeriesCohesionSpec(
+                anchor_image_id=anchor_image_id,
+                gallery_zone=gallery_zone,
+            )
+
         # 2. Build SceneInput
         if isinstance(scene, str):
             scene_input = SceneInput(
@@ -289,7 +336,12 @@ class OpticalCompiler:
                 paper_profile=paper_prof,
                 print_spec=print_spec,
                 policy_safe=policy_safe,
+                stress_probe=sp,
+                min_file_mb=min_mb,
+                lighting_environment=le_obj,
+                series_cohesion=sc_obj,
             )
+
         else:
             scene_input = scene
             # Apply any explicit kwargs on top of the SceneInput object
@@ -396,6 +448,14 @@ class OpticalCompiler:
                 scene_input.print_spec = print_spec
             if policy_safe:
                 scene_input.policy_safe = policy_safe
+            if sp is not None:
+                scene_input.stress_probe = sp
+            if min_mb is not None:
+                scene_input.min_file_mb = min_mb
+            if le_obj is not None:
+                scene_input.lighting_environment = le_obj
+            if sc_obj is not None:
+                scene_input.series_cohesion = sc_obj
 
         # 3. Parse target engine
         engine = (

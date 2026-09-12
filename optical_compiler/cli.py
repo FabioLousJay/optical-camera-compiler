@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 import subprocess
 import sys
 from typing import Optional
@@ -347,6 +348,142 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Enforce policy-safe compliance layer preventing refusal loops while locking camera physics and anatomy.",
     )
+    # --- Tool 8: PFEP v1.0 Diagnostic Stress Probes ---
+    parser.add_argument(
+        "--probe",
+        "-k",
+        dest="probe",
+        choices=[
+            "master_portrait_lock",
+            "outpaint_lens_honest",
+            "stress_hard_key",
+            "stress_cross_polarized",
+            "stress_glasses_reflections",
+            "stress_seated_compression",
+            "stress_standing_compression",
+            "stress_background_scale",
+            "stress_hair_specular",
+            "stress_shadow_color",
+        ],
+        default=None,
+        help="PFEP v1.0 canonical stress diagnostic probe.",
+    )
+    # --- Tool 9: Closed-Loop Output Constraints & Exhibition Systems ---
+    parser.add_argument(
+        "--min-mb",
+        dest="min_mb",
+        type=float,
+        default=None,
+        help="Non-negotiable minimum file size in MB for closed-loop super-resolution export.",
+    )
+    parser.add_argument(
+        "--cct",
+        dest="cct_kelvin",
+        type=int,
+        default=None,
+        help="Gallery exhibition correlated color temperature in Kelvin (e.g. 5000).",
+    )
+    parser.add_argument(
+        "--lux",
+        dest="illuminance_lux",
+        type=int,
+        default=None,
+        help="Gallery exhibition illuminance in lux (e.g. 500).",
+    )
+    parser.add_argument(
+        "--cri",
+        dest="spectral_cri",
+        type=float,
+        default=None,
+        help="Gallery exhibition lighting CRI / TM-30 spectral fidelity (e.g. 98.0).",
+    )
+    parser.add_argument(
+        "--wall-surround",
+        dest="wall_surround",
+        default=None,
+        help="Gallery surround / wall reflectance (e.g. 'Neutral Gray 18%%', 'Deep Charcoal').",
+    )
+    parser.add_argument(
+        "--gallery-zone",
+        dest="gallery_zone",
+        default=None,
+        help="Gallery exhibition wing or zone for series cohesion (e.g. 'Zone A - North Wing').",
+    )
+    parser.add_argument(
+        "--anchor-id",
+        dest="anchor_image_id",
+        default=None,
+        help="Anchor image ID for exhibition series visual cohesion calibration.",
+    )
+    parser.add_argument(
+        "--export-closed-loop",
+        metavar="IMAGE_PATH",
+        help="Execute closed-loop super-resolution export with machine-verifiable constraints on an image.",
+    )
+    parser.add_argument(
+        "--export-out",
+        metavar="OUTPUT_PATH",
+        help="Output filepath for closed-loop export.",
+    )
+    parser.add_argument(
+        "--export-format",
+        choices=["png", "tiff", "jpeg"],
+        help="Output format for closed-loop export (default: PNG).",
+    )
+    parser.add_argument(
+        "--target-width",
+        type=int,
+        default=None,
+        help="Exact output raster width in pixels.",
+    )
+    parser.add_argument(
+        "--target-height",
+        type=int,
+        default=None,
+        help="Exact output raster height in pixels.",
+    )
+    parser.add_argument(
+        "--print-width",
+        type=float,
+        default=None,
+        help="Physical print width in inches.",
+    )
+    parser.add_argument(
+        "--print-height",
+        type=float,
+        default=None,
+        help="Physical print height in inches.",
+    )
+    parser.add_argument(
+        "--ppi",
+        type=int,
+        default=300,
+        help="Target print raster PPI (default: 300).",
+    )
+    parser.add_argument(
+        "--add-micro-noise",
+        action="store_true",
+        help="Inject subtle micro-noise entropy for lossless compression benchmarking experiment.",
+    )
+    parser.add_argument(
+        "--report-md",
+        metavar="REPORT_PATH",
+        help="Save closed-loop execution report markdown to custom path.",
+    )
+    parser.add_argument(
+        "--export-profile",
+        "-ep",
+        choices=["A", "B", "C", "a", "b", "c"],
+        help="Practical export profile (A: 4000x6000 24MP, B: 5000x7500 37.5MP, C: 6000x9000 54MP).",
+    )
+    parser.add_argument(
+        "--init-pfep",
+        nargs="?",
+        const="pfep_workspace",
+        metavar="DIR",
+        help="Initialize a complete PFEP v1.0 project directory with 10 diagnostic prompt packs and run logs.",
+    )
+
     parser.add_argument(
         "--content-type",
         dest="content_type",
@@ -456,6 +593,26 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
+    # 0. Handle PFEP project initialization if requested
+    if getattr(args, "init_pfep", None):
+        try:
+            from .pfep import init_pfep_project
+            target_dir = args.init_pfep if args.init_pfep != "default" else "pfep_workspace"
+            created = init_pfep_project(target_dir)
+            if args.json:
+                print(json.dumps({"target_dir": str(target_dir), "files_created": [str(p) for p in created]}, indent=2))
+            else:
+                print("=" * 80)
+                print(f"PFEP v1.0 WORKSPACE INITIALIZED: {target_dir}")
+                print("=" * 80)
+                for p in created:
+                    print(f"  + {p.relative_to(Path(target_dir).resolve()) if Path(target_dir).resolve() in p.parents else p.name}")
+                print(f"\nSuccessfully generated {len(created)} protocol assets, 10 diagnostic prompt packs, and run logs.")
+            return 0
+        except Exception as err:
+            sys.stderr.write(f"PFEP Initialization Error: {err}\n")
+            return 1
+
     # 1. Handle direct 102MP upscale request if provided
     if args.upscale_102mp:
         try:
@@ -484,6 +641,45 @@ def main(argv: Optional[list[str]] = None) -> int:
             return 0 if report["validation_passed"] else 1
         except Exception as err:
             sys.stderr.write(f"102MP Upscale Error: {err}\n")
+            return 1
+
+    # 1b. Handle direct closed-loop export request if provided
+    if getattr(args, "export_closed_loop", None):
+        try:
+            from .restoration import export_closed_loop
+            run_rep, rep_dict = export_closed_loop(
+                args.export_closed_loop,
+                output_path=args.export_out or "export_output.png",
+                target_width=args.target_width,
+                target_height=args.target_height,
+                width_in=args.print_width,
+                height_in=args.print_height,
+                ppi=args.ppi or 300,
+                min_mb=args.min_mb,
+                output_format=args.export_format,
+                profile=getattr(args, "export_profile", None),
+                add_noise=args.add_micro_noise,
+                generate_report=True,
+            )
+            if args.report_md:
+                Path(args.report_md).write_text(run_rep.to_markdown(), encoding="utf-8")
+            if args.json:
+                print(json.dumps(rep_dict, indent=2))
+            else:
+                print("=" * 80)
+                print("CLOSED-LOOP SUPER-RESOLUTION EXPORT & PROVENANCE REPORT")
+                print("=" * 80)
+                print(f"Status:       {'PASSED' if run_rep.passed_constraints else 'FAILED'}")
+                print(f"Input:        {run_rep.input_path} ({run_rep.source_dimensions[0]}x{run_rep.source_dimensions[1]})")
+                print(f"Output:       {run_rep.output_path} ({run_rep.output_dimensions[0]}x{run_rep.output_dimensions[1]} @ {run_rep.target_ppi} PPI)")
+                print(f"File Size:    {run_rep.file_size_mb:.2f} MB ({run_rep.file_size_bytes:,} bytes)")
+                print(f"SHA-256:      {run_rep.sha256}")
+                print(f"Time:         {run_rep.execution_seconds:.3f}s")
+                if run_rep.failure_reasons:
+                    print(f"Failures:     {', '.join(run_rep.failure_reasons)}")
+            return 0 if run_rep.passed_constraints else 1
+        except Exception as err:
+            sys.stderr.write(f"Closed-Loop Export Error: {err}\n")
             return 1
 
     if not args.scene and getattr(args, "scene_flag", None):
@@ -578,6 +774,14 @@ def main(argv: Optional[list[str]] = None) -> int:
         "paper_profile": getattr(args, "paper", None),
         "print_spec": None,
         "policy_safe": getattr(args, "policy_safe", False),
+        "stress_probe": getattr(args, "probe", None),
+        "min_mb": getattr(args, "min_mb", None),
+        "cct_kelvin": getattr(args, "cct_kelvin", None),
+        "illuminance_lux": getattr(args, "illuminance_lux", None),
+        "spectral_cri": getattr(args, "spectral_cri", None),
+        "wall_surround": getattr(args, "wall_surround", None),
+        "gallery_zone": getattr(args, "gallery_zone", None),
+        "anchor_image_id": getattr(args, "anchor_image_id", None),
     }
 
     if getattr(args, "print_size", None):

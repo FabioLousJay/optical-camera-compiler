@@ -252,7 +252,23 @@ class FluxAdapter(BaseAdapter):
         )
         sections.append(output_desc)
 
+        if scene.has_stress_probe and scene.stress_probe:
+            sections.append(scene.stress_probe.directive_text)
+        if scene.has_lighting_environment and scene.lighting_environment:
+            le = scene.lighting_environment
+            sections.append(
+                f"Exhibition lighting calibrated for gallery display at {le.illuminance_lux} lux, {le.cct_kelvin}K CCT, with TM-30/CRI {le.spectral_cri} spectral fidelity against {le.wall_surround} surround."
+            )
+        if scene.has_series_cohesion and scene.series_cohesion:
+            sc = scene.series_cohesion
+            sections.append(
+                f"Series visual cohesion anchored to {sc.anchor_image_id or 'master'} in {sc.gallery_zone or 'gallery zone'} with midtone density {sc.midtone_density} and shadow depth {sc.shadow_depth}."
+            )
+        if scene.min_file_mb:
+            sections.append(f"Minimum uncompressed output target: {scene.min_file_mb:.1f} MB.")
+
         # 6. Natural language negative constraints (Flux thrives on explicit negative assertions in context)
+
         banned_tropes = (
             f"Output: {res_text}, uncompressed 16-bit raw capture, lossless acutance, zero chroma subsampling. "
             "Eliminate plastic or poreless airbrushed skin, synthetic beauty filters, "

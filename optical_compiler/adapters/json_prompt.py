@@ -68,7 +68,12 @@ class JSONAllInOneAdapter(BaseAdapter):
             resolution_str = scene.output_resolution or f"12MP PNG, {scene.aspect_ratio}"
 
         # 4. Build master All-in-One JSON dictionary
-        if scene.is_policy_safe:
+        if scene.has_stress_probe:
+            probe_name = scene.stress_probe.name if scene.stress_probe else "NONE"
+            protocol_name = f"PFEP v1.0 Diagnostic Stress Probe Protocol [{probe_name}]"
+        elif scene.has_lighting_environment or scene.has_series_cohesion:
+            protocol_name = "Exhibition Gallery Lighting & Series Cohesion Calibration Matrix"
+        elif scene.is_policy_safe:
             protocol_name = "Policy-Safe Compliance Recovery & GenAI Photography Mastery Suite"
         elif scene.has_body_morphology:
             protocol_name = "Body Morphology & Proportional Volume Calibration Protocol"
@@ -91,6 +96,12 @@ class JSONAllInOneAdapter(BaseAdapter):
         else:
             protocol_name = "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
 
+        is_schema_3_5 = bool(
+            scene.has_stress_probe
+            or scene.has_lighting_environment
+            or scene.has_series_cohesion
+            or scene.min_file_mb
+        )
         is_schema_3_4 = bool(
             scene.has_body_morphology
             or scene.has_material_style
@@ -104,7 +115,7 @@ class JSONAllInOneAdapter(BaseAdapter):
             or scene.has_copy_space
             or scene.has_gobo
         )
-        schema_ver = "3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2")
+        schema_ver = "3.5" if is_schema_3_5 else ("3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2"))
 
         all_in_one_data: dict[str, Any] = {
             "$schema": "https://raw.githubusercontent.com/FabioLousJay/optical-camera-compiler/main/schemas/all_in_one_prompt.json",
@@ -154,7 +165,10 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "remove_text_when_present": scene.remove_text_when_present,
                 "paper_profile": scene.paper_profile.value if scene.paper_profile else None,
                 "policy_safe": scene.policy_safe,
+                "stress_probe": scene.stress_probe.value if scene.stress_probe else None,
+                "min_file_mb": scene.min_file_mb,
             },
+
             "product_fidelity": {
                 "active": scene.has_product_lock,
                 "product_crop_reference": scene.product_crop or (scene.reference.filename if scene.reference else None),
@@ -241,6 +255,39 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "compliance_mode": "editorial_dignified_fine_art",
                 "fully_clothed": True,
                 "physics_preserved": True,
+            },
+            "pfep_diagnostic_probe": {
+                "active": scene.has_stress_probe,
+                "probe_id": scene.stress_probe.value if scene.stress_probe else None,
+                "probe_name": scene.stress_probe.name if scene.stress_probe else None,
+                "directive": scene.stress_probe.directive_text if scene.stress_probe else None,
+                "pass_gate_rule": "Identity == 2 AND total_score >= 12 across 8 evaluation axes",
+            },
+            "closed_loop_constraints": {
+                "active": scene.has_closed_loop_constraints,
+                "min_file_mb": scene.min_file_mb,
+                "output_resolution": resolution_str,
+                "physical_print_size": (
+                    f"{scene.print_spec.width_in}\" x {scene.print_spec.height_in}\" @ {scene.print_spec.ppi} PPI"
+                    if scene.print_spec and (scene.print_spec.width_in > 0 or scene.print_spec.height_in > 0)
+                    else None
+                ),
+                "hash_algorithm": "SHA-256",
+            },
+            "exhibition_lighting_environment": {
+                "active": scene.has_lighting_environment,
+                "cct_kelvin": scene.lighting_environment.cct_kelvin if scene.lighting_environment else 5000,
+                "illuminance_lux": scene.lighting_environment.illuminance_lux if scene.lighting_environment else 500,
+                "spectral_cri": scene.lighting_environment.spectral_cri if scene.lighting_environment else 98.0,
+                "wall_surround": scene.lighting_environment.wall_surround if scene.lighting_environment else "Neutral Gray 18%",
+            },
+            "series_visual_cohesion": {
+                "active": scene.has_series_cohesion,
+                "anchor_image_id": scene.series_cohesion.anchor_image_id if scene.series_cohesion else None,
+                "gallery_zone": scene.series_cohesion.gallery_zone if scene.series_cohesion else None,
+                "midtone_density": scene.series_cohesion.midtone_density if scene.series_cohesion else 1.0,
+                "shadow_depth": scene.series_cohesion.shadow_depth if scene.series_cohesion else 1.0,
+                "highlight_rolloff": scene.series_cohesion.highlight_rolloff if scene.series_cohesion else 1.0,
             },
             "content_classification": {
                 "type": scene.content_type.value if scene.content_type else "photograph",

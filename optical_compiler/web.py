@@ -1458,7 +1458,73 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </div>
       </div>
 
+      <!-- 10. PFEP v1.0 DIAGNOSTIC STRESS PROBES -->
+      <div class="panel-section">
+        <div class="section-header">
+          <div class="section-title">10. PFEP v1.0 Diagnostic Stress Probes</div>
+          <div class="section-meta" style="color: var(--accent-cyan);">Hard Identity Gate: 2/2</div>
+        </div>
+        <div style="margin-top: 0.5rem;">
+          <label class="field-label" for="probeSelect">Select Canonical Diagnostic Probe</label>
+          <select class="custom-select" id="probeSelect" onchange="debounceCompile()">
+            <option value="none" selected>None (Production Rig)</option>
+            <option value="master_portrait_lock">01: Master Portrait Lock (Baseline Anchor)</option>
+            <option value="outpaint_lens_honest">02: Lens-Honest Outpaint (FOV Lock, No Fisheye)</option>
+            <option value="stress_hard_key">03: Hard Key Stress (50-60° Key, Pores in Shadows)</option>
+            <option value="stress_cross_polarized">04: Cross-Polarized Skin (Zero Specular Glare, True Subsurface)</option>
+            <option value="stress_glasses_reflections">05: Glasses Reflections (Eyes Visible, Plausible Lens Flare)</option>
+            <option value="stress_seated_compression">06: Seated Compression (Optical Distance Locked to Standing)</option>
+            <option value="stress_standing_compression">07: Standing Compression (Zero Perspective Stretching)</option>
+            <option value="stress_background_scale">08: Background Scale Stress (Subject Scale Locked)</option>
+            <option value="stress_hair_specular">09: Hair Specular Dynamics (Anisotropic Sheen, No Helmet Gloss)</option>
+            <option value="stress_shadow_color">10: Shadow Color Integrity (Warm Melanin, Zero Synthetic Tint)</option>
+          </select>
+          <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 0.35rem; line-height: 1.4;">
+            8-Axis Scorecard: Identity (0-2), Geometry (0-2), Lighting (0-2), Skin (0-2), Hair (0-2), Optics (0-2), Acutance (0-2), Color (0-2). Pass Rule: Identity == 2 AND Total &ge; 12.
+          </div>
+        </div>
+      </div>
+
+      <!-- 11. EXHIBITION LIGHTING & CLOSED-LOOP OUTPUT CONSTRAINTS -->
+      <div class="panel-section">
+        <div class="section-header">
+          <div class="section-title">11. Exhibition Systems & Closed-Loop Output</div>
+          <div class="section-meta" style="color: var(--accent-amber);">500 Lux • TM-30 98 • SHA-256</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;">
+          <div>
+            <label class="field-label" for="minMbInput">Minimum File Size (MB)</label>
+            <input type="number" step="0.5" class="custom-input" id="minMbInput" placeholder="e.g. 35.0" oninput="debounceCompile()">
+          </div>
+          <div>
+            <label class="field-label" for="cctInput">Gallery CCT Kelvin</label>
+            <input type="number" class="custom-input" id="cctInput" placeholder="5000" oninput="debounceCompile()">
+          </div>
+          <div>
+            <label class="field-label" for="luxInput">Exhibition Lux</label>
+            <input type="number" class="custom-input" id="luxInput" placeholder="500" oninput="debounceCompile()">
+          </div>
+          <div>
+            <label class="field-label" for="criInput">TM-30 / CRI Fidelity</label>
+            <input type="number" step="0.5" class="custom-input" id="criInput" placeholder="98.0" oninput="debounceCompile()">
+          </div>
+          <div>
+            <label class="field-label" for="wallSurroundInput">Wall / Surround</label>
+            <input type="text" class="custom-input" id="wallSurroundInput" placeholder="Neutral Gray 18%" oninput="debounceCompile()">
+          </div>
+          <div>
+            <label class="field-label" for="galleryZoneInput">Gallery Zone</label>
+            <input type="text" class="custom-input" id="galleryZoneInput" placeholder="Zone A - North Wing" oninput="debounceCompile()">
+          </div>
+        </div>
+        <div style="margin-top: 0.5rem;">
+          <label class="field-label" for="anchorIdInput">Series Anchor Image ID</label>
+          <input type="text" class="custom-input" id="anchorIdInput" placeholder="anchor_portrait_001" oninput="debounceCompile()">
+        </div>
+      </div>
+
     </div>
+
 
     <!-- RIGHT PANEL: COMPILED TARGET ENGINE OUTPUT -->
     <div class="output-panel">
@@ -2765,6 +2831,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         remove_text: document.getElementById('chkRemoveText') ? document.getElementById('chkRemoveText').checked : false,
         paper: (document.getElementById('paperProfileSelect') && document.getElementById('paperProfileSelect').value !== 'none') ? document.getElementById('paperProfileSelect').value : null,
         policy_safe: document.getElementById('chkPolicySafe') ? document.getElementById('chkPolicySafe').checked : false,
+        probe: (document.getElementById('probeSelect') && document.getElementById('probeSelect').value !== 'none') ? document.getElementById('probeSelect').value : null,
+        min_mb: document.getElementById('minMbInput') ? (parseFloat(document.getElementById('minMbInput').value) || null) : null,
+        cct: document.getElementById('cctInput') ? (parseInt(document.getElementById('cctInput').value, 10) || null) : null,
+        lux: document.getElementById('luxInput') ? (parseInt(document.getElementById('luxInput').value, 10) || null) : null,
+        cri: document.getElementById('criInput') ? (parseFloat(document.getElementById('criInput').value) || null) : null,
+        wall_surround: document.getElementById('wallSurroundInput') ? document.getElementById('wallSurroundInput').value.trim() : null,
+        gallery_zone: document.getElementById('galleryZoneInput') ? document.getElementById('galleryZoneInput').value.trim() : null,
+        anchor_id: document.getElementById('anchorIdInput') ? document.getElementById('anchorIdInput').value.trim() : null,
       };
 
       try {
@@ -3268,7 +3342,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
         """Handle compilation requests via REST API."""
         parsed_path = self.path.split("?")[0]
 
-        if parsed_path not in ("/api/compile", "/api/upscale-102mp"):
+        if parsed_path not in ("/api/compile", "/api/upscale-102mp", "/api/export-closed-loop"):
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
             return
 
@@ -3278,6 +3352,42 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             body = json.loads(body_bytes.decode("utf-8"))
         except Exception as err:
             self._send_json({"error": f"Invalid JSON payload: {err}"}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/export-closed-loop":
+            input_path = body.get("input_path") or body.get("image_path")
+            if not input_path:
+                self._send_json({"error": "Missing required field 'input_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+
+            try:
+                from .restoration import PILLOW_AVAILABLE, export_closed_loop
+            except ImportError:
+                self._send_json({"error": "Restoration module could not be imported."}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+                return
+
+            if not PILLOW_AVAILABLE:
+                self._send_json({"error": "Pillow is not installed."}, status=HTTPStatus.BAD_REQUEST)
+                return
+
+            try:
+                output_path = body.get("output_path") or "export_output.png"
+                run_rep, rep_dict = export_closed_loop(
+                    input_path=input_path,
+                    output_path=output_path,
+                    target_width=body.get("target_width"),
+                    target_height=body.get("target_height"),
+                    width_in=body.get("width_in"),
+                    height_in=body.get("height_in"),
+                    ppi=int(body.get("ppi", 300)),
+                    min_mb=float(body.get("min_mb")) if body.get("min_mb") is not None else None,
+                    output_format=body.get("output_format"),
+                    add_noise=bool(body.get("add_noise", False)),
+                    generate_report=True,
+                )
+                self._send_json(rep_dict)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
             return
 
         if parsed_path == "/api/upscale-102mp":
@@ -3380,6 +3490,14 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 remove_text_when_present=bool(body.get("remove_text_when_present") or body.get("remove_text", False)),
                 paper_profile=body.get("paper_profile") or body.get("paper"),
                 policy_safe=bool(body.get("policy_safe", False)),
+                stress_probe=body.get("stress_probe") or body.get("probe"),
+                min_mb=body.get("min_mb"),
+                cct_kelvin=body.get("cct_kelvin") or body.get("cct"),
+                illuminance_lux=body.get("illuminance_lux") or body.get("lux"),
+                spectral_cri=body.get("spectral_cri") or body.get("cri"),
+                wall_surround=body.get("wall_surround"),
+                gallery_zone=body.get("gallery_zone"),
+                anchor_image_id=body.get("anchor_image_id") or body.get("anchor_id"),
             )
             self._send_json(payload.to_dict())
         except Exception as err:

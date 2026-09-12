@@ -2,8 +2,9 @@
 
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Version: 3.5.0](https://img.shields.io/badge/version-3.5.0-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 128 Passing](https://img.shields.io/badge/tests-128%20passing-brightgreen.svg)](tests/)
+[![Tests: 147 Passing](https://img.shields.io/badge/tests-147%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -193,6 +194,47 @@ Prepares generated imagery for fine-art exhibition, gallery prints, and high-Dma
   * **`9:12` (Vertical 44.2MP 8K-Class Exhibition Master)**: Renders at $5760 \times 7680\text{ px}$ uncompressed.
 * **JSON Prompt Schema 3.4 Upgrade**: Automatically emits `schema_version: "3.4"` with dedicated structured blocks: `body_morphology_volume_engine`, `volumetric_material_engine`, `prepress_matrix`, and `policy_compliance_layer`.
 * **Two-Stage Quality Inspection**: Standardized checklist for 100% and 200% zoom validation of iris detail, fingernail lunula, textile weave, and text sharpness.
+
+### 6. 🔒 Closed-Loop Resolution Engine & Provenance Lab (v3.5)
+* **Non-Negotiable File Size Enforcement (`--min-mb [MB]`)**:
+  Enforces hard raster payload constraints (e.g. `--min-mb 8.0`) so that AI upscalers and export engines cannot silently deliver undersized outputs.
+* **Iterative Square-Root Sizing Heuristic**:
+  $$\text{linear multiplier} \approx \sqrt{\frac{\text{target MB}}{\text{current MB}}}$$
+  Automatically re-samples raster dimensions across iterative passes until the exact byte threshold is satisfied.
+* **Practical Export Profiles (`--export-profile` / `-ep`)**:
+  * **Profile A**: $4000 \times 6000\text{ px}$ ($24\text{ MP}$), mobile-manageable high-resolution output.
+  * **Profile B**: $5000 \times 7500\text{ px}$ ($37.5\text{ MP}$), large print & desktop output.
+  * **Profile C**: $6000 \times 9000\text{ px}$ ($54\text{ MP}$), archival museum-grade master.
+* **Cryptographic SHA-256 Provenance & Audit Reports**:
+  Every closed-loop export generates an `EXPORT_REPORT.md` and `PROVENANCE.json` containing:
+  * Exact source & output pixel dimensions and target PPI
+  * Encoded byte counts & file size in MB
+  * Cryptographic SHA-256 digest (`sha256_file`)
+  * Programmatic assertion status and execution runtime
+* **Controlled Micro-Noise Entropy Experiment (`add_micro_noise` / `--add-micro-noise`)**:
+  Injects subtle single-channel high-frequency entropy explicitly treated and documented as an entropy experiment for lossless PNG compression benchmarking (not artificial optical detail).
+* **Automated CI Workflow**: `.github/workflows/export.yml` provides GitHub Actions pipeline with `workflow_dispatch` for automated validation and artifact publishing.
+
+### 7. 🎯 Portrait Fidelity Engineering Protocol (PFEP v1.0) & 10 Stress Probes
+* **10 Canonical Diagnostic Probes (`--probe` / `-k`)**:
+  1. `master_portrait_lock`: Baseline reference anchor for identity, optics, and lighting.
+  2. `outpaint_lens_honest`: Full-body outpaint under locked camera height, distance, and 85mm compression.
+  3. `stress_hard_key`: Harsh 50–60° key light with near-zero fill and deep negative fill to test pore retention in shadows.
+  4. `stress_cross_polarized`: Cross-polarized studio lighting emulation; suppresses specular glare to test subsurface melanin and blood micro-chroma.
+  5. `stress_glasses_reflections`: Multi-element lens reflection realism; eyes and pupils visible through spectacles without opaque white rectangles.
+  6. `stress_seated_compression`: Seated posture compression lock; tests for improper camera height shifts or perspective stretching.
+  7. `stress_standing_compression`: Standing upright compression lock; enforces identical spatial compression to seated variant.
+  8. `stress_background_scale`: Background scale invariance under locked optics; prevents FOV widening or background shrinkage.
+  9. `stress_hair_specular`: 55–65° directional rim/key lighting; tests anisotropic specular response across individual hair fibers (no helmet hair).
+  10. `stress_shadow_color`: Shadow-side skin color accuracy; tests for organic warm undertones and eliminates synthetic gray/cyan contamination.
+* **8-Axis Renderer Scorecard (`RendererScorecard`) with Identity Hard Gate**:
+  * Evaluates: Identity, Focus, Skin Texture, Lighting Honesty, Glasses, Hair, Geometry, Background Scale (0–2 per axis, max 16).
+  * **Hard Gating Rule**: Identity MUST be 2 (`identity == 2`) and total score $\ge 12$ to pass. Identity drift is non-recoverable.
+* **Automated Project Scaffolding (`--init-pfep [DIR]`)**:
+  Generates complete PFEP directory structure: `00_inputs/`, `01_prompts/` (with all 10 compact prompt files), `02_runs/run_001/notes.md`, `03_selected/`, `04_converged/`, and `PFEP_README.md`.
+* **Gallery Exhibition Systems**:
+  * **Lighting Environment Compensation (`--cct`, `--lux`, `--cri`, `--wall-surround`)**: Simulates reflective gallery display conditions (Kelvin CCT, illuminance lux, TM-30/CRI, surround reflectance).
+  * **Series Cohesion Matrix (`--anchor-id`, `--gallery-zone`)**: Synchronizes midtone density, shadow depth, and highlight roll-off across multi-room gallery installations.
 
 ---
 

@@ -276,7 +276,25 @@ class ImagenAdapter(BaseAdapter):
         if scene.has_body_morphology:
             style_prose += " Eliminate balloon muscles, grotesque proportions, comic-book anatomy, and body distortion."
 
-        positive_prompt = f"{scene_core}{ref_prose} {optical_prose} {lighting_prose} {micro_prose} {style_prose}"
+        extra_directives = []
+        if scene.has_stress_probe and scene.stress_probe:
+            extra_directives.append(scene.stress_probe.directive_text)
+        if scene.has_lighting_environment and scene.lighting_environment:
+            le = scene.lighting_environment
+            extra_directives.append(
+                f"Exhibition lighting calibrated for gallery display at {le.illuminance_lux} lux, {le.cct_kelvin}K CCT, CRI {le.spectral_cri} against {le.wall_surround} surround."
+            )
+        if scene.has_series_cohesion and scene.series_cohesion:
+            sc = scene.series_cohesion
+            extra_directives.append(
+                f"Series visual cohesion anchored to {sc.anchor_image_id or 'master'} in {sc.gallery_zone or 'gallery zone'} with midtone density {sc.midtone_density} and shadow depth {sc.shadow_depth}."
+            )
+        if scene.min_file_mb:
+            extra_directives.append(f"Minimum uncompressed output target: {scene.min_file_mb:.1f} MB.")
+
+        extra_prose = (" " + " ".join(extra_directives)) if extra_directives else ""
+        positive_prompt = f"{scene_core}{ref_prose} {optical_prose} {lighting_prose} {micro_prose} {style_prose}{extra_prose}"
+
 
         # Negative prompt payload
         include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock)

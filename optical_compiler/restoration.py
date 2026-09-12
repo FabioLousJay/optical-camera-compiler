@@ -17,9 +17,11 @@ Technical Implementation:
 from __future__ import annotations
 
 import gc
+import hashlib
 import json
 import math
 import os
+import time
 from dataclasses import asdict, dataclass, field
 from math import gcd
 from pathlib import Path
@@ -491,12 +493,54 @@ def restore_and_upscale_102mp(
     return report
 
 
-def inches_to_pixels(width_in: float, height_in: float, ppi: int = 300) -> tuple[int, int]:
-    """Convert physical print dimensions (inches) and target raster PPI to exact pixel dimensions.
+@dataclass(frozen=True)
+class PrintSpec:
+    """Print specification defining physical dimensions in inches and target raster PPI."""
 
+    width_in: float
+    height_in: float
+    ppi: int = 300
+
+
+def inches_to_pixels(
+    width_in_or_spec: Union[float, PrintSpec],
+    height_in: Optional[float] = None,
+    ppi: int = 300,
+) -> tuple[int, int]:
+    """Convert physical print dimensions and PPI to exact pixel dimensions.
+
+    Accepts either (width_in, height_in, ppi) or a PrintSpec object.
     Formula: pixels = print inches * PPI
     """
-    return int(round(width_in * ppi)), int(round(height_in * ppi))
+    if isinstance(width_in_or_spec, PrintSpec):
+        return int(round(width_in_or_spec.width_in * width_in_or_spec.ppi)), int(
+            round(width_in_or_spec.height_in * width_in_or_spec.ppi)
+        )
+    if height_in is None:
+        raise ValueError("height_in must be provided when width_in is a float")
+    return int(round(width_in_or_spec * ppi)), int(round(height_in * ppi))
+
+
+EXPORT_PROFILES: dict[str, dict[str, Any]] = {
+    "A": {
+        "name": "Profile A",
+        "dimensions": (4000, 6000),
+        "megapixels": 24.0,
+        "description": "Mobile-manageable high-resolution output",
+    },
+    "B": {
+        "name": "Profile B",
+        "dimensions": (5000, 7500),
+        "megapixels": 37.5,
+        "description": "Larger print/desktop output",
+    },
+    "C": {
+        "name": "Profile C",
+        "dimensions": (6000, 9000),
+        "megapixels": 54.0,
+        "description": "Very large archival/desktop output",
+    },
+}
 
 
 STANDARD_PRINT_SIZES: dict[str, dict[str, Any]] = {
@@ -571,3 +615,312 @@ PAPER_CHARACTERISTICS: dict[str, dict[str, Any]] = {
         "recommended_sharpening": "Substantial edge reinforcement to overcome tactile fabric grain",
     },
 }
+
+
+def scale_multiplier_for_size(target_mb: float, current_mb: float) -> float:
+    """Calculate the linear dimension scale multiplier to reach a target file size.
+
+    Sizing Heuristic:
+        Since uncompressed / deflate pixel payload area scales quadratically with linear
+        dimensions, the linear scale multiplier is approximately:
+            multiplier = sqrt(target_mb / current_mb)
+
+    Args:
+        target_mb: Desired target file size in megabytes (MB).
+        current_mb: Current file size in megabytes (MB).
+
+    Returns:
+        Float multiplier rounded to 4 decimal places (minimum 1.0).
+    """
+    if current_mb <= 0 or target_mb <= 0 or target_mb <= current_mb:
+        return 1.0
+    return round(math.sqrt(target_mb / current_mb), 4)
+
+
+def viewing_distance_inches(width_in: float, height_in: float, multiplier: float = 1.5) -> float:
+    """Calculate recommended gallery exhibition viewing distance in inches.
+
+    Formula:
+        diagonal = sqrt(width_in^2 + height_in^2)
+        viewing_distance = diagonal * multiplier (typically 1.5x)
+
+    Args:
+        width_in: Print physical width in inches.
+        height_in: Print physical height in inches.
+        multiplier: Distance multiplier relative to image diagonal (default 1.5x).
+
+    Returns:
+        Viewing distance in inches rounded to 2 decimal places.
+    """
+    if width_in <= 0 or height_in <= 0:
+        return 0.0
+    diagonal = math.sqrt(width_in**2 + height_in**2)
+    return round(diagonal * multiplier, 2)
+
+
+def add_micro_noise(img: Any, strength: int = 1) -> Any:
+    """Inject subtle pseudo-random high-frequency micro-noise into image data.
+
+    NOTE ON INTENT & METHODOLOGY:
+    This operation is strictly an entropy experiment designed to test lossless
+    deflate/LZW compressibility and gradient quantization dithering under
+    rigorous export benchmarking. It does NOT invent or recover genuine optical
+    detail or high-frequency sensor capture information.
+
+    Args:
+        img: A PIL Image instance.
+        strength: Integer strength factor (default: 1, range: 1..5).
+
+    Returns:
+        A PIL Image with subtle high-frequency entropy injected.
+    """
+    if not PILLOW_AVAILABLE:
+        return img
+    w, h = img.size
+    mode = img.mode
+    # Generate random single-channel byte entropy
+    num_bytes = w * h
+    noise_bytes = os.urandom(num_bytes)
+    noise_img = Image.frombytes("L", (w, h), noise_bytes)
+    if mode in ("RGB", "RGBA"):
+        noise_conv = noise_img.convert(mode)
+    else:
+        noise_conv = noise_img
+
+    alpha = min(0.05, max(0.001, 0.004 * strength))
+    return Image.blend(img, noise_conv, alpha=alpha)
+
+
+def sha256_file(path: Union[str, Path]) -> str:
+    """Compute cryptographic SHA-256 hex digest of a file in 64KB blocks."""
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"File not found for hashing: {p}")
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        while chunk := f.read(65536):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+@dataclass
+class RunReport:
+    """Execution report and cryptographic provenance record for closed-loop exports."""
+
+    input_path: str
+    output_path: str
+    source_dimensions: tuple[int, int]
+    output_dimensions: tuple[int, int]
+    target_ppi: int
+    file_size_bytes: int
+    file_size_mb: float
+    min_mb: Optional[float] = None
+    output_format: str = "PNG"
+    sha256: str = ""
+    execution_seconds: float = 0.0
+    passed_constraints: bool = True
+    failure_reasons: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert report to dictionary."""
+        return asdict(self)
+
+    def to_markdown(self) -> str:
+        """Render report as GitHub-flavored Markdown."""
+        status_badge = "**PASSED**" if self.passed_constraints else "**FAILED**"
+        w, h = self.output_dimensions
+        src_w, src_h = self.source_dimensions
+        width_in = round(w / self.target_ppi, 2) if self.target_ppi > 0 else 0.0
+        height_in = round(h / self.target_ppi, 2) if self.target_ppi > 0 else 0.0
+        view_dist = viewing_distance_inches(width_in, height_in, 1.5) if width_in > 0 else 0.0
+        min_mb_str = f"{self.min_mb:.2f} MB" if self.min_mb is not None else "None (Unconstrained)"
+
+        failure_section = ""
+        if self.failure_reasons:
+            failures_list = "\n".join(f"- {r}" for r in self.failure_reasons)
+            failure_section = f"\n### Constraint Failures\n{failures_list}\n"
+
+        return f"""# Closed-Loop Export & Provenance Report
+
+- **Status**: {status_badge}
+- **Execution Time**: {self.execution_seconds:.3f}s
+- **Output File**: `{Path(self.output_path).name}`
+- **SHA-256 Digest**: `{self.sha256}`
+
+## Specifications & Output Metrics
+| Parameter | Value |
+| :--- | :--- |
+| Source Dimensions | {src_w} x {src_h} px |
+| Output Dimensions | {w} x {h} px |
+| Raster Target PPI | {self.target_ppi} PPI |
+| Physical Print Size | {width_in:.2f}" x {height_in:.2f}" |
+| Viewing Distance (1.5x Diagonal) | {view_dist:.1f}" |
+| File Size | {self.file_size_mb:.2f} MB ({self.file_size_bytes:,} bytes) |
+| Min MB Threshold | {min_mb_str} |
+| Format | {self.output_format} |
+| Micro-Noise Entropy Exp | {self.metadata.get('micro_noise_applied', False)} |
+{failure_section}
+## Machine-Verifiable Cryptographic Provenance
+- **Algorithm**: SHA-256
+- **Digest**: `{self.sha256}`
+- **Verification Command**: `shasum -a 256 {Path(self.output_path).name}`
+"""
+
+
+def export_closed_loop(
+    input_path: Union[str, Path],
+    output_path: Union[str, Path],
+    target_width: Optional[int] = None,
+    target_height: Optional[int] = None,
+    width_in: Optional[float] = None,
+    height_in: Optional[float] = None,
+    ppi: int = 300,
+    min_mb: Optional[float] = None,
+    output_format: Optional[str] = None,
+    profile: Optional[str] = None,
+    add_noise: bool = False,
+    noise_strength: int = 1,
+    generate_report: bool = True,
+) -> tuple[RunReport, dict[str, Any]]:
+    """Execute closed-loop super-resolution export with machine-verifiable constraints.
+
+    Workflow:
+        1. Resolve dimensions via profile ('A', 'B', 'C'), print size (width_in/height_in * ppi),
+           or explicit pixel dimensions.
+        2. Perform high-acutance Lanczos resampling.
+        3. Optionally inject controlled micro-noise entropy for lossless compression benchmarking.
+        4. Save with target DPI and evaluate resultant file size.
+        5. If min_mb is specified and file size is below threshold, calculate square-root
+           dimension multiplier heuristic and iteratively rescale until constraint is satisfied.
+        6. Compute cryptographic SHA-256 provenance hash.
+        7. Generate EXPORT_REPORT.md and PROVENANCE.json.
+        8. Assert constraints programmatically and return execution report.
+    """
+    if not PILLOW_AVAILABLE:
+        raise RuntimeError("Pillow is required for export_closed_loop.")
+
+    start_time = time.time()
+    in_p = Path(input_path)
+    if not in_p.exists():
+        raise FileNotFoundError(f"Input file not found: {in_p}")
+
+    out_p = Path(output_path)
+    out_p.parent.mkdir(parents=True, exist_ok=True)
+
+    with Image.open(in_p) as img:
+        src_w, src_h = img.size
+        curr_img = img.copy()
+
+    # Determine initial target dimensions
+    if profile and profile.upper() in EXPORT_PROFILES:
+        tw, th = EXPORT_PROFILES[profile.upper()]["dimensions"]
+    elif width_in and height_in:
+        tw, th = inches_to_pixels(width_in, height_in, ppi)
+    elif target_width and target_height:
+        tw, th = target_width, target_height
+    elif target_width:
+        tw = target_width
+        th = max(1, int(round(tw * (src_h / src_w))))
+    elif target_height:
+        th = target_height
+        tw = max(1, int(round(th * (src_w / src_h))))
+    else:
+        tw, th = src_w, src_h
+
+    # Determine format
+    if output_format:
+        fmt = output_format.strip().upper()
+    else:
+        ext = out_p.suffix.lower()
+        if ext in (".tif", ".tiff"):
+            fmt = "TIFF"
+        elif ext in (".jpg", ".jpeg"):
+            fmt = "JPEG"
+        else:
+            fmt = "PNG"
+
+    def _save_to_disk(im: Any, target_p: Path, target_fmt: str) -> None:
+        if target_fmt == "PNG":
+            im.save(target_p, format="PNG", dpi=(ppi, ppi), compress_level=6)
+        elif target_fmt in ("TIFF", "TIF"):
+            im.save(target_p, format="TIFF", dpi=(ppi, ppi))
+        elif target_fmt in ("JPEG", "JPG"):
+            save_im = im.convert("RGB") if im.mode in ("RGBA", "P") else im
+            save_im.save(target_p, format="JPEG", quality=96, dpi=(ppi, ppi))
+        else:
+            im.save(target_p, format=target_fmt, dpi=(ppi, ppi))
+
+    # Initial resize
+    if curr_img.size != (tw, th):
+        curr_img = curr_img.resize((tw, th), Image.Resampling.LANCZOS)
+
+    if add_noise:
+        curr_img = add_micro_noise(curr_img, strength=noise_strength)
+
+    _save_to_disk(curr_img, out_p, fmt)
+    current_bytes = out_p.stat().st_size
+    current_mb = current_bytes / 1_000_000.0
+
+    # Iterative sizing heuristic closed loop (up to 5 iterations)
+    iteration = 0
+    max_iterations = 5
+    while min_mb is not None and current_mb < min_mb and iteration < max_iterations:
+        iteration += 1
+        multiplier = max(1.08, scale_multiplier_for_size(min_mb, current_mb))
+        new_tw = max(1, int(round(tw * multiplier)))
+        new_th = max(1, int(round(th * multiplier)))
+        with Image.open(in_p) as src_im:
+            curr_img = src_im.resize((new_tw, new_th), Image.Resampling.LANCZOS)
+        if add_noise:
+            curr_img = add_micro_noise(curr_img, strength=noise_strength)
+        _save_to_disk(curr_img, out_p, fmt)
+        tw, th = new_tw, new_th
+        current_bytes = out_p.stat().st_size
+        current_mb = current_bytes / 1_000_000.0
+
+    execution_time = round(time.time() - start_time, 4)
+    sha_hash = sha256_file(out_p)
+
+    # Verification assertions
+    failure_reasons = []
+    if min_mb is not None and current_mb < min_mb:
+        failure_reasons.append(
+            f"File size {current_mb:.2f} MB is below required minimum of {min_mb:.2f} MB after {iteration} scaling iterations."
+        )
+
+    passed_constraints = len(failure_reasons) == 0
+
+    run_report = RunReport(
+        input_path=str(in_p),
+        output_path=str(out_p),
+        source_dimensions=(src_w, src_h),
+        output_dimensions=(tw, th),
+        target_ppi=ppi,
+        file_size_bytes=current_bytes,
+        file_size_mb=round(current_mb, 2),
+        min_mb=min_mb,
+        output_format=fmt,
+        sha256=sha_hash,
+        execution_seconds=execution_time,
+        passed_constraints=passed_constraints,
+        failure_reasons=failure_reasons,
+        metadata={
+            "micro_noise_applied": add_noise,
+            "noise_strength": noise_strength,
+            "profile": profile,
+            "closed_loop_iterations": iteration,
+        },
+    )
+
+    report_dict = run_report.to_dict()
+
+    if generate_report:
+        report_md_path = out_p.parent / "EXPORT_REPORT.md"
+        report_md_path.write_text(run_report.to_markdown(), encoding="utf-8")
+
+        prov_json_path = out_p.parent / "PROVENANCE.json"
+        prov_json_path.write_text(json.dumps(report_dict, indent=2), encoding="utf-8")
+
+    return run_report, report_dict
+

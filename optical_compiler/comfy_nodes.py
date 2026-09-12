@@ -15,13 +15,16 @@ from .models import (
     GripModifier,
     GripType,
     IrisBladeCount,
+    LightingEnvironmentSpec,
     LightingRatio,
     MaterialStyle,
     PaperProfile,
     ReferenceImageInput,
     ReferenceMode,
     SceneInput,
+    SeriesCohesionSpec,
     StreakFlare,
+    StressProbe,
 )
 
 RIG_NAMES = [
@@ -233,6 +236,27 @@ class OpticalCameraCompilerNode:
                 "remove_text": (["disabled", "enabled"], {"default": "disabled"}),
                 "paper_profile": (["none", "matte_cotton", "luster", "glossy", "baryta", "canvas"], {"default": "none"}),
                 "policy_safe": (["disabled", "enabled"], {"default": "disabled"}),
+                "stress_probe": (
+                    [
+                        "none",
+                        "master_portrait_lock",
+                        "outpaint_lens_honest",
+                        "stress_hard_key",
+                        "stress_cross_polarized",
+                        "stress_glasses_reflections",
+                        "stress_seated_compression",
+                        "stress_standing_compression",
+                        "stress_background_scale",
+                        "stress_hair_specular",
+                        "stress_shadow_color",
+                    ],
+                    {"default": "none"},
+                ),
+                "min_mb": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1000.0}),
+                "cct_kelvin": ("INT", {"default": 0, "min": 0, "max": 20000}),
+                "illuminance_lux": ("INT", {"default": 0, "min": 0, "max": 10000}),
+                "gallery_zone": ("STRING", {"default": ""}),
+                "anchor_image_id": ("STRING", {"default": ""}),
             },
         }
 
@@ -286,6 +310,12 @@ class OpticalCameraCompilerNode:
         remove_text: str = "disabled",
         paper_profile: str = "none",
         policy_safe: str = "disabled",
+        stress_probe: str = "none",
+        min_mb: float = 0.0,
+        cct_kelvin: int = 0,
+        illuminance_lux: int = 0,
+        gallery_zone: str = "",
+        anchor_image_id: str = "",
     ) -> tuple[str, str, str]:
         profile_id = RIG_NAME_TO_ID.get(camera_rig, "auto")
 
@@ -367,6 +397,23 @@ class OpticalCameraCompilerNode:
         cs_val = CopySpace.from_string(copy_space) if copy_space != "none" else None
         asz_val = AdSafeZone.from_string(ad_safe_zone) if ad_safe_zone != "none" else None
 
+        probe_enum = StressProbe.from_str(stress_probe) if stress_probe != "none" else StressProbe.NONE
+        min_mb_val = float(min_mb) if min_mb > 0 else None
+
+        le_spec = None
+        if cct_kelvin > 0 or illuminance_lux > 0:
+            le_spec = LightingEnvironmentSpec(
+                cct_kelvin=cct_kelvin if cct_kelvin > 0 else 5000,
+                illuminance_lux=illuminance_lux if illuminance_lux > 0 else 500,
+            )
+
+        sc_spec = None
+        if gallery_zone.strip() or anchor_image_id.strip():
+            sc_spec = SeriesCohesionSpec(
+                anchor_image_id=anchor_image_id.strip() if anchor_image_id.strip() else None,
+                gallery_zone=gallery_zone.strip() if gallery_zone.strip() else None,
+            )
+
         scene = SceneInput(
             subject=subject.strip(),
             environment=environment.strip() if environment.strip() else None,
@@ -405,6 +452,10 @@ class OpticalCameraCompilerNode:
             remove_text_when_present=(remove_text == "enabled"),
             paper_profile=PaperProfile.from_str(paper_profile) if paper_profile != "none" else None,
             policy_safe=(policy_safe == "enabled"),
+            stress_probe=probe_enum,
+            min_file_mb=min_mb_val,
+            lighting_environment=le_spec,
+            series_cohesion=sc_spec,
         )
 
         result = compile_scene(
@@ -479,12 +530,89 @@ class OpticalConservative102MPUpscalerNode:
         )
 
 
+class OpticalClosedLoopExporterNode:
+    """ComfyUI node executing Closed-Loop Resolution Engine with SHA-256 cryptographic provenance."""
+
+    @classmethod
+    def INPUT_TYPES(cls) -> dict[str, Any]:
+        return {
+            "required": {
+                "image_path": ("STRING", {"default": ""}),
+            },
+            "optional": {
+                "output_path": ("STRING", {"default": ""}),
+                "target_width": ("INT", {"default": 0, "min": 0, "max": 20000}),
+                "target_height": ("INT", {"default": 0, "min": 0, "max": 20000}),
+                "width_in": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 200.0}),
+                "height_in": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 200.0}),
+                "ppi": ("INT", {"default": 300, "min": 72, "max": 1200}),
+                "min_mb": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 500.0}),
+                "output_format": (["PNG", "TIFF", "JPEG"], {"default": "PNG"}),
+                "add_micro_noise": (["disabled", "enabled"], {"default": "disabled"}),
+                "generate_report": (["enabled", "disabled"], {"default": "enabled"}),
+            },
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "FLOAT", "BOOLEAN")
+    RETURN_NAMES = ("output_path", "sha256", "report_markdown", "file_mb", "passed_constraints")
+    FUNCTION = "export_image"
+    CATEGORY = "image/export"
+
+    def export_image(
+        self,
+        image_path: str,
+        output_path: str = "",
+        target_width: int = 0,
+        target_height: int = 0,
+        width_in: float = 0.0,
+        height_in: float = 0.0,
+        ppi: int = 300,
+        min_mb: float = 0.0,
+        output_format: str = "PNG",
+        add_micro_noise: str = "disabled",
+        generate_report: str = "enabled",
+    ) -> tuple[str, str, str, float, bool]:
+        from .restoration import export_closed_loop
+
+        in_p = image_path.strip()
+        out_p = output_path.strip() if output_path.strip() else f"exports/export_{Path(in_p).stem}.{output_format.lower()}"
+        tw = target_width if target_width > 0 else None
+        th = target_height if target_height > 0 else None
+        win = width_in if width_in > 0 else None
+        hin = height_in if height_in > 0 else None
+        min_mb_val = min_mb if min_mb > 0 else None
+
+        run_report, _ = export_closed_loop(
+            input_path=in_p,
+            output_path=out_p,
+            target_width=tw,
+            target_height=th,
+            width_in=win,
+            height_in=hin,
+            ppi=ppi,
+            min_mb=min_mb_val,
+            output_format=output_format,
+            add_noise=(add_micro_noise == "enabled"),
+            generate_report=(generate_report == "enabled"),
+        )
+
+        return (
+            run_report.output_path,
+            run_report.sha256,
+            run_report.to_markdown(),
+            run_report.file_size_mb,
+            run_report.passed_constraints,
+        )
+
+
 NODE_CLASS_MAPPINGS = {
     "OpticalCameraCompiler": OpticalCameraCompilerNode,
     "OpticalConservative102MPUpscaler": OpticalConservative102MPUpscalerNode,
+    "OpticalClosedLoopExporter": OpticalClosedLoopExporterNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "OpticalCameraCompiler": "📷 Optical Camera Compiler",
     "OpticalConservative102MPUpscaler": "🔬 PIL Conservative 102MP Upscaler Lock",
+    "OpticalClosedLoopExporter": "🔒 Closed-Loop Resolution Engine & Provenance",
 }
