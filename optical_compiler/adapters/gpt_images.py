@@ -42,6 +42,18 @@ class GPTImagesAdapter(BaseAdapter):
                 "Full body head-to-toe visible including shoes."
             )
             sections.append(base_instr)
+        elif ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
+            base_instr = (
+                "Base instruction (Universal De-Pixelate + Upscale Restoration v3.1 – GFX100RF Signature Lock): "
+                "Use the attached image as the mandatory single source of truth. Restore and upscale the attached image "
+                "by removing pixelation, blockiness, compression damage, aliasing, mosquito noise, and low-resolution softness "
+                "while strictly preserving the source image's true identity, composition, proportions, colors, materials, "
+                "lighting logic, text content, and scene integrity. The final output must read as a high-resolution "
+                "Fujifilm GFX100RF capture of the same scene, not a reimagined, rewritten, beautified, stylized, or regenerated version. "
+                "Do not add, remove, beautify, stylize, paraphrase, rewrite, redesign, or reinterpret any element. "
+                f"Subject: {scene.subject}."
+            )
+            sections.append(base_instr)
         elif ref_mode == ReferenceMode.RESTORE_UPSCALE:
             base_instr = (
                 f"Base instruction: Using the provided image as the base. "
@@ -71,7 +83,40 @@ class GPTImagesAdapter(BaseAdapter):
                 base_instr += f" Framing: {scene.framing}."
             sections.append(base_instr)
 
-        # 2. Focus discipline & Surface rendering
+        # 2. Human skin realism override protocol
+        if scene.human_skin_realism or ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
+            skin_override_block = (
+                "Human skin realism override protocol: For any visible human skin, human skin realism overrides "
+                "micro-detail recovery, perceived resolution, sharpening, and texture reconstruction. "
+                "Skin must remain softer than eyes, hair, clothing, jewelry, teeth, text, hard edges, and architecture. "
+                "Skin must never become the sharpest texture in the image. Remove AI-generated swirls, decorative micro-patterns, "
+                "engraved texture, embossed texture, pore stamping, worm-like texture, lace-like texture, metallic texture, and synthetic skin grain. "
+                "Preserve natural uneven skin texture, age-appropriate wrinkles, folds, pores, freckles, moles, age spots, beard texture, stubble, "
+                "under-eye texture, neck texture, and hand texture where visible. Do not invent pores or wrinkles unsupported by the source. "
+                "Skin tonal transitions must remain smooth and photographic, never carved, crunchy, metallic, or HDR-like."
+            )
+            sections.append(skin_override_block)
+
+        # 3. Content type reproduction directive
+        if scene.content_type and scene.content_type.is_flat_reproduction:
+            repro_block = (
+                f"Content type reproduction directive ({scene.content_type.value}): "
+                "Render as flat reproduction capture. Suppress optical depth-of-field falloff, suppress vignetting, "
+                "and suppress film grain texture inappropriate for copy-stand or reproduction context."
+            )
+            sections.append(repro_block)
+
+        # 4. Text and structured graphics preservation protocol
+        if scene.text_preservation or ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
+            text_block = (
+                "Text and structured content preservation: All visible text must be preserved exactly as in the source image. "
+                "Do not paraphrase, rewrite, correct grammar, fix punctuation, or reinterpret text. "
+                "Maintain original line breaks, font style, stroke weight, alignment, hierarchy, and placement. "
+                "Preserve all arrows, connectors, boxes, icons, and diagram relationships exactly."
+            )
+            sections.append(text_block)
+
+        # 5. Focus discipline & Surface rendering
         focus_block = (
             "Focus discipline: Focus locked on the near eye. Iris and eyelashes tack sharp. "
             "Absolute zero motion blur."
@@ -86,13 +131,18 @@ class GPTImagesAdapter(BaseAdapter):
         surface_directives = ". ".join(profile.micro_detail_and_physics.surface_rendering)
         surface_block = (
             "Surface rendering: Natural human skin with visible pores and micro texture. "
-            f"{surface_directives}. "
-            "Accurate dermal subsurface scattering without waxy specularities or artificial blur. "
-            "High micro-contrast. Crisp edges. No haze. No diffusion."
+            + (
+                "Human skin realism prioritized over artificial clarity. Natural organic skin softer than hard edges, eyes, hair, and textiles. "
+                if (scene.human_skin_realism and ref_mode == ReferenceMode.DEPIXELATE_GFX100RF)
+                else ""
+            )
+            + f"{surface_directives}. "
+            + "Accurate dermal subsurface scattering without waxy specularities or artificial blur. "
+            + "High micro-contrast on hair, fabric, eyes, and environment. Crisp edges. No haze. No diffusion."
         )
         sections.append(surface_block)
 
-        # 3. Lighting Geometry & Light Transport
+        # 6. Lighting Geometry & Light Transport
         lighting_block = (
             f"Lighting geometry: {scene.lighting or profile.lighting_and_exposure.primary_lighting}. "
             f"Directional key light positioned 35–45° off-axis, slightly above eye line for micro-contrast. "
@@ -102,19 +152,23 @@ class GPTImagesAdapter(BaseAdapter):
         )
         sections.append(lighting_block)
 
-        # 4. Camera Hardware & Lens Module
+        # 7. Camera Hardware & Lens Module
         cam = profile.sensor_and_optics
+        color_desc = f" Color science: {cam.dynamic_range}." if cam.dynamic_range else ""
         camera_block = (
             f"Camera hardware: Shot on {cam.camera_system}. "
             f"Lens: {cam.lens} set to {cam.aperture_sweet_spot}. "
             f"Sensor: {cam.sensor_dimensions}, {cam.sensor_type}. "
-            f"Exposure: {cam.shutter}, base {cam.iso_base}. "
+            f"Exposure: {cam.shutter}, base {cam.iso_base}.{color_desc} "
             f"Clean rectilinear projection with zero perspective distortion."
         )
         sections.append(camera_block)
 
-        # 5. Output Resolution Target & File Quality
-        res = scene.output_resolution or self._resolve_default_resolution(scene.aspect_ratio)
+        # 8. Output Resolution Target & File Quality
+        if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
+            res = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution, scaled to source aspect ratio)"
+        else:
+            res = scene.output_resolution or self._resolve_default_resolution(scene.aspect_ratio)
         res_block = (
             f"Output specification: {res}. "
             f"Uncompressed 16-bit raw tonal latitude, maximum acutance without JPEG compression artifacts, "
@@ -122,12 +176,13 @@ class GPTImagesAdapter(BaseAdapter):
         )
         sections.append(res_block)
 
-        # 6. Negative constraints embedded in natural language
+        # 9. Negative constraints embedded in natural language
         neg_tokens = profile.negative_embeddings.all_tokens(
             include_anti_drift=is_ref,
             include_branding=scene.suppress_text_branding,
             include_compression=True,
             include_outpaint=(ref_mode == ReferenceMode.OUTPAINT_FULL_BODY),
+            include_skin_realism=scene.human_skin_realism,
         )
         if scene.custom_negatives:
             neg_tokens.extend(scene.custom_negatives)

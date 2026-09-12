@@ -21,6 +21,7 @@ class ImagenAdapter(BaseAdapter):
         is_restore = ref and ref.mode == ReferenceMode.RESTORE_UPSCALE
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
+        is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
 
         # 1. Subject & Scene foundation
         scene_elements = []
@@ -31,6 +32,16 @@ class ImagenAdapter(BaseAdapter):
                 "Keep the same wardrobe, colors, fabric texture, and wrinkles. Maintain the same camera height and perspective. "
                 f"No wide-angle distortion. Full body head-to-toe visible including shoes. Depicting {scene.subject}"
             )
+        elif is_depixelate:
+            scene_elements.append(
+                "Universal De-Pixelate and Upscale Restoration of the attached reference image rendered with a fixed Fujifilm GFX100RF 102MP signature. "
+                "Eliminating pixelation, blockiness, compression damage, aliasing, mosquito noise, and low-resolution softness "
+                "while strictly preserving identity, composition, proportions, materials, lighting logic, and text content"
+            )
+            if scene.framing:
+                scene_elements.append(f"rendered as a {scene.framing} of {scene.subject}")
+            else:
+                scene_elements.append(f"focusing faithfully on {scene.subject}")
         elif is_restore:
             scene_elements.append(f"Master optical remaster and high-resolution restoration of the reference photograph")
             if scene.framing:
@@ -64,7 +75,15 @@ class ImagenAdapter(BaseAdapter):
 
         # Reference-specific anchor instructions
         ref_directives = []
-        if is_restore and ref:
+        if is_depixelate and ref:
+            ref_directives.append(
+                "Fixed Fujifilm GFX100RF 102MP restoration lock: Use attached image as single source of truth. "
+                "Human skin realism strictly overrides sharpness: skin remains naturally soft compared to eyes, hair, teeth, jewelry, and text. "
+                "Preserve all visible text exactly without paraphrasing."
+            )
+            if scene.content_type and scene.content_type.is_flat_reproduction:
+                ref_directives.append("Render as flat reproduction capture suppressing optical falloff, vignetting, and grain.")
+        elif is_restore and ref:
             ref_directives.append(
                 f"Strict optical preservation directive ({int(ref.fidelity_lock * 100)}% identity lock): "
                 f"Elevate image fidelity to true {optics.camera_system} resolution while maintaining exact "
@@ -98,7 +117,7 @@ class ImagenAdapter(BaseAdapter):
         micro_parts = [
             f"Detail fidelity: {micro.surface_rendering[0]}.",
             f"{micro.surface_rendering[1]}.",
-            f"{micro.depth_and_optics[0]}, with {micro.depth_and_optics[1].lower()}."
+            f"{micro.depth_and_optics[0]}.",
         ]
         if scene.sharpness_protocol:
             micro_parts.append(
@@ -106,8 +125,11 @@ class ImagenAdapter(BaseAdapter):
             )
         micro_prose = " ".join(micro_parts)
 
-        # 5. Natural anti-artifact directive & Quality scaling
-        res_text = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
+        # 5. Aesthetic directive and final output resolution
+        if is_depixelate:
+            res_text = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution)"
+        else:
+            res_text = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
         style_prose = (
             f"Aesthetic directive: {profile.execution_directive} "
             f"Output: {res_text}, uncompressed 16-bit raw capture, maximum acutance, zero chroma subsampling. "
@@ -116,18 +138,19 @@ class ImagenAdapter(BaseAdapter):
         )
         if scene.suppress_text_branding:
             style_prose += " Strictly eliminate all text, watermarks, logos, brand names, and typography."
-        if is_restore or is_transform or is_outpaint:
+        if is_restore or is_transform or is_outpaint or is_depixelate:
             style_prose += " Eliminate facial morphing, feature drift, identity loss, and warped geometry."
 
         positive_prompt = f"{scene_core}{ref_prose} {optical_prose} {lighting_prose} {micro_prose} {style_prose}"
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding,
             include_compression=True,
             include_outpaint=is_outpaint,
+            include_skin_realism=scene.human_skin_realism,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)

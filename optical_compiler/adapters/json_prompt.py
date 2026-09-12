@@ -52,19 +52,27 @@ class JSONAllInOneAdapter(BaseAdapter):
             include_branding=scene.suppress_text_branding,
             include_compression=True,
             include_outpaint=(ref_mode == ReferenceMode.OUTPAINT_FULL_BODY),
+            include_skin_realism=scene.human_skin_realism,
         )
         if scene.custom_negatives:
             all_neg_tokens.extend(scene.custom_negatives)
 
         # 3. Resolve resolution
-        resolution_str = scene.output_resolution or f"12MP PNG, {scene.aspect_ratio}"
+        if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
+            resolution_str = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution)"
+        else:
+            resolution_str = scene.output_resolution or f"12MP PNG, {scene.aspect_ratio}"
 
         # 4. Build master All-in-One JSON dictionary
         all_in_one_data: dict[str, Any] = {
             "$schema": "https://raw.githubusercontent.com/FabioLousJay/optical-camera-compiler/main/schemas/all_in_one_prompt.json",
             "generator": "Optical Camera Compiler",
-            "schema_version": "2.0",
-            "protocol": "Brutally Sharp Portrait Kit & All-in-One Prompt Engine",
+            "schema_version": "3.1",
+            "protocol": (
+                "Universal De-Pixelate + Upscale Restoration (GFX100RF 102MP + Skin Realism Override)"
+                if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF
+                else "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
+            ),
             "target_engine": "json",
             "scene": {
                 "subject": scene.subject,
@@ -76,6 +84,37 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "output_resolution": resolution_str,
                 "sharpness_protocol": scene.sharpness_protocol,
                 "suppress_text_branding": scene.suppress_text_branding,
+                "human_skin_realism": scene.human_skin_realism,
+                "content_type": scene.content_type.value if scene.content_type else None,
+                "text_preservation": scene.text_preservation,
+            },
+            "content_classification": {
+                "type": scene.content_type.value if scene.content_type else "photograph",
+                "is_flat_reproduction": bool(scene.content_type and scene.content_type.is_flat_reproduction),
+                "reproduction_directive": (
+                    "Render as flat reproduction capture. Suppress optical depth-of-field falloff, vignetting, and grain."
+                    if (scene.content_type and scene.content_type.is_flat_reproduction)
+                    else "Standard three-dimensional optical camera capture."
+                ),
+            },
+            "human_skin_realism_override_protocol": {
+                "active": scene.human_skin_realism,
+                "enforced": scene.human_skin_realism,
+                "priority": "absolute for any visible human skin; outranks all texture reconstruction, micro-detail recovery, and sharpness",
+                "core_rule": "Human skin realism is more important than maximum detail. Skin must remain softer than eyes, hair, clothing, jewelry, teeth, text, and hard edges.",
+                "rules": [
+                    "When realistic skin and maximum sharpness conflict, choose realistic skin.",
+                    "Remove AI-generated swirls, decorative micro-patterns, engraved texture, embossed texture, pore stamping, worm-like texture, and lace-like texture.",
+                    "Preserve natural uneven skin texture and age-appropriate wrinkles without inventing pores or wrinkles.",
+                    "Skin tonal transitions must remain smooth and photographic, never carved, crunchy, metallic, or HDR-like.",
+                ],
+            },
+            "hardware_rendering_target": {
+                "camera_system": optics.camera_system,
+                "lens": optics.lens,
+                "shutter": optics.shutter,
+                "sensor_dimensions": optics.sensor_dimensions,
+                "color_science": getattr(micro, "color_science", "Accurate 16-bit raw tonal latitude"),
             },
             "camera_hardware": {
                 "profile_id": profile.profile_id,

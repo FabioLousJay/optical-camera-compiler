@@ -8,6 +8,7 @@ from .adapters import get_adapter
 from .models import (
     CameraProfile,
     CompiledPayload,
+    ContentType,
     ReferenceImageInput,
     ReferenceMode,
     SceneInput,
@@ -60,6 +61,9 @@ class OpticalCompiler:
         suppress_text_branding: bool = True,
         lighting_preset: Optional[str] = None,
         capture_mode: Optional[str] = None,
+        human_skin_realism: bool = True,
+        content_type: Optional[Union[str, ContentType]] = None,
+        text_preservation: bool = True,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -84,6 +88,11 @@ class OpticalCompiler:
             sharpness_protocol: Enforce near-eye focus lock, iris sharpness, and stability cues.
             output_resolution: Exact uncompressed output target (e.g. '12MP PNG, vertical 9:11').
             suppress_text_branding: Actively eliminate text, brand names, logos, and watermarks.
+            lighting_preset: Master photographic lighting recipe.
+            capture_mode: Camera discipline and sensor stability mode.
+            human_skin_realism: Enforce human skin realism override protocol.
+            content_type: Classification of image content (photograph, portrait, document_scan, etc.).
+            text_preservation: Enforce exact OCR safety and text preservation rules.
 
         Returns:
             CompiledPayload with positive prompt, negative prompt, parameters, and metadata.
@@ -114,6 +123,13 @@ class OpticalCompiler:
                 ),
             )
 
+        # Parse content_type
+        c_type: Optional[ContentType] = None
+        if isinstance(content_type, ContentType):
+            c_type = content_type
+        elif isinstance(content_type, str):
+            c_type = ContentType.from_str(content_type)
+
         # 2. Build SceneInput
         if isinstance(scene, str):
             scene_input = SceneInput(
@@ -138,6 +154,9 @@ class OpticalCompiler:
                 sharpness_protocol=sharpness_protocol,
                 output_resolution=output_resolution,
                 suppress_text_branding=suppress_text_branding,
+                human_skin_realism=human_skin_realism,
+                content_type=c_type,
+                text_preservation=text_preservation,
             )
         else:
             scene_input = scene
@@ -180,6 +199,10 @@ class OpticalCompiler:
             if output_resolution:
                 scene_input.output_resolution = output_resolution
             scene_input.suppress_text_branding = suppress_text_branding
+            scene_input.human_skin_realism = human_skin_realism
+            if c_type:
+                scene_input.content_type = c_type
+            scene_input.text_preservation = text_preservation
 
         # 3. Parse target engine
         engine = (
@@ -188,8 +211,10 @@ class OpticalCompiler:
             else TargetEngine.from_str(target)
         )
 
-        # 4. Resolve base profile (dynamic auto router or fixed profile)
-        if self.is_auto:
+        # 4. Resolve base profile (dynamic auto router, fixed profile, or locked GFX100RF)
+        if scene_input.reference and scene_input.reference.mode == ReferenceMode.DEPIXELATE_GFX100RF:
+            base = load_profile("fujifilm_gfx100rf")
+        elif self.is_auto:
             target_profile_id = auto_select_profile(scene_input)
             base = load_profile(target_profile_id)
         else:
@@ -200,7 +225,9 @@ class OpticalCompiler:
 
         # 6. Compile via target adapter
         adapter = get_adapter(engine)
-        return adapter.compile(scene_input, active_profile)
+        payload = adapter.compile(scene_input, active_profile)
+        payload.metadata.setdefault("hardware_profile", active_profile.profile_id)
+        return payload
 
     def compile_all(
         self,

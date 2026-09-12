@@ -28,12 +28,17 @@ class MidjourneyAdapter(BaseAdapter):
         is_restore = ref and ref.mode == ReferenceMode.RESTORE_UPSCALE
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
+        is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
 
         # 1. Subject description
         core_elements = []
         if is_outpaint:
             core_elements.append(
                 "full body downward outpaint extension of reference photo head-to-toe with shoes, preserving facial identity and clothing"
+            )
+        elif is_depixelate:
+            core_elements.append(
+                "Universal De-Pixelate and 102MP upscale restoration of reference photo, Fujinon 35mm f/4 leaf shutter, Reala Ace color response"
             )
         elif is_restore:
             core_elements.append("optical remaster and high-resolution restoration of reference image")
@@ -74,7 +79,7 @@ class MidjourneyAdapter(BaseAdapter):
         lighting_tokens = [
             lighting.primary_lighting,
             "negative fill flags",
-            "resolved epidermal skin pores",
+            "organic human skin realism overriding artificial clarity",
             "fine vellus hair",
             "subsurface scattering",
             "natural material micro-relief",
@@ -98,7 +103,10 @@ class MidjourneyAdapter(BaseAdapter):
             "--v 8.2",
         ]
 
-        if is_restore:
+        if is_depixelate:
+            ref_target = ref.filename if (ref and ref.filename) else "[REFERENCE_IMAGE_URL]"
+            flags.extend([f"--sref {ref_target}", "--iw 2.0", "--cw 100"])
+        elif is_restore:
             flags.extend(["--iw 2.0", "--cw 100"])
         elif is_transform:
             flags.extend(["--cref [REFERENCE_IMAGE_URL]", "--cw 80", "--iw 1.5"])
@@ -117,6 +125,29 @@ class MidjourneyAdapter(BaseAdapter):
             "computational bokeh",
             "blown highlights",
         ]
+        if scene.human_skin_realism or is_depixelate:
+            banned_mj.extend([
+                "pore stamping",
+                "engraved skin",
+                "embossed skin",
+                "carved skin",
+                "swirl texture",
+                "repeating micro-patterns",
+                "lace-like facial texture",
+                "worm-like texture",
+                "AI skin grain",
+                "hyper-sharpened pores",
+                "overprocessed HDR skin",
+                "synthetic cheek texture",
+                "fake forehead texture",
+                "fake neck texture",
+                "decorative skin detail",
+                "Velvia punch",
+                "Classic Chrome grading",
+                "Acros conversion",
+                "fake shallow depth of field",
+                "synthetic bokeh balls",
+            ])
         if scene.suppress_text_branding:
             banned_mj.extend([
                 "text",
@@ -129,7 +160,7 @@ class MidjourneyAdapter(BaseAdapter):
                 "signature",
                 "label",
             ])
-        if is_restore or is_transform or is_outpaint:
+        if is_restore or is_transform or is_outpaint or is_depixelate:
             banned_mj.extend([
                 "facial morphing",
                 "identity drift",

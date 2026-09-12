@@ -19,6 +19,7 @@ class SDXLAdapter(BaseAdapter):
         is_restore = ref and ref.mode == ReferenceMode.RESTORE_UPSCALE
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
+        is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
 
         # 1. Positive Prompt (Weighted camera and texture tokens)
         pos_chunks = []
@@ -27,6 +28,12 @@ class SDXLAdapter(BaseAdapter):
             pos_chunks.append(
                 "full body downward outpaint extension of reference photo head-to-toe with shoes, "
                 "preserving exact facial identity, expression, wardrobe fabric, and wrinkles"
+            )
+        elif is_depixelate:
+            pos_chunks.append(
+                "universal de-pixelate and 102MP upscale restoration of reference photo, "
+                "fixed Fujifilm GFX100RF 102MP rendering, Fujinon 35mm f/4 leaf shutter, Reala Ace color response, "
+                "organic human skin realism overriding artificial clarity, strict text preservation"
             )
         elif is_restore:
             pos_chunks.append(
@@ -76,12 +83,12 @@ class SDXLAdapter(BaseAdapter):
 
         # Micro-texture & physical optical falloff
         texture_tokens = [
-            "resolved epidermal skin pores",
+            "organic human skin realism overriding perceived sharpness" if is_depixelate else "resolved epidermal skin pores",
             "fine vellus facial hair",
             "subsurface dermal scattering",
             "natural material micro-relief and micro-abrasions",
             "high MTF optical acutance",
-            "natural large-sensor f/8 depth of field falloff",
+            "natural large-sensor f/4 depth of field falloff" if is_depixelate else "natural large-sensor f/8 depth of field falloff",
             "rectilinear optical projection",
         ]
         if scene.sharpness_protocol:
@@ -90,7 +97,10 @@ class SDXLAdapter(BaseAdapter):
                 "iris and eyelashes tack sharp",
                 "zero motion blur",
             ])
-        res_tag = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
+        if is_depixelate:
+            res_tag = scene.output_resolution or "102MP Medium Format (11648 x 8736)"
+        else:
+            res_tag = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
         texture_tokens.append(f"{res_tag}, uncompressed raw quality")
         pos_chunks.extend(texture_tokens)
 
@@ -100,12 +110,13 @@ class SDXLAdapter(BaseAdapter):
         positive_prompt = ", ".join(pos_chunks)
 
         # 2. Negative Prompt (Comprehensive artifact suppression)
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding,
             include_compression=True,
             include_outpaint=is_outpaint,
+            include_skin_realism=scene.human_skin_realism,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)

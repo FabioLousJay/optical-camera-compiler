@@ -963,26 +963,47 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div id="refControls" style="display: none; flex-direction: column; gap: 0.75rem; margin-top: 0.15rem;">
           <div class="field-group">
             <label>Reference Workflow Mode</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.35rem;">
               <button type="button" class="mode-card active" id="btnModeRestore" onclick="setRefMode('restore')">
-                <div style="font-size: 0.73rem; font-weight: 700; color: #fff;">🔬 Remaster</div>
-                <div style="font-size: 0.63rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.3;">
-                  1:1 Identity lock & 150MP upscale
+                <div style="font-size: 0.72rem; font-weight: 700; color: #fff;">🔬 Remaster</div>
+                <div style="font-size: 0.60rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.2;">
+                  1:1 Identity lock & 150MP
+                </div>
+              </button>
+              <button type="button" class="mode-card" id="btnModeDepixelate" onclick="setRefMode('depixelate')">
+                <div style="font-size: 0.72rem; font-weight: 700; color: #fff;">✨ De-Pixelate</div>
+                <div style="font-size: 0.60rem; color: var(--accent-rose); margin-top: 0.15rem; line-height: 1.2;">
+                  GFX100RF 102MP & Skin Lock
                 </div>
               </button>
               <button type="button" class="mode-card" id="btnModeTransform" onclick="setRefMode('transform')">
-                <div style="font-size: 0.73rem; font-weight: 700; color: #fff;">🎨 Re-Shoot</div>
-                <div style="font-size: 0.63rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.3;">
-                  Adapt scene while locking bones & gaze
+                <div style="font-size: 0.72rem; font-weight: 700; color: #fff;">🎨 Re-Shoot</div>
+                <div style="font-size: 0.60rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.2;">
+                  Adapt scene with bone lock
                 </div>
               </button>
               <button type="button" class="mode-card" id="btnModeOutpaint" onclick="setRefMode('outpaint')">
-                <div style="font-size: 0.73rem; font-weight: 700; color: #fff;">📐 Outpaint</div>
-                <div style="font-size: 0.63rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.3;">
-                  Extend down head-to-toe with shoes
+                <div style="font-size: 0.72rem; font-weight: 700; color: #fff;">📐 Outpaint</div>
+                <div style="font-size: 0.60rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.2;">
+                  Head-to-toe with shoes
                 </div>
               </button>
             </div>
+          </div>
+
+          <!-- Content Classification & Reproduction Directive -->
+          <div class="field-group" style="margin-top: 0.15rem;">
+            <label for="contentTypeSelect">Content Classification (Auto-Suppresses DoF/Grain for Flat Scans)</label>
+            <select id="contentTypeSelect" onchange="debounceCompile()">
+              <option value="photograph" selected>Photograph (Standard Realistic Camera Optics)</option>
+              <option value="portrait">Portrait (Human Skin Override Priority Target)</option>
+              <option value="product_photo">Product Photography (Commercial Clean Acutance)</option>
+              <option value="document_scan">Document Scan (Flat Reproduction / Zero DoF Falloff)</option>
+              <option value="poster_or_flyer">Poster / Flyer (Flat Reproduction / Suppress Vignette)</option>
+              <option value="meme_or_infographic">Meme / Infographic (Flat Digital Reproduction)</option>
+              <option value="ui_or_screenshot">UI / Screenshot (Flat Digital Reproduction)</option>
+              <option value="mixed_content">Mixed Content (Hybrid Photographic & Graphics)</option>
+            </select>
           </div>
 
           <!-- Extreme Anti-Drift Fidelity Slider -->
@@ -999,14 +1020,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             </div>
           </div>
 
-          <!-- Preserved Element Checkboxes -->
+          <!-- Preserved Element Checkboxes & Skin Realism Overrides -->
           <div class="field-group">
-            <label>Biometric & Structural Anchors</label>
+            <label>Biometric, Structural & Optical Overrides</label>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-top: 0.2rem;">
               <label class="check-item"><input type="checkbox" id="chkFacial" checked onchange="debounceCompile()"> Facial Geometry & Bones</label>
               <label class="check-item"><input type="checkbox" id="chkGaze" checked onchange="debounceCompile()"> Eye Shape & Gaze</label>
               <label class="check-item"><input type="checkbox" id="chkProportions" checked onchange="debounceCompile()"> Anatomical Proportions</label>
               <label class="check-item"><input type="checkbox" id="chkLighting" onchange="debounceCompile()"> Lighting Falloff Mood</label>
+              <label class="check-item"><input type="checkbox" id="chkSkinRealism" checked onchange="debounceCompile()"> Skin Realism (Ban Pore Stamp)</label>
+              <label class="check-item"><input type="checkbox" id="chkTextPreserve" checked onchange="debounceCompile()"> Strict OCR & Text Lock</label>
             </div>
           </div>
         </div>
@@ -1736,15 +1759,31 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       document.getElementById('btnModeTransform').classList.toggle('active', mode === 'transform');
       const btnOut = document.getElementById('btnModeOutpaint');
       if (btnOut) btnOut.classList.toggle('active', mode === 'outpaint');
+      const btnDepix = document.getElementById('btnModeDepixelate');
+      if (btnDepix) btnDepix.classList.toggle('active', mode === 'depixelate');
 
       const slider = document.getElementById('fidelitySlider');
-      if (mode === 'restore' && parseInt(slider.value, 10) < 90) {
+      if ((mode === 'restore' || mode === 'depixelate') && parseInt(slider.value, 10) < 90) {
         slider.value = 95;
       } else if (mode === 'outpaint') {
         slider.value = 95;
       } else if (mode === 'transform' && parseInt(slider.value, 10) > 90) {
         slider.value = 85;
       }
+
+      if (mode === 'depixelate') {
+        const profSel = document.getElementById('profileSelect');
+        if (profSel) {
+          for (let opt of profSel.options) {
+            if (opt.value === 'fujifilm_gfx100rf') {
+              profSel.value = 'fujifilm_gfx100rf';
+              if (typeof onProfileChange === 'function') onProfileChange();
+              break;
+            }
+          }
+        }
+      }
+
       onFidelitySliderChange();
       updateRefBadge();
       debounceCompile();
@@ -1767,6 +1806,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (!refData || !refData.active) {
         badge.textContent = "NO IMAGE ATTACHED";
         badge.style.color = "var(--text-muted)";
+      } else if (activeRefMode === 'depixelate') {
+        badge.textContent = "ACTIVE // GFX100RF 102MP DE-PIXELATE";
+        badge.style.color = "var(--accent-rose)";
       } else if (activeRefMode === 'restore') {
         badge.textContent = "ACTIVE // 1:1 RESTORE & REMASTER";
         badge.style.color = "var(--accent-cyan)";
@@ -2050,9 +2092,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         if (document.getElementById('chkLighting').checked) preserved.push("lighting falloff and mood");
 
         const fidelityVal = parseInt(document.getElementById('fidelitySlider').value, 10) / 100;
-        const denoiseVal = activeRefMode === 'restore' ? 0.35 : (activeRefMode === 'outpaint' ? 0.40 : 0.65);
+        const denoiseVal = (activeRefMode === 'restore' || activeRefMode === 'depixelate') ? 0.25 : (activeRefMode === 'outpaint' ? 0.40 : 0.65);
 
         let refModeStr = "restore_upscale";
+        if (activeRefMode === 'depixelate') refModeStr = "depixelate_gfx100rf";
         if (activeRefMode === 'transform') refModeStr = "transform_adapt";
         if (activeRefMode === 'outpaint') refModeStr = "outpaint_full_body";
 
@@ -2087,6 +2130,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         reference: refPayload,
         sharpness_protocol: document.getElementById('chkSharpness') ? document.getElementById('chkSharpness').checked : true,
         suppress_text_branding: document.getElementById('chkAntiBrand') ? document.getElementById('chkAntiBrand').checked : true,
+        human_skin_realism: document.getElementById('chkSkinRealism') ? document.getElementById('chkSkinRealism').checked : true,
+        content_type: document.getElementById('contentTypeSelect') ? document.getElementById('contentTypeSelect').value : 'photograph',
+        text_preservation: document.getElementById('chkTextPreserve') ? document.getElementById('chkTextPreserve').checked : true,
         output_resolution: selectedResText,
       };
 
@@ -2463,6 +2509,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 config = RestorationConfig(
                     cleanup_enabled=bool(body.get("cleanup", True)),
                     sharpening_enabled=bool(body.get("sharpening", True)),
+                    human_skin_realism=bool(body.get("human_skin_realism", True)),
                 )
                 output_path = body.get("output_path") or None
                 output_format = body.get("output_format") or None
@@ -2505,6 +2552,9 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 sharpness_protocol=body.get("sharpness_protocol", True),
                 output_resolution=body.get("output_resolution"),
                 suppress_text_branding=body.get("suppress_text_branding", True),
+                human_skin_realism=body.get("human_skin_realism", True),
+                content_type=body.get("content_type", "photograph"),
+                text_preservation=body.get("text_preservation", True),
             )
             self._send_json(payload.to_dict())
         except Exception as err:

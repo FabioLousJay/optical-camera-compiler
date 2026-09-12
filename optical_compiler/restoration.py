@@ -62,6 +62,7 @@ class RestorationConfig:
     unsharp_radius: float = 0.75
     unsharp_percent: int = 42
     unsharp_threshold: int = 5
+    human_skin_realism: bool = True
 
     # Output defaults
     jpeg_quality: int = 96
@@ -315,10 +316,17 @@ def restore_and_upscale_102mp(
     # 9. Sharpening pipeline (Single-pass region-neutral low-radius UnsharpMask)
     sharpening_applied = False
     if cfg.sharpening_enabled:
+        threshold = cfg.unsharp_threshold
+        percent = cfg.unsharp_percent
+        if cfg.human_skin_realism:
+            # Human Skin Realism: organic skin must remain softer than eyes/hair/text.
+            # Higher threshold ensures subtle skin micro-relief does not get edge-sharpened into artificial grain.
+            threshold = max(threshold, 7)
+            percent = min(percent, 38)
         unsharp = ImageFilter.UnsharpMask(
             radius=cfg.unsharp_radius,
-            percent=cfg.unsharp_percent,
-            threshold=cfg.unsharp_threshold,
+            percent=percent,
+            threshold=threshold,
         )
         sharpened_img = current_img.filter(unsharp)
         current_img.close()
@@ -468,6 +476,7 @@ def restore_and_upscale_102mp(
         "upscale_stages": [f"{sw}x{sh}" for sw, sh in stages],
         "cleanup_applied": cleanup_applied,
         "sharpening_applied": sharpening_applied,
+        "human_skin_realism_active": cfg.human_skin_realism,
         "icc_profile_embedded": bool(icc_profile),
         "exif_preserved": bool(exif_bytes),
         "alpha_preserved": bool(upscaled_alpha is not None) if has_alpha else None,

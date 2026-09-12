@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from .compiler import compile_scene
-from .models import ReferenceImageInput, ReferenceMode, SceneInput
+from .models import ContentType, ReferenceImageInput, ReferenceMode, SceneInput
 
 RIG_NAMES = [
     "Auto (Intelligent Camera Router)",
@@ -94,9 +94,29 @@ class OpticalCameraCompilerNode:
                     {"default": "9:11"},
                 ),
                 "reference_mode": (
-                    ["disabled", "transform_adapt", "restore_upscale", "outpaint_full_body"],
+                    [
+                        "disabled",
+                        "transform_adapt",
+                        "restore_upscale",
+                        "depixelate_gfx100rf",
+                        "outpaint_full_body",
+                    ],
                     {"default": "disabled"},
                 ),
+                "content_type": (
+                    [
+                        "photograph",
+                        "portrait",
+                        "product_photo",
+                        "document_scan",
+                        "poster_or_flyer",
+                        "meme_or_infographic",
+                        "ui_or_screenshot",
+                        "mixed_content",
+                    ],
+                    {"default": "photograph"},
+                ),
+                "human_skin_realism": (["enabled", "disabled"], {"default": "enabled"}),
                 "fidelity_lock": (
                     "FLOAT",
                     {"default": 0.85, "min": 0.10, "max": 1.0, "step": 0.05, "round": 0.01},
@@ -147,6 +167,8 @@ class OpticalCameraCompilerNode:
         lighting_override: str = "",
         aspect_ratio: str = "9:11",
         reference_mode: str = "disabled",
+        content_type: str = "photograph",
+        human_skin_realism: str = "enabled",
         fidelity_lock: float = 0.85,
         capture_mode: str = "default",
         lighting_preset: str = "none",
@@ -158,10 +180,11 @@ class OpticalCameraCompilerNode:
         profile_id = RIG_NAME_TO_ID.get(camera_rig, "auto")
 
         ref_input = None
-        if reference_mode in ("transform_adapt", "restore_upscale", "outpaint_full_body"):
+        if reference_mode in ("transform_adapt", "restore_upscale", "depixelate_gfx100rf", "outpaint_full_body"):
             mode_map = {
                 "transform_adapt": ReferenceMode.TRANSFORM_ADAPT,
                 "restore_upscale": ReferenceMode.RESTORE_UPSCALE,
+                "depixelate_gfx100rf": ReferenceMode.DEPIXELATE_GFX100RF,
                 "outpaint_full_body": ReferenceMode.OUTPAINT_FULL_BODY,
             }
             ref_mode = mode_map.get(reference_mode, ReferenceMode.NONE)
@@ -187,6 +210,11 @@ class OpticalCameraCompilerNode:
         cm_val = None if capture_mode == "default" else capture_mode
         lp_val = None if lighting_preset == "none" else lighting_preset
 
+        try:
+            ct_enum = ContentType(content_type)
+        except (ValueError, KeyError):
+            ct_enum = ContentType.PHOTOGRAPH
+
         scene = SceneInput(
             subject=subject.strip(),
             environment=environment.strip() if environment.strip() else None,
@@ -197,6 +225,8 @@ class OpticalCameraCompilerNode:
             lighting_preset=lp_val,
             sharpness_protocol=(brutal_sharpness_protocol == "enabled"),
             suppress_text_branding=(suppress_text_branding == "enabled"),
+            human_skin_realism=(human_skin_realism == "enabled"),
+            content_type=ct_enum,
         )
 
         result = compile_scene(
@@ -226,6 +256,7 @@ class OpticalConservative102MPUpscalerNode:
                 "format": (["auto", "jpeg", "png", "tiff"], {"default": "auto"}),
                 "cleanup_enabled": (["enabled", "disabled"], {"default": "enabled"}),
                 "sharpening_enabled": (["enabled", "disabled"], {"default": "enabled"}),
+                "human_skin_realism": (["enabled", "disabled"], {"default": "enabled"}),
             },
         }
 
@@ -241,6 +272,7 @@ class OpticalConservative102MPUpscalerNode:
         format: str = "auto",
         cleanup_enabled: str = "enabled",
         sharpening_enabled: str = "enabled",
+        human_skin_realism: str = "enabled",
     ) -> tuple[str, str, int, int, float]:
         import json
         from .restoration import restore_and_upscale_102mp, RestorationConfig
@@ -248,6 +280,7 @@ class OpticalConservative102MPUpscalerNode:
         cfg = RestorationConfig(
             cleanup_enabled=(cleanup_enabled == "enabled"),
             sharpening_enabled=(sharpening_enabled == "enabled"),
+            human_skin_realism=(human_skin_realism == "enabled"),
         )
         out_fmt = None if format == "auto" else format.upper()
         out_p = output_path.strip() if output_path.strip() else None

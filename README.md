@@ -3,7 +3,7 @@
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 51 Passing](https://img.shields.io/badge/tests-51%20passing-brightgreen.svg)](tests/)
+[![Tests: 62 Passing](https://img.shields.io/badge/tests-62%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -54,9 +54,9 @@ Standard AI generations often suffer from JPEG block compression, chroma subsamp
 
 ---
 
-## Reference Image Pipeline (Modes A, B, & C)
+## Reference Image Pipeline (Modes A, B, C, & D)
 
-Attach any reference image from your **local hardware** (drag & drop or file select) into the compiler to unlock three production workflows:
+Attach any reference image from your **local hardware** (drag & drop or file select) into the compiler to unlock four production workflows:
 
 ### 🔬 Mode A: Optical Re-Master & Max-Fidelity Upscale (`restore_upscale`)
 Elevates existing low-resolution or AI-distorted photos to medium-format camera quality (**Phase One IQ4 150MP**, **Hasselblad H6D-100c**) while preserving 100% of the original subject identity, composition, and physical details.
@@ -66,6 +66,21 @@ Adapts the reference subject into a completely new scene, lighting condition, wa
 
 ### 🧍 Mode C: Full-Body Outpainting (`outpaint_full_body`)
 Extends a medium-shot or tight headshot downward into a full-length head-to-toe portrait. Preserves the exact head, face, skin texture, and hair from the reference while generating seamless torso, legs, footwear, and shadows with zero perspective distortion.
+
+### ✨ Mode D: Universal De-Pixelate & 102MP Upscale Restoration v3.1 (`depixelate_gfx100rf` / `--depixelate`)
+Reference-guided image restoration and resolution enhancement with fixed **Fujifilm GFX100RF 102MP** rendering target and non-negotiable **Human Skin Realism Override Protocol**. Eliminates pixelation, JPEG macro-blocking, compression damage, aliasing, and digital softness while preserving source identity, proportions, and lighting logic.
+
+#### 🛡️ Human Skin Realism Override Protocol
+Whenever human skin is present in the image, skin realism takes absolute priority over micro-detail recovery, perceived resolution, sharpening, and texture reconstruction:
+* **Organic Skin Softness**: Skin must remain softer than eyes, hair, jewelry, teeth, clothing, text, and hard edges.
+* **Zero Synthetic Texturing**: Strictly prohibits pore stamping, repeated procedural dots, artificial pebbled leather skin, AI skin swirls/worms/lace, and synthetic high-frequency noise.
+* **Zero Plastic Waxiness**: Prohibits plastic airbrushing, wax figure skin, porcelain smoothing, and beauty filter smearing.
+* **Natural Dynamic Range**: Realistic skin subsurface scattering with soft tonal transitions and natural tonal gradation.
+
+#### 📄 Content Classification & Flat Copy-Stand Reproduction
+The compiler classifies content into 8 domain archetypes (`photograph`, `portrait`, `product_photo`, `document_scan`, `poster_or_flyer`, `meme_or_infographic`, `ui_or_screenshot`, `mixed_content`):
+* **Flat Reproduction Enforcement**: For document scans, UI screenshots, infographics, posters, and memes, optical depth-of-field falloff, background defocus bokeh, chromatic aberration, lens vignetting, and analog grain are strictly suppressed.
+* **Strict Text & Structured Content Preservation**: Enforces character-for-character typographic accuracy, font weights, tabular alignments, and diagram connectors without hallucinated glyphs or drift.
 
 ---
 
@@ -183,10 +198,10 @@ When `profile="auto"` is specified (default in ComfyUI), the compiler inspects y
    * *Sensor*: $43.8 \times 32.9\,\text{mm}$ high-speed 102MP CMOS II HS.
    * *Optics*: Fujinon GF 110mm f/2 R LM WR, GF 80mm f/1.7, GF 55mm f/1.7.
    * *Physics*: Fujifilm color science (Classic Chrome / Reala Ace / Astia), 16-bit raw latitude.
-9. **FUJIFILM GFX100RF Rangefinder Large Format (`fujifilm_gfx100rf`)**:
-   * *Sensor*: $43.8 \times 32.9\,\text{mm}$ 102MP Large-Format CMOS II rangefinder.
-   * *Optics*: Fujinon GF 45mm f/2.8 R WR, GF 63mm f/2.8 R WR, GF 110mm f/2 R LM WR.
-   * *Physics*: Rangefinder form factor, street documentary fidelity, film simulation color science.
+9. **FUJIFILM GFX100RF Fixed-Lens 102MP Medium Format (`fujifilm_gfx100rf`)**:
+   * *Sensor*: $43.8 \times 32.9\,\text{mm}$ 102MP high-speed CMOS II HS, native $11648 \times 8736$ resolution.
+   * *Optics*: Fixed Fujinon 35mm f/4 lens (stopped down to f/5.6–f/8 optical sweet spot), 0.84x magnification, edge-to-edge MTF sharpness.
+   * *Physics*: Integrated leaf shutter, zero rolling shutter artifacts, ultra-low vibration, Reala Ace / Classic Chrome color science, 16-bit raw tonal latitude.
 10. **Linhof Master Technika 4x5 Large Format (`linhof_technika_4x5`)**:
     * *Sensor*: $102 \times 127\,\text{mm}$ (4x5 inch) sheet film.
     * *Optics*: Schneider Apo-Symmar 150mm f/5.6 L, Rodenstock Grandagon-N 90mm f/4.5.
@@ -335,9 +350,11 @@ Restart ComfyUI, then right-click on the graph canvas:
   * `negative_prompt` ➔ Pipe into `CLIP Text Encode (Negative)`
   * `unified_payload` ➔ Full prompt with negative shield for single-prompt nodes (GPT / Flux.1 / Midjourney)
 * **Controls**:
-  * `camera_rig`: Select from all 13 camera systems (including Sony a1 II, Canon R5 II, Nikon Z 9).
-  * `model_target`: `gpt_images`, `imagen`, `midjourney`, `flux`, `sdxl`.
-  * `reference_mode`: `disabled`, `transform_adapt`, `restore_upscale`, `outpaint_full_body`.
+  * `camera_rig`: Select from all 19 camera systems or `auto` (Sony a1 II, Fujifilm GFX100RF, Phase One IQ4, Leica, Hasselblad, ARRI, etc.).
+  * `model_target`: `gpt_images`, `imagen`, `midjourney`, `flux`, `sdxl`, `json`, `raw_spec`.
+  * `reference_mode`: `disabled`, `transform_adapt`, `restore_upscale`, `outpaint_full_body`, `depixelate_gfx100rf`.
+  * `content_type`: `photograph`, `portrait`, `product_photo`, `document_scan`, `poster_or_flyer`, `meme_or_infographic`, `ui_or_screenshot`, `mixed_content`.
+  * `human_skin_realism`: `enabled` / `disabled` (prioritizes skin realism over sharpening, bans synthetic pore stamps).
   * `aspect_ratio`: `9:11` (default 12MP), `4:5`, `3:2`, `4:3`, `5:4`, `16:9`, `1:1`, `21:9`, `9:16`.
   * `brutal_sharpness_protocol`: `enabled` / `disabled`.
   * `suppress_text_branding`: `enabled` / `disabled`.
@@ -392,6 +409,27 @@ Pass `-c` or `--copy` to automatically send the compiled prompt directly to your
 python3 -m optical_compiler "Elderly fisherman with weathered skin" \
   --profile nikon_z9 \
   --target gpt_images \
+  -c
+```
+
+### 4. Mode D: Universal De-Pixelate & 102MP Upscale Restoration v3.1
+De-pixelate a low-resolution reference image using GFX100RF 102MP signature lock and human skin realism override:
+```bash
+python3 -m optical_compiler "Restore low-res photo" \
+  --depixelate \
+  --reference path/to/pixelated_face.jpg \
+  --content-type portrait \
+  --target gpt_images \
+  -c
+```
+
+For document scans, infographics, or UI screenshots (enforcing flat copy reproduction with suppressed optical DoF and grain):
+```bash
+python3 -m optical_compiler "Historical document archive" \
+  --depixelate \
+  --reference path/to/scanned_map.png \
+  --content-type document_scan \
+  --target json \
   -c
 ```
 

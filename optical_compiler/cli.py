@@ -92,9 +92,40 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--ref-mode",
         dest="ref_mode",
-        choices=["restore", "transform"],
+        choices=["restore", "transform", "depixelate", "depixelate_gfx100rf"],
         default="restore",
-        help="Reference mode: 'restore' (optical remaster & upscale) or 'transform' (context adaptation with identity lock).",
+        help="Reference mode: 'restore' (optical remaster), 'transform' (re-shoot/adapt), or 'depixelate_gfx100rf' (v3.1 102MP lock).",
+    )
+    parser.add_argument(
+        "--depixelate",
+        action="store_true",
+        help="Shortcut for --ref-mode depixelate_gfx100rf (Universal De-Pixelate & 102MP Upscale Restoration).",
+    )
+    parser.add_argument(
+        "--content-type",
+        dest="content_type",
+        choices=[
+            "photograph",
+            "portrait",
+            "product_photo",
+            "document_scan",
+            "poster_or_flyer",
+            "meme_or_infographic",
+            "ui_or_screenshot",
+            "mixed_content",
+        ],
+        default="photograph",
+        help="Input classification type for restoration (suppresses DoF, vignetting, and grain for document scans and screenshots).",
+    )
+    parser.add_argument(
+        "--no-skin-realism",
+        action="store_true",
+        help="Disable the Human Skin Realism Override protocol.",
+    )
+    parser.add_argument(
+        "--no-text-preservation",
+        action="store_true",
+        help="Disable strict OCR text and diagram preservation.",
     )
     parser.add_argument(
         "--fidelity-lock",
@@ -182,11 +213,13 @@ def main(argv: Optional[list[str]] = None) -> int:
     # 1. Handle direct 102MP upscale request if provided
     if args.upscale_102mp:
         try:
-            from .restoration import restore_and_upscale_102mp
+            from .restoration import RestorationConfig, restore_and_upscale_102mp
+            config = RestorationConfig(human_skin_realism=not args.no_skin_realism)
             report = restore_and_upscale_102mp(
                 args.upscale_102mp,
                 output_path=args.upscale_out,
                 output_format=args.upscale_format,
+                config=config,
             )
             if args.json:
                 print(json.dumps(report, indent=2))
@@ -199,6 +232,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                 print(f"Output:      {report['output_path']} ({report['output_width']}x{report['output_height']}, {report['output_megapixels']} MP)")
                 print(f"Ratio Lock:  Exact rational ratio preserved = {report['exact_aspect_ratio_preserved']}")
                 print(f"Stages:      {' -> '.join(report['upscale_stages'])}")
+                print(f"Skin Realism:{'ACTIVE (Protected organic micro-relief)' if report.get('human_skin_realism_active') else 'OFF'}")
                 print(f"File Size:   {report['file_size_mib_standard']} MiB ({report['file_size_bytes']} bytes)")
                 print(f"Validation:  {'PASSED (Zero-drift verified)' if report['validation_passed'] else 'FAILED'}")
             return 0 if report["validation_passed"] else 1
@@ -216,10 +250,22 @@ def main(argv: Optional[list[str]] = None) -> int:
         sys.stderr.write(f"Error loading camera profile '{args.profile}': {err}\n")
         return 1
 
+    ref_mode_choice = args.ref_mode
+    if args.depixelate:
+        ref_mode_choice = "depixelate_gfx100rf"
+
     ref_dict = None
     if args.reference:
-        mode_str = "restore_upscale" if args.ref_mode == "restore" else "transform_adapt"
-        default_denoise = 0.35 if args.ref_mode == "restore" else 0.65
+        if ref_mode_choice in ("depixelate", "depixelate_gfx100rf"):
+            mode_str = "depixelate_gfx100rf"
+            default_denoise = 0.25
+        elif ref_mode_choice == "restore":
+            mode_str = "restore_upscale"
+            default_denoise = 0.35
+        else:
+            mode_str = "transform_adapt"
+            default_denoise = 0.65
+
         denoise_val = args.denoise if args.denoise is not None else default_denoise
         ref_dict = {
             "filename": args.reference,
@@ -240,6 +286,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         "reference": ref_dict,
         "lighting_preset": args.lighting_preset,
         "capture_mode": args.capture_mode,
+        "human_skin_realism": not args.no_skin_realism,
+        "content_type": args.content_type,
+        "text_preservation": not args.no_text_preservation,
     }
 
     profile_title = (

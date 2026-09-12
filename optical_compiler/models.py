@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from enum import Enum
 from typing import Any, Optional
 
@@ -190,6 +190,39 @@ CAPTURE_MODE_DIRECTIVES: dict[CaptureMode, str] = {
 }
 
 
+class ContentType(str, Enum):
+    """Classification of source imagery for targeted restoration and reproduction logic."""
+
+    PHOTOGRAPH = "photograph"
+    PORTRAIT = "portrait"
+    PRODUCT_PHOTO = "product_photo"
+    DOCUMENT_SCAN = "document_scan"
+    POSTER_OR_FLYER = "poster_or_flyer"
+    MEME_OR_INFOGRAPHIC = "meme_or_infographic"
+    UI_OR_SCREENSHOT = "ui_or_screenshot"
+    MIXED_CONTENT = "mixed_content"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[ContentType]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+    @property
+    def is_flat_reproduction(self) -> bool:
+        """Return True if content type requires flat copy-stand reproduction."""
+        return self in (
+            ContentType.DOCUMENT_SCAN,
+            ContentType.POSTER_OR_FLYER,
+            ContentType.MEME_OR_INFOGRAPHIC,
+            ContentType.UI_OR_SCREENSHOT,
+        )
+
+
 class ReferenceMode(str, Enum):
     """Workflow mode when processing a reference image."""
 
@@ -197,13 +230,29 @@ class ReferenceMode(str, Enum):
     RESTORE_UPSCALE = "restore_upscale"  # 1:1 Identity restoration and optical remastering
     TRANSFORM_ADAPT = "transform_adapt"  # Aesthetic/scene adaptation with biometric subject lock
     OUTPAINT_FULL_BODY = "outpaint_full_body"  # Outpaint medium shot to full body head-to-toe
+    DEPIXELATE_GFX100RF = "depixelate_gfx100rf"  # Universal De-Pixelate + Upscale Restoration (GFX100RF 102MP + Skin Realism Override)
 
     @classmethod
     def from_str(cls, value: Optional[str]) -> ReferenceMode:
-        """Parse mode safely."""
+        """Parse mode safely with aliases."""
         if not value:
             return cls.NONE
-        normalized = value.strip().lower()
+        normalized = value.strip().lower().replace("-", "_").replace(" ", "_")
+        alias_map = {
+            "depixelate": cls.DEPIXELATE_GFX100RF,
+            "depixelate_upscale": cls.DEPIXELATE_GFX100RF,
+            "gfx100rf": cls.DEPIXELATE_GFX100RF,
+            "gfx100rf_restore": cls.DEPIXELATE_GFX100RF,
+            "depixelate_gfx100rf": cls.DEPIXELATE_GFX100RF,
+            "restore": cls.RESTORE_UPSCALE,
+            "restore_upscale": cls.RESTORE_UPSCALE,
+            "transform": cls.TRANSFORM_ADAPT,
+            "transform_adapt": cls.TRANSFORM_ADAPT,
+            "outpaint": cls.OUTPAINT_FULL_BODY,
+            "outpaint_full_body": cls.OUTPAINT_FULL_BODY,
+        }
+        if normalized in alias_map:
+            return alias_map[normalized]
         for member in cls:
             if member.value == normalized:
                 return member
@@ -354,6 +403,41 @@ class NegativeShield:
             "mismatched lighting",
         ]
     )
+    skin_realism_defects: list[str] = field(
+        default_factory=lambda: [
+            "plastic skin",
+            "wax skin",
+            "porcelain skin",
+            "airbrushed texture",
+            "over-smoothed skin",
+            "fake pores",
+            "pore stamping",
+            "engraved skin",
+            "embossed skin",
+            "carved skin",
+            "swirl texture",
+            "repeating micro-patterns",
+            "lace-like facial texture",
+            "worm-like texture",
+            "AI skin grain",
+            "painted skin",
+            "CGI skin",
+            "hyper-sharpened pores",
+            "overprocessed HDR skin",
+            "synthetic cheek texture",
+            "fake forehead texture",
+            "fake neck texture",
+            "decorative skin detail",
+            "Velvia punch",
+            "Classic Chrome grading",
+            "Acros conversion of color sources",
+            "invented fabric patterns",
+            "fake shallow depth of field",
+            "synthetic bokeh balls",
+            "rolling shutter artifacts",
+            "smartphone computational look",
+        ]
+    )
 
     def all_tokens(
         self,
@@ -361,6 +445,7 @@ class NegativeShield:
         include_branding: bool = True,
         include_compression: bool = True,
         include_outpaint: bool = False,
+        include_skin_realism: bool = True,
     ) -> list[str]:
         """Return a flat list of all negative tokens across selected categories."""
         tokens = list(self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift)
@@ -385,6 +470,11 @@ class NegativeShield:
                 tokens.append(t)
                 seen.add(t)
 
+        if include_skin_realism:
+            for t in self.skin_realism_defects:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
         if include_branding:
             for t in self.branding_and_text:
                 if t not in seen:
@@ -433,20 +523,28 @@ class CameraProfile:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> CameraProfile:
         """Hydrate CameraProfile from dictionary representation."""
+        def _filter(cls_type: Any, d: dict[str, Any]) -> dict[str, Any]:
+            if not isinstance(d, dict):
+                return {}
+            valid_names = {f.name for f in fields(cls_type)}
+            return {k: v for k, v in d.items() if k in valid_names}
+
         sensor_data = data.get("sensor_and_optics", {})
         lighting_data = data.get("lighting_and_exposure", {})
         micro_data = data.get("micro_detail_and_physics", {})
-        neg_data = data.get("negative_embeddings", {})
+        neg_data = dict(data.get("negative_embeddings", {}))
+        if "content_and_branding_drift" in neg_data and "branding_and_text" not in neg_data:
+            neg_data["branding_and_text"] = neg_data.pop("content_and_branding_drift")
 
         return cls(
             profile_id=data.get("profile_id", "custom"),
             title=data.get("title", "Custom Profile"),
             schema_version=data.get("schema_version", "2.0"),
             purpose=data.get("purpose", ""),
-            sensor_and_optics=SensorOptics(**sensor_data),
-            lighting_and_exposure=LightingSetup(**lighting_data),
-            micro_detail_and_physics=MicroPhysics(**micro_data),
-            negative_embeddings=NegativeShield(**neg_data),
+            sensor_and_optics=SensorOptics(**_filter(SensorOptics, sensor_data)),
+            lighting_and_exposure=LightingSetup(**_filter(LightingSetup, lighting_data)),
+            micro_detail_and_physics=MicroPhysics(**_filter(MicroPhysics, micro_data)),
+            negative_embeddings=NegativeShield(**_filter(NegativeShield, neg_data)),
             execution_directive=data.get("execution_directive", ""),
         )
 
@@ -480,6 +578,9 @@ class SceneInput:
     sharpness_protocol: bool = True
     output_resolution: Optional[str] = None
     suppress_text_branding: bool = True
+    human_skin_realism: bool = True
+    content_type: Optional[ContentType] = None
+    text_preservation: bool = True
 
 
 @dataclass

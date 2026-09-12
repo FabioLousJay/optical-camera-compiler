@@ -1,40 +1,44 @@
 {
   "profile_id": "fujifilm_gfx100rf",
-  "title": "FUJIFILM GFX100RF Large Format Rangefinder",
+  "title": "Fujifilm GFX100RF Fixed 35mm f/4 Medium Format",
   "schema_version": "2.0",
-  "purpose": "Portable large-format rangefinder form factor for travel, environmental portraiture, documentary, and landscape with maximum resolution and analog film simulation color science.",
+  "purpose": "Hardware-locked 102MP medium format rangefinder simulation with Fixed Fujinon 35mm f/4 optics, leaf shutter, and Reala Ace color science for reference-faithful de-pixelation, resolution enhancement, and human skin realism.",
   "sensor_and_optics": {
-    "camera_system": "FUJIFILM GFX100RF (102MP GFX CMOS II Large Format)",
-    "sensor_type": "43.8x32.9mm Large Format GFX CMOS II with X-Processor 5",
-    "sensor_dimensions": "43.8x32.9mm large format sensor (102MP)",
-    "full_frame_equivalent": "~40mm full-frame normal-wide field of view",
-    "lens": "Fujinon GF 50mm f/3.5 R LM WR stopped down to f/5.6 optical sweet spot",
-    "aperture_sweet_spot": "f/5.6",
+    "camera_system": "Fujifilm GFX100RF",
+    "sensor_type": "43.8mm x 32.9mm CMOS II HS with X-Processor 5",
+    "sensor_dimensions": "43.8mm x 32.9mm CMOS II HS, 102 megapixels effective (11648 x 8736 native resolution)",
+    "full_frame_equivalent": "Fixed Fujinon 35mm f/4 (28mm full-frame equivalent)",
+    "lens": "Fixed Fujinon 35mm f/4 (9 elements in 8 groups, 2 aspherical elements)",
+    "aperture_sweet_spot": "f/4",
     "iso_base": "ISO 80 base sensor sensitivity",
-    "dynamic_range": "16-bit raw tonal latitude with Fujifilm analog color science (Classic Chrome / Reala Ace)",
-    "shutter": "Focal-plane shutter with 1/125s flash sync and high-speed electronic shutter"
+    "dynamic_range": "16-bit raw tonal latitude with Reala Ace film simulation (neutral white balance, balanced saturation, accurate skin tones, faithful neutrals, restrained reds, natural greens)",
+    "shutter": "Leaf shutter, flash sync at all speeds, zero rolling shutter artifacts"
   },
   "lighting_and_exposure": {
     "primary_lighting": "Natural ambient directional daylight with subtle reflector bounce, base ISO 80, 16-bit raw capture",
-    "light_transport": "Open environmental light transport, soft shadow graduation, authentic analog highlight roll-off"
+    "light_transport": "Open environmental light transport, soft shadow graduation, authentic analog highlight roll-off and medium-format midtone separation"
   },
   "micro_detail_and_physics": {
     "surface_rendering": [
-      "Natural epidermal skin texture with resolved pores, fine vellus hair, and accurate subsurface scattering",
-      "True material micro-relief: fabric weave, weathered stone, foliage micro-textures",
-      "Organic acutance without digital edge ringing or clarity boosts"
+      "Organic human skin realism overriding perceived sharpness: naturally soft skin compared with eyes, hair, teeth, fabric, jewelry, text, and hard edges",
+      "Preserved age-appropriate wrinkles, folds, pores, freckles, moles, beard stubble without artificial pore stamping or synthetic AI patterns",
+      "Extreme corner-to-corner sharpness where source supports it, high micro-contrast on hair, fabric, eyes, and environmental detail",
+      "Fine luminance grain texture consistent with high-resolution medium format capture, never coarse, never synthetic"
     ],
     "depth_and_optics": [
-      "Natural large-format environmental separation with subtle focal falloff",
-      "Rectilinear optical projection, zero edge distortion",
-      "Uncompressed tonal transitions across midtones"
+      "Deep depth of field characteristic of f/4 on 44x33mm medium format at wide-normal focal length, shallow bokeh only at genuine close focus",
+      "Minimal geometric distortion, near-zero barrel or pincushion with modest natural vignetting only when subject distance implies it",
+      "Smooth highlight roll-off and medium-format tonal separation in midtones and shadows",
+      "Leaf shutter rendering with zero motion smear and zero rolling shutter artifacts"
     ]
   },
   "negative_embeddings": {
     "render_defects": [
-      "CGI",
-      "3D render",
+      "cartoon",
       "illustration",
+      "painting",
+      "3D render",
+      "CGI",
       "digital sharpening halos",
       "chromatic aberration",
       "denoise smearing",
@@ -42,25 +46,74 @@
       "double edges",
       "ringing",
       "oversharpening",
-      "crunchy HDR"
+      "crunchy HDR",
+      "overprocessed HDR",
+      "oversaturated colors",
+      "Velvia punch",
+      "Classic Chrome grading",
+      "Acros conversion of color sources",
+      "fake shallow depth of field",
+      "synthetic bokeh balls",
+      "rolling shutter artifacts",
+      "smartphone computational look"
     ],
     "skin_and_lighting_drift": [
-      "airbrushed skin",
-      "plastic poreless skin",
-      "artificial pore carving",
-      "computational bokeh",
-      "beauty filter glow",
-      "clipped highlights",
-      "crushed shadows",
-      "unmotivated teal-orange grading"
+      "beautified face",
+      "plastic skin",
+      "wax skin",
+      "porcelain skin",
+      "airbrushed texture",
+      "over-smoothed skin",
+      "fake pores",
+      "pore stamping",
+      "engraved skin",
+      "embossed skin",
+      "carved skin",
+      "swirl texture",
+      "repeating micro-patterns",
+      "lace-like facial texture",
+      "worm-like texture",
+      "AI skin grain",
+      "painted skin",
+      "CGI skin",
+      "hyper-sharpened pores",
+      "overprocessed HDR skin",
+      "synthetic cheek texture",
+      "fake forehead texture",
+      "fake neck texture",
+      "decorative skin detail",
+      "glow effects",
+      "dreamy diffusion",
+      "lens dirt effects",
+      "fake film burn",
+      "unwanted vignette"
     ],
     "anatomical_drift": [
-      "mutated hands",
-      "extra digits",
-      "fused limbs",
-      "asymmetrical pupil dilation",
-      "deformed facial features"
+      "identity drift",
+      "face reshaping",
+      "body reshaping",
+      "weight change",
+      "age change",
+      "warped anatomy",
+      "extra fingers",
+      "extra limbs",
+      "mutated hands"
+    ],
+    "content_and_branding_drift": [
+      "wardrobe changes",
+      "background replacement",
+      "invented fabric patterns",
+      "hallucinated text",
+      "paraphrased text",
+      "rewritten caption",
+      "typeset replacement",
+      "background inventions",
+      "layout redesign",
+      "changed arrows",
+      "changed labels",
+      "changed interface wording",
+      "hallucinated logos"
     ]
   },
-  "execution_directive": "Enforce FUJIFILM GFX100RF 102MP large-format documentary fidelity with authentic Classic Chrome / Reala Ace tonal depth. Eliminate digital sharpening, synthetic smoothing, and plastic textures."
+  "execution_directive": "Enforce Fujifilm GFX100RF 102MP fixed Fujinon 35mm f/4 medium-format fidelity with Reala Ace color response. For any image containing visible human skin, human skin realism strictly overrides micro-detail recovery and sharpness."
 }

@@ -17,6 +17,7 @@ from .models import (
     LightingSetup,
     MicroPhysics,
     NegativeShield,
+    ReferenceMode,
     SceneInput,
     SensorOptics,
 )
@@ -200,6 +201,11 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "reala ace",
             "rangefinder",
             "city walk",
+            "depixelate",
+            "upscale",
+            "restoration",
+            "gfx100rf",
+            "skin realism",
         ],
     ),
     (
@@ -225,6 +231,8 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
 def auto_select_profile(scene: Union[str, SceneInput]) -> str:
     """Intelligently route a scene description or SceneInput to the optimal camera profile."""
     if isinstance(scene, SceneInput):
+        if scene.reference and scene.reference.mode == ReferenceMode.DEPIXELATE_GFX100RF:
+            return "fujifilm_gfx100rf"
         text = f"{scene.subject} {scene.framing or ''} {scene.environment or ''} {scene.mood or ''}".lower()
     else:
         text = str(scene).lower()

@@ -24,6 +24,7 @@ class FluxAdapter(BaseAdapter):
         is_restore = ref and ref.mode == ReferenceMode.RESTORE_UPSCALE
         is_transform = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
+        is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
 
         # 1. Subject & Scene
         subject_desc = scene.subject
@@ -43,6 +44,22 @@ class FluxAdapter(BaseAdapter):
                 "Keep the same wardrobe, colors, fabric texture, and wrinkles. Maintain the same camera height and perspective. "
                 f"No wide-angle distortion. Full body head-to-toe visible including shoes. Depicting {subject_desc}."
             )
+        elif is_depixelate:
+            sections.append(
+                f"Universal De-Pixelate and 102MP Upscale Restoration of source reference image. "
+                f"Photo of {subject_desc} rendered with fixed Fujifilm GFX100RF 102MP signature. "
+                f"Eliminating pixelation, blockiness, aliasing, and compression artifacts while strictly preserving "
+                f"source identity, composition, proportions, colors, and all visible text."
+            )
+            if scene.human_skin_realism:
+                sections.append(
+                    "Human skin realism override: Real organic skin softer than eyes, hair, jewelry, and text. "
+                    "No pore stamping, no AI swirls, no synthetic skin grain."
+                )
+            if scene.content_type and scene.content_type.is_flat_reproduction:
+                sections.append(
+                    "Flat reproduction capture: Suppress optical depth-of-field falloff, vignetting, and grain."
+                )
         elif is_restore:
             sections.append(
                 f"Master optical remaster and high-resolution restoration of source reference image. "
@@ -99,19 +116,35 @@ class FluxAdapter(BaseAdapter):
             micro_parts.append(
                 "Focus discipline: focus locked on near eye with eyelashes and iris tack sharp, zero motion blur."
             )
-        sections.append(" ".join(micro_parts))
+        micro_desc = " ".join(micro_parts)
+        sections.append(micro_desc)
 
-        # 5. Anti-synthetic assertions & Quality scaling
-        res_text = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
+        # 5. Output quality & resolution targets
+        if is_depixelate:
+            res_text = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution)"
+        else:
+            res_text = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
+        output_desc = (
+            f"Rendering target: {res_text}, uncompressed 16-bit raw tonal latitude, "
+            f"zero lossy compression, native optical MTF acutance without digital edge halos."
+        )
+        sections.append(output_desc)
+
+        # 6. Natural language negative constraints (Flux thrives on explicit negative assertions in context)
         banned_tropes = (
             f"Output: {res_text}, uncompressed 16-bit raw capture, lossless acutance, zero chroma subsampling. "
             "Eliminate plastic or poreless airbrushed skin, synthetic beauty filters, "
             "fake computational bokeh, digital sharpening halos, chromatic aberration, "
             "and CGI 3D render looks."
         )
+        if scene.human_skin_realism or is_depixelate:
+            banned_tropes += (
+                " Strictly eliminate pore stamping, engraved skin, carved skin, swirl texture, "
+                "repeating micro-patterns, lace-like facial texture, worm-like texture, and AI skin grain."
+            )
         if scene.suppress_text_branding:
             banned_tropes += " Eliminate all text, watermarks, logos, brand names, and typography."
-        if is_restore or is_transform or is_outpaint:
+        if is_restore or is_transform or is_outpaint or is_depixelate:
             banned_tropes += (
                 " Eliminate facial morphing, identity loss, altered bone structure, "
                 "warped geometry, and hallucinated anatomical features."
@@ -123,12 +156,13 @@ class FluxAdapter(BaseAdapter):
         positive_prompt = " ".join(sections)
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding,
             include_compression=True,
             include_outpaint=is_outpaint,
+            include_skin_realism=scene.human_skin_realism,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
