@@ -181,6 +181,20 @@ class RawSpecAdapter(BaseAdapter):
                 "Cryptographic Provenance: SHA-256 mandatory digest verification",
             ])
 
+        if scene.has_reconstruction_lock_4x or (scene.reference and scene.reference.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X):
+            recon = scene.reconstruction_lock
+            lines.extend([
+                "",
+                "--- Professional 4X Reconstruction Lock Protocol ---",
+                "Linear Multiplier: 4X (Area Multiplier: 16X)",
+                f"Super-Resolution Backend: {recon.backend.value if recon else 'realesrnet_x4plus'}",
+                f"Denoise Strength: {recon.denoise_strength if recon else 0.15}",
+                f"Selective Blend Ratio: {recon.blend_ratio if recon else 0.20}",
+                f"Sky & Atmospheric Haze Protection: {'ENFORCED' if (recon is None or recon.protect_sky_haze) else 'DISABLED'}",
+                "Anti-Model Stacking: ENFORCED",
+                "Source-Lock Integrity: Zero generative hallucination, geological mutation, or terrain drift",
+            ])
+
         positive_prompt = "\n".join(lines)
 
         negative_prompt = ", ".join(
@@ -188,6 +202,7 @@ class RawSpecAdapter(BaseAdapter):
                 include_product_drift=scene.has_product_lock,
                 include_hand_drift=scene.has_hand_lock,
                 include_body_distortion=scene.has_body_morphology,
+                include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or (scene.reference and scene.reference.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X)),
             )
         )
 

@@ -35,6 +35,7 @@ class ImagenAdapter(BaseAdapter):
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
+        is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
 
         # 1. Subject & Scene foundation
         scene_elements = []
@@ -83,6 +84,20 @@ class ImagenAdapter(BaseAdapter):
                 scene_elements.append(f"rendered as a {scene.framing} of {scene.subject}")
             else:
                 scene_elements.append(f"focusing faithfully on {scene.subject}")
+        elif is_recon_4x:
+            recon = scene.reconstruction_lock
+            b_val = recon.backend.value if recon else "realesrnet_x4plus"
+            dn_val = recon.denoise_strength if recon else 0.15
+            bl_val = recon.blend_ratio if recon else 0.20
+            scene_elements.append(
+                f"Professional 4X Reconstruction Lock of the attached reference image rendered with strict linear raster scaling (4X linear, 16X pixel area). "
+                f"Absolute source lock: zero generative hallucination, rock strata distortion, or terrain drift. "
+                f"Reconstructed via {b_val} with denoise {dn_val} and selective high-frequency blend {bl_val}, protected smooth sky and haze gradients"
+            )
+            if scene.framing:
+                scene_elements.append(f"rendered as a {scene.framing} of {scene.subject}")
+            else:
+                scene_elements.append(f"preserving source framing of {scene.subject}")
         elif is_restore:
             scene_elements.append(f"Master optical remaster and high-resolution restoration of the reference photograph")
             if scene.framing:
@@ -173,6 +188,15 @@ class ImagenAdapter(BaseAdapter):
                 "Cap geometry, closure threading, label kerning, typographic tracking, mold parting seams, and SKU color are locked. "
                 "Reject any distortion, cap substitution, or text hallucination."
             )
+        elif is_recon_4x:
+            recon = scene.reconstruction_lock
+            b_val = recon.backend.value if recon else "realesrnet_x4plus"
+            ref_directives.append(
+                f"Strict 4X Linear Reconstruction Lock: Absolute photographic geometry lock. "
+                f"Output strictly at 4X linear scale (16X pixel area). Backend {b_val}. "
+                "Atmospheric and sky gradients protected from noise. Anti-model stacking strictly enforced. "
+                "Zero generative hallucination or geological drift."
+            )
 
         if scene.has_body_morphology:
             regions = scene.body_volume or (", ".join(scene.body_morphology.volume_regions) if scene.body_morphology and scene.body_morphology.volume_regions else "biceps, chest, gut")
@@ -257,6 +281,8 @@ class ImagenAdapter(BaseAdapter):
         # 5. Aesthetic directive and final output resolution
         if is_depixelate:
             res_text = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution)"
+        elif is_recon_4x:
+            res_text = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area)"
         else:
             res_text = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
         style_prose = (
@@ -269,6 +295,8 @@ class ImagenAdapter(BaseAdapter):
             style_prose += " Strictly eliminate all text, watermarks, logos, brand names, and typography."
         if is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock:
             style_prose += " Eliminate facial morphing, feature drift, identity loss, and warped geometry."
+        if is_recon_4x:
+            style_prose += " Eliminate generative hallucination, altered terrain, rock strata distortion, sky grain, and stacking halos."
         if is_product_lock:
             style_prose += " Eliminate wrong cap geometry, incorrect label kerning, sku color drift, missing seams, and packaging distortion."
         if scene.has_hand_lock:
@@ -297,7 +325,7 @@ class ImagenAdapter(BaseAdapter):
 
 
         # Negative prompt payload
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock or is_recon_4x)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding and not is_product_lock,
@@ -307,6 +335,7 @@ class ImagenAdapter(BaseAdapter):
             include_product_drift=is_product_lock,
             include_hand_drift=scene.has_hand_lock,
             include_body_distortion=scene.has_body_morphology,
+            include_reconstruction_drift=is_recon_4x,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)

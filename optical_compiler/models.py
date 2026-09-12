@@ -639,6 +639,7 @@ class ReferenceMode(str, Enum):
     DEPIXELATE_GFX100RF = "depixelate_gfx100rf"  # Universal De-Pixelate + Upscale Restoration (GFX100RF 102MP + Skin Realism Override)
     IDENTITY_LOCK = "identity_lock"  # Strict anatomical and biometric identity lock (zero gender, age, mass, or bone drift)
     PRODUCT_LOCK = "product_lock"  # 100% Commercial SKU lock (cap geometry, label kerning, seams, material finish, SKU color)
+    RECONSTRUCTION_LOCK_4X = "reconstruction_lock_4x"  # Professional 4X Reconstruction Lock (source-locked deep SR, anti-hallucination)
 
     @classmethod
     def from_str(cls, value: Optional[str]) -> ReferenceMode:
@@ -669,6 +670,13 @@ class ReferenceMode(str, Enum):
             "sku_lock": cls.PRODUCT_LOCK,
             "packshot": cls.PRODUCT_LOCK,
             "commercial_lock": cls.PRODUCT_LOCK,
+            "reconstruction_lock_4x": cls.RECONSTRUCTION_LOCK_4X,
+            "recon_4x": cls.RECONSTRUCTION_LOCK_4X,
+            "4x_recon": cls.RECONSTRUCTION_LOCK_4X,
+            "4x_reconstruction": cls.RECONSTRUCTION_LOCK_4X,
+            "reconstruction_lock": cls.RECONSTRUCTION_LOCK_4X,
+            "professional_4x": cls.RECONSTRUCTION_LOCK_4X,
+            "p4x_lock": cls.RECONSTRUCTION_LOCK_4X,
         }
         if normalized in alias_map:
             return alias_map[normalized]
@@ -678,6 +686,77 @@ class ReferenceMode(str, Enum):
         return cls.NONE
 
     from_string = from_str
+
+
+class SuperResolutionBackend(str, Enum):
+    """Deep super-resolution model backends for source-locked 4X reconstruction."""
+
+    REAL_ESRNET_X4PLUS = "realesrnet_x4plus"  # Maximum structural fidelity baseline, minimal hallucination
+    SWINIR_M_X4 = "swinir_m_x4"  # Balanced transformer-based restoration
+    REAL_ESRGAN_X4V3 = "realesrgan_x4v3"  # Controlled perceptual texture with low denoising strength (-dn 0.15)
+    REAL_ESRGAN_X4PLUS = "realesrgan_x4plus"  # Aggressive perceptual sharpness
+    HAT_S_X4 = "hat_s_x4"  # Hybrid attention transformer (CPU-manageable HAT-S)
+    PIL_CONSERVATIVE = "pil_conservative"  # Zero-dependency local mathematical baseline
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> SuperResolutionBackend:
+        if not value:
+            return cls.REAL_ESRNET_X4PLUS
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_").replace(".", "_")
+        aliases = {
+            "realesrnet": cls.REAL_ESRNET_X4PLUS,
+            "realesrnet_x4": cls.REAL_ESRNET_X4PLUS,
+            "realesrnet_x4plus": cls.REAL_ESRNET_X4PLUS,
+            "fidelity": cls.REAL_ESRNET_X4PLUS,
+            "swinir": cls.SWINIR_M_X4,
+            "swinir_m": cls.SWINIR_M_X4,
+            "swinir_m_x4": cls.SWINIR_M_X4,
+            "realesrgan_v3": cls.REAL_ESRGAN_X4V3,
+            "realesrgan_x4v3": cls.REAL_ESRGAN_X4V3,
+            "realesr_general_x4v3": cls.REAL_ESRGAN_X4V3,
+            "balanced": cls.REAL_ESRGAN_X4V3,
+            "realesrgan": cls.REAL_ESRGAN_X4PLUS,
+            "realesrgan_plus": cls.REAL_ESRGAN_X4PLUS,
+            "realesrgan_x4plus": cls.REAL_ESRGAN_X4PLUS,
+            "perceptual": cls.REAL_ESRGAN_X4PLUS,
+            "hat": cls.HAT_S_X4,
+            "hat_s": cls.HAT_S_X4,
+            "hat_s_x4": cls.HAT_S_X4,
+            "pil": cls.PIL_CONSERVATIVE,
+            "pil_conservative": cls.PIL_CONSERVATIVE,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for m in cls:
+            if m.value == norm or m.name.lower() == norm:
+                return m
+        return cls.REAL_ESRNET_X4PLUS
+
+
+@dataclass
+class ReconstructionLock4XSpec:
+    """Specification for the Professional 4X Reconstruction Lock Protocol."""
+
+    backend: SuperResolutionBackend = SuperResolutionBackend.REAL_ESRNET_X4PLUS
+    denoise_strength: float = 0.15  # Recommended range: 0.10 - 0.25 (preserves source texture)
+    tile_size: int = 256  # 128 for low-RAM CPU, 256 for balanced
+    tile_pad: int = 16
+    blend_ratio: float = 0.20  # 15% - 30% blend of sharper detail into fidelity master
+    protect_sky_haze: bool = True  # Exclude sky, fog, atmospheric depth from sharpening/noise amplification
+    anti_model_stacking: bool = True  # Prohibit serial model stacking that compounds hallucination
+    linear_scale: int = 4  # Strictly 4X linear (16X pixel count)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "backend": self.backend.value,
+            "denoise_strength": self.denoise_strength,
+            "tile_size": self.tile_size,
+            "tile_pad": self.tile_pad,
+            "blend_ratio": self.blend_ratio,
+            "protect_sky_haze": self.protect_sky_haze,
+            "anti_model_stacking": self.anti_model_stacking,
+            "linear_scale": self.linear_scale,
+        }
 
 
 class BodyVolumeRegion(str, Enum):
@@ -1589,6 +1668,22 @@ class NegativeShield:
             "grotesque exaggeration",
         ]
     )
+    reconstruction_drift: list[str] = field(
+        default_factory=lambda: [
+            "generative hallucination",
+            "diffusion drift",
+            "invented terrain",
+            "altered geology",
+            "rock strata distortion",
+            "sky grain",
+            "sky halos",
+            "atmospheric haze noise",
+            "sequential upscaling artifacts",
+            "over-sharpening halos",
+            "tiling boundary seams",
+            "model stacking artifacts",
+        ]
+    )
 
     def all_tokens(
         self,
@@ -1600,6 +1695,7 @@ class NegativeShield:
         include_product_drift: bool = False,
         include_hand_drift: bool = False,
         include_body_distortion: bool = False,
+        include_reconstruction_drift: bool = False,
     ) -> list[str]:
         """Return a flat list of all negative tokens across selected categories."""
         tokens = list(self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift)
@@ -1661,6 +1757,11 @@ class NegativeShield:
                     seen.add(t)
         if include_body_distortion:
             for t in self.body_distortion:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
+        if include_reconstruction_drift:
+            for t in self.reconstruction_drift:
                 if t not in seen:
                     tokens.append(t)
                     seen.add(t)
@@ -1785,6 +1886,7 @@ class SceneInput:
     min_file_mb: Optional[float] = None
     lighting_environment: Optional[LightingEnvironmentSpec] = None
     series_cohesion: Optional[SeriesCohesionSpec] = None
+    reconstruction_lock: Optional[ReconstructionLock4XSpec] = None
 
     @property
     def has_product_lock(self) -> bool:
@@ -1953,6 +2055,13 @@ class SceneInput:
             or self.min_file_mb
             or (self.print_spec and (self.print_spec.width_in > 0 or self.print_spec.height_in > 0))
         )
+
+    @property
+    def has_reconstruction_lock_4x(self) -> bool:
+        """Return True if 4X reconstruction lock mode or spec is active."""
+        if self.reference and self.reference.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X:
+            return True
+        return self.reconstruction_lock is not None
 
 
 

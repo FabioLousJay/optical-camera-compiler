@@ -57,6 +57,7 @@ class JSONAllInOneAdapter(BaseAdapter):
             include_product_drift=scene.has_product_lock,
             include_hand_drift=scene.has_hand_lock,
             include_body_distortion=scene.has_body_morphology,
+            include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X),
         )
         if scene.custom_negatives:
             all_neg_tokens.extend(scene.custom_negatives)
@@ -64,11 +65,15 @@ class JSONAllInOneAdapter(BaseAdapter):
         # 3. Resolve resolution
         if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
             resolution_str = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution)"
+        elif ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X or scene.has_reconstruction_lock_4x:
+            resolution_str = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area)"
         else:
             resolution_str = scene.output_resolution or f"12MP PNG, {scene.aspect_ratio}"
 
         # 4. Build master All-in-One JSON dictionary
-        if scene.has_stress_probe:
+        if scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X:
+            protocol_name = "Professional 4X Reconstruction Lock Protocol (Linear Expansion + High-Fidelity Multi-Model Blend)"
+        elif scene.has_stress_probe:
             probe_name = scene.stress_probe.name if scene.stress_probe else "NONE"
             protocol_name = f"PFEP v1.0 Diagnostic Stress Probe Protocol [{probe_name}]"
         elif scene.has_lighting_environment or scene.has_series_cohesion:
@@ -96,6 +101,10 @@ class JSONAllInOneAdapter(BaseAdapter):
         else:
             protocol_name = "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
 
+        is_schema_3_6 = bool(
+            scene.has_reconstruction_lock_4x
+            or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X
+        )
         is_schema_3_5 = bool(
             scene.has_stress_probe
             or scene.has_lighting_environment
@@ -115,7 +124,7 @@ class JSONAllInOneAdapter(BaseAdapter):
             or scene.has_copy_space
             or scene.has_gobo
         )
-        schema_ver = "3.5" if is_schema_3_5 else ("3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2"))
+        schema_ver = "3.6" if is_schema_3_6 else ("3.5" if is_schema_3_5 else ("3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2")))
 
         all_in_one_data: dict[str, Any] = {
             "$schema": "https://raw.githubusercontent.com/FabioLousJay/optical-camera-compiler/main/schemas/all_in_one_prompt.json",
@@ -289,6 +298,18 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "shadow_depth": scene.series_cohesion.shadow_depth if scene.series_cohesion else 1.0,
                 "highlight_rolloff": scene.series_cohesion.highlight_rolloff if scene.series_cohesion else 1.0,
             },
+            "reconstruction_lock_4x": {
+                "active": bool(scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X),
+                "linear_scale": 4,
+                "area_scale": 16,
+                "backend": scene.reconstruction_lock.backend.value if scene.reconstruction_lock else "realesrnet_x4plus",
+                "denoise_strength": scene.reconstruction_lock.denoise_strength if scene.reconstruction_lock else 0.15,
+                "blend_ratio": scene.reconstruction_lock.blend_ratio if scene.reconstruction_lock else 0.20,
+                "protect_sky_haze": scene.reconstruction_lock.protect_sky_haze if scene.reconstruction_lock else True,
+                "anti_model_stacking": True,
+                "prohibit_diffusion_hallucination": True,
+                "target_verification": "shasum -a 256 output_file",
+            },
             "content_classification": {
                 "type": scene.content_type.value if scene.content_type else "photograph",
                 "is_flat_reproduction": bool(scene.content_type and scene.content_type.is_flat_reproduction),
@@ -375,6 +396,7 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "product_drift": shield.product_drift if scene.has_product_lock else [],
                 "hand_drift": shield.hand_drift if scene.has_hand_lock else [],
                 "body_distortion": shield.body_distortion if scene.has_body_morphology else [],
+                "reconstruction_drift": shield.reconstruction_drift if (scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) else [],
                 "all_negative_tokens": all_neg_tokens,
             },
             "compiled_prompts": {

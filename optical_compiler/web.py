@@ -3342,7 +3342,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
         """Handle compilation requests via REST API."""
         parsed_path = self.path.split("?")[0]
 
-        if parsed_path not in ("/api/compile", "/api/upscale-102mp", "/api/export-closed-loop"):
+        if parsed_path not in ("/api/compile", "/api/upscale-102mp", "/api/export-closed-loop", "/api/recon-4x"):
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
             return
 
@@ -3352,6 +3352,45 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             body = json.loads(body_bytes.decode("utf-8"))
         except Exception as err:
             self._send_json({"error": f"Invalid JSON payload: {err}"}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/recon-4x":
+            input_path = body.get("input_path") or body.get("image_path")
+            if not input_path:
+                self._send_json({"error": "Missing required field 'input_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+
+            try:
+                from .restoration import PILLOW_AVAILABLE, execute_4x_reconstruction_lock
+            except ImportError:
+                self._send_json({"error": "Restoration module could not be imported."}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+                return
+
+            if not PILLOW_AVAILABLE:
+                self._send_json({"error": "Pillow is not installed."}, status=HTTPStatus.BAD_REQUEST)
+                return
+
+            try:
+                output_path = body.get("output_path") or None
+                backend = body.get("backend", "realesrnet_x4plus")
+                denoise_strength = float(body.get("denoise_strength", 0.15))
+                blend_ratio = float(body.get("blend_ratio", 0.20))
+                protect_sky_haze = bool(body.get("protect_sky_haze", True))
+                output_format = body.get("output_format")
+
+                rep, rep_dict = execute_4x_reconstruction_lock(
+                    input_path=input_path,
+                    output_path=output_path,
+                    backend=backend,
+                    denoise_strength=denoise_strength,
+                    blend_ratio=blend_ratio,
+                    protect_sky_haze=protect_sky_haze,
+                    output_format=output_format,
+                    generate_report=True,
+                )
+                self._send_json(rep_dict)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
             return
 
         if parsed_path == "/api/export-closed-loop":
@@ -3498,6 +3537,11 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 wall_surround=body.get("wall_surround"),
                 gallery_zone=body.get("gallery_zone"),
                 anchor_image_id=body.get("anchor_image_id") or body.get("anchor_id"),
+                reconstruction_lock=body.get("reconstruction_lock") or body.get("recon_4x", False),
+                sr_backend=body.get("sr_backend"),
+                sr_denoise=float(body["sr_denoise"]) if body.get("sr_denoise") is not None else None,
+                sr_blend=float(body["sr_blend"]) if body.get("sr_blend") is not None else None,
+                protect_sky_haze=bool(body.get("protect_sky_haze", True)),
             )
             self._send_json(payload.to_dict())
         except Exception as err:

@@ -23,12 +23,14 @@ from .models import (
     MaterialStyle,
     PaperProfile,
     PrintSpec,
+    ReconstructionLock4XSpec,
     ReferenceImageInput,
     ReferenceMode,
     SceneInput,
     SeriesCohesionSpec,
     StreakFlare,
     StressProbe,
+    SuperResolutionBackend,
     TargetEngine,
 )
 from .profiles import apply_overrides, auto_select_profile, load_profile
@@ -123,6 +125,11 @@ class OpticalCompiler:
         series_cohesion: Optional[SeriesCohesionSpec] = None,
         gallery_zone: Optional[str] = None,
         anchor_image_id: Optional[str] = None,
+        reconstruction_lock: Optional[Union[bool, dict, ReconstructionLock4XSpec]] = None,
+        sr_backend: Optional[Union[str, SuperResolutionBackend]] = None,
+        sr_denoise: Optional[float] = None,
+        sr_blend: Optional[float] = None,
+        protect_sky_haze: bool = True,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -278,6 +285,33 @@ class OpticalCompiler:
                 gallery_zone=gallery_zone,
             )
 
+        # 4X Reconstruction Lock normalization
+        recon_obj: Optional[ReconstructionLock4XSpec] = None
+        if isinstance(reconstruction_lock, ReconstructionLock4XSpec):
+            recon_obj = reconstruction_lock
+        elif isinstance(reconstruction_lock, dict):
+            b_val = reconstruction_lock.get("backend", sr_backend or SuperResolutionBackend.REAL_ESRNET_X4PLUS)
+            if isinstance(b_val, str):
+                b_val = SuperResolutionBackend.from_str(b_val)
+            recon_obj = ReconstructionLock4XSpec(
+                backend=b_val,
+                denoise_strength=float(reconstruction_lock.get("denoise_strength", sr_denoise if sr_denoise is not None else 0.15)),
+                tile_size=int(reconstruction_lock.get("tile_size", 256)),
+                tile_pad=int(reconstruction_lock.get("tile_pad", 16)),
+                blend_ratio=float(reconstruction_lock.get("blend_ratio", sr_blend if sr_blend is not None else 0.20)),
+                protect_sky_haze=bool(reconstruction_lock.get("protect_sky_haze", protect_sky_haze)),
+                anti_model_stacking=bool(reconstruction_lock.get("anti_model_stacking", True)),
+                linear_scale=int(reconstruction_lock.get("linear_scale", 4)),
+            )
+        elif bool(reconstruction_lock) or (ref_obj and ref_obj.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X):
+            b_val = SuperResolutionBackend.from_str(sr_backend) if isinstance(sr_backend, str) else (sr_backend or SuperResolutionBackend.REAL_ESRNET_X4PLUS)
+            recon_obj = ReconstructionLock4XSpec(
+                backend=b_val,
+                denoise_strength=sr_denoise if sr_denoise is not None else 0.15,
+                blend_ratio=sr_blend if sr_blend is not None else 0.20,
+                protect_sky_haze=protect_sky_haze,
+            )
+
         # 2. Build SceneInput
         if isinstance(scene, str):
             scene_input = SceneInput(
@@ -340,6 +374,7 @@ class OpticalCompiler:
                 min_file_mb=min_mb,
                 lighting_environment=le_obj,
                 series_cohesion=sc_obj,
+                reconstruction_lock=recon_obj,
             )
 
         else:
@@ -456,6 +491,8 @@ class OpticalCompiler:
                 scene_input.lighting_environment = le_obj
             if sc_obj is not None:
                 scene_input.series_cohesion = sc_obj
+            if recon_obj is not None:
+                scene_input.reconstruction_lock = recon_obj
 
         # 3. Parse target engine
         engine = (

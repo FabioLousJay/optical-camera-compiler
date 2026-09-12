@@ -100,6 +100,24 @@ class GPTImagesAdapter(BaseAdapter):
                 f"Subject: {scene.subject}."
             )
             sections.append(base_instr)
+        elif ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X or scene.has_reconstruction_lock_4x:
+            recon_spec = scene.reconstruction_lock
+            backend_name = recon_spec.backend.value if recon_spec else "realesrnet_x4plus"
+            denoise_val = recon_spec.denoise_strength if recon_spec else 0.15
+            blend_val = recon_spec.blend_ratio if recon_spec else 0.20
+            base_instr = (
+                "Base instruction (Professional 4X Reconstruction Lock Protocol): "
+                "Strict 4X linear raster reconstruction ($W_{out}=4W_0$, $H_{out}=4H_0$, 16X pixel area). "
+                "Strict source-lock fidelity: preserve exact composition, geography, geology, rock strata, camera angle, and color relationships. "
+                "Zero generative hallucination or terrain redesign (diffusion hallucination strictly prohibited). "
+                f"Super-resolution reconstruction backend: {backend_name} (denoise strength: {denoise_val}, selective high-frequency blend: {blend_val}). "
+                "Sky and atmospheric haze protection: zero noise injection or sharpening artifacts in smooth gradients, clouds, or atmospheric depth. "
+                "Anti-model stacking enforced. "
+                f"Subject: {scene.subject}."
+            )
+            if scene.environment:
+                base_instr += f" Environment: {scene.environment}."
+            sections.append(base_instr)
         elif ref_mode == ReferenceMode.TRANSFORM_ADAPT:
             base_instr = (
                 f"Base instruction: Photographic adaptation with biometric character lock. "
@@ -389,6 +407,8 @@ class GPTImagesAdapter(BaseAdapter):
         # 9. Output Resolution Target & File Quality
         if ref_mode == ReferenceMode.DEPIXELATE_GFX100RF:
             res = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution, scaled to source aspect ratio)"
+        elif ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X or scene.has_reconstruction_lock_4x:
+            res = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area, uncompressed master raster)"
         else:
             res = scene.output_resolution or self._resolve_default_resolution(scene.aspect_ratio)
         res_block = (
@@ -397,6 +417,22 @@ class GPTImagesAdapter(BaseAdapter):
             f"zero chroma subsampling (4:4:4)."
         )
         sections.append(res_block)
+
+        # 4X Reconstruction Lock Protocol Directives
+        if scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X:
+            recon = scene.reconstruction_lock
+            b_val = recon.backend.value if recon else "realesrnet_x4plus"
+            dn_val = recon.denoise_strength if recon else 0.15
+            bl_val = recon.blend_ratio if recon else 0.20
+            sky_txt = "Active (zero synthetic noise or haloing in smooth sky/haze)" if (recon is None or recon.protect_sky_haze) else "Disabled"
+            sections.append(
+                f"4X Reconstruction Lock Directives:\n"
+                f"- Linear Dimension Scaling: Exact 4X linear expansion ($W_{{out}} = 4W_0, H_{{out}} = 4H_0$). Area multiplier: 16X.\n"
+                f"- Super-Resolution Reconstruction Backend: {b_val} (denoise: {dn_val}, selective detail blend: {bl_val}).\n"
+                f"- Sky and Atmospheric Haze Protection: {sky_txt}.\n"
+                "- Anti-Model Stacking: Prohibit sequential model cascades.\n"
+                "- Strict Source Geometry Lock: Prohibit generative hallucination, geological mutation, or terrain drift."
+            )
 
         # PFEP Diagnostic Stress Probe
         if scene.has_stress_probe and scene.stress_probe:
@@ -436,6 +472,7 @@ class GPTImagesAdapter(BaseAdapter):
             include_product_drift=scene.has_product_lock,
             include_hand_drift=scene.has_hand_lock,
             include_body_distortion=scene.has_body_morphology,
+            include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X),
         )
         if scene.custom_negatives:
             neg_tokens.extend(scene.custom_negatives)

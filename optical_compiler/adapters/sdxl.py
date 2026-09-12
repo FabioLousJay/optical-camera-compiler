@@ -33,6 +33,7 @@ class SDXLAdapter(BaseAdapter):
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
+        is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
 
         # 1. Positive Prompt (Weighted camera and texture tokens)
         pos_chunks = []
@@ -67,6 +68,16 @@ class SDXLAdapter(BaseAdapter):
                 "universal de-pixelate and 102MP upscale restoration of reference photo, "
                 "fixed Fujifilm GFX100RF 102MP rendering, Fujinon 35mm f/4 leaf shutter, Reala Ace color response, "
                 "organic human skin realism overriding artificial clarity, strict text preservation"
+            )
+        elif is_recon_4x:
+            recon = scene.reconstruction_lock
+            b_val = recon.backend.value if recon else "realesrnet_x4plus"
+            dn_val = recon.denoise_strength if recon else 0.15
+            bl_val = recon.blend_ratio if recon else 0.20
+            pos_chunks.append(
+                f"Professional 4X Reconstruction Lock, exact 4X linear raster expansion, 16X pixel area, "
+                f"{b_val} backend, denoise {dn_val}, selective detail blend {bl_val}, "
+                "sky and atmospheric haze gradient protection, zero generative hallucination, unaltered geology"
             )
         elif is_restore:
             pos_chunks.append(
@@ -211,6 +222,8 @@ class SDXLAdapter(BaseAdapter):
             ])
         if is_depixelate:
             res_tag = scene.output_resolution or "102MP Medium Format (11648 x 8736)"
+        elif is_recon_4x:
+            res_tag = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area)"
         else:
             res_tag = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
         texture_tokens.append(f"{res_tag}, uncompressed raw quality")
@@ -232,7 +245,7 @@ class SDXLAdapter(BaseAdapter):
 
 
         # 2. Negative Prompt (Comprehensive artifact suppression)
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_identity_lock or is_product_lock or is_recon_4x)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding and not is_product_lock,
@@ -242,6 +255,7 @@ class SDXLAdapter(BaseAdapter):
             include_product_drift=is_product_lock,
             include_hand_drift=scene.has_hand_lock,
             include_body_distortion=scene.has_body_morphology,
+            include_reconstruction_drift=is_recon_4x,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
@@ -314,6 +328,15 @@ class SDXLAdapter(BaseAdapter):
                 "reference_mode": "outpaint_full_body",
                 "outpaint_direction": "downward",
                 "controlnet_inpaint_weight": 0.90,
+            })
+        elif is_recon_4x:
+            recon = scene.reconstruction_lock
+            parameters.update({
+                "reference_mode": "reconstruction_lock_4x",
+                "linear_scale": 4,
+                "backend": recon.backend.value if recon else "realesrnet_x4plus",
+                "denoise_strength": recon.denoise_strength if recon else 0.15,
+                "blend_ratio": recon.blend_ratio if recon else 0.20,
             })
         elif is_restore and ref:
             parameters.update({

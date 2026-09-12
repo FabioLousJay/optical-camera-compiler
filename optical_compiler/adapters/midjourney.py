@@ -36,6 +36,7 @@ class MidjourneyAdapter(BaseAdapter):
         is_depixelate = ref and ref.mode == ReferenceMode.DEPIXELATE_GFX100RF
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
+        is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
 
         # 1. Subject description
         core_elements = []
@@ -59,6 +60,12 @@ class MidjourneyAdapter(BaseAdapter):
         elif is_depixelate:
             core_elements.append(
                 "Universal De-Pixelate and 102MP upscale restoration of reference photo, Fujinon 35mm f/4 leaf shutter, Reala Ace color response"
+            )
+        elif is_recon_4x:
+            recon = scene.reconstruction_lock
+            b_val = recon.backend.value if recon else "realesrnet_x4plus"
+            core_elements.append(
+                f"Professional 4X Reconstruction Lock, 4X linear expansion 16X area, {b_val} backend, protected sky haze gradients, source-locked geometry, zero hallucination"
             )
         elif is_identity_lock:
             core_elements.append(
@@ -210,7 +217,10 @@ class MidjourneyAdapter(BaseAdapter):
             "--v 8.2",
         ]
 
-        if is_depixelate or is_identity_lock or is_product_lock:
+        if is_recon_4x:
+            ref_target = ref.filename if (ref and ref.filename) else "[SOURCE_IMAGE_URL]"
+            flags.extend([f"--sref {ref_target}", "--iw 2.0", "--cw 100"])
+        elif is_depixelate or is_identity_lock or is_product_lock:
             ref_target = ref.filename if (ref and ref.filename) else (scene.product_crop or "[PRODUCT_CROP_URL]")
             flags.extend([f"--sref {ref_target}", "--iw 2.0", "--cw 100"])
         elif is_restore:
@@ -232,6 +242,16 @@ class MidjourneyAdapter(BaseAdapter):
             "computational bokeh",
             "blown highlights",
         ]
+        if is_recon_4x:
+            banned_mj.extend([
+                "generative hallucination",
+                "invented geology",
+                "altered terrain",
+                "rock strata distortion",
+                "sky grain",
+                "sky halos",
+                "stacking artifacts",
+            ])
         if scene.human_skin_realism or is_depixelate:
             banned_mj.extend([
                 "pore stamping",

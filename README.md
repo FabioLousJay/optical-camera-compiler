@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Version: 3.5.0](https://img.shields.io/badge/version-3.5.0-blue.svg)](pyproject.toml)
+[![Version: 3.6.0](https://img.shields.io/badge/version-3.6.0-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 147 Passing](https://img.shields.io/badge/tests-147%20passing-brightgreen.svg)](tests/)
+[![Tests: 167 Passing](https://img.shields.io/badge/tests-167%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -100,6 +100,24 @@ Commercial packaging and SKU generation with forensic anti-drift protection for 
   4. **Gate 4: Material Finish & Specular Response (`--material-finish`)**: Matte, satin, gloss, frosted glass, refractive index, and anti-plastic enforcement.
   5. **Gate 5: SKU Color Integrity (`--sku-color`)**: Exact Pantone/hex brand color lock across shifting scene lighting.
 * **Intelligent Camera Routing**: Commercial product locks auto-route to the **Phase One XF IQ4 150MP Trichromatic** digital back with Schneider Kreuznach optics.
+
+### 🏔️ Mode G: Professional 4X Reconstruction Lock Protocol v3.6 (`recon_4x` / `--recon-4x`)
+Delivers defensible, museum-grade 4X super-resolution upscaling and reconstruction for luxury landscape photography, fine art, and synthetic photography (synthography):
+* **Exact 4X Linear Expansion ($W_{\text{out}} = 4W_0, H_{\text{out}} = 4H_0$)**: Exactly 16X pixel area expansion. Resolves the critical industry failure mode where "upscalers" simply interpolate and enlarge file size without adding genuine photographic microstructure.
+* **Super-Resolution Decision Matrix (`--sr-backend`)**:
+  * `realesrnet_x4plus` (*Master Baseline / Default*): Maximum source structural fidelity, zero hallucinated micro-geometry.
+  * `swinir_m_x4`: Transformer-based real-world SR with balanced acutance and controlled micro-detail.
+  * `realesrgan_x4v3` (*with `-dn 0.15`*): Low denoising strength prevents loss of delicate surface textures.
+  * `hat_s_x4`: Hierarchical Attention Transformer for structural edge definition.
+  * *Explicit Rejection of SUPIR / Diffusion Upscalers*: Diffusion restoration models (SUPIR, etc.) are strictly prohibited due to generative hallucination, terrain alteration, and structural drift.
+* **Frequency Separation & Sky / Atmospheric Haze Protection (`--protect-sky` / `--no-protect-sky`)**: Generates an adaptive luminance difference mask that excludes smooth gradients (sky, clouds, fog, horizon haze) from high-frequency sharpening and micro-noise injection, preventing halos and artificial sky grain.
+* **Selective Detail Blend (`--sr-blend 0.20`)**: Blends 15%–30% of high-frequency texture strictly into structured surfaces (rock strata, tree foliage, fabric weave).
+* **Anti-Model Stacking Law**: Prohibits compounding generative errors by running one super-resolution pass sequentially onto another.
+* **Cryptographic Provenance & Audit Reports**: Generates deterministic SHA-256 hashes, `PROVENANCE.json`, and `RECONSTRUCTION_REPORT.md` alongside lossless master outputs (PNG, TIFF, JPEG).
+* **CLI Execution**:
+  ```bash
+  optical-compiler "Sandstone ridges at sunset" --recon-4x inputs/landscape.png --sr-backend swinir_m_x4 --sr-denoise 0.15 --sr-blend 0.20
+  ```
 
 ---
 
@@ -504,22 +522,15 @@ git clone https://github.com/FabioLousJay/optical-camera-compiler.git
 ```
 
 Restart ComfyUI, then right-click on the graph canvas:
-**Add Node ➔ prompt/optical ➔ 📷 Optical Camera Compiler**
-
-* **Outputs**:
+* **Add Node ➔ prompt/optical ➔ 📷 Optical Camera Compiler**
   * `positive_prompt` ➔ Pipe directly into `CLIP Text Encode (Prompt)`
   * `negative_prompt` ➔ Pipe into `CLIP Text Encode (Negative)`
   * `unified_payload` ➔ Full prompt with negative shield for single-prompt nodes (GPT / Flux.1 / Midjourney)
-* **Controls**:
-  * `camera_rig`: Select from all 19 camera systems or `auto` (Sony a1 II, Fujifilm GFX100RF, Phase One IQ4, Leica, Hasselblad, ARRI, etc.).
-  * `model_target`: `gpt_images`, `imagen`, `midjourney`, `flux`, `sdxl`, `json`, `raw_spec`.
-  * `reference_mode`: `disabled`, `transform_adapt`, `restore_upscale`, `outpaint_full_body`, `depixelate_gfx100rf`.
-  * `content_type`: `photograph`, `portrait`, `product_photo`, `document_scan`, `poster_or_flyer`, `meme_or_infographic`, `ui_or_screenshot`, `mixed_content`.
-  * `human_skin_realism`: `enabled` / `disabled` (prioritizes skin realism over sharpening, bans synthetic pore stamps).
-  * `aspect_ratio`: `9:11` (default 12MP), `4:5`, `3:2`, `4:3`, `5:4`, `16:9`, `1:1`, `21:9`, `9:16`.
-  * `brutal_sharpness_protocol`: `enabled` / `disabled`.
-  * `suppress_text_branding`: `enabled` / `disabled`.
-
+  * Controls: `camera_rig` (19 systems or `auto`), `model_target`, `reference_mode` (`disabled`, `transform_adapt`, `restore_upscale`, `outpaint_full_body`, `depixelate_gfx100rf`, `product_lock`, `reconstruction_lock_4x`), `content_type`, `human_skin_realism`, `aspect_ratio`.
+* **Add Node ➔ upscale/optical ➔ 🔬 Optical 4X Reconstruction Lock**
+  * Dedicated high-fidelity image super-resolution execution node.
+  * Inputs: `image_path`, `backend` (`realesrnet_x4plus`, `swinir_m_x4`, `realesrgan_x4v3`, `hat_s_x4`), `denoise_strength`, `blend_ratio`, `protect_sky_haze`, `output_format`.
+  * Outputs: `output_image_path`, `reconstruction_report_md`.
 ---
 
 ## Quickstart & Installation

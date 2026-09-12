@@ -98,14 +98,67 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--ref-mode",
         dest="ref_mode",
-        choices=["restore", "transform", "depixelate", "depixelate_gfx100rf", "identity", "identity_lock", "product", "product_lock", "product_crop"],
+        choices=[
+            "restore", "transform", "depixelate", "depixelate_gfx100rf", "identity", "identity_lock",
+            "product", "product_lock", "product_crop", "recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock"
+        ],
         default="restore",
-        help="Reference mode: 'restore' (optical remaster), 'transform' (re-shoot/adapt), 'identity_lock' (strict anatomical lock), 'depixelate_gfx100rf' (v3.1 102MP lock), or 'product_lock' (100%% SKU lock).",
+        help="Reference mode: 'restore', 'transform', 'identity_lock', 'depixelate_gfx100rf', 'product_lock', or 'recon_4x' (4X Reconstruction Lock).",
     )
     parser.add_argument(
         "--depixelate",
         action="store_true",
         help="Shortcut for --ref-mode depixelate_gfx100rf (Universal De-Pixelate & 102MP Upscale Restoration).",
+    )
+    parser.add_argument(
+        "--recon-4x",
+        "--reconstruction-lock-4x",
+        dest="recon_4x",
+        nargs="?",
+        const=True,
+        default=None,
+        help="Activate Professional 4X Reconstruction Lock Protocol (exact 4X linear expansion, source lock, multi-model blend). Optionally pass an image path to execute reconstruction directly.",
+    )
+    parser.add_argument(
+        "--sr-backend",
+        dest="sr_backend",
+        choices=["realesrnet_x4plus", "swinir_m_x4", "realesrgan_x4v3", "realesrgan_x4plus", "hat_s_x4", "pil_conservative"],
+        default="realesrnet_x4plus",
+        help="Super-resolution model backend for 4X Reconstruction Lock (default: 'realesrnet_x4plus').",
+    )
+    parser.add_argument(
+        "--sr-denoise",
+        dest="sr_denoise",
+        type=float,
+        default=0.15,
+        help="Denoising strength for SR backend (0.0 to 1.0, default: 0.15 for controlled detail without texture wipe).",
+    )
+    parser.add_argument(
+        "--sr-blend",
+        dest="sr_blend",
+        type=float,
+        default=0.20,
+        help="High-frequency detail blend ratio (0.0 to 1.0, default: 0.20 for 15%%-30%% detail composite on textured regions).",
+    )
+    parser.add_argument(
+        "--no-protect-sky",
+        dest="protect_sky_haze",
+        action="store_false",
+        default=True,
+        help="Disable automatic sky, cloud, and atmospheric haze protection masking during 4X reconstruction.",
+    )
+    parser.add_argument(
+        "--recon-out",
+        dest="recon_out",
+        default=None,
+        help="Output destination path for 4X reconstruction execution.",
+    )
+    parser.add_argument(
+        "--recon-format",
+        dest="recon_format",
+        choices=["png", "tiff", "tif", "jpeg", "jpg"],
+        default=None,
+        help="Target output format for 4X reconstruction.",
     )
     parser.add_argument(
         "--product-lock",
@@ -682,6 +735,42 @@ def main(argv: Optional[list[str]] = None) -> int:
             sys.stderr.write(f"Closed-Loop Export Error: {err}\n")
             return 1
 
+    # 1c. Handle direct 4X reconstruction request if an image path was provided to --recon-4x
+    if isinstance(getattr(args, "recon_4x", None), str) and Path(args.recon_4x).exists():
+        try:
+            from .restoration import execute_4x_reconstruction_lock
+            rep, rep_d = execute_4x_reconstruction_lock(
+                args.recon_4x,
+                output_path=getattr(args, "recon_out", None),
+                backend=getattr(args, "sr_backend", "realesrnet_x4plus"),
+                denoise_strength=getattr(args, "sr_denoise", 0.15),
+                blend_ratio=getattr(args, "sr_blend", 0.20),
+                protect_sky_haze=getattr(args, "protect_sky_haze", True),
+                output_format=getattr(args, "recon_format", None),
+                generate_report=True,
+            )
+            if args.json:
+                print(json.dumps(rep_d, indent=2))
+            else:
+                print("=" * 80)
+                print("PROFESSIONAL 4X RECONSTRUCTION LOCK ENGINE")
+                print("=" * 80)
+                print(f"Status:       {'PASSED (Verified 4X Linear Source Lock)' if rep.validation_passed else 'FAILED'}")
+                print(f"Input:        {rep.input_path} ({rep.source_dimensions[0]}x{rep.source_dimensions[1]}, {rep.source_megapixels} MP)")
+                print(f"Output:       {rep.output_path} ({rep.output_dimensions[0]}x{rep.output_dimensions[1]}, {rep.output_megapixels} MP)")
+                print(f"Multiplier:   {rep.linear_multiplier}X linear ({rep.area_multiplier}X pixel area)")
+                print(f"Backend:      {rep.backend} (denoise: {rep.denoise_strength}, detail blend: {rep.blend_ratio})")
+                print(f"Sky & Haze:   {'PROTECTED (Gradient Mask)' if rep.sky_haze_protected else 'UNMASKED'}")
+                print(f"File Size:    {rep.file_size_mb:.2f} MB ({rep.file_size_bytes:,} bytes)")
+                print(f"SHA-256:      {rep.sha256}")
+                print(f"Time:         {rep.execution_seconds:.4f}s")
+                if rep.validation_failures:
+                    print(f"Failures:     {', '.join(rep.validation_failures)}")
+            return 0 if rep.validation_passed else 1
+        except Exception as err:
+            sys.stderr.write(f"4X Reconstruction Error: {err}\n")
+            return 1
+
     if not args.scene and getattr(args, "scene_flag", None):
         args.scene = args.scene_flag
 
@@ -700,10 +789,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         ref_mode_choice = "depixelate_gfx100rf"
     elif getattr(args, "product_lock", False):
         ref_mode_choice = "product_lock"
+    elif getattr(args, "recon_4x", None) is not None:
+        ref_mode_choice = "recon_4x"
 
     ref_dict = None
     ref_path = args.reference or getattr(args, "product_crop", None)
-    if ref_path or ref_mode_choice in ("product_lock", "product", "product_crop"):
+    if ref_path or ref_mode_choice in ("product_lock", "product", "product_crop", "recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock"):
         if ref_mode_choice in ("depixelate", "depixelate_gfx100rf"):
             mode_str = "depixelate_gfx100rf"
             default_denoise = 0.25
@@ -713,6 +804,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         elif ref_mode_choice in ("product_lock", "product", "product_crop", "sku_lock", "packshot"):
             mode_str = "product_lock"
             default_denoise = 0.20
+        elif ref_mode_choice in ("recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock"):
+            mode_str = "reconstruction_lock_4x"
+            default_denoise = getattr(args, "sr_denoise", 0.15)
         elif ref_mode_choice == "restore":
             mode_str = "restore_upscale"
             default_denoise = 0.35
@@ -722,7 +816,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 
         denoise_val = args.denoise if args.denoise is not None else default_denoise
         ref_dict = {
-            "filename": ref_path or "product_reference_crop.png",
+            "filename": ref_path or (str(args.recon_4x) if isinstance(args.recon_4x, str) else "source_reference.png"),
             "mode": mode_str,
             "fidelity_lock": args.fidelity_lock,
             "denoise_strength": denoise_val,
@@ -738,6 +832,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         "lighting": args.lighting,
         "aspect_ratio": args.aspect_ratio,
         "reference": ref_dict,
+        "reconstruction_lock": bool(getattr(args, "recon_4x", None) is not None or ref_mode_choice in ("recon_4x", "reconstruction_lock_4x", "4x_recon", "p4x_lock")),
+        "sr_backend": getattr(args, "sr_backend", "realesrnet_x4plus"),
+        "sr_denoise": getattr(args, "sr_denoise", 0.15),
+        "sr_blend": getattr(args, "sr_blend", 0.20),
+        "protect_sky_haze": getattr(args, "protect_sky_haze", True),
         "product_crop": getattr(args, "product_crop", None),
         "sku_color": getattr(args, "sku_color", None),
         "cap_geometry": getattr(args, "cap_geometry", None),
@@ -916,6 +1015,62 @@ def upscaler_main(argv: Optional[list[str]] = None) -> int:
         return 0 if report["validation_passed"] else 1
     except Exception as err:
         sys.stderr.write(f"102MP Upscale Error: {err}\n")
+        return 1
+
+
+def recon_4x_main(argv: Optional[list[str]] = None) -> int:
+    """Dedicated CLI entrypoint for Professional 4X Reconstruction Lock Protocol."""
+    parser = argparse.ArgumentParser(
+        prog="optical-recon-4x",
+        description="Professional 4X Reconstruction Lock and Super-Resolution Engine.",
+    )
+    parser.add_argument("image", help="Path to input image file.")
+    parser.add_argument("-o", "--output", help="Optional destination output path.")
+    parser.add_argument(
+        "--backend",
+        choices=["realesrnet_x4plus", "swinir_m_x4", "realesrgan_x4v3", "realesrgan_x4plus", "hat_s_x4", "pil_conservative"],
+        default="realesrnet_x4plus",
+        help="Super-resolution backend (default: realesrnet_x4plus).",
+    )
+    parser.add_argument("--denoise", type=float, default=0.15, help="Denoising strength (default: 0.15).")
+    parser.add_argument("--blend", type=float, default=0.20, help="Detail blend ratio (default: 0.20).")
+    parser.add_argument("--no-protect-sky", dest="protect_sky", action="store_false", default=True, help="Disable sky protection mask.")
+    parser.add_argument("-f", "--format", choices=["png", "tiff", "tif", "jpeg", "jpg"], help="Output format.")
+    parser.add_argument("--json", action="store_true", help="Output raw JSON execution report.")
+    args = parser.parse_args(argv)
+
+    try:
+        from .restoration import execute_4x_reconstruction_lock
+        rep, rep_d = execute_4x_reconstruction_lock(
+            args.image,
+            output_path=args.output,
+            backend=args.backend,
+            denoise_strength=args.denoise,
+            blend_ratio=args.blend,
+            protect_sky_haze=args.protect_sky,
+            output_format=args.format,
+            generate_report=True,
+        )
+        if args.json:
+            print(json.dumps(rep_d, indent=2))
+        else:
+            print("=" * 80)
+            print("PROFESSIONAL 4X RECONSTRUCTION LOCK ENGINE")
+            print("=" * 80)
+            print(f"Status:       {'PASSED (Verified 4X Linear Source Lock)' if rep.validation_passed else 'FAILED'}")
+            print(f"Input:        {rep.input_path} ({rep.source_dimensions[0]}x{rep.source_dimensions[1]}, {rep.source_megapixels} MP)")
+            print(f"Output:       {rep.output_path} ({rep.output_dimensions[0]}x{rep.output_dimensions[1]}, {rep.output_megapixels} MP)")
+            print(f"Multiplier:   {rep.linear_multiplier}X linear ({rep.area_multiplier}X pixel area)")
+            print(f"Backend:      {rep.backend} (denoise: {rep.denoise_strength}, detail blend: {rep.blend_ratio})")
+            print(f"Sky & Haze:   {'PROTECTED (Gradient Mask)' if rep.sky_haze_protected else 'UNMASKED'}")
+            print(f"File Size:    {rep.file_size_mb:.2f} MB ({rep.file_size_bytes:,} bytes)")
+            print(f"SHA-256:      {rep.sha256}")
+            print(f"Time:         {rep.execution_seconds:.4f}s")
+            if rep.validation_failures:
+                print(f"Failures:     {', '.join(rep.validation_failures)}")
+        return 0 if rep.validation_passed else 1
+    except Exception as err:
+        sys.stderr.write(f"4X Reconstruction Error: {err}\n")
         return 1
 
 

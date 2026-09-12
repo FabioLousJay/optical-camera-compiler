@@ -13,6 +13,7 @@ from .models import (
     LightingSetup,
     MicroPhysics,
     NegativeShield,
+    ReconstructionLock4XSpec,
     ReferenceImageInput,
     ReferenceMode,
     RendererScorecard,
@@ -20,6 +21,7 @@ from .models import (
     SensorOptics,
     SeriesCohesionSpec,
     StressProbe,
+    SuperResolutionBackend,
     TargetEngine,
 )
 from .pfep import (
@@ -31,10 +33,12 @@ from .profiles import apply_overrides, auto_select_profile, load_profile
 from .restoration import (
     EXPORT_PROFILES,
     PrintSpec,
+    ReconstructionReport,
     RestorationConfig,
     RunReport,
     add_micro_noise,
     calculate_exact_ratio_102mp_dimensions,
+    execute_4x_reconstruction_lock,
     export_closed_loop,
     inches_to_pixels,
     restore_and_upscale_102mp,
@@ -43,7 +47,7 @@ from .restoration import (
     viewing_distance_inches,
 )
 
-__version__ = "3.5.0"
+__version__ = "3.6.0"
 
 __all__ = [
     "OpticalCompiler",
@@ -81,6 +85,10 @@ __all__ = [
     "sha256_file",
     "export_closed_loop",
     "RunReport",
+    "ReconstructionLock4XSpec",
+    "SuperResolutionBackend",
+    "ReconstructionReport",
+    "execute_4x_reconstruction_lock",
     "init_pfep_project",
     "PROMPT_TEMPLATES",
     "RUN_LOG_TEMPLATE",

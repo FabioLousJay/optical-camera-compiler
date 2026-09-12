@@ -1,7 +1,6 @@
-"""ComfyUI custom node interface for Optical Camera Compiler."""
-
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from .compiler import compile_scene
@@ -19,12 +18,14 @@ from .models import (
     LightingRatio,
     MaterialStyle,
     PaperProfile,
+    ReconstructionLock4XSpec,
     ReferenceImageInput,
     ReferenceMode,
     SceneInput,
     SeriesCohesionSpec,
     StreakFlare,
     StressProbe,
+    SuperResolutionBackend,
 )
 
 RIG_NAMES = [
@@ -123,6 +124,7 @@ class OpticalCameraCompilerNode:
                         "identity_lock",
                         "product_lock",
                         "depixelate_gfx100rf",
+                        "reconstruction_lock_4x",
                         "outpaint_full_body",
                     ],
                     {"default": "disabled"},
@@ -320,6 +322,7 @@ class OpticalCameraCompilerNode:
         profile_id = RIG_NAME_TO_ID.get(camera_rig, "auto")
 
         ref_input = None
+        ref_mode = ReferenceMode.NONE
         if reference_mode in (
             "transform_adapt",
             "restore_upscale",
@@ -327,6 +330,7 @@ class OpticalCameraCompilerNode:
             "product_lock",
             "depixelate_gfx100rf",
             "outpaint_full_body",
+            "reconstruction_lock_4x",
         ) or product_crop.strip():
             mode_map = {
                 "transform_adapt": ReferenceMode.TRANSFORM_ADAPT,
@@ -335,6 +339,7 @@ class OpticalCameraCompilerNode:
                 "product_lock": ReferenceMode.PRODUCT_LOCK,
                 "depixelate_gfx100rf": ReferenceMode.DEPIXELATE_GFX100RF,
                 "outpaint_full_body": ReferenceMode.OUTPAINT_FULL_BODY,
+                "reconstruction_lock_4x": ReferenceMode.RECONSTRUCTION_LOCK_4X,
             }
             ref_mode = mode_map.get(reference_mode, ReferenceMode.PRODUCT_LOCK if product_crop.strip() else ReferenceMode.NONE)
             if ref_mode == ReferenceMode.PRODUCT_LOCK:
@@ -414,6 +419,15 @@ class OpticalCameraCompilerNode:
                 gallery_zone=gallery_zone.strip() if gallery_zone.strip() else None,
             )
 
+        recon_spec = None
+        if ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X:
+            recon_spec = ReconstructionLock4XSpec(
+                backend=SuperResolutionBackend.REAL_ESRNET_X4PLUS,
+                denoise_strength=0.15,
+                blend_ratio=0.20,
+                protect_sky_haze=True,
+            )
+
         scene = SceneInput(
             subject=subject.strip(),
             environment=environment.strip() if environment.strip() else None,
@@ -456,6 +470,7 @@ class OpticalCameraCompilerNode:
             min_file_mb=min_mb_val,
             lighting_environment=le_spec,
             series_cohesion=sc_spec,
+            reconstruction_lock=recon_spec,
         )
 
         result = compile_scene(
@@ -605,14 +620,86 @@ class OpticalClosedLoopExporterNode:
         )
 
 
+class Optical4XReconstructionLockNode:
+    """ComfyUI custom node for Professional 4X Reconstruction Lock Protocol."""
+
+    @classmethod
+    def INPUT_TYPES(cls) -> dict[str, Any]:
+        return {
+            "required": {
+                "image_path": ("STRING", {"default": "input_image.png"}),
+                "backend": (
+                    [
+                        "realesrnet_x4plus (Structural Fidelity Master)",
+                        "swinir_m_x4 (Balanced Transformer)",
+                        "realesrgan_x4v3 (Controlled Detail -dn 0.15)",
+                        "realesrgan_x4plus (Aggressive Perceptual Sharpness)",
+                        "hat_s_x4 (Hybrid Attention Transformer)",
+                        "pil_conservative (Zero Hallucination Lanczos)",
+                    ],
+                    {"default": "realesrnet_x4plus (Structural Fidelity Master)"},
+                ),
+                "denoise_strength": ("FLOAT", {"default": 0.15, "min": 0.0, "max": 1.0, "step": 0.01}),
+                "blend_ratio": ("FLOAT", {"default": 0.20, "min": 0.0, "max": 1.0, "step": 0.01}),
+                "protect_sky_haze": (["enabled", "disabled"], {"default": "enabled"}),
+                "output_format": (["PNG", "TIFF", "JPEG"], {"default": "PNG"}),
+            },
+            "optional": {
+                "output_path": ("STRING", {"default": ""}),
+            },
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "FLOAT", "BOOLEAN")
+    RETURN_NAMES = ("output_path", "sha256", "report_markdown", "file_mb", "validation_passed")
+    FUNCTION = "reconstruct_4x"
+    CATEGORY = "image/upscaling"
+
+    def reconstruct_4x(
+        self,
+        image_path: str,
+        backend: str = "realesrnet_x4plus (Structural Fidelity Master)",
+        denoise_strength: float = 0.15,
+        blend_ratio: float = 0.20,
+        protect_sky_haze: str = "enabled",
+        output_format: str = "PNG",
+        output_path: str = "",
+    ) -> tuple[str, str, str, float, bool]:
+        from .restoration import execute_4x_reconstruction_lock
+
+        in_p = image_path.strip()
+        out_p = output_path.strip() if output_path.strip() else None
+        backend_key = backend.split(" ")[0].strip()
+
+        report, _ = execute_4x_reconstruction_lock(
+            input_path=in_p,
+            output_path=out_p,
+            backend=backend_key,
+            denoise_strength=denoise_strength,
+            blend_ratio=blend_ratio,
+            protect_sky_haze=(protect_sky_haze == "enabled"),
+            output_format=output_format,
+            generate_report=True,
+        )
+
+        return (
+            report.output_path,
+            report.sha256,
+            report.to_markdown(),
+            report.file_size_mb,
+            report.validation_passed,
+        )
+
+
 NODE_CLASS_MAPPINGS = {
     "OpticalCameraCompiler": OpticalCameraCompilerNode,
     "OpticalConservative102MPUpscaler": OpticalConservative102MPUpscalerNode,
     "OpticalClosedLoopExporter": OpticalClosedLoopExporterNode,
+    "Optical4XReconstructionLock": Optical4XReconstructionLockNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "OpticalCameraCompiler": "📷 Optical Camera Compiler",
     "OpticalConservative102MPUpscaler": "🔬 PIL Conservative 102MP Upscaler Lock",
     "OpticalClosedLoopExporter": "🔒 Closed-Loop Resolution Engine & Provenance",
+    "Optical4XReconstructionLock": "🚀 4X Reconstruction Lock Engine",
 }
