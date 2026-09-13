@@ -4,7 +4,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Version: 3.8.0](https://img.shields.io/badge/version-3.8.0-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 197 Passing](https://img.shields.io/badge/tests-197%20passing-brightgreen.svg)](tests/)
+[![Tests: 198 Passing](https://img.shields.io/badge/tests-198%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -799,6 +799,23 @@ python3 -m optical_compiler "De-pixelate damaged product packaging photo" \
   --target midjourney \
   -c
 ```
+
+### 13. Web Studio Console: Organized Camera Style & Ambient Style Dropdowns
+The Web Studio interactive console (`python3 -m optical_compiler.web --port 8000`) features categorized dual dropdowns for modular prompt engineering:
+* **📷 Camera Style Dropdown**:
+  * **Medium Format Titans**: Phase One XF IQ4 150MP, Hasselblad H6D-100c, Hasselblad X2D II 100C, Fujifilm GFX 100 II, FUJIFILM GFX100RF.
+  * **Leica Precision Systems**: Leica M11 60MP, Leica M6 Analog, Leica Q3 Monochrom, Leica SL2 Motion Blur, Leica SL3-P Maestro IV.
+  * **High-Speed & High-Resolution Flagships**: Sony a1 II (1/400s flash sync), Sony Alpha 7R V (61MP horology & flat copy-stand), Canon EOS R5 Mark II, Canon EOS R1 (action ballet), Nikon Z 9 Plena, Panasonic LUMIX S1R II (1:1 micro-science).
+  * **Cinema & Anamorphic Systems**: ARRI Alexa 35 (Cooke Look & 2.0x Anamorphic Scope), Sony FX Venice line.
+  * **Analog Sheet Film & Classic Formats**: Linhof Master Technika 4x5, Pentax 67 II, Hasselblad 500C/M.
+* **🌤️ Ambient Style Dropdown**:
+  * **Cities & Urban Streetscapes**: Parisian Saint-Germain, Tokyo Shinjuku neon alleys, New York SoHo lofts, London Mayfair mews, Milan Brera porticos, Kyoto Gion twilight, Berlin Mitte concrete.
+  * **Luxury Hospitality**: Amalfi Coast villa terraces, Manhattan modernist penthouses, Parisian Grand Palace lobbies, Kyoto luxury ryokans, Saint-Moritz alpine chalets, intimate speakeasy cocktail lounges.
+  * **Coastal & Maritime**: Mediterranean white cliffsides, Atlantic ocean sand dunes, Nordic fjords, Polynesian tropical lagoons, Big Sur marine layer bluffs.
+  * **Rural Landscapes & Wild Terroir**: Tuscan Chianti vineyards, Pacific Northwest pine forests, Cotswolds cottage gardens, Mojave sandstone plateaus, Scottish Highland moors.
+  * **Commercial Studio & Exhibition**: Cosmetic packshots with water droplets, Haute Couture infinity coves with Para 220, Carrara sculptor ateliers, watchmaker micro-benches, museum rotundas, Venetian gobo hero shots.
+  * **Mastery Protocols**: 4D liquid glass & latex, heavyweight body morphology, Baryta fine art prepress, Universal De-Pixelate v2.0 OCR safety, pure monochromatic luminance.
+* **↺ Clear / Build Your Own**: One-click action wiping all parameters and resetting dropdowns to let users construct custom prompts completely from scratch.
 
 ---
 

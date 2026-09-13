@@ -193,6 +193,50 @@ class TestWebStudioHandler(unittest.TestCase):
             self.assertTrue(res_data["exact_aspect_ratio_preserved"])
             self.assertEqual(res_data["output_format"], "PNG")
 
+    def test_get_root_html_camera_and_ambient_dropdowns(self) -> None:
+        """Verify root / returns HTML containing both Camera Style and Ambient Style dropdowns and Clear / Build Your Own."""
+        status, headers, body = self._execute_request("GET", "/")
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+        
+        # Verify dual dropdown IDs and labels
+        self.assertIn('id="cameraPresetSelect"', html)
+        self.assertIn('id="ambientPresetSelect"', html)
+        self.assertIn("Camera Style:", html)
+        self.assertIn("Ambient Style:", html)
+
+        # Verify Clear / Build Your Own button and options
+        self.assertIn("Clear / Build Your Own", html)
+        self.assertIn("-- Clear / Build Your Own (Custom Rig) --", html)
+        self.assertIn("-- Clear / Build Your Own (Custom Ambience) --", html)
+
+        # Verify legacy compatibility shim
+        self.assertIn('id="scenarioSelect"', html)
+
+        # Verify key camera presets in the HTML
+        self.assertIn("cam_phase_one_iq4_still", html)
+        self.assertIn("cam_leica_m11_reportage", html)
+        self.assertIn("cam_leica_q3_monochrom", html)
+        self.assertIn("cam_leica_sl2_motion_blur", html)
+        self.assertIn("cam_sony_a1_ii_flash_freeze", html)
+        self.assertIn("cam_canon_eos_r5_ii_vogue", html)
+        self.assertIn("cam_canon_eos_r1_action", html)
+        self.assertIn("cam_nikon_z9_plena", html)
+        self.assertIn("cam_panasonic_s1rii_micro", html)
+        self.assertIn("cam_arri_alexa_35_anamorphic", html)
+        self.assertIn("cam_linhof_4x5_architectural", html)
+        self.assertIn("cam_pentax_67_bokeh_king", html)
+
+        # Verify key ambient presets in the HTML
+        self.assertIn("amb_paris_haussmann", html)
+        self.assertIn("amb_tokyo_shinjuku", html)
+        self.assertIn("amb_amalfi_terrace", html)
+        self.assertIn("amb_tuscan_vineyard", html)
+        self.assertIn("amb_cosmetic_packshot", html)
+        self.assertIn("amb_4d_liquid_glass", html)
+        self.assertIn("amb_depixel_v2_restoration", html)
+        self.assertIn("amb_monochrome_luminance", html)
+
 
 if __name__ == "__main__":
     unittest.main()

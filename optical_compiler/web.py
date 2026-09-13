@@ -133,23 +133,28 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       50% { opacity: 0.3; transform: scale(0.85); }
     }
 
-    /* SCENARIO BAR (DROPDOWN + SURPRISE CONTROLS) */
+    /* SCENARIO BAR (ORGANIZED BY CAMERA STYLE & AMBIENT STYLE + BUILD YOUR OWN) */
     .scenario-bar {
       background: #0b0e14;
       border-bottom: 1px solid var(--border-subtle);
-      padding: 0.75rem 2rem;
+      padding: 0.85rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .scenario-controls-container {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
+      gap: 1rem;
+      width: 100%;
       flex-wrap: wrap;
     }
-    .scenario-select-wrap {
+    .scenario-select-group {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
       flex: 1;
-      max-width: 800px;
+      min-width: 320px;
     }
     .scenario-label {
       color: var(--accent-amber);
@@ -161,30 +166,43 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       letter-spacing: 0.06em;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
     }
     .scenario-select {
       background: var(--bg-card);
       border: 1px solid #2d3748;
       color: var(--text-primary);
-      padding: 0.45rem 0.85rem;
+      padding: 0.48rem 0.85rem;
       border-radius: 6px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-family: inherit;
       font-weight: 500;
       flex: 1;
       cursor: pointer;
       transition: all 0.15s ease;
+      min-width: 240px;
     }
     .scenario-select:focus {
       border-color: var(--accent-amber);
       box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
     }
+    .scenario-select optgroup {
+      font-weight: 700;
+      color: var(--accent-cyan);
+      background: #111827;
+      padding: 4px 0;
+    }
+    .scenario-select option {
+      font-weight: normal;
+      color: #e2e8f0;
+      background: #0f172a;
+      padding: 4px 6px;
+    }
     .btn-surprise {
       background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      border: 1px solid rgba(245, 158, 11, 0.35);
       color: var(--accent-amber);
-      padding: 0.45rem 0.9rem;
+      padding: 0.48rem 1rem;
       border-radius: 6px;
       font-size: 0.75rem;
       font-family: var(--font-mono);
@@ -205,6 +223,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       font-size: 0.72rem;
       color: var(--text-muted);
       font-family: var(--font-mono);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .scenario-hint strong {
+      color: var(--text-secondary);
     }
 
     /* Main Grid Layout */
@@ -757,68 +781,135 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </div>
   </header>
 
-  <!-- NATURAL SCENARIO & RIG DROPDOWN BAR -->
+  <!-- CALIBRATED SCENARIOS & RIGS: ORGANIZED BY CAMERA STYLE & AMBIENT STYLE -->
   <div class="scenario-bar">
-    <div class="scenario-select-wrap">
-      <div class="scenario-label">
-        <span>🎬 Starting Scenario:</span>
+    <div class="scenario-controls-container">
+      
+      <!-- 1. CAMERA & LENS RIG STYLE DROPDOWN -->
+      <div class="scenario-select-group">
+        <label class="scenario-label" for="cameraPresetSelect">
+          <span>📷 Camera Style:</span>
+        </label>
+        <select class="scenario-select" id="cameraPresetSelect" onchange="onCameraPresetSelectChange()">
+          <option value="none" selected>✨ -- Clear / Build Your Own (Custom Rig) --</option>
+          
+          <optgroup label="🏆 Medium Format Commercial Titans (100MP–150MP)">
+            <option value="cam_phase_one_iq4_still">Phase One XF IQ4 150MP // Schneider 80mm LS (Museum Fine Art Curator)</option>
+            <option value="cam_phase_one_iq4_arch">Phase One XF IQ4 150MP // Schneider 55mm LS (Brutalist Concrete Library)</option>
+            <option value="cam_hasselblad_h6d_para">Hasselblad H6D-100c // HC 100mm f/2.2 (Haute Couture Studio & Para 220)</option>
+            <option value="cam_hasselblad_x2d_hncs">Hasselblad X2D II 100C // XCD 90mm f/2.5 V (HNCS 16-Bit Equestrian Editorial)</option>
+            <option value="cam_fujifilm_gfx100ii_reala">Fujifilm GFX 100 II // GF 110mm f/2 (Carrara Marble Sculptor Atelier)</option>
+            <option value="cam_fujifilm_gfx100rf_street">FUJIFILM GFX100RF // 35mm f/4 @ f/5.6 (Fixed 102MP Archival Street)</option>
+          </optgroup>
+
+          <optgroup label="🇩🇪 Leica Rangefinders & Precision Optics">
+            <option value="cam_leica_m11_reportage">Leica M11 60MP // Summilux-M 35mm f/1.4 FLE II (Haussmannian Street Reportage)</option>
+            <option value="cam_leica_m11_noctilux">Leica M11 60MP // Noctilux-M 50mm f/0.95 (Jazz Club The King of Light)</option>
+            <option value="cam_leica_m6_analog_trix">Leica M6 Classic 35mm // Summicron-M 50mm f/2 (Kodak Tri-X 400 Street)</option>
+            <option value="cam_leica_q3_monochrom">Leica Q3 Monochrom 60.3MP // Summilux 28mm f/1.7 ASPH (Zero-CFA Archival)</option>
+            <option value="cam_leica_sl2_motion_blur">Leica SL2 47.3MP // Summilux-SL 50mm f/1.4 @ f/2.8 (Stationary Subject vs Motion Trails)</option>
+            <option value="cam_leica_sl3_p_apo">Leica SL3-P Maestro IV // APO-Summicron-SL 50mm f/2 (Foreign Dispatch Reportage)</option>
+          </optgroup>
+
+          <optgroup label="⚡ Flagship Stacked & High-Resolution Systems">
+            <option value="cam_sony_a1_ii_flash_freeze">Sony a1 II 50.1MP // FE 85mm f/1.4 GM II (1/400s Flash Freeze Fencing)</option>
+            <option value="cam_sony_a7rv_macro_horology">Sony Alpha 7R V 61MP // FE 50mm f/1.2 GM (Horologist Macro Micro-Bench)</option>
+            <option value="cam_sony_a7rv_depixel_flat">Sony Alpha 7R V 61MP // 55mm f/1.8 ZA (Flat Copy-Stand & De-Pixelate v2.0 OCR)</option>
+            <option value="cam_canon_eos_r5_ii_vogue">Canon EOS R5 Mark II 45MP // RF 85mm f/1.2L USM (Vogue Sculptural Beauty)</option>
+            <option value="cam_canon_eos_r1_action">Canon EOS R1 Full-Frame // RF 70-200mm f/2.8L (Decisive Ballet Grand Jeté)</option>
+            <option value="cam_nikon_z9_plena">Nikon Z 9 45.7MP // NIKKOR Z 135mm f/1.8 S Plena (Plena Circular Bokeh Cellist)</option>
+            <option value="cam_panasonic_s1rii_micro">Panasonic LUMIX S1R II // Lumix S 100mm f/2.8 Macro (1:1 Orchid Micro-Science)</option>
+          </optgroup>
+
+          <optgroup label="🎬 Hollywood Cinema & Anamorphic Systems">
+            <option value="cam_arri_alexa_35_cooke">ARRI Alexa 35 ALEV 4 // Cooke S4/i 50mm T2.0 (The Cooke Look Speakeasy)</option>
+            <option value="cam_arri_alexa_35_anamorphic">ARRI Alexa 35 Scope // Atlas Orion 65mm 2.0x (Cyan Streak Flare & Oval Bokeh)</option>
+            <option value="cam_sony_fx_venice_noir">Sony FX Cinema Line // FE 50mm f/1.2 GM @ f/2.8 (Venice S-Cinetone Saxophone Noir)</option>
+          </optgroup>
+
+          <optgroup label="🎞️ Analog Sheet Film & Classic Formats">
+            <option value="cam_linhof_4x5_architectural">Linhof Master Technika 4x5 // Schneider 150mm f/5.6 (Neoclassical Rotunda)</option>
+            <option value="cam_linhof_4x5_desert">Linhof Master Technika 4x5 // Rodenstock 90mm f/4.5 (Expansive Desert Strata)</option>
+            <option value="cam_pentax_67_bokeh_king">Pentax 67 II 6x7 // SMC 105mm f/2.4 (The Bokeh King Dune Ocean Portrait)</option>
+            <option value="cam_pentax_67_cotswolds">Pentax 67 II 6x7 // SMC 90mm f/2.8 (Cotswolds English Country Garden)</option>
+            <option value="cam_hasselblad_500cm_zeiss">Hasselblad 500C/M 6x6 // Zeiss Planar 80mm f/2.8 CF (Tuscan Chianti Vineyard)</option>
+          </optgroup>
+        </select>
       </div>
-      <select class="scenario-select" id="scenarioSelect" onchange="onScenarioSelectChange()">
-        <option value="none">✨ -- None / Custom Prompt (Surprise Mode: Write Freely) --</option>
-        
-        <optgroup label="🏙️ Cities & Urban Streets">
-          <option value="city_paris" selected>Parisian Street Walk // Haussmannian Architecture, Overcast Diffuse (Leica M11)</option>
-          <option value="tokyo_night">Tokyo Shinjuku Alley // Wet Asphalt & Glowing Neon Signs (Leica M6 // Cinestill)</option>
-          <option value="nyc_soho">New York SoHo Cast-Iron Loft // Morning Sunbeam Rake (Sony A7R V)</option>
-          <option value="london_drizzle">London Mayfair // Muted Portland Stone, Gentle Drizzle (Leica M11)</option>
-          <option value="milan_portico">Milan Design District // Italian Marble Portico & Crisp Contrast (Hasselblad H6D)</option>
-        </optgroup>
 
-        <optgroup label="🏨 Luxury Hotels & Hospitality">
-          <option value="hotel_terrace">Amalfi Coast Luxury Hotel Terrace // Morning Sun & Sea Breeze (Hasselblad H6D)</option>
-          <option value="hotel_penthouse">Modernist Penthouse Suite // Floor-to-Ceiling Skyline Views (Phase One IQ4)</option>
-          <option value="hotel_lobby">Grand Art Deco Hotel Lobby // Polished Marble & Warm Brass (Fujifilm GFX)</option>
-          <option value="hotel_bar">Intimate Hotel Cocktail Lounge // Dim Tungsten, Velvet & Mirrors (ARRI Alexa 35)</option>
-        </optgroup>
+      <!-- 2. AMBIENT & LIGHTING STYLE DROPDOWN -->
+      <div class="scenario-select-group">
+        <label class="scenario-label" for="ambientPresetSelect">
+          <span>🌤️ Ambient Style:</span>
+        </label>
+        <select class="scenario-select" id="ambientPresetSelect" onchange="onAmbientPresetSelectChange()">
+          <option value="none" selected>✨ -- Clear / Build Your Own (Custom Ambience) --</option>
+          
+          <optgroup label="🏙️ Cities & Urban Streetscapes">
+            <option value="amb_paris_haussmann">Paris Saint-Germain // Haussmann Limestone, Zinc Roofs & Overcast Diffuse (5500K)</option>
+            <option value="amb_tokyo_shinjuku">Tokyo Shinjuku Alleyway // Wet Reflective Asphalt, Glowing Neon & Puddles</option>
+            <option value="amb_nyc_soho_loft">New York SoHo Cast-Iron // Raking Morning Sunbeam, Fire Escapes & Cobblestone</option>
+            <option value="amb_london_mayfair">London Mayfair Mews // Portland Limestone, Black Railings & Soft Misty Drizzle</option>
+            <option value="amb_milan_portico">Milan Brera Design Quarter // High-Contrast Italian Marble Portico Shadows</option>
+            <option value="amb_kyoto_gion">Kyoto Gion Preservation Lane // Dark Aged Cedar, Glowing Lanterns & Rain</option>
+            <option value="amb_berlin_concrete">Berlin Mitte Industrial Yard // Raw Board-Formed Concrete & Cold Overcast</option>
+          </optgroup>
 
-        <optgroup label="🌊 Coastal, Beach & Islands">
-          <option value="beach_dunes">Ocean Beach & Sand Dunes // Golden Hour Low Sun & Sea Breeze (Pentax 67)</option>
-          <option value="mediterranean_cliff">Mediterranean White Cliffside // Sun-Bleached Rock & Deep Azure Sea (Hasselblad 500C/M)</option>
-          <option value="nordic_fjord">Nordic Coastal Fjord // Cool Sea Mist & Dark Wet Rocks (Fujifilm GFX)</option>
-          <option value="tropical_shore">Tropical Island Shoreline // Humid Haze & Late Sun Silhouette (Leica M11)</option>
-        </optgroup>
+          <optgroup label="🏨 Luxury Hospitality & Architectural Sanctuaries">
+            <option value="amb_amalfi_terrace">Amalfi Coast Cliffside Villa // Terracotta, Morning Sun & Mediterranean Sea Breeze</option>
+            <option value="amb_manhattan_penthouse">Manhattan Skyline Penthouse // Floor-to-Ceiling Glass & Golden Sunrise Horizon</option>
+            <option value="amb_paris_palace_lobby">Parisian Grand Palace Lobby // Fluted Carrara Marble & Crystal Chandeliers</option>
+            <option value="amb_kyoto_ryokan">Kyoto Luxury Sukiya Ryokan // Tatami Mats, Sliding Shoji & Moss Garden Sunbeams</option>
+            <option value="amb_alpine_chalet">Saint-Moritz Alpine Chalet // Raw Granite Fireplace, Cashmere & Mountain Snowlight</option>
+            <option value="amb_speakeasy_lounge">Speakeasy Cocktail Lounge // Dim Filament Tungsten, Midnight Velvet & Mirrors</option>
+          </optgroup>
 
-        <optgroup label="🌾 Rural, Nature & Countryside">
-          <option value="rural_vineyard">Tuscan Vineyard & Cypress Road // Warm Golden Afternoon (Hasselblad 500C/M)</option>
-          <option value="mountain_cabin">Pine Forest Mountain Cabin // Diffuse Morning Fog & Cedar Scent (Linhof 4x5)</option>
-          <option value="english_country">Cotswolds Country Garden // Wildflowers & Gentle English Daylight (Pentax 67)</option>
-          <option value="desert_canyon">Expansive Desert Plateau // Open Blue Sky & Raking Dune Shadows (Linhof 4x5)</option>
-        </optgroup>
+          <optgroup label="🌊 Coastal, Maritime & Island Escapes">
+            <option value="amb_mediterranean_cliff">Mediterranean White Cliffside // Sun-Bleached Rock, Bougainvillea & Azure Sea</option>
+            <option value="amb_atlantic_dunes">Windswept Atlantic Ocean Dunes // Low Golden Hour Sun & Wild Dune Grass</option>
+            <option value="amb_nordic_fjord">Norwegian Coastal Fjord // Cool Sea Mist, Dark Wet Granite & Mossy Rocks</option>
+            <option value="amb_tropical_shore">Polynesian Secluded Shoreline // Coconut Palm Silhouettes & Humid Sunset Glow</option>
+            <option value="amb_big_sur_bluffs">Big Sur California Coastline // High Coastal Bluffs, Pacific Marine Layer & Sun Break</option>
+          </optgroup>
 
-        <optgroup label="📸 Commercial Studio & Architecture">
-          <option value="architect_brutalist">Architect in Brutalist Concrete Library // High Clerestory Skylight (Phase One IQ4)</option>
-          <option value="commercial_packshot">Commercial Packshot // 100% SKU Approval Gate (Phase One IQ4 150MP)</option>
-          <option value="fashion_studio">Haute Couture Studio Editorial // Giant Broncolor Para 220 Strobe (Hasselblad H6D)</option>
-          <option value="sculptor_atelier">Carrara Marble Sculptor Atelier // Limestone Dust & Directional Sun (Fujifilm GFX)</option>
-          <option value="watchmaker_bench">Horologist Micro-Bench // Macro Brass Gears & Focus (Sony A7R V)</option>
-          <option value="museum_gallery">Neoclassical Museum Rotunda // Soaring Marble Fluted Columns (Linhof 4x5)</option>
-          <option value="hollywood_anamorphic">Hollywood Cinema Anamorphic // 2.0x Oval Bokeh & Blue Streak Flare (ARRI Alexa 35)</option>
-          <option value="commercial_billboard_copy_space">Commercial Advertising Hero // Venetian Gobo & Copy-Space (Phase One IQ4 150MP)</option>
-        </optgroup>
+          <optgroup label="🌾 Terroir, Rural Landscapes & Wild Nature">
+            <option value="amb_tuscan_vineyard">Tuscan Chianti Hills // Cypress Avenue, Warm Golden Dust & Terracotta Earth</option>
+            <option value="amb_pnw_pine_forest">Pacific Northwest Pine Forest // Douglas Fir Canopy, Morning Mist & Damp Earth</option>
+            <option value="amb_cotswolds_garden">Cotswolds English Cottage Garden // Blooming Climbing Roses & Gentle English Daylight</option>
+            <option value="amb_mojave_desert">Mojave Desert Sandstone Plateau // Monumental Strata, Dune Shadows & Azure Sky</option>
+            <option value="amb_highland_moor">Scottish Highlands Heather Moor // Low Raking Clouds, Peat Moss & Windblown Grass</option>
+          </optgroup>
 
-        <optgroup label="✨ GenAI Photography Mastery Suite (v3.4)">
-          <option value="hyperrealistic_latex_character">4D Liquid Glass & Latex High-Fashion Editorial // Contour Rim Light (Hasselblad X2D II)</option>
-          <option value="heavyweight_editorial_portrait">Calibrated Heavyweight Body Morphology // 240 lbs Frame-Proportional (Sony a1 II)</option>
-          <option value="gallery_baryta_print">Print-Calibrated Exhibition Prepress // Baryta Fine Art 16x24@300 (Phase One IQ4)</option>
-        </optgroup>
-      </select>
+          <optgroup label="📸 High-End Commercial Studio & Exhibition">
+            <option value="amb_cosmetic_packshot">Luxury Cosmetic Packshot // Diffused Strip Softboxes, Water Droplets & 100% SKU Gate</option>
+            <option value="amb_haute_couture_studio">Haute Couture Runway Studio // Giant Broncolor Para 220 Strobe & Infinity Cove</option>
+            <option value="amb_sculptor_atelier">Carrara Sculptor Atelier // Swirling Limestone Dust & High Raking Directional Sun</option>
+            <option value="amb_horologist_bench">Horologist Micro-Bench // Macro Brass Gears & Focused Worklamp Illumination</option>
+            <option value="amb_museum_rotunda">Neoclassical Museum Rotunda // Soaring Fluted Columns & Coffered Glass Skylight</option>
+            <option value="amb_commercial_gobo_copy">Commercial Advertising Hero // Venetian Blinds Gobo Shadow & Left-Third Copy Space</option>
+          </optgroup>
 
-      <button class="btn-surprise" onclick="clearToSurprise()" title="Wipe scene fields to let the prompt surprise you freely">
-        <span>↺ Clear / Surprise Mode</span>
+          <optgroup label="✨ Mastery Protocols & Technical Directives">
+            <option value="amb_4d_liquid_glass">4D Liquid Glass & Latex High-Fashion // Contour Rim Strobe & Opaque Black Void</option>
+            <option value="amb_heavyweight_morphology">Calibrated Heavyweight Body Morphology // Directional Window Rake & Skin Pores</option>
+            <option value="amb_baryta_print_prepress">Exhibition Prepress Master // Baryta Fine Art 16x24@300 Print Calibration</option>
+            <option value="amb_depixel_v2_restoration">Universal De-Pixelate v2.0 // Flat Copy-Stand & Character-for-Character OCR Safety</option>
+            <option value="amb_monochrome_luminance">Pure Monochromatic Luminance // Zero-CFA Monochromatic Sensor & Obsidian Blacks</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- 3. CLEAR / BUILD YOUR OWN BUTTON -->
+      <button class="btn-surprise" id="btnClearBuildOwn" onclick="clearToSurprise()" title="Reset all creative and technical fields to build your own scene freely">
+        <span>↺ Clear / Build Your Own</span>
       </button>
+
+      <!-- Legacy shim element -->
+      <select id="scenarioSelect" style="display:none;"><option value="none">none</option></select>
+
     </div>
     <div class="scenario-hint">
-      Select a starting scenario or write freely. All fields below are fully editable.
+      Pick a <strong>Camera Rig</strong> for hardware & optics, or an <strong>Ambient Style</strong> for lighting & atmosphere. Click <strong>Clear / Build Your Own</strong> to write freely.
     </div>
   </div>
 
@@ -1770,454 +1861,785 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         "Lumix S PRO 85mm f/1.8 (Lightweight Portrait Prime)",
         "Lumix S 100mm f/2.8 Macro (1:1 Micro-Detail Specialist)",
         "Lumix S PRO 24-70mm f/2.8 (Professional Documentary Standard)"
+      ],
+      leica_sl2: [
+        "Leica Summilux-SL 50mm f/1.4 ASPH (Motion-Blur Crowd Reference)",
+        "Leica APO-Summicron-SL 35mm f/2 ASPH (Environmental Reportage)",
+        "Leica APO-Summicron-SL 75mm f/2 ASPH (Portrait Acutance)",
+        "Leica Super-Vario-Elmar-SL 16-35mm f/3.5-4.5 ASPH (Architectural Street)"
       ]
     };
 
-    // Scenarios library covering everyday natural environments, cities, weather, hotels, beaches, rural
-    const SCENARIOS = {
-      city_paris: {
+    // =========================================================================
+    // CALIBRATED CAMERA & LENS RIG PRESETS (Organized by Camera System & Optics)
+    // =========================================================================
+    const CAMERA_PRESETS = {
+      // 1. Medium Format Commercial Titans (100MP–150MP)
+      cam_phase_one_iq4_still: {
+        profile: "phase_one_iq4",
+        lens: "Schneider Kreuznach 80mm LS f/2.8 Blue Ring",
+        aperture: "f/8.0",
+        subject: "Fine art museum curator in tailored charcoal wool suit examining a classical marble bust, high tactile micro-relief and chisel marks",
+        framing: "three-quarter museum gallery portrait",
+        environment: "neoclassical museum rotunda with soaring limestone walls and diffuse high clerestory light",
+        wardrobe: "bespoke charcoal three-piece suit with silk pocket square",
+        mood: "timeless archival reverence, museum-grade 150MP resolution",
+        timeWeather: "overcast",
+        lighting: "architectural_skylight",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5",
+        paperProfile: "baryta",
+        printSize: "16x24@300"
+      },
+      cam_phase_one_iq4_arch: {
+        profile: "phase_one_iq4",
+        lens: "Schneider Kreuznach 55mm LS f/2.8 Blue Ring",
+        aperture: "f/8.0",
+        subject: "Architect leaning over a monolithic drafting table reviewing hand-drawn blueprints and raw concrete scale models",
+        framing: "wide environmental architectural portrait",
+        environment: "brutalist board-formed concrete library pavilion with high clerestory windows",
+        wardrobe: "charcoal fine-knit merino turtleneck and tailored trousers",
+        mood: "austere, contemplative, intellectual focus",
+        timeWeather: "overcast",
+        lighting: "architectural_skylight",
+        filmStock: "digital_raw",
+        aspectRatio: "16:9"
+      },
+      cam_hasselblad_h6d_para: {
+        profile: "hasselblad_h6d",
+        lens: "Hasselblad HC 100mm f/2.2 Portrait Lens",
+        aperture: "f/4.0",
+        subject: "Haute couture fashion model in structural pleated ivory silk gown with razor-sharp gaze",
+        framing: "full-length architectural fashion portrait",
+        environment: "pristine white infinity cove photo studio with subtle floor reflections",
+        wardrobe: "sculptural pleated raw ivory silk architectural dress",
+        mood: "avant-garde, pristine luxury, crystalline micro-contrast",
+        timeWeather: "auto",
+        lighting: "strobe_para",
+        filmStock: "portra_160",
+        aspectRatio: "4:5"
+      },
+      cam_hasselblad_x2d_hncs: {
+        profile: "hasselblad_x2d_ii_100c",
+        lens: "Hasselblad XCD 90mm f/2.5 V",
+        aperture: "f/2.5",
+        subject: "Equestrian trainer standing beside a dark thoroughbred in sunlit stone courtyard, tactile leather reins and tweed textures",
+        framing: "three-quarter outdoor editorial portrait",
+        environment: "historic limestone stables courtyard with sun-warmed cobblestones and horse brasses",
+        wardrobe: "tailored olive tweed field jacket and leather riding boots",
+        mood: "refined heritage, HNCS 16-bit organic skin tones and tactile micro-relief",
+        timeWeather: "golden_hour",
+        lighting: "golden_hour",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_fujifilm_gfx100ii_reala: {
+        profile: "fujifilm_gfx100ii",
+        lens: "Fujinon GF 110mm f/2 R LM WR",
+        aperture: "f/2.8",
+        subject: "Master stone sculptor covered in fine marble dust on muscular forearms, chisel resting on Carrara relief",
+        framing: "three-quarter artisanal portrait",
+        environment: "historic Carrara limestone atelier with half-carved sculptures and raking morning sunbeams",
+        wardrobe: "heavy indigo canvas workshirt and stained leather apron",
+        mood: "intense concentration, raw craftsmanship, 102MP tonal graduation",
+        timeWeather: "morning_fog",
+        lighting: "window_daylight",
+        filmStock: "classic_chrome",
+        aspectRatio: "4:5"
+      },
+      cam_fujifilm_gfx100rf_street: {
+        profile: "fujifilm_gfx100rf",
+        lens: "Fujinon GF 45mm f/2.8 R WR",
+        aperture: "f/5.6",
+        subject: "Documentary photographer standing watchful on rain-slicked city crossing, camera resting at hip",
+        framing: "environmental street portrait",
+        environment: "rain-soaked European pedestrian plaza with historic stone facades and reflections",
+        wardrobe: "charcoal waxed cotton coat and leather boots",
+        mood: "fixed-lens medium format acutance, zero optical distortion, archival realism",
+        timeWeather: "rainy_wet",
+        lighting: "window_daylight",
+        filmStock: "classic_chrome",
+        aspectRatio: "4:3"
+      },
+
+      // 2. Leica Rangefinders & Precision Optics
+      cam_leica_m11_reportage: {
         profile: "leica_m11",
+        lens: "Leica Summilux-M 35mm f/1.4 ASPH FLE II",
+        aperture: "f/2.8",
         subject: "Pedestrian walking past an outdoor cafe terrace, holding an espresso cup",
-        framing: "three-quarter editorial portrait",
+        framing: "three-quarter street editorial portrait",
         environment: "wet cobblestone Paris street in Saint-Germain, limestone Haussmann facade in background",
         wardrobe: "tailored navy wool trench coat and gray cashmere scarf",
         mood: "effortless, contemplative, authentic Parisian elegance",
-        aperture: "f/2.8",
         timeWeather: "overcast",
         cityVibe: "paris",
         lighting: "window_daylight",
         filmStock: "digital_raw",
-        filter: "none"
+        aspectRatio: "3:2"
       },
-      tokyo_night: {
+      cam_leica_m11_noctilux: {
+        profile: "leica_m11",
+        lens: "Leica Noctilux-M 50mm f/0.95 ASPH",
+        aperture: "f/1.4",
+        subject: "Jazz pianist paused at grand piano keys in intimate low-lit lounge, glistening lacquer reflections",
+        framing: "tight atmospheric portrait with razor-thin depth of field",
+        environment: "intimate jazz club with warm amber filament wall sconces and dark velvet curtains",
+        wardrobe: "crisp white unbuttoned collar shirt and dark wool vest",
+        mood: "The King of Light, dreamy subject isolation, luminous specular falloff",
+        timeWeather: "night_city",
+        lighting: "tungsten_candle",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_leica_m6_analog_trix: {
         profile: "leica_m6_analog",
-        subject: "Person holding a clear vinyl umbrella under rain reflections",
-        framing: "medium close-up cinematic portrait",
-        environment: "narrow rain-soaked alleyway in Shinjuku with glowing neon signs and reflective puddles",
-        wardrobe: "dark oversized coat with glistening raindrops on shoulders",
-        mood: "melancholic, cinematic, vivid night atmosphere",
+        lens: "Leica Summicron-M 50mm f/2 Dual-Range",
         aperture: "f/2.0",
+        subject: "City commuter under umbrella standing by crosswalk, raindrops caught in light",
+        framing: "medium close-up street documentary portrait",
+        environment: "narrow rain-soaked Shinjuku alley with glowing neon signs and reflective puddles",
+        wardrobe: "dark oversized trench coat with glistening raindrops on shoulders",
+        mood: "authentic 35mm silver halide grain, gritty timeless Magnum photojournalism",
         timeWeather: "rainy_wet",
         cityVibe: "tokyo",
         lighting: "tungsten_candle",
-        filmStock: "cinestill_800t",
-        filter: "pro_mist_eighth"
+        filmStock: "tri_x_400",
+        aspectRatio: "3:2"
       },
-      nyc_soho: {
-        profile: "sony_a7rv",
-        subject: "Designer sitting on a concrete ledge reviewing fabric swatches",
-        framing: "three-quarter editorial portrait",
-        environment: "sunlit SoHo loft exterior with historic cast-iron columns and fire escapes",
-        wardrobe: "minimalist black blazer, crisp white t-shirt, tailored trousers",
-        mood: "sharp, modern, vibrant creative energy",
+      cam_leica_q3_monochrom: {
+        profile: "leica_q3_monochrom",
+        lens: "Leica Summilux 28mm f/1.7 ASPH",
+        aperture: "f/2.8",
+        subject: "Portrait of veteran silversmith with deep character wrinkles and intense focused gaze at jeweler bench",
+        framing: "intimate environmental craftsman portrait",
+        environment: "antique goldsmith workshop with scattered burins, silver wire, and raking north skylight",
+        wardrobe: "charcoal linen apron over textured gray work shirt",
+        mood: "zero Color Filter Array, uncompromised pure luminance micro-contrast, obsidian black to specular white",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_leica_sl2_motion_blur: {
+        profile: "leica_sl2",
+        lens: "Leica Summilux-SL 50mm f/1.4 ASPH",
+        aperture: "f/2.8",
+        subject: "Stationary traveler standing serenely still and tack-sharp at eye level while rushing crowd blurs around them",
+        framing: "wide environmental transit hall portrait",
+        environment: "grand European railway station concourse with streaming commuters in multi-directional motion blur trails",
+        wardrobe: "tailored camel wool coat and leather weekender bag",
+        mood: "calm center of gravity amidst swirling urban momentum, slow shutter motion-blur aesthetic",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_leica_sl3_p_apo: {
+        profile: "leica_sl3_p",
+        lens: "Leica APO-Summicron-SL 50mm f/2 ASPH",
         aperture: "f/2.0",
-        timeWeather: "golden_hour",
-        cityVibe: "nyc",
-        lighting: "golden_hour",
+        subject: "Foreign correspondent standing on rain-spattered hotel balcony reviewing investigative notes",
+        framing: "three-quarter documentary portrait",
+        environment: "European capital city skyline under stormy twilight sky, wet railings and distant city lights",
+        wardrobe: "dark navy waterproof shell over fine charcoal sweater",
+        mood: "apochromatic optical acutance, zero chromatic aberration, Maestro IV tonal depth",
+        timeWeather: "blue_hour",
+        lighting: "blue_hour",
         filmStock: "digital_raw",
-        filter: "none"
+        aspectRatio: "3:2"
       },
-      london_drizzle: {
-        profile: "leica_m11",
-        subject: "Art dealer standing outside an old brick gallery entrance",
-        framing: "three-quarter editorial portrait",
-        environment: "Mayfair street with weathered Portland stone, black railings, and subtle drizzle",
-        wardrobe: "charcoal tweed overcoat and leather Chelsea boots",
-        mood: "understated British refinement, calm",
+
+      // 3. Flagship Stacked & High-Resolution Systems
+      cam_sony_a1_ii_flash_freeze: {
+        profile: "sony_a1_ii",
+        lens: "Sony FE 85mm F1.4 GM II (SEL85F14GM2)",
         aperture: "f/2.8",
-        timeWeather: "overcast",
-        cityVibe: "london",
-        lighting: "window_daylight",
-        filmStock: "portra_400",
-        filter: "none"
-      },
-      milan_portico: {
-        profile: "hasselblad_h6d",
-        subject: "Fashion director walking briskly through a classical colonnade",
-        framing: "full-length architectural fashion portrait",
-        environment: "lofty marble portico in Brera with geometric shadows and sunlit courtyard",
-        wardrobe: "sharp structured camel wool coat and oversized dark sunglasses",
-        mood: "commanding, sophisticated, high fashion",
-        aperture: "f/4.0",
-        timeWeather: "noon_sun",
-        cityVibe: "milan",
-        lighting: "strobe_para",
-        filmStock: "portra_160",
-        filter: "none"
-      },
-      hotel_terrace: {
-        profile: "hasselblad_h6d",
-        subject: "Guest relaxing on sun-warmed linen cushions with morning fruit and coffee",
-        framing: "three-quarter editorial portrait",
-        environment: "private terracotta terrace of a cliffside boutique hotel overlooking the sea",
-        wardrobe: "unbleached relaxed white linen shirt and light linen trousers",
-        mood: "peaceful luxury, serene warmth, slow living",
-        aperture: "f/3.5",
-        timeWeather: "golden_hour",
-        cityVibe: "mediterranean",
-        lighting: "golden_hour",
-        filmStock: "portra_160",
-        filter: "none"
-      },
-      hotel_penthouse: {
-        profile: "phase_one_iq4",
-        subject: "Traveler standing near floor-to-ceiling glass looking out across the city skyline",
-        framing: "three-quarter editorial portrait",
-        environment: "modernist luxury penthouse living room with smoked oak flooring and marble accents",
-        wardrobe: "fine ribbed dark knit sweater and tailored wool trousers",
-        mood: "quiet contemplation, refined luxury",
-        aperture: "f/5.6",
-        timeWeather: "morning_fog",
-        cityVibe: "none",
-        lighting: "architectural_skylight",
-        filmStock: "digital_raw",
-        filter: "none"
-      },
-      hotel_lobby: {
-        profile: "fujifilm_gfx100ii",
-        subject: "Guest seated in an emerald velvet armchair waiting by a grand marble fireplace",
-        framing: "medium close-up cinematic portrait",
-        environment: "historic Grand Hotel lobby with fluted plaster columns, warm chandeliers, and gilded mirrors",
-        wardrobe: "tailored midnight blue double-breasted suit",
-        mood: "opulent, cinematic, dignified",
-        aperture: "f/2.8",
-        timeWeather: "night_city",
-        cityVibe: "none",
-        lighting: "tungsten_candle",
-        filmStock: "classic_chrome",
-        filter: "pro_mist_eighth"
-      },
-      hotel_bar: {
-        profile: "arri_alexa_35",
-        subject: "Patron seated at a curved mahogany bar holding a tumbler of whiskey",
-        framing: "medium close-up cinematic portrait",
-        environment: "speakeasy cocktail lounge with warm amber backlighting and brass accents",
-        wardrobe: "crisp unbuttoned collar shirt and vintage leather jacket",
-        mood: "intimate, moody, cinematic storytelling",
-        aperture: "f/2.0",
-        timeWeather: "night_city",
-        cityVibe: "none",
-        lighting: "rembrandt_key",
-        filmStock: "arri_logc4",
-        filter: "pro_mist_quarter"
-      },
-      beach_dunes: {
-        profile: "pentax_67ii",
-        subject: "Person standing amidst wild sea grass with wind blowing through their hair",
-        framing: "three-quarter editorial portrait",
-        environment: "coastal sand dunes leading to an open ocean beach at low tide",
-        wardrobe: "chunky cream cable-knit wool sweater and weathered denim",
-        mood: "raw coastal beauty, free, natural",
-        aperture: "f/2.4",
-        timeWeather: "golden_hour",
-        cityVibe: "none",
-        lighting: "golden_hour",
-        filmStock: "portra_400",
-        filter: "none"
-      },
-      mediterranean_cliff: {
-        profile: "hasselblad_500cm",
-        subject: "Model looking out over the sea leaning against a sun-bleached stone balustrade",
-        framing: "full-length architectural fashion portrait",
-        environment: "whitewashed Mediterranean cliffside village with vibrant bougainvillea and deep blue ocean",
-        wardrobe: "flowing sky-blue cotton sundress with delicate embroidery",
-        mood: "sun-drenched, radiant, timeless summer",
-        aperture: "f/4.0",
-        timeWeather: "noon_sun",
-        cityVibe: "mediterranean",
-        lighting: "golden_hour",
-        filmStock: "portra_160",
-        filter: "none"
-      },
-      nordic_fjord: {
-        profile: "fujifilm_gfx100ii",
-        subject: "Hiker standing on wet granite shoreline looking across calm fjord waters",
-        framing: "wide environmental cinematic frame",
-        environment: "Norwegian coastal fjord with dark mist-shrouded peaks and mossy rocks",
-        wardrobe: "mustard yellow technical rain parka and waterproof hiking boots",
-        mood: "epic nature, vast scale, crisp northern air",
-        aperture: "f/5.6",
-        timeWeather: "morning_fog",
-        cityVibe: "scandinavia",
-        lighting: "window_daylight",
-        filmStock: "classic_chrome",
-        filter: "none"
-      },
-      tropical_shore: {
-        profile: "leica_m11",
-        subject: "Local fisherman mending nets under palm tree canopy",
-        framing: "environmental full-body portrait",
-        environment: "secluded tropical beach with gentle surf, wet sand, and coconut palms",
-        wardrobe: "faded linen shirt and roll-up cotton trousers",
-        mood: "peaceful daily life, grounded, sun-baked",
-        aperture: "f/2.8",
-        timeWeather: "golden_hour",
-        cityVibe: "none",
-        lighting: "golden_hour",
-        filmStock: "portra_400",
-        filter: "none"
-      },
-      rural_vineyard: {
-        profile: "hasselblad_500cm",
-        subject: "Winemaker inspecting grape clusters in late summer light",
-        framing: "three-quarter editorial portrait",
-        environment: "sun-drenched Tuscan vineyard on rolling hills with cypress trees in background",
-        wardrobe: "rustic chambray shirt and dirt-stained leather work gloves",
-        mood: "earthy, authentic, slow agrarian rhythm",
-        aperture: "f/4.0",
-        timeWeather: "golden_hour",
-        cityVibe: "mediterranean",
-        lighting: "golden_hour",
-        filmStock: "portra_400",
-        filter: "none"
-      },
-      mountain_cabin: {
-        profile: "linhof_technika_4x5",
-        subject: "Woodworker carving timber on outdoor deck surrounded by pines",
-        framing: "three-quarter editorial portrait",
-        environment: "rustic cedar mountain cabin deck with wood shavings and morning fog in the pines",
-        wardrobe: "heavy red-and-black wool flannel overshirt and leather apron",
-        mood: "quiet craftsmanship, solitary, mountain air",
-        aperture: "f/8.0",
-        timeWeather: "morning_fog",
-        cityVibe: "none",
-        lighting: "window_daylight",
-        filmStock: "portra_400",
-        filter: "none"
-      },
-      english_country: {
-        profile: "pentax_67ii",
-        subject: "Botanist gathering garden roses into a wicker basket",
-        framing: "three-quarter editorial portrait",
-        environment: "English country stone cottage garden overflowing with climbing roses and delphiniums",
-        wardrobe: "waxed cotton jacket and sage linen dress",
-        mood: "pastoral, romantic, gentle morning tranquility",
-        aperture: "f/2.4",
-        timeWeather: "overcast",
-        cityVibe: "london",
-        lighting: "window_daylight",
-        filmStock: "portra_160",
-        filter: "none"
-      },
-      desert_canyon: {
-        profile: "linhof_technika_4x5",
-        subject: "Explorer standing at canyon rim looking into the vast expanse",
-        framing: "wide environmental cinematic frame",
-        environment: "red sandstone canyon rim with deep geological strata and distant desert haze",
-        wardrobe: "khaki canvas safari jacket and wide-brim felt hat",
-        mood: "monumental scale, ancient earth, adventurous stillness",
-        aperture: "f/11",
-        timeWeather: "noon_sun",
-        cityVibe: "none",
-        lighting: "golden_hour",
-        filmStock: "provia_100f",
-        filter: "cpl"
-      },
-      architect_brutalist: {
-        profile: "phase_one_iq4",
-        subject: "Architect leaning against heavy timber drafting desk, examining blueprints and concrete models",
-        framing: "three-quarter editorial portrait",
-        environment: "brutalist board-formed concrete library with high clerestory windows",
-        wardrobe: "charcoal wool blazer over black fine knit turtleneck, wire-frame spectacles",
-        mood: "austere, contemplative, intellectual focus",
-        aperture: "f/8.0",
-        timeWeather: "overcast",
-        cityVibe: "none",
-        lighting: "architectural_skylight",
-        filmStock: "digital_raw",
-        filter: "none"
-      },
-      commercial_packshot: {
-        profile: "phase_one_iq4",
-        subject: "Luxury cosmetic serum bottle on polished dark slate pedestal with natural micro-water droplets",
-        framing: "macro packshot product hero shot",
-        environment: "high-end commercial studio cyclorama with dual diffused strip softboxes",
-        wardrobe: "",
-        mood: "pristine, tactile, ultra-premium commercial quality",
-        aperture: "f/8.0",
-        timeWeather: "studio_soft",
-        cityVibe: "none",
-        lighting: "strobe_softbox",
-        filmStock: "digital_raw",
-        filter: "none",
-        refMode: "product",
-        capGeometry: "matte black anodized aluminum dropper cap with 48-ridge knurling collar and flush seal",
-        skuColor: "Amber pharmaceutical glass (#8B4513) with Pantone 116 C gold hot-stamp foil text",
-        labelKerning: "crisp micro-typography, precise character tracking, zero hallucinated micro-text",
-        materialFinish: "heavy-base borosilicate glass, anti-reflective coating, tactile uncoated paper label",
-        seamGeometry: "flawless circular base without mold flash, hairline parting seam along shoulder",
-        productCrop: "packshot_reference_hero.png"
-      },
-      fashion_studio: {
-        profile: "hasselblad_h6d",
-        subject: "High-fashion model posing in sculpted structural silk couture gown",
-        framing: "full-length architectural fashion portrait",
-        environment: "pristine white infinity cove photo studio with subtle floor reflections",
-        wardrobe: "unbleached raw ivory silk draped architectural dress with sharp folds",
-        mood: "avant-garde, sculptural, pristine editorial elegance",
-        aperture: "f/4.0",
+        subject: "Fencing athlete paused between lunges, perspiration glistening on brow, tack-sharp near-eye pupil focus",
+        framing: "three-quarter athletic editorial portrait",
+        environment: "minimalist dark gymnasium with high directional strobe freeze and black negative fill",
+        wardrobe: "white textured fencing jacket with foil blade resting vertically",
+        mood: "1/400s electronic stacked shutter freeze, brutal near-eye sharpness, zero motion blur",
         timeWeather: "auto",
-        cityVibe: "none",
         lighting: "strobe_para",
-        filmStock: "portra_160",
-        filter: "none"
+        filmStock: "digital_raw",
+        aspectRatio: "9:11"
       },
-      sculptor_atelier: {
-        profile: "fujifilm_gfx100ii",
-        subject: "Master stone sculptor covered in fine marble dust on muscular forearms",
-        framing: "three-quarter editorial portrait",
-        environment: "historic Carrara limestone atelier with half-carved statues and raking morning light shafts",
-        wardrobe: "heavy indigo canvas workshirt and stained leather apron",
-        mood: "intense concentration, raw craftsmanship",
-        aperture: "f/2.8",
-        timeWeather: "morning_fog",
-        cityVibe: "none",
-        lighting: "window_daylight",
-        filmStock: "classic_chrome",
-        filter: "none"
-      },
-      watchmaker_bench: {
+      cam_sony_a7rv_macro_horology: {
         profile: "sony_a7rv",
-        subject: "Senior watchmaker looking through brass loupe, placing tourbillon balance wheel",
+        lens: "Sony FE 50mm f/1.2 GM (SEL50F12GM)",
+        aperture: "f/2.8",
+        subject: "Senior watchmaker looking through brass loupe, placing tourbillon balance wheel with titanium tweezers",
         framing: "extreme macro iris and skin detail portrait",
         environment: "cluttered antique wooden workbench with miniature gear wheels and micro-screwdrivers",
         wardrobe: "dark wool vest and rolled-up striped cotton shirt",
-        mood: "microscopic precision, quiet mastery",
-        aperture: "f/2.8",
+        mood: "61MP microscopic precision, resolved epidermal pores, brass tooth reflections",
         timeWeather: "auto",
-        cityVibe: "none",
         lighting: "strobe_para",
         filmStock: "digital_raw",
-        filter: "none"
+        aspectRatio: "4:5"
       },
-      museum_gallery: {
-        profile: "linhof_technika_4x5",
-        subject: "Curator standing gracefully in grand central gallery flanked by classical marble sculptures",
-        framing: "full-length architectural fashion portrait",
-        environment: "soaring neoclassical museum rotunda with polished marble floor and fluted columns",
-        wardrobe: "bespoke charcoal three-piece suit with silk tie",
-        mood: "scholarly majesty, timeless architectural symmetry",
-        aperture: "f/11",
-        timeWeather: "overcast",
-        cityVibe: "none",
-        lighting: "architectural_skylight",
-        filmStock: "portra_160",
-        filter: "none"
+      cam_sony_a7rv_depixel_flat: {
+        profile: "sony_a7rv",
+        lens: "Sony FE 50mm f/1.2 GM (SEL50F12GM)",
+        aperture: "f/5.6",
+        subject: "High-resolution flat archival document reproduction and infographic restoration with crisp typography",
+        framing: "perpendicular flat copy-stand reproduction",
+        environment: "professional copy-stand studio with balanced 45-degree polarized illumination",
+        wardrobe: "none",
+        mood: "Universal De-Pixelate v2.0 protocol, zero geometric distortion, strict OCR typography preservation",
+        timeWeather: "studio_soft",
+        lighting: "strobe_softbox",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
       },
-      hollywood_anamorphic: {
+      cam_canon_eos_r5_ii_vogue: {
+        profile: "canon_eos_r5_ii",
+        lens: "Canon RF 85mm F1.2L USM (Reference Portrait Prime)",
+        aperture: "f/1.4",
+        subject: "Beauty editorial model with sculptural wet-look hair, radiant luminous skin, and piercing direct gaze",
+        framing: "tight beauty headshot",
+        environment: "warm sand-colored studio seamless backdrop with diffused beauty dish key light",
+        wardrobe: "minimalist nude silk bandeau top",
+        mood: "legendary Canon skin tone warmth, creamy background defocus, tack-sharp eyelashes",
+        timeWeather: "auto",
+        lighting: "strobe_softbox",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_canon_eos_r1_action: {
+        profile: "canon_eos_r1",
+        lens: "Canon RF 70-200mm F2.8L IS USM Z (Action & Sports Master)",
+        aperture: "f/2.8",
+        subject: "Prima ballerina caught at the floating zenith of a grand jeté leap across sunlit stage floor",
+        framing: "dynamic full-body performance framing",
+        environment: "historic opera house rehearsal hall with tall arched windows and dusty light shafts",
+        wardrobe: "dusty rose rehearsal tulle skirt and fitted black leotard",
+        mood: "stacked full-frame instantaneous motion freeze, decisive peak moment, athletic elegance",
+        timeWeather: "window_daylight",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "16:9"
+      },
+      cam_nikon_z9_plena: {
+        profile: "nikon_z9",
+        lens: "NIKKOR Z 135mm f/1.8 S Plena (Zero Vignetting Texture Monster)",
+        aperture: "f/1.8",
+        subject: "Cellist seated in deep concentration during rehearsal, natural window backlight rimming hair",
+        framing: "medium seated performance portrait",
+        environment: "wood-paneled concert hall chamber with warm timber acoustic baffles",
+        wardrobe: "dark tailored charcoal wool suit",
+        mood: "Plena zero-vignetting edge-to-edge circular bokeh, velvety separation, tack-sharp cello strings",
+        timeWeather: "window_daylight",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_panasonic_s1rii_micro: {
+        profile: "panasonic_lumix_s1rii",
+        lens: "Lumix S 100mm f/2.8 Macro (1:1 Micro-Detail Specialist)",
+        aperture: "f/5.6",
+        subject: "Botanical taxonomist dissecting rare cloud forest orchid petal with surgical micro-tweezers",
+        framing: "1:1 macro scientific portrait",
+        environment: "botany research laboratory bench with specimen glass jars and natural north daylight",
+        wardrobe: "crisp white laboratory coat and dark slate glasses",
+        mood: "micro-science optical purity, cellular petal vein relief, tactile pollen grains",
+        timeWeather: "window_daylight",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+
+      // 4. Hollywood Cinema & Anamorphic Systems
+      cam_arri_alexa_35_cooke: {
         profile: "arri_alexa_35",
-        subject: "Cinematic operative in wet rain-slicked city avenue, intense focused stillness",
+        lens: "Cooke S4/i 50mm T2.0 Cine Prime ('The Cooke Look')",
+        aperture: "f/2.0",
+        subject: "Detective seated at corner booth of dim speakeasy holding tumbler, intense focused gaze",
+        framing: "cinematic medium close-up",
+        environment: "speakeasy cocktail lounge with warm amber backlighting, mahogany, and brass accents",
+        wardrobe: "vintage weathered leather bomber jacket over open-collar dark shirt",
+        mood: "The Cooke Look, 17 stops dynamic range, organic LogC4 highlight roll-off",
+        timeWeather: "night_city",
+        lighting: "rembrandt_key",
+        filmStock: "arri_logc4",
+        aspectRatio: "21:9"
+      },
+      cam_arri_alexa_35_anamorphic: {
+        profile: "arri_alexa_35",
+        lens: "Atlas Orion 65mm T2.0 2x Anamorphic Prime (Oval Bokeh & Horizontal Flare)",
+        aperture: "f/2.0",
+        subject: "Cinematic operative standing on wet rain-slicked city avenue, intense focused stillness",
         framing: "widescreen medium cinematic shot",
         environment: "rain-soaked neon district with reflective wet asphalt and vertical anamorphic light streaks",
         wardrobe: "dark distressed tactical trench coat",
-        mood: "cinematic tension, atmospheric sci-fi noir",
-        aperture: "f/2.0",
+        mood: "2.0x horizontal optical squeeze, 2:1 vertical oval bokeh, cyan streak flares",
         timeWeather: "rainy_wet",
         cityVibe: "tokyo",
         lighting: "neon",
         filmStock: "arri_logc4",
-        filter: "anamorphic_streak",
         aspectRatio: "21:9",
         anamorphic: true,
         squeeze: "2.0x",
         streakFlare: "cyan_blue",
-        irisBlades: "14_blade_circular",
-        gobo: "geometric_slits",
-        lightingRatio: "8:1"
+        irisBlades: "14_blade_circular"
       },
-      commercial_billboard_copy_space: {
-        profile: "phase_one_iq4",
-        subject: "Luxury skincare essence glass bottle held by elegant hand in precision pinch grip",
-        framing: "asymmetric commercial advertising layout with negative copy space",
-        environment: "architectural limestone studio plinth with sharp raking shadow patterns",
-        wardrobe: "none",
-        mood: "prestigious commercial luxury, pristine high-acutance minimalism",
-        aperture: "f/8.0",
-        timeWeather: "auto",
-        cityVibe: "none",
-        lighting: "strobe_para",
-        filmStock: "digital_raw",
-        filter: "none",
-        aspectRatio: "4:5",
-        handLock: true,
-        gripType: "precision_pinch",
-        handDetails: "slender fingers, visible lunula, natural cuticles, contact tissue blanching on glass",
-        gobo: "venetian_blinds",
-        gripModifier: "beauty_dish_honeycomb",
-        lightingRatio: "4:1",
-        copySpace: "left_third",
-        adSafeZone: "instagram_feed_4_5",
-        productCrop: "essence_bottle_hero.png",
-        skuColor: "Pantone 296 C Deep Navy (#001F3F)",
-        capGeometry: "Brushed aluminum knurled dropper collar",
-        labelKerning: "Optically locked serif tracking +20",
-        materialFinish: "Satin frosted cosmetic glass, 12% specular roughness",
-        seamGeometry: "Seamless polished base rim",
-        approvalGate: true
-      },
-      hyperrealistic_latex_character: {
-        profile: "hasselblad_x2d_ii_100c",
-        subject: "Avant-garde couture model wearing sculpted liquid-glass and glossy latex bodysuit, piercing calm gaze",
-        framing: "three-quarter editorial high-fashion framing",
-        environment: "deep opaque black softly blurred studio void with controlled rim glow",
-        wardrobe: "bespoke black liquid-glass and latex bodysuit with contoured structural paneling",
-        mood: "hypnotic avant-garde editorial, pristine optical precision",
-        aperture: "f/4.0",
-        timeWeather: "auto",
-        cityVibe: "none",
-        lighting: "strobe_para",
-        filmStock: "digital_raw",
-        filter: "none",
-        aspectRatio: "9:12",
-        materialStyle: "glossy_latex",
-        bgStyle: "opaque_black_blur",
-        volumetric4D: true,
-        removeText: true,
-        policySafe: true
-      },
-      heavyweight_editorial_portrait: {
-        profile: "sony_a1_ii",
-        subject: "Heavyweight athlete seated in quiet contemplation, authentic skin pores and fine vellus hair",
-        framing: "medium seated editorial portrait",
-        environment: "minimalist concrete locker pavilion, raking directional skylight",
-        wardrobe: "ribbed athletic compression tank conforming naturally to enlarged chest and waist",
-        mood: "dignified power, quiet rebellion, calm intensity",
+      cam_sony_fx_venice_noir: {
+        profile: "sony_fx_series",
+        lens: "Sony FE 50mm f/1.2 GM @ f/2.8 (Venice Cine Sweet Spot)",
         aperture: "f/2.8",
+        subject: "Jazz saxophonist performing under single warm tungsten pool of light on dark club stage",
+        framing: "medium performance shot with deep shadows",
+        environment: "intimate cellar jazz club with brick arches, subtle haze, and warm spotlight",
+        wardrobe: "midnight blue velvet blazer and unbuttoned silk shirt",
+        mood: "Venice color science, S-Cinetone organic skin rendering, 180-degree cinema shutter cadence",
+        timeWeather: "night_city",
+        lighting: "tungsten_candle",
+        filmStock: "digital_raw",
+        aspectRatio: "16:9"
+      },
+
+      // 5. Analog Sheet Film & Classic Formats
+      cam_linhof_4x5_architectural: {
+        profile: "linhof_technika_4x5",
+        lens: "Schneider Kreuznach Apo-Symmar 150mm f/5.6 L (Museum Reference)",
+        aperture: "f/11",
+        subject: "Museum director standing gracefully in grand central gallery flanked by classical sculptures",
+        framing: "full-length architectural fashion portrait",
+        environment: "soaring neoclassical museum rotunda with polished marble floor and fluted columns",
+        wardrobe: "bespoke charcoal three-piece suit with silk tie",
+        mood: "Scheimpflug optical plane alignment, zero vertical keystoning, Kodak Ektar 100 resolution",
+        timeWeather: "overcast",
+        lighting: "architectural_skylight",
+        filmStock: "portra_160",
+        aspectRatio: "4:5"
+      },
+      cam_linhof_4x5_desert: {
+        profile: "linhof_technika_4x5",
+        lens: "Rodenstock Grandagon-N 90mm f/4.5 (Extreme Architectural Rise)",
+        aperture: "f/16",
+        subject: "Explorer standing at canyon rim looking into the vast expanse of red sandstone",
+        framing: "wide environmental cinematic frame",
+        environment: "red sandstone canyon rim with deep geological strata and distant desert haze",
+        wardrobe: "khaki canvas safari jacket and wide-brim felt hat",
+        mood: "monumental scale, ancient earth, sheet film micro-acutance, adventurous stillness",
+        timeWeather: "noon_sun",
+        lighting: "golden_hour",
+        filmStock: "provia_100f",
+        aspectRatio: "4:5"
+      },
+      cam_pentax_67_bokeh_king: {
+        profile: "pentax_67ii",
+        lens: "SMC Pentax 67 105mm f/2.4 (The Legendary Bokeh King)",
+        aperture: "f/2.4",
+        subject: "Person standing amidst wild sea grass with evening wind blowing through hair",
+        framing: "three-quarter editorial portrait",
+        environment: "coastal sand dunes leading to an open ocean beach at low tide",
+        wardrobe: "chunky cream cable-knit wool sweater and weathered denim",
+        mood: "The Legendary Bokeh King, medium format 6x7 negative depth, velvety background melt",
+        timeWeather: "golden_hour",
+        lighting: "golden_hour",
+        filmStock: "portra_400",
+        aspectRatio: "4:5"
+      },
+      cam_pentax_67_cotswolds: {
+        profile: "pentax_67ii",
+        lens: "SMC Pentax 67 90mm f/2.8 (Crisp Documentary Normal)",
+        aperture: "f/2.8",
+        subject: "Botanist gathering garden roses into a wicker basket beside weathered stone wall",
+        framing: "three-quarter editorial portrait",
+        environment: "English country stone cottage garden overflowing with climbing roses and delphiniums",
+        wardrobe: "waxed cotton jacket and sage linen dress",
+        mood: "pastoral, romantic, gentle morning tranquility, organic Portra color palette",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "portra_160",
+        aspectRatio: "4:5"
+      },
+      cam_hasselblad_500cm_zeiss: {
+        profile: "hasselblad_500cm",
+        lens: "Carl Zeiss Planar T* 80mm f/2.8 CF (Legendary Standard)",
+        aperture: "f/4.0",
+        subject: "Winemaker inspecting grape clusters in late summer light along vineyard terrace",
+        framing: "square medium format environmental portrait",
+        environment: "sun-drenched Tuscan vineyard on rolling hills with cypress trees in background",
+        wardrobe: "rustic chambray shirt and dirt-stained leather work gloves",
+        mood: "Zeiss Planar micro-contrast, square 6x6 medium format discipline, sun-drenched Tuscany",
+        timeWeather: "golden_hour",
+        cityVibe: "mediterranean",
+        lighting: "golden_hour",
+        filmStock: "portra_400",
+        aspectRatio: "1:1"
+      }
+    };
+
+    // =========================================================================
+    // CALIBRATED AMBIENT & LIGHTING PRESETS (Organized by Environmental Style)
+    // =========================================================================
+    const AMBIENT_PRESETS = {
+      // 1. Cities & Urban Streetscapes
+      amb_paris_haussmann: {
+        environment: "wet cobblestone Paris street in Saint-Germain, limestone Haussmann facade in background with zinc rooftops",
+        timeWeather: "overcast",
+        cityVibe: "paris",
+        lighting: "window_daylight",
+        mood: "effortless European sophistication, contemplative, authentic Parisian elegance",
+        wardrobe: "tailored navy wool trench coat and gray cashmere scarf",
+        filmStock: "digital_raw"
+      },
+      amb_tokyo_shinjuku: {
+        environment: "narrow rain-soaked alleyway in Shinjuku with glowing neon signs and reflective puddles",
+        timeWeather: "rainy_wet",
+        cityVibe: "tokyo",
+        lighting: "tungsten_candle",
+        mood: "melancholic, cinematic, vivid night atmosphere with saturated reflections",
+        wardrobe: "dark oversized coat with glistening raindrops on shoulders",
+        filmStock: "cinestill_800t"
+      },
+      amb_nyc_soho_loft: {
+        environment: "sunlit SoHo loft exterior with historic cast-iron columns, fire escapes, and Belgian block cobblestones",
+        timeWeather: "golden_hour",
+        cityVibe: "nyc",
+        lighting: "golden_hour",
+        mood: "sharp, modern, vibrant creative energy with raking morning sunlight",
+        wardrobe: "minimalist black blazer, crisp white t-shirt, tailored trousers",
+        filmStock: "digital_raw"
+      },
+      amb_london_mayfair: {
+        environment: "Mayfair street with weathered Portland stone, black wrought-iron railings, and gentle misty drizzle",
+        timeWeather: "overcast",
+        cityVibe: "london",
+        lighting: "window_daylight",
+        mood: "understated British refinement, calm overcast atmosphere",
+        wardrobe: "charcoal tweed overcoat and leather Chelsea boots",
+        filmStock: "portra_400"
+      },
+      amb_milan_portico: {
+        environment: "lofty marble portico in Brera design district with geometric sunbeam shadows and sunlit courtyard",
+        timeWeather: "noon_sun",
+        cityVibe: "milan",
+        lighting: "strobe_para",
+        mood: "commanding, sophisticated Italian fashion with high-contrast shadow carving",
+        wardrobe: "sharp structured camel wool coat and dark sunglasses",
+        filmStock: "portra_160"
+      },
+      amb_kyoto_gion: {
+        environment: "historic Gion preservation lane with dark aged cedar lattice timber, glowing amber paper lanterns, and wet flagstones",
+        timeWeather: "rainy_wet",
+        cityVibe: "tokyo",
+        lighting: "tungsten_candle",
+        mood: "serene, contemplative, ancient Japanese atmospheric evening",
+        wardrobe: "indigo-dyed heavy linen smock and wooden geta footwear",
+        filmStock: "portra_400"
+      },
+      amb_berlin_concrete: {
+        environment: "raw board-formed concrete industrial courtyard in Berlin Mitte with exposed steel beams and gravel",
+        timeWeather: "overcast",
+        cityVibe: "none",
+        lighting: "window_daylight",
+        mood: "stark brutalist minimalism, cold industrial aesthetic",
+        wardrobe: "monochromatic black technical parka and heavyweight trousers",
+        filmStock: "digital_raw"
+      },
+
+      // 2. Luxury Hospitality & Architectural Sanctuaries
+      amb_amalfi_terrace: {
+        environment: "private terracotta terrace of a cliffside boutique hotel overlooking the deep azure Mediterranean sea",
+        timeWeather: "golden_hour",
+        cityVibe: "mediterranean",
+        lighting: "golden_hour",
+        mood: "peaceful luxury, serene warmth, slow coastal living",
+        wardrobe: "unbleached relaxed white linen shirt and light linen trousers",
+        filmStock: "portra_160"
+      },
+      amb_manhattan_penthouse: {
+        environment: "modernist luxury penthouse living room with smoked oak flooring, marble accents, and floor-to-ceiling skyline views",
+        timeWeather: "morning_fog",
+        cityVibe: "nyc",
+        lighting: "architectural_skylight",
+        mood: "quiet contemplation, refined architectural luxury",
+        wardrobe: "fine ribbed dark knit sweater and tailored wool trousers",
+        filmStock: "digital_raw"
+      },
+      amb_paris_palace_lobby: {
+        environment: "historic Grand Hotel lobby with fluted plaster columns, warm crystal chandeliers, gilded mirrors, and marble hearth",
+        timeWeather: "night_city",
+        cityVibe: "paris",
+        lighting: "tungsten_candle",
+        mood: "opulent, cinematic, dignified European grandeur",
+        wardrobe: "tailored midnight blue double-breasted suit",
+        filmStock: "classic_chrome"
+      },
+      amb_kyoto_ryokan: {
+        environment: "traditional luxury ryokan interior with natural tatami mats, sliding shoji screens, and morning light on moss garden",
+        timeWeather: "window_daylight",
+        cityVibe: "none",
+        lighting: "window_daylight",
+        mood: "zen tranquility, meditative quiet, organic natural textures",
+        wardrobe: "natural raw silk yukata robe with dark sash",
+        filmStock: "provia_100f"
+      },
+      amb_alpine_chalet: {
+        environment: "Swiss luxury alpine chalet salon with roaring raw granite hearth, floor-to-ceiling snow views, and timber beams",
+        timeWeather: "overcast",
+        cityVibe: "none",
+        lighting: "tungsten_candle",
+        mood: "hygge warmth, tactile comfort against alpine winter chill",
+        wardrobe: "chunky ivory ribbed cashmere turtleneck and flannel trousers",
+        filmStock: "portra_400"
+      },
+      amb_speakeasy_lounge: {
+        environment: "speakeasy cocktail lounge with curved mahogany bar, dim amber filament bulbs, and midnight velvet drapery",
+        timeWeather: "night_city",
+        cityVibe: "none",
+        lighting: "rembrandt_key",
+        mood: "intimate, moody, cinematic storytelling",
+        wardrobe: "crisp unbuttoned collar shirt and vintage leather jacket",
+        filmStock: "arri_logc4"
+      },
+
+      // 3. Coastal, Maritime & Island Escapes
+      amb_mediterranean_cliff: {
+        environment: "whitewashed Mediterranean cliffside village with vibrant bougainvillea, sun-bleached stone, and deep blue ocean",
+        timeWeather: "noon_sun",
+        cityVibe: "mediterranean",
+        lighting: "golden_hour",
+        mood: "sun-drenched, radiant, timeless summer warmth",
+        wardrobe: "flowing sky-blue cotton sundress with delicate embroidery",
+        filmStock: "portra_160"
+      },
+      amb_atlantic_dunes: {
+        environment: "coastal sand dunes leading to an open ocean beach at low tide with windswept sea oats",
+        timeWeather: "golden_hour",
+        cityVibe: "none",
+        lighting: "golden_hour",
+        mood: "raw coastal beauty, free, natural salt air",
+        wardrobe: "chunky cream cable-knit wool sweater and weathered denim",
+        filmStock: "portra_400"
+      },
+      amb_nordic_fjord: {
+        environment: "Norwegian coastal fjord with dark mist-shrouded peaks, dark wet granite rocks, and pine fringe",
+        timeWeather: "morning_fog",
+        cityVibe: "scandinavia",
+        lighting: "window_daylight",
+        mood: "epic nature, vast monumental scale, crisp northern air",
+        wardrobe: "mustard yellow technical rain parka and waterproof hiking boots",
+        filmStock: "classic_chrome"
+      },
+      amb_tropical_shore: {
+        environment: "secluded tropical beach with gentle surf, wet sand, and coconut palm silhouettes against orange twilight",
+        timeWeather: "golden_hour",
+        cityVibe: "none",
+        lighting: "golden_hour",
+        mood: "peaceful daily life, grounded, sun-baked serenity",
+        wardrobe: "faded linen shirt and roll-up cotton trousers",
+        filmStock: "portra_400"
+      },
+      amb_big_sur_bluffs: {
+        environment: "high dramatic coastal cliffs over crashing Pacific surf with dense marine layer fog breaking into warm golden sun",
+        timeWeather: "morning_fog",
+        cityVibe: "none",
+        lighting: "golden_hour",
+        mood: "untamed wilderness, awe-inspiring maritime atmosphere",
+        wardrobe: "waxed canvas field coat and heavy wool beanie",
+        filmStock: "portra_400"
+      },
+
+      // 4. Terroir, Rural Landscapes & Wild Nature
+      amb_tuscan_vineyard: {
+        environment: "sun-drenched Tuscan vineyard on rolling hills with cypress trees and warm late afternoon golden dust",
+        timeWeather: "golden_hour",
+        cityVibe: "mediterranean",
+        lighting: "golden_hour",
+        mood: "earthy, authentic, slow agrarian rhythm",
+        wardrobe: "rustic chambray shirt and dirt-stained leather work gloves",
+        filmStock: "portra_400"
+      },
+      amb_pnw_pine_forest: {
+        environment: "dense Pacific Northwest pine forest mountain trail, mossy Douglas fir canopy, and damp cedar earth",
+        timeWeather: "morning_fog",
+        cityVibe: "none",
+        lighting: "window_daylight",
+        mood: "quiet solitary wilderness, cool damp mountain air",
+        wardrobe: "heavy red-and-black wool flannel overshirt and leather boots",
+        filmStock: "portra_400"
+      },
+      amb_cotswolds_garden: {
+        environment: "English country stone cottage garden overflowing with climbing roses, delphiniums, and dry-stone walls",
+        timeWeather: "overcast",
+        cityVibe: "london",
+        lighting: "window_daylight",
+        mood: "pastoral, romantic, gentle morning English daylight",
+        wardrobe: "waxed cotton jacket and sage linen dress",
+        filmStock: "portra_160"
+      },
+      amb_mojave_desert: {
+        environment: "red sandstone canyon rim with deep geological strata, raking dune shadows, and distant desert haze",
+        timeWeather: "noon_sun",
+        cityVibe: "none",
+        lighting: "golden_hour",
+        mood: "monumental scale, ancient earth, adventurous stillness",
+        wardrobe: "khaki canvas safari jacket and wide-brim felt hat",
+        filmStock: "provia_100f"
+      },
+      amb_highland_moor: {
+        environment: "Scottish Highlands peat moorland covered in blooming purple heather under low dramatic storm clouds",
+        timeWeather: "overcast",
+        cityVibe: "none",
+        lighting: "window_daylight",
+        mood: "brooding, wild, romantic solitude",
+        wardrobe: "heavy Harris Tweed jacket and waterproof leather field boots",
+        filmStock: "portra_160"
+      },
+
+      // 5. High-End Commercial Studio & Exhibition
+      amb_cosmetic_packshot: {
+        environment: "high-end commercial studio cyclorama with dual diffused strip softboxes and black flag negative fill",
+        timeWeather: "studio_soft",
+        cityVibe: "none",
+        lighting: "strobe_softbox",
+        mood: "pristine, tactile, ultra-premium commercial quality",
+        wardrobe: "none",
+        filmStock: "digital_raw"
+      },
+      amb_haute_couture_studio: {
+        environment: "pure white infinity cove photo studio with subtle floor reflections and giant Broncolor Para 220 strobe",
+        timeWeather: "auto",
+        cityVibe: "none",
+        lighting: "strobe_para",
+        mood: "sculptural high-fashion elegance, pristine micro-contrast",
+        wardrobe: "unbleached raw ivory silk draped architectural dress",
+        filmStock: "portra_160"
+      },
+      amb_sculptor_atelier: {
+        environment: "historic Carrara limestone atelier with half-carved statues and raking morning sunlight beams",
+        timeWeather: "morning_fog",
+        cityVibe: "none",
+        lighting: "window_daylight",
+        mood: "intense concentration, raw craftsmanship, suspended marble dust",
+        wardrobe: "heavy indigo canvas workshirt and stained leather apron",
+        filmStock: "classic_chrome"
+      },
+      amb_horologist_bench: {
+        environment: "cluttered antique wooden workbench with miniature gear wheels, watchmaker loupes, and brass shavings",
+        timeWeather: "auto",
+        cityVibe: "none",
+        lighting: "strobe_para",
+        mood: "microscopic precision, quiet mastery",
+        wardrobe: "dark wool vest and rolled-up striped cotton shirt",
+        filmStock: "digital_raw"
+      },
+      amb_museum_rotunda: {
+        environment: "soaring neoclassical museum rotunda with polished marble floor, fluted columns, and glass skylight",
+        timeWeather: "overcast",
+        cityVibe: "none",
+        lighting: "architectural_skylight",
+        mood: "scholarly majesty, timeless architectural symmetry",
+        wardrobe: "bespoke charcoal three-piece suit with silk tie",
+        filmStock: "portra_160"
+      },
+      amb_commercial_gobo_copy: {
+        environment: "architectural limestone studio plinth with sharp raking Venetian blind shadow patterns and negative copy-space",
+        timeWeather: "auto",
+        cityVibe: "none",
+        lighting: "strobe_para",
+        mood: "prestigious commercial luxury, pristine high-acutance minimalism",
+        wardrobe: "none",
+        filmStock: "digital_raw"
+      },
+
+      // 6. Mastery Protocols & Technical Directives
+      amb_4d_liquid_glass: {
+        environment: "deep opaque black softly blurred studio void with controlled contour rim glow",
+        timeWeather: "auto",
+        cityVibe: "none",
+        lighting: "strobe_para",
+        mood: "hypnotic avant-garde editorial, pristine optical precision",
+        wardrobe: "bespoke black liquid-glass and latex bodysuit with contoured structural paneling",
+        filmStock: "digital_raw"
+      },
+      amb_heavyweight_morphology: {
+        environment: "minimalist concrete locker pavilion, raking directional skylight",
         timeWeather: "auto",
         cityVibe: "none",
         lighting: "window_rake",
-        filmStock: "digital_raw",
-        filter: "none",
-        aspectRatio: "4:5",
-        bodyVolume: "biceps, chest, gut",
-        weightLb: 240,
-        policySafe: true
+        mood: "dignified power, quiet rebellion, calm intensity",
+        wardrobe: "ribbed athletic compression tank conforming naturally to enlarged torso",
+        filmStock: "digital_raw"
       },
-      gallery_baryta_print: {
-        profile: "phase_one_iq4",
-        subject: "Master ceramicist holding unglazed stoneware vessel, intense tactile micro-relief",
-        framing: "intimate chest-level craftsman portrait",
+      amb_baryta_print_prepress: {
         environment: "Kyoto pottery atelier, clay dust suspended in directional sunlight",
-        wardrobe: "indigo dyed heavy linen smock",
-        mood: "timeless artisanal presence, exhibition fine art acutance",
-        aperture: "f/8.0",
         timeWeather: "auto",
         cityVibe: "none",
         lighting: "daylight_diffuse",
-        filmStock: "digital_raw",
-        filter: "none",
-        aspectRatio: "4:5",
-        paperProfile: "baryta",
-        printSize: "16x24@300",
-        policySafe: true
+        mood: "timeless artisanal presence, exhibition fine art acutance",
+        wardrobe: "indigo dyed heavy linen smock",
+        filmStock: "digital_raw"
+      },
+      amb_depixel_v2_restoration: {
+        environment: "professional document copystand with 45-degree balanced polarization and zero reflections",
+        timeWeather: "studio_soft",
+        cityVibe: "none",
+        lighting: "strobe_softbox",
+        mood: "Universal De-Pixelate v2.0 restoration, strict OCR safety, flat copy-stand acutance",
+        wardrobe: "none",
+        filmStock: "digital_raw"
+      },
+      amb_monochrome_luminance: {
+        environment: "monochrome stone archival gallery with raking directional window light",
+        timeWeather: "overcast",
+        cityVibe: "none",
+        lighting: "window_daylight",
+        mood: "pure monochromatic sensor fidelity, zero CFA interpolation, obsidian black to pure specular white",
+        wardrobe: "charcoal wool minimalist attire",
+        filmStock: "digital_raw"
       }
     };
+
+    // Backward-compatible merged dictionary
+    const SCENARIOS = Object.assign({}, CAMERA_PRESETS, AMBIENT_PRESETS);
+    // Aliases for legacy scenario keys
+    SCENARIOS.city_paris = CAMERA_PRESETS.cam_leica_m11_reportage;
+    SCENARIOS.tokyo_night = CAMERA_PRESETS.cam_leica_m6_analog_trix;
+    SCENARIOS.nyc_soho = CAMERA_PRESETS.cam_sony_a7rv_macro_horology;
+    SCENARIOS.london_drizzle = CAMERA_PRESETS.cam_leica_sl3_p_apo;
+    SCENARIOS.milan_portico = CAMERA_PRESETS.cam_hasselblad_h6d_para;
+    SCENARIOS.hotel_terrace = AMBIENT_PRESETS.amb_amalfi_terrace;
+    SCENARIOS.hotel_penthouse = CAMERA_PRESETS.cam_phase_one_iq4_arch;
+    SCENARIOS.hotel_lobby = AMBIENT_PRESETS.amb_paris_palace_lobby;
+    SCENARIOS.hotel_bar = CAMERA_PRESETS.cam_arri_alexa_35_cooke;
+    SCENARIOS.beach_dunes = CAMERA_PRESETS.cam_pentax_67_bokeh_king;
+    SCENARIOS.mediterranean_cliff = AMBIENT_PRESETS.amb_mediterranean_cliff;
+    SCENARIOS.nordic_fjord = AMBIENT_PRESETS.amb_nordic_fjord;
+    SCENARIOS.tropical_shore = AMBIENT_PRESETS.amb_tropical_shore;
+    SCENARIOS.rural_vineyard = CAMERA_PRESETS.cam_hasselblad_500cm_zeiss;
+    SCENARIOS.mountain_cabin = AMBIENT_PRESETS.amb_pnw_pine_forest;
+    SCENARIOS.english_country = CAMERA_PRESETS.cam_pentax_67_cotswolds;
+    SCENARIOS.desert_canyon = CAMERA_PRESETS.cam_linhof_4x5_desert;
+    SCENARIOS.architect_brutalist = CAMERA_PRESETS.cam_phase_one_iq4_arch;
+    SCENARIOS.commercial_packshot = AMBIENT_PRESETS.amb_cosmetic_packshot;
+    SCENARIOS.fashion_studio = CAMERA_PRESETS.cam_hasselblad_h6d_para;
+    SCENARIOS.sculptor_atelier = CAMERA_PRESETS.cam_fujifilm_gfx100ii_reala;
+    SCENARIOS.watchmaker_bench = CAMERA_PRESETS.cam_sony_a7rv_macro_horology;
+    SCENARIOS.museum_gallery = CAMERA_PRESETS.cam_linhof_4x5_architectural;
+    SCENARIOS.hollywood_anamorphic = CAMERA_PRESETS.cam_arri_alexa_35_anamorphic;
+    SCENARIOS.commercial_billboard_copy_space = AMBIENT_PRESETS.amb_commercial_gobo_copy;
+    SCENARIOS.hyperrealistic_latex_character = AMBIENT_PRESETS.amb_4d_liquid_glass;
+    SCENARIOS.heavyweight_editorial_portrait = AMBIENT_PRESETS.amb_heavyweight_morphology;
+    SCENARIOS.gallery_baryta_print = CAMERA_PRESETS.cam_phase_one_iq4_still;
 
     async function init() {
       setupDragAndDrop();
       await loadProfiles();
-      // Apply default Paris scenario to start
-      onScenarioSelectChange();
+      // Apply default Leica M11 + Paris scenario to start
+      if (document.getElementById('cameraPresetSelect')) {
+        document.getElementById('cameraPresetSelect').value = 'cam_leica_m11_reportage';
+        onCameraPresetSelectChange();
+      }
+      if (document.getElementById('ambientPresetSelect')) {
+        document.getElementById('ambientPresetSelect').value = 'amb_paris_haussmann';
+        onAmbientPresetSelectChange();
+      }
     }
 
     function setupDragAndDrop() {
@@ -2428,80 +2850,132 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
     }
 
-    function onScenarioSelectChange() {
-      const select = document.getElementById('scenarioSelect');
-      const val = select.value;
+    function onCameraPresetSelectChange() {
+      const select = document.getElementById('cameraPresetSelect');
+      const val = select ? select.value : 'none';
 
       if (val === 'none') {
-        // Element of surprise: clear fields so user has complete freedom
-        clearToSurprise();
         return;
       }
 
-      const s = SCENARIOS[val];
-      if (!s) return;
+      const c = CAMERA_PRESETS[val];
+      if (!c) return;
 
-      // Populate camera profile
-      document.getElementById('profileSelect').value = s.profile;
+      // 1. Populate camera profile
+      document.getElementById('profileSelect').value = c.profile;
       onProfileChange();
 
-      // Populate creative fields (completely editable)
-      document.getElementById('subjectInput').value = s.subject;
-      document.getElementById('framingInput').value = s.framing;
-      document.getElementById('environmentInput').value = s.environment;
-      document.getElementById('wardrobeInput').value = s.wardrobe;
-      document.getElementById('moodInput').value = s.mood;
+      // 2. Populate matched lens if present in options
+      if (c.lens) {
+        const lensSelect = document.getElementById('lensSelect');
+        const targetLensPrefix = c.lens.split(" (")[0].toLowerCase();
+        for (let i = 0; i < lensSelect.options.length; i++) {
+          if (lensSelect.options[i].text.toLowerCase().includes(targetLensPrefix) ||
+              lensSelect.options[i].value.toLowerCase().includes(targetLensPrefix)) {
+            lensSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
 
+      // 3. Populate camera-tailored subject & framing
+      if (c.subject) document.getElementById('subjectInput').value = c.subject;
+      if (c.framing) document.getElementById('framingInput').value = c.framing;
+
+      // 4. If ambient style is not set, provide sensible default environment from camera preset
+      const ambSelect = document.getElementById('ambientPresetSelect');
+      if (!ambSelect || ambSelect.value === 'none') {
+        if (c.environment) document.getElementById('environmentInput').value = c.environment;
+        if (c.wardrobe) document.getElementById('wardrobeInput').value = c.wardrobe;
+        if (c.mood) document.getElementById('moodInput').value = c.mood;
+        if (c.timeWeather) document.getElementById('timeWeatherSelect').value = c.timeWeather;
+        if (c.cityVibe) document.getElementById('cityVibeSelect').value = c.cityVibe;
+        if (c.lighting) document.getElementById('lightingSelect').value = c.lighting;
+        if (c.filmStock) document.getElementById('filmStockSelect').value = c.filmStock;
+      }
+
+      // 5. Special camera features
+      if (c.anamorphic !== undefined && document.getElementById('chkAnamorphic')) {
+        document.getElementById('chkAnamorphic').checked = !!c.anamorphic;
+        if (c.squeeze) document.getElementById('squeezeSelect').value = c.squeeze;
+        if (c.streakFlare) document.getElementById('streakFlareSelect').value = c.streakFlare;
+        if (c.irisBlades) document.getElementById('irisBladesSelect').value = c.irisBlades;
+      }
+      if (c.aspectRatio && document.getElementById('aspectSelect')) {
+        document.getElementById('aspectSelect').value = c.aspectRatio;
+      }
+      if (c.paperProfile && document.getElementById('paperProfileSelect')) {
+        document.getElementById('paperProfileSelect').value = c.paperProfile;
+      }
+      if (c.printSize && document.getElementById('printSizeSelect')) {
+        document.getElementById('printSizeSelect').value = c.printSize;
+      }
+
+      setAperture(c.aperture || 'f/2.8');
+      debounceCompile();
+    }
+
+    function onAmbientPresetSelectChange() {
+      const select = document.getElementById('ambientPresetSelect');
+      const val = select ? select.value : 'none';
+
+      if (val === 'none') {
+        return;
+      }
+
+      const a = AMBIENT_PRESETS[val];
+      if (!a) return;
+
+      if (a.environment) document.getElementById('environmentInput').value = a.environment;
+      if (a.wardrobe) document.getElementById('wardrobeInput').value = a.wardrobe;
+      if (a.mood) document.getElementById('moodInput').value = a.mood;
+      if (a.timeWeather) document.getElementById('timeWeatherSelect').value = a.timeWeather;
+      if (a.cityVibe) document.getElementById('cityVibeSelect').value = a.cityVibe;
+      if (a.lighting) document.getElementById('lightingSelect').value = a.lighting;
+      if (a.filmStock) document.getElementById('filmStockSelect').value = a.filmStock;
+
+      debounceCompile();
+    }
+
+    function onScenarioSelectChange(customKey) {
+      const val = customKey || (document.getElementById('scenarioSelect') ? document.getElementById('scenarioSelect').value : 'none');
+      if (val === 'none') {
+        clearToSurprise();
+        return;
+      }
+      if (CAMERA_PRESETS[val]) {
+        if (document.getElementById('cameraPresetSelect')) document.getElementById('cameraPresetSelect').value = val;
+        onCameraPresetSelectChange();
+        return;
+      }
+      if (AMBIENT_PRESETS[val]) {
+        if (document.getElementById('ambientPresetSelect')) document.getElementById('ambientPresetSelect').value = val;
+        onAmbientPresetSelectChange();
+        return;
+      }
+      const s = SCENARIOS[val];
+      if (!s) return;
+      if (s.profile) {
+        document.getElementById('profileSelect').value = s.profile;
+        onProfileChange();
+      }
+      if (s.subject) document.getElementById('subjectInput').value = s.subject;
+      if (s.framing) document.getElementById('framingInput').value = s.framing;
+      if (s.environment) document.getElementById('environmentInput').value = s.environment;
+      if (s.wardrobe) document.getElementById('wardrobeInput').value = s.wardrobe;
+      if (s.mood) document.getElementById('moodInput').value = s.mood;
       if (s.timeWeather) document.getElementById('timeWeatherSelect').value = s.timeWeather;
       if (s.cityVibe) document.getElementById('cityVibeSelect').value = s.cityVibe;
       if (s.lighting) document.getElementById('lightingSelect').value = s.lighting;
       if (s.filmStock) document.getElementById('filmStockSelect').value = s.filmStock;
-      if (s.filter) document.getElementById('filterSelect').value = s.filter;
-
-      if (s.refMode) {
-        const controls = document.getElementById('refControls');
-        if (controls) controls.style.display = 'flex';
-        setRefMode(s.refMode);
-        if (s.capGeometry && document.getElementById('capGeometryInput')) document.getElementById('capGeometryInput').value = s.capGeometry;
-        if (s.skuColor && document.getElementById('skuColorInput')) document.getElementById('skuColorInput').value = s.skuColor;
-        if (s.labelKerning && document.getElementById('labelKerningInput')) document.getElementById('labelKerningInput').value = s.labelKerning;
-        if (s.materialFinish && document.getElementById('materialFinishInput')) document.getElementById('materialFinishInput').value = s.materialFinish;
-        if (s.seamGeometry && document.getElementById('seamsInput')) document.getElementById('seamsInput').value = s.seamGeometry;
-        if (s.productCrop && document.getElementById('productCropInput')) document.getElementById('productCropInput').value = s.productCrop;
-      }
-
-      if (s.handLock !== undefined && document.getElementById('chkHandLock')) document.getElementById('chkHandLock').checked = !!s.handLock;
-      if (s.gripType && document.getElementById('gripTypeSelect')) document.getElementById('gripTypeSelect').value = s.gripType;
-      if (s.handDetails && document.getElementById('handDetailsInput')) document.getElementById('handDetailsInput').value = s.handDetails;
-
-      if (s.anamorphic !== undefined && document.getElementById('chkAnamorphic')) document.getElementById('chkAnamorphic').checked = !!s.anamorphic;
-      if (s.squeeze && document.getElementById('squeezeSelect')) document.getElementById('squeezeSelect').value = s.squeeze;
-      if (s.streakFlare && document.getElementById('streakFlareSelect')) document.getElementById('streakFlareSelect').value = s.streakFlare;
-      if (s.irisBlades && document.getElementById('irisBladesSelect')) document.getElementById('irisBladesSelect').value = s.irisBlades;
-
-      if (s.gobo && document.getElementById('goboSelect')) document.getElementById('goboSelect').value = s.gobo;
-      if (s.gripModifier && document.getElementById('gripModifierSelect')) document.getElementById('gripModifierSelect').value = s.gripModifier;
-      if (s.lightingRatio && document.getElementById('lightingRatioSelect')) document.getElementById('lightingRatioSelect').value = s.lightingRatio;
-      if (s.copySpace && document.getElementById('copySpaceSelect')) document.getElementById('copySpaceSelect').value = s.copySpace;
-      if (s.adSafeZone && document.getElementById('adSafeZoneSelect')) document.getElementById('adSafeZoneSelect').value = s.adSafeZone;
-      if (s.aspectRatio && document.getElementById('aspectSelect')) document.getElementById('aspectSelect').value = s.aspectRatio;
-
-      if (document.getElementById('bodyVolumeInput')) document.getElementById('bodyVolumeInput').value = s.bodyVolume || '';
-      if (document.getElementById('weightLbInput')) document.getElementById('weightLbInput').value = s.weightLb || '';
-      if (document.getElementById('materialStyleSelect')) document.getElementById('materialStyleSelect').value = s.materialStyle || 'none';
-      if (document.getElementById('bgStyleSelect')) document.getElementById('bgStyleSelect').value = s.bgStyle || 'default';
-      if (document.getElementById('chkVolumetric4D')) document.getElementById('chkVolumetric4D').checked = !!s.volumetric4D;
-      if (document.getElementById('chkRemoveText')) document.getElementById('chkRemoveText').checked = !!s.removeText;
-      if (document.getElementById('paperProfileSelect')) document.getElementById('paperProfileSelect').value = s.paperProfile || 'none';
-      if (document.getElementById('printSizeSelect')) document.getElementById('printSizeSelect').value = s.printSize || 'default';
-      if (document.getElementById('chkPolicySafe')) document.getElementById('chkPolicySafe').checked = !!s.policySafe;
-
-      setAperture(s.aperture || 'f/2.8');
+      if (s.aperture) setAperture(s.aperture);
       debounceCompile();
     }
 
     function clearToSurprise() {
-      document.getElementById('scenarioSelect').value = 'none';
+      if (document.getElementById('cameraPresetSelect')) document.getElementById('cameraPresetSelect').value = 'none';
+      if (document.getElementById('ambientPresetSelect')) document.getElementById('ambientPresetSelect').value = 'none';
+      if (document.getElementById('scenarioSelect')) document.getElementById('scenarioSelect').value = 'none';
       document.getElementById('subjectInput').value = '';
       document.getElementById('environmentInput').value = '';
       document.getElementById('wardrobeInput').value = '';
@@ -2543,9 +3017,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
       document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
       
-      showToast("Cleared! Write freely for total element of surprise.");
+      showToast("Cleared! Build your own scene freely or pick from camera & ambient styles.");
       debounceCompile();
     }
+    const clearToBuildYourOwn = clearToSurprise;
 
     function injectEnv(keyword) {
       const input = document.getElementById('environmentInput');
@@ -2633,7 +3108,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
       document.getElementById('customLensInput').value = '';
 
-      if (selected && selected.aperture && document.getElementById('scenarioSelect').value === 'none') {
+      const camPresetEl = document.getElementById('cameraPresetSelect');
+      if (selected && selected.aperture && (!camPresetEl || camPresetEl.value === 'none')) {
         setAperture(selected.aperture);
       } else {
         debounceCompile();
