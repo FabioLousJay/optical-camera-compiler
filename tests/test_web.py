@@ -237,6 +237,83 @@ class TestWebStudioHandler(unittest.TestCase):
         self.assertIn("amb_depixel_v2_restoration", html)
         self.assertIn("amb_monochrome_luminance", html)
 
+    def test_country_city_and_geographic_vibe_dropdowns(self) -> None:
+        """Verify root / contains Country/City and Geographic Vibe dual dropdowns meeting all regional thresholds."""
+        status, headers, body = self._execute_request("GET", "/")
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+
+        # 1. Verify presence of both coordinated dropdowns and compatibility shim
+        self.assertIn('id="countryCitySelect"', html)
+        self.assertIn('id="geographicVibeSelect"', html)
+        self.assertIn('id="cityVibeSelect"', html)
+        self.assertIn("Country / City", html)
+        self.assertIn("Geographic Vibe", html)
+
+        # 2. Verify all regional optgroups exist
+        self.assertIn("United States (18 Cities)", html)
+        self.assertIn("Canada (11 Cities)", html)
+        self.assertIn("Brazil (12 Cities)", html)
+        self.assertIn("Europe (34 Cities)", html)
+        self.assertIn("Asia (22 Cities)", html)
+        self.assertIn("Oceania (12 Cities)", html)
+        self.assertIn("The Orient (Middle East, Levant, Silk Road, North Africa - 22 Cities)", html)
+
+        # 3. Verify city quotas meet or exceed user requirements
+        usa_cities = [c for c in html.split('value="') if c.startswith("usa_")]
+        can_cities = [c for c in html.split('value="') if c.startswith("can_")]
+        bra_cities = [c for c in html.split('value="') if c.startswith("bra_")]
+        eur_cities = [c for c in html.split('value="') if c.startswith("eur_")]
+        asia_cities = [c for c in html.split('value="') if c.startswith("asia_")]
+        oce_cities = [c for c in html.split('value="') if c.startswith("oce_")]
+        ori_cities = [c for c in html.split('value="') if c.startswith("ori_")]
+
+        # In select options (at least 1 occurrence per city value)
+        self.assertGreaterEqual(len(set([c.split('"')[0] for c in usa_cities])), 15)
+        self.assertGreaterEqual(len(set([c.split('"')[0] for c in can_cities])), 10)
+        self.assertGreaterEqual(len(set([c.split('"')[0] for c in bra_cities])), 10)
+        self.assertGreaterEqual(len(set([c.split('"')[0] for c in eur_cities])), 30)
+        self.assertGreaterEqual(len(set([c.split('"')[0] for c in asia_cities])), 20)
+        self.assertGreaterEqual(len(set([c.split('"')[0] for c in oce_cities])), 10)
+        self.assertGreaterEqual(len(set([c.split('"')[0] for c in ori_cities])), 20)
+
+        # Total unique cities count across all 7 regions
+        total_unique_cities = (
+            len(set([c.split('"')[0] for c in usa_cities]))
+            + len(set([c.split('"')[0] for c in can_cities]))
+            + len(set([c.split('"')[0] for c in bra_cities]))
+            + len(set([c.split('"')[0] for c in eur_cities]))
+            + len(set([c.split('"')[0] for c in asia_cities]))
+            + len(set([c.split('"')[0] for c in oce_cities]))
+            + len(set([c.split('"')[0] for c in ori_cities]))
+        )
+        self.assertGreaterEqual(total_unique_cities, 120)
+
+        # 4. Verify Geographic Vibes categories and key presets
+        self.assertIn("Historic & Classical Architecture", html)
+        self.assertIn("Modern, Industrial & Urban Atmosphere", html)
+        self.assertIn("Regional, Coastal & Environmental Archetypes", html)
+        self.assertIn('value="haussmann"', html)
+        self.assertIn('value="cast_iron_soho"', html)
+        self.assertIn('value="georgian_brick"', html)
+        self.assertIn('value="classical_marble"', html)
+        self.assertIn('value="modern_skyscrapers"', html)
+        self.assertIn('value="industrial_brick"', html)
+        self.assertIn('value="brutalist_concrete"', html)
+        self.assertIn('value="art_deco_brass"', html)
+        self.assertIn('value="narrow_neon_alleys"', html)
+        self.assertIn('value="mediterranean_whitewash"', html)
+        self.assertIn('value="traditional_timber_lattice"', html)
+        self.assertIn('value="desert_sandstone_oasis"', html)
+        self.assertIn('value="tropical_oceanfront"', html)
+        self.assertIn('value="oriental_geometric_mosaic"', html)
+
+        # 5. Verify JavaScript dictionaries and handlers
+        self.assertIn("COUNTRY_CITY_DATA", html)
+        self.assertIn("GEOGRAPHIC_VIBE_DATA", html)
+        self.assertIn("onCountryCityChange", html)
+        self.assertIn("onGeographicVibeChange", html)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -817,6 +817,22 @@ The Web Studio interactive console (`python3 -m optical_compiler.web --port 8000
   * **Mastery Protocols**: 4D liquid glass & latex, heavyweight body morphology, Baryta fine art prepress, Universal De-Pixelate v2.0 OCR safety, pure monochromatic luminance.
 * **↺ Clear / Build Your Own**: One-click action wiping all parameters and resetting dropdowns to let users construct custom prompts completely from scratch.
 
+### 14. Global City Roster & Geographic Architectural Vibes
+The Web Studio Section 02 (`Scene & Styling`) separates geographic location from architectural atmosphere into **two dedicated, coordinated dropdowns**:
+* **🌍 Country / City Dropdown (130+ Global Hubs in 7 Regional Optgroups)**:
+  * **United States (18 cities)**: New York City, Los Angeles, Chicago, San Francisco, Miami, Seattle, Boston, Austin, New Orleans, Las Vegas, Nashville, Philadelphia, Washington D.C., Denver, Portland, Atlanta, Honolulu, Santa Fe.
+  * **Canada (11 cities)**: Toronto, Vancouver, Montreal, Quebec City, Calgary, Ottawa, Victoria, Banff, Halifax, Edmonton, Winnipeg.
+  * **Brazil (12 cities)**: Rio de Janeiro, São Paulo, Salvador da Bahia, Brasília, Curitiba, Florianópolis, Belo Horizonte, Manaus, Recife, Paraty, Ouro Preto, Fortaleza.
+  * **Europe (34 cities)**: Paris, London, Milan, Rome, Florence, Venice, Berlin, Amsterdam, Barcelona, Madrid, Lisbon, Porto, Vienna, Prague, Budapest, Edinburgh, Dublin, Copenhagen, Stockholm, Oslo, Helsinki, Reykjavik, Zurich, Geneva, Munich, Athens, Santorini, Dubrovnik, Warsaw, Brussels, Bruges, Monaco, Seville, Krakow.
+  * **Asia (22 cities)**: Tokyo, Kyoto, Osaka, Seoul, Busan, Singapore, Bangkok, Chiang Mai, Mumbai, New Delhi, Hong Kong, Taipei, Shanghai, Beijing, Ho Chi Minh City, Hanoi, Kuala Lumpur, Jakarta, Bali (Ubud), Manila, Colombo, Kathmandu.
+  * **Oceania (12 cities)**: Sydney, Melbourne, Brisbane, Perth, Adelaide, Hobart, Gold Coast, Auckland, Wellington, Queenstown, Christchurch, Suva (Fiji).
+  * **The Orient (22 cities)**: Istanbul, Dubai, Abu Dhabi, Doha, Muscat, Riyadh, AlUla, Cairo, Alexandria, Luxor, Marrakech, Casablanca, Fes, Beirut, Amman, Petra, Jerusalem, Samarkand, Bukhara, Isfahan, Baku, Tbilisi.
+* **🏛️ Geographic Vibe Dropdown (25+ Curated Architectural & Environmental Archetypes)**:
+  * **Historic & Classical Architecture**: Haussmannian Limestone, Cast-Iron SoHo, Refined Georgian Brick, Classical Marble Porticos, Medieval Fortress Stone, Baroque Colonial Stucco & Azulejos, Gothic Sandstone Spires.
+  * **Modern, Industrial & Urban Atmosphere**: Modernist Glass Skyscrapers, Industrial Red-Brick Warehouses, Brutalist Concrete Monoliths, Art Deco Brass & Terrazzo, Sprawling Megacity Flyovers, Rain-Slicked Narrow Neon Alleys, Steamy Urban Noir Sodium Vapor.
+  * **Regional, Coastal & Environmental Archetypes**: Mediterranean Whitewash & Azure Horizon, Tuscan Terracotta & Cypress Avenues, Traditional Cedar Timber Lattice, Desert Sandstone Oasis & Adobe, Tropical Oceanfront Palms, Active Maritime Wharves, High Alpine Schist & Timber, Nordic Minimalist Granite & Pine, Subtropical Courtyards & Tiered Fountains, Foggy River Embankment Viaducts, Oriental Zellij Geometric Mosaics.
+* **⚡ Decoupled Combinatorial Prompting**: Easily pair any city with diverse architectural aesthetics (e.g. *Tokyo + Narrow Neon Alleys* vs. *Tokyo + Traditional Cedar Lattice* vs. *Tokyo + Modernist Glass Skyscrapers*) with automatic prompt replacement without text clutter.
+
 ---
 
 ## Python API Usage

@@ -994,30 +994,220 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             </select>
           </div>
           <div class="field-group">
-            <label for="cityVibeSelect">City / Geographic Vibe</label>
-            <select id="cityVibeSelect" onchange="onCityVibeChange()">
-              <option value="none">Universal / Anywhere</option>
-              <option value="paris" selected>Paris, France (Haussmannian, muted stone)</option>
-              <option value="tokyo">Tokyo, Japan (Alley minimalism, modern neon)</option>
-              <option value="nyc">New York, USA (Cast-iron SoHo, brownstones)</option>
-              <option value="mediterranean">Mediterranean (Sun-bleached white, azure sea)</option>
-              <option value="london">London, UK (Georgian brick, refined overcast)</option>
-              <option value="milan">Milan, Italy (Marble porticos, high fashion)</option>
-              <option value="scandinavia">Scandinavia (Granite, minimalist timber)</option>
-            </select>
+            <label for="moodInput">Mood / Emotion</label>
+            <input type="text" id="moodInput" placeholder="e.g. effortless, contemplative, serene" oninput="debounceCompile()">
           </div>
         </div>
 
         <div class="field-row">
           <div class="field-group">
+            <label for="countryCitySelect">Country / City <span class="hint">130+ Global Hubs</span></label>
+            <select id="countryCitySelect" onchange="onCountryCityChange()">
+              <option value="none">Universal / Anywhere (No Specific City)</option>
+              <optgroup label="United States (18 Cities)">
+                <option value="usa_nyc">New York City, USA (Manhattan, SoHo, Brownstones)</option>
+                <option value="usa_la">Los Angeles, USA (Venice, DTLA Arts, Hollywood Hills)</option>
+                <option value="usa_chicago">Chicago, USA (Loop Architecture, Riverwalk)</option>
+                <option value="usa_sf">San Francisco, USA (Victorian Painted Ladies, Bay Fog)</option>
+                <option value="usa_miami">Miami, USA (South Beach Art Deco, Biscayne Bay)</option>
+                <option value="usa_seattle">Seattle, USA (Pike Place, Puget Sound Mist)</option>
+                <option value="usa_boston">Boston, USA (Beacon Hill Red Brick, Cobblestones)</option>
+                <option value="usa_austin">Austin, USA (South Congress, Texas Limestone)</option>
+                <option value="usa_new_orleans">New Orleans, USA (French Quarter Wrought Iron)</option>
+                <option value="usa_las_vegas">Las Vegas, USA (Strip Neon Glare, Mojave Horizon)</option>
+                <option value="usa_nashville">Nashville, USA (Music Row Studios, Neon Marquee)</option>
+                <option value="usa_philadelphia">Philadelphia, USA (Historic Brick Rowhomes, Rittenhouse)</option>
+                <option value="usa_dc">Washington D.C., USA (Neoclassical Marble, Georgetown)</option>
+                <option value="usa_denver">Denver, USA (LoDo Historic Lofts, Rocky Backdrop)</option>
+                <option value="usa_portland">Portland, USA (Pearl District, Evergreen Mist)</option>
+                <option value="usa_atlanta">Atlanta, USA (Midtown Tree Canopy, Modernist Lofts)</option>
+                <option value="usa_honolulu">Honolulu, Hawaii, USA (Waikiki Coast, Volcanic Ridges)</option>
+                <option value="usa_santa_fe">Santa Fe, New Mexico, USA (Pueblo Adobe, Earth Tones)</option>
+              </optgroup>
+              <optgroup label="Canada (11 Cities)">
+                <option value="can_toronto">Toronto, Canada (Victorian Bay-and-Gables, Financial Core)</option>
+                <option value="can_vancouver">Vancouver, Canada (Gastown Brick, Seawall, Mountains)</option>
+                <option value="can_montreal">Montreal, Canada (Old Montreal Cobblestones, Greystone Facades)</option>
+                <option value="can_quebec_city">Quebec City, Canada (Château Frontenac, Walled Old Quebec)</option>
+                <option value="can_calgary">Calgary, Canada (Modern High-Rise Glass, Bow River)</option>
+                <option value="can_ottawa">Ottawa, Canada (Gothic Revival Parliament, Rideau Canal)</option>
+                <option value="can_victoria">Victoria, Canada (Inner Harbour Stone, British Colonial)</option>
+                <option value="can_banff">Banff, Canada (Alpine Timber Lodges, Turquoise Glaciers)</option>
+                <option value="can_halifax">Halifax, Canada (Maritime Wharves, Weathered Clapboard)</option>
+                <option value="can_edmonton">Edmonton, Canada (River Valley Parkland, Strathcona Brick)</option>
+                <option value="can_winnipeg">Winnipeg, Canada (Exchange District Terracotta Masonry)</option>
+              </optgroup>
+              <optgroup label="Brazil (12 Cities)">
+                <option value="bra_rio">Rio de Janeiro, Brazil (Copacabana Wave, Sugarloaf, Tijuca)</option>
+                <option value="bra_saopaulo">São Paulo, Brazil (Paulista Monoliths, Vila Madalena Art)</option>
+                <option value="bra_salvador">Salvador da Bahia, Brazil (Pelourinho Pastel Baroque, Cobblestones)</option>
+                <option value="bra_brasilia">Brasília, Brazil (Niemeyer White Curves, Monumental Axis)</option>
+                <option value="bra_curitiba">Curitiba, Brazil (Botanical Glass Dome, Pine Avenues)</option>
+                <option value="bra_florianopolis">Florianópolis, Brazil (Azorean Fishing Villages, Emerald Lagoons)</option>
+                <option value="bra_belohorizonte">Belo Horizonte, Brazil (Pampulha Modernism, Iron Mountains)</option>
+                <option value="bra_manaus">Manaus, Brazil (Teatro Amazonas Belle Époque, Rio Negro)</option>
+                <option value="bra_recife">Recife, Brazil (Recife Antigo Dutch Colonial, Mangrove Bridges)</option>
+                <option value="bra_paraty">Paraty, Brazil (UNESCO Whitewashed Walls, Irregular Cobblestones)</option>
+                <option value="bra_ouro_preto">Ouro Preto, Brazil (Baroque Mountain Slopes, Soapstone Sculptures)</option>
+                <option value="bra_fortaleza">Fortaleza, Brazil (Iracema Oceanfront, Jangada Coastal Sun)</option>
+              </optgroup>
+              <optgroup label="Europe (34 Cities)">
+                <option value="eur_paris" selected>Paris, France (Haussmann Limestone, Zinc Mansards, Balconies)</option>
+                <option value="eur_london">London, UK (Georgian Red Brick, Portland Stone, Thames Mist)</option>
+                <option value="eur_milan">Milan, Italy (Duomo Marble Spires, Galleria Glass, Fashion District)</option>
+                <option value="eur_rome">Rome, Italy (Ancient Travertine, Ochre Palazzi, Sunlit Piazzas)</option>
+                <option value="eur_florence">Florence, Italy (Renaissance Sandstone, Arno Bridges, Terracotta)</option>
+                <option value="eur_venice">Venice, Italy (Venetian Gothic Palazzi, Canal Reflections)</option>
+                <option value="eur_berlin">Berlin, Germany (Bauhaus Minimalism, Raw Brick Lofts, Boulevards)</option>
+                <option value="eur_amsterdam">Amsterdam, Netherlands (Gabled Canal Houses, Brick Bridges)</option>
+                <option value="eur_barcelona">Barcelona, Spain (Modernisme Curves, Warm Catalan Stone)</option>
+                <option value="eur_madrid">Madrid, Spain (Gran Vía Facades, Habsburg Plazas, Castilian Sun)</option>
+                <option value="eur_lisbon">Lisbon, Portugal (Glazed Azulejo Tiles, Terracotta Miradouros)</option>
+                <option value="eur_porto">Porto, Portugal (Ribeira River Granite, Blue Ceramic Cladding)</option>
+                <option value="eur_vienna">Vienna, Austria (Imperial Ringstraße, Gilded Baroque, Marble Cafes)</option>
+                <option value="eur_prague">Prague, Czech Republic (Gothic Spires, Charles Bridge, Bohemian Alleys)</option>
+                <option value="eur_budapest">Budapest, Hungary (Art Nouveau Stone, Danube Riverfront Bridges)</option>
+                <option value="eur_edinburgh">Edinburgh, Scotland (Old Town Volcanic Closes, New Town Sandstone)</option>
+                <option value="eur_dublin">Dublin, Ireland (Georgian Painted Doors, Temple Bar Cobblestones)</option>
+                <option value="eur_copenhagen">Copenhagen, Denmark (Nyhavn Townhouses, Minimalist Danish Brick)</option>
+                <option value="eur_stockholm">Stockholm, Sweden (Gamla Stan Ochre Facades, Baltic Waterways)</option>
+                <option value="eur_oslo">Oslo, Norway (Fjord Waterfront Glass, Dark Nordic Zinc & Timber)</option>
+                <option value="eur_helsinki">Helsinki, Finland (National Romantic Granite, Neoclassical Marble)</option>
+                <option value="eur_reykjavik">Reykjavik, Iceland (Corrugated Iron Houses, Basalt Harbor, Arctic Light)</option>
+                <option value="eur_zurich">Zurich, Switzerland (Limmat River Bridges, Medieval Guild Houses)</option>
+                <option value="eur_geneva">Geneva, Switzerland (Lake Promenade, Belle Époque Mansions, Jura Vista)</option>
+                <option value="eur_munich">Munich, Germany (Bavarian Neoclassical, Marienplatz Gothic Arches)</option>
+                <option value="eur_athens">Athens, Greece (Acropolis Marble Colonnades, Plaka Pastel Terraces)</option>
+                <option value="eur_santorini">Santorini, Greece (Cliffside Whitewashed Cave Villas, Azure Domes)</option>
+                <option value="eur_dubrovnik">Dubrovnik, Croatia (Polished Limestone Stradun, Fortress Walls)</option>
+                <option value="eur_warsaw">Warsaw, Poland (Royal Old Town Facades, Sleek High-Tech Towers)</option>
+                <option value="eur_brussels">Brussels, Belgium (Grand Place Gilded Guildhalls, Art Nouveau Iron)</option>
+                <option value="eur_bruges">Bruges, Belgium (Medieval Flemish Step-Gables, Willow-Lined Canals)</option>
+                <option value="eur_monaco">Monaco (Riviera Cliffside Palazzi, Yacht Harbor, Casino Esplanade)</option>
+                <option value="eur_seville">Seville, Spain (Mudéjar Courtyards, Orange Tree Plazas, Wrought Iron)</option>
+                <option value="eur_krakow">Krakow, Poland (Wawel Royal Stone, Medieval Rynek Cloth Hall)</option>
+              </optgroup>
+              <optgroup label="Asia (22 Cities)">
+                <option value="asia_tokyo">Tokyo, Japan (Shinjuku Neon Layers, Ginza Architectural Glass)</option>
+                <option value="asia_kyoto">Kyoto, Japan (Gion Wooden Machiya, Shoji Lattices, Moss Gardens)</option>
+                <option value="asia_osaka">Osaka, Japan (Dotonbori Canal Neon, Vibrant Urban Food Alleys)</option>
+                <option value="asia_seoul">Seoul, South Korea (Hanok Tiled Eaves, Futuristic Gangnam Glass)</option>
+                <option value="asia_busan">Busan, South Korea (Gamcheon Pastel Hillside, Haeundae Coastal Towers)</option>
+                <option value="asia_singapore">Singapore (Marina Bay High-Tech Biophilia, Peranakan Shophouses)</option>
+                <option value="asia_bangkok">Bangkok, Thailand (Chao Phraya Gilded Spires, Street Night Markets)</option>
+                <option value="asia_chiang_mai">Chiang Mai, Thailand (Lanna Teak Temples, Mist-Veiled Mountains)</option>
+                <option value="asia_mumbai">Mumbai, India (Victorian Gothic Stone, Marine Drive Promenade)</option>
+                <option value="asia_delhi">New Delhi, India (Red Sandstone Mughal Arches, Imperial Avenues)</option>
+                <option value="asia_hong_kong">Hong Kong (Vertical Skyscraper Canyon, Victoria Harbour Ferries)</option>
+                <option value="asia_taipei">Taipei, Taiwan (Ximending Neon Alleys, Japanese-Era Red Brick)</option>
+                <option value="asia_shanghai">Shanghai, China (The Bund 1920s Neoclassical, Pudong Skyline)</option>
+                <option value="asia_beijing">Beijing, China (Hutong Courtyards, Forbidden City Vermilion Walls)</option>
+                <option value="asia_saigon">Ho Chi Minh City, Vietnam (French Colonial Stucco, Tree-Lined Avenues)</option>
+                <option value="asia_hanoi">Hanoi, Vietnam (Old Quarter Narrow Tube Houses, Misty Hoan Kiem)</option>
+                <option value="asia_kuala_lumpur">Kuala Lumpur, Malaysia (Petronas Stainless Towers, Moorish Arches)</option>
+                <option value="asia_jakarta">Jakarta, Indonesia (Kota Tua Dutch Facades, Gleaming Skywalks)</option>
+                <option value="asia_bali">Bali (Ubud), Indonesia (Carved Volcanic Stone Gates, Tiered Rice Paddies)</option>
+                <option value="asia_manila">Manila, Philippines (Intramuros Fortified Stone Walls, Bay Sunset)</option>
+                <option value="asia_colombo">Colombo, Sri Lanka (Bawa Tropical Modernism, Indian Ocean Shore)</option>
+                <option value="asia_kathmandu">Kathmandu, Nepal (Carved Newar Wood Screens, Himalayan Mountain Air)</option>
+              </optgroup>
+              <optgroup label="Oceania (12 Cities)">
+                <option value="oce_sydney">Sydney, Australia (Opera House Sails, Sandstone Rocks, Harbour Light)</option>
+                <option value="oce_melbourne">Melbourne, Australia (Bluestone Laneways, Victorian Cast-Iron Verandahs)</option>
+                <option value="oce_brisbane">Brisbane, Australia (Queenslander Timber Stilts, Subtropical Riverbanks)</option>
+                <option value="oce_perth">Perth, Australia (Swan River Esplanade, Clean Western Sunlight)</option>
+                <option value="oce_adelaide">Adelaide, Australia (Historic Sandstone Terraces, Parkland Rings)</option>
+                <option value="oce_hobart">Hobart, Australia (Salamanca Sandstone Wharves, Mount Wellington Vista)</option>
+                <option value="oce_gold_coast">Gold Coast, Australia (Gleaming Oceanfront Towers, Golden Sand Breaks)</option>
+                <option value="oce_auckland">Auckland, New Zealand (Volcanic Harbour Cones, Waterfront Marinas)</option>
+                <option value="oce_wellington">Wellington, New Zealand (Timber Hillside Cottages, Cook Strait Breeze)</option>
+                <option value="oce_queenstown">Queenstown, New Zealand (Alpine Schist Lodges, Remarkables Mountain Peaks)</option>
+                <option value="oce_christchurch">Christchurch, New Zealand (Avon River Willows, Contemporary Architecture)</option>
+                <option value="oce_suva">Suva, Fiji (South Pacific Colonial Verandas, Lush Rain Coast)</option>
+              </optgroup>
+              <optgroup label="The Orient (Middle East, Levant, Silk Road, North Africa - 22 Cities)">
+                <option value="ori_istanbul">Istanbul, Turkey (Bosphorus Waters, Byzantine Domes, Ottoman Minarets)</option>
+                <option value="ori_dubai">Dubai, UAE (Burj Glass Spires, DIFC Marble Plazas, Desert Horizons)</option>
+                <option value="ori_abu_dhabi">Abu Dhabi, UAE (White Marble Colonnades, Geometric Shade Domes)</option>
+                <option value="ori_doha">Doha, Qatar (Museum of Islamic Art Limestone, Souq Waqif Mud Walls)</option>
+                <option value="ori_muscat">Muscat, Oman (Low-Rise Whitewashed Coast, Hajar Mountain Forts)</option>
+                <option value="ori_riyadh">Riyadh, Saudi Arabia (Al Masmak Clay Fortress, KAFD Geometric Glass)</option>
+                <option value="ori_alula">AlUla, Saudi Arabia (Hegra Carved Sandstone Tombs, Golden Canyon Dusk)</option>
+                <option value="ori_cairo">Cairo, Egypt (Historic Islamic Minarets, Golden Nile Atmospheric Haze)</option>
+                <option value="ori_alexandria">Alexandria, Egypt (Corniche Sea Promenade, Greco-Roman Heritage)</option>
+                <option value="ori_luxor">Luxor, Egypt (Monumental Karnak Sandstone Hypostyle, Desert Cliffs)</option>
+                <option value="ori_marrakech">Marrakech, Morocco (Ochre Tadelakt Walls, Zellij Fountains, Lantern Glow)</option>
+                <option value="ori_casablanca">Casablanca, Morocco (Hassan II Oceanfront Mosque, Mauresque Art Deco)</option>
+                <option value="ori_fes">Fes, Morocco (Medieval Walled Medina Alleys, Carved Cedar Madrasas)</option>
+                <option value="ori_beirut">Beirut, Lebanon (Levantine Triple-Arched Sandstone, Coastal Corniche)</option>
+                <option value="ori_amman">Amman, Jordan (Terraced Limestone Hillside Cubes, Desert Twilight)</option>
+                <option value="ori_petra">Petra, Jordan (Rosy Sandstone Siq, Carved Treasury Facade)</option>
+                <option value="ori_jerusalem">Jerusalem (Golden Limestone Walls, Arched Passageways, Olive Groves)</option>
+                <option value="ori_samarkand">Samarkand, Uzbekistan (Registan Azure-Glazed Tiles, Turquoise Domes)</option>
+                <option value="ori_bukhara">Bukhara, Uzbekistan (Kalyan Baked Brickwork, Silk Road Trading Domes)</option>
+                <option value="ori_isfahan">Isfahan, Iran (Naqsh-e Jahan Mosaic Tiles, Vaulted Arched Bridges)</option>
+                <option value="ori_baku">Baku, Azerbaijan (Medieval Shirvanshah Stone, Futuristic Flame Glass)</option>
+                <option value="ori_tbilisi">Tbilisi, Georgia (Carved Wooden Lace Balconies, Narikala Fortress)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="geographicVibeSelect">Geographic Vibe <span class="hint">Architecture & Light</span></label>
+            <select id="geographicVibeSelect" onchange="onGeographicVibeChange()">
+              <option value="none">Universal / Natural Environment (No Specific Architecture)</option>
+              <optgroup label="Historic & Classical Architecture">
+                <option value="haussmann" selected>Haussmannian Limestone, Ornate Balconies & Zinc Mansards</option>
+                <option value="cast_iron_soho">Historic Cast-Iron Facades, Fire Escapes & Belgian Block Cobblestones</option>
+                <option value="georgian_brick">Refined Georgian Brickwork, Black Iron Railings & Muted Overcast</option>
+                <option value="classical_marble">Classical Marble Porticos, Fluted Colonnades & Deep Carved Shadows</option>
+                <option value="medieval_fortress">Ancient Fortress Stone, Medieval Cobblestone Alleys & Timber Beams</option>
+                <option value="baroque_colonial">Weathered Pastel Stucco, Baroque Curves & Glazed Azulejos</option>
+                <option value="gothic_stone">Gothic Sandstone Spires, Leaded Windows & Deep Vaulted Shadows</option>
+              </optgroup>
+              <optgroup label="Modern, Industrial & Urban Atmosphere">
+                <option value="modern_skyscrapers">Modernist Glass Skyscrapers, Steel Cantilevers & Rooftop Horizons</option>
+                <option value="industrial_brick">Industrial Red-Brick Warehouses, Steel Mullions & Weathered Patina</option>
+                <option value="brutalist_concrete">Brutalist Board-Formed Concrete, Angular Monoliths & Deep Shadows</option>
+                <option value="art_deco_brass">Art Deco Geometric Terrazzo, Fluted Pillars & Warm Brass Accents</option>
+                <option value="megacity_flyovers">Sprawling Multi-Level Flyovers, Kinetic Traffic Streaks & Distant Glow</option>
+                <option value="narrow_neon_alleys">Rain-Slicked Narrow Alleys, Neon Signage Glow & Wet Puddle Reflections</option>
+                <option value="urban_noir_sodium">Steamy Asphalt Night, High-Contrast Sodium Vapor & Deep Shadows</option>
+              </optgroup>
+              <optgroup label="Regional, Coastal & Environmental Archetypes">
+                <option value="mediterranean_whitewash">Sun-Bleached Whitewashed Stucco, Terracotta Tiles & Azure Sea</option>
+                <option value="tuscan_terracotta">Terracotta Terraces, Cypress Avenues & Warm Golden Dust</option>
+                <option value="traditional_timber_lattice">Traditional Cedar Timber Lattices, Sliding Shoji & Paper Lanterns</option>
+                <option value="desert_sandstone_oasis">Carved Desert Sandstone, Earthy Adobe Walls & Geometric Slit Shadows</option>
+                <option value="tropical_oceanfront">Ocean Palms, Humid Sea Spray & High-Contrast Tropical Sunlight</option>
+                <option value="maritime_harbor">Active Maritime Wharves, Weathered Timber Piers & Salt Fog</option>
+                <option value="alpine_chalet">High Alpine Schist Stone, Heavy Timber Logs & Crisp Mountain Air</option>
+                <option value="nordic_minimalist">Nordic Granite Slabs, Mossy Pine Fringes & Clean Scandinavian Daylight</option>
+                <option value="subtropical_courtyard">Verdant Courtyard, Tiered Stone Fountains & Cascading Bougainvillea</option>
+                <option value="river_embankment">Foggy River Embankment, Arched Stone Viaducts & Gaslamp Haze</option>
+                <option value="oriental_geometric_mosaic">Islamic Geometric Zellij Tiles, Horseshoe Arches & Pierced Brass Lanterns</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group" style="grid-column: 1 / -1;">
             <label for="wardrobeInput">Wardrobe / Styling</label>
             <input type="text" id="wardrobeInput" placeholder="e.g. tailored wool coat, silk scarf" oninput="debounceCompile()">
           </div>
-          <div class="field-group">
-            <label for="moodInput">Mood / Emotion</label>
-            <input type="text" id="moodInput" placeholder="e.g. effortless, contemplative, serene" oninput="debounceCompile()">
-          </div>
         </div>
+
+        <!-- Hidden backward-compatibility shim for legacy scripts -->
+        <select id="cityVibeSelect" style="display:none;" onchange="onCityVibeChange()">
+          <option value="none">Universal / Anywhere</option>
+          <option value="paris">Paris, France</option>
+          <option value="tokyo">Tokyo, Japan</option>
+          <option value="nyc">New York, USA</option>
+          <option value="mediterranean">Mediterranean</option>
+          <option value="london">London, UK</option>
+          <option value="milan">Milan, Italy</option>
+          <option value="scandinavia">Scandinavia</option>
+        </select>
       </div>
 
       <!-- REFERENCE IMAGE & ANTI-DRIFT STUDIO -->
@@ -2850,6 +3040,37 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
     }
 
+    function syncLegacyCityVibe(val) {
+      if (!val) return;
+      const cityMap = {
+        paris: 'eur_paris',
+        tokyo: 'asia_tokyo',
+        nyc: 'usa_nyc',
+        london: 'eur_london',
+        milan: 'eur_milan',
+        mediterranean: 'eur_santorini',
+        scandinavia: 'eur_stockholm'
+      };
+      const vibeMap = {
+        paris: 'haussmann',
+        tokyo: 'narrow_neon_alleys',
+        nyc: 'cast_iron_soho',
+        london: 'georgian_brick',
+        milan: 'classical_marble',
+        mediterranean: 'mediterranean_whitewash',
+        scandinavia: 'nordic_minimalist'
+      };
+      if (document.getElementById('countryCitySelect') && cityMap[val]) {
+        document.getElementById('countryCitySelect').value = cityMap[val];
+      }
+      if (document.getElementById('geographicVibeSelect') && vibeMap[val]) {
+        document.getElementById('geographicVibeSelect').value = vibeMap[val];
+      }
+      if (document.getElementById('cityVibeSelect')) {
+        document.getElementById('cityVibeSelect').value = val;
+      }
+    }
+
     function onCameraPresetSelectChange() {
       const select = document.getElementById('cameraPresetSelect');
       const val = select ? select.value : 'none';
@@ -2861,11 +3082,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const c = CAMERA_PRESETS[val];
       if (!c) return;
 
-      // 1. Populate camera profile
-      document.getElementById('profileSelect').value = c.profile;
-      onProfileChange();
+      // 1. Switch Profile
+      if (c.profile) {
+        document.getElementById('profileSelect').value = c.profile;
+        onProfileChange();
+      }
 
-      // 2. Populate matched lens if present in options
+      // 2. Select Lens
       if (c.lens) {
         const lensSelect = document.getElementById('lensSelect');
         const targetLensPrefix = c.lens.split(" (")[0].toLowerCase();
@@ -2889,7 +3112,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         if (c.wardrobe) document.getElementById('wardrobeInput').value = c.wardrobe;
         if (c.mood) document.getElementById('moodInput').value = c.mood;
         if (c.timeWeather) document.getElementById('timeWeatherSelect').value = c.timeWeather;
-        if (c.cityVibe) document.getElementById('cityVibeSelect').value = c.cityVibe;
+        if (c.countryCity && document.getElementById('countryCitySelect')) document.getElementById('countryCitySelect').value = c.countryCity;
+        if (c.geographicVibe && document.getElementById('geographicVibeSelect')) document.getElementById('geographicVibeSelect').value = c.geographicVibe;
+        if (c.cityVibe) syncLegacyCityVibe(c.cityVibe);
         if (c.lighting) document.getElementById('lightingSelect').value = c.lighting;
         if (c.filmStock) document.getElementById('filmStockSelect').value = c.filmStock;
       }
@@ -2930,7 +3155,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (a.wardrobe) document.getElementById('wardrobeInput').value = a.wardrobe;
       if (a.mood) document.getElementById('moodInput').value = a.mood;
       if (a.timeWeather) document.getElementById('timeWeatherSelect').value = a.timeWeather;
-      if (a.cityVibe) document.getElementById('cityVibeSelect').value = a.cityVibe;
+      if (a.countryCity && document.getElementById('countryCitySelect')) document.getElementById('countryCitySelect').value = a.countryCity;
+      if (a.geographicVibe && document.getElementById('geographicVibeSelect')) document.getElementById('geographicVibeSelect').value = a.geographicVibe;
+      if (a.cityVibe) syncLegacyCityVibe(a.cityVibe);
       if (a.lighting) document.getElementById('lightingSelect').value = a.lighting;
       if (a.filmStock) document.getElementById('filmStockSelect').value = a.filmStock;
 
@@ -2965,7 +3192,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (s.wardrobe) document.getElementById('wardrobeInput').value = s.wardrobe;
       if (s.mood) document.getElementById('moodInput').value = s.mood;
       if (s.timeWeather) document.getElementById('timeWeatherSelect').value = s.timeWeather;
-      if (s.cityVibe) document.getElementById('cityVibeSelect').value = s.cityVibe;
+      if (s.countryCity && document.getElementById('countryCitySelect')) document.getElementById('countryCitySelect').value = s.countryCity;
+      if (s.geographicVibe && document.getElementById('geographicVibeSelect')) document.getElementById('geographicVibeSelect').value = s.geographicVibe;
+      if (s.cityVibe) syncLegacyCityVibe(s.cityVibe);
       if (s.lighting) document.getElementById('lightingSelect').value = s.lighting;
       if (s.filmStock) document.getElementById('filmStockSelect').value = s.filmStock;
       if (s.aperture) setAperture(s.aperture);
@@ -2982,7 +3211,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       document.getElementById('moodInput').value = '';
       document.getElementById('framingInput').value = '';
       document.getElementById('timeWeatherSelect').value = 'auto';
-      document.getElementById('cityVibeSelect').value = 'none';
+      if (document.getElementById('countryCitySelect')) document.getElementById('countryCitySelect').value = 'none';
+      if (document.getElementById('geographicVibeSelect')) document.getElementById('geographicVibeSelect').value = 'none';
+      if (document.getElementById('cityVibeSelect')) document.getElementById('cityVibeSelect').value = 'none';
+      lastInjectedCity = null;
+      lastInjectedVibe = null;
       if (document.getElementById('productCropInput')) document.getElementById('productCropInput').value = '';
       if (document.getElementById('skuColorInput')) document.getElementById('skuColorInput').value = '';
       if (document.getElementById('capGeometryInput')) document.getElementById('capGeometryInput').value = '';
@@ -3063,27 +3296,249 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       debounceCompile();
     }
 
-    function onCityVibeChange() {
-      const val = document.getElementById('cityVibeSelect').value;
-      if (val === 'none') {
-        debounceCompile();
-        return;
-      }
-      const labels = {
-        paris: "Paris (Haussmann limestone facade, zinc rooftops, classic Parisian elegance)",
-        tokyo: "Tokyo (narrow atmospheric street, minimalist aesthetic, subtle signage)",
-        nyc: "New York City (SoHo cast-iron lofts, classic fire escapes, urban asphalt)",
-        mediterranean: "Mediterranean Coast (whitewashed stucco, terracotta tiles, deep azure water)",
-        london: "London (refined Georgian brickwork, classic black iron railings, muted overcast)",
-        milan: "Milan (architectural stone porticos, quiet cobblestone courtyard, fashion district)",
-        scandinavia: "Scandinavia (minimalist natural timber, granite rock, clean northern light)"
-      };
-      const text = labels[val];
+    let lastInjectedCity = null;
+    let lastInjectedVibe = null;
+
+    const COUNTRY_CITY_DATA = {
+      // United States (18 Cities)
+      usa_nyc: "in New York City (Manhattan, SoHo cast-iron architecture, historic brownstones)",
+      usa_la: "in Los Angeles (Venice, DTLA arts district, warm Southern California light)",
+      usa_chicago: "in Chicago (Loop architectural canyons, riverwalk, classic brick brownstones)",
+      usa_sf: "in San Francisco (Victorian Painted Ladies, steep cable car hill, Pacific bay fog)",
+      usa_miami: "in Miami (South Beach pastel Art Deco, ocean palms, Biscayne Bay)",
+      usa_seattle: "in Seattle (Pike Place market, Puget Sound waterfront, misty overcast)",
+      usa_boston: "in Boston (Beacon Hill historic red brick, gas lamps, cobblestones)",
+      usa_austin: "in Austin (South Congress avenue, vintage neon, warm Texas limestone)",
+      usa_new_orleans: "in New Orleans (French Quarter ornate wrought-iron balconies, Creole cottages)",
+      usa_las_vegas: "in Las Vegas (Strip neon marquee glare, mid-century retro, Mojave horizon)",
+      usa_nashville: "in Nashville (Music Row historic brick recording studios, Broadway neon)",
+      usa_philadelphia: "in Philadelphia (historic brick rowhomes, Rittenhouse cobblestones)",
+      usa_dc: "in Washington D.C. (Neoclassical marble monuments, tree-lined Georgetown brick)",
+      usa_denver: "in Denver (historic LoDo brick lofts, high-altitude Rocky Mountain backdrop)",
+      usa_portland: "in Portland (Pearl District industrial brick, mossy evergreen mist)",
+      usa_atlanta: "in Atlanta (Midtown lush tree canopy, historic Inman Park, modernist lofts)",
+      usa_honolulu: "in Honolulu, Hawaii (Waikiki coastline, volcanic ridgelines, vibrant tropical light)",
+      usa_santa_fe: "in Santa Fe, New Mexico (historic Pueblo adobe architecture, earth tones, high desert sun)",
+
+      // Canada (11 Cities)
+      can_toronto: "in Toronto (Victorian bay-and-gables, Financial District reflective glass)",
+      can_vancouver: "in Vancouver (Gastown historic brick, coastal seawall, snow-capped mountain backdrop)",
+      can_montreal: "in Montreal (Old Montreal cobblestones, historic greystone facades, Plateau exterior spiral stairs)",
+      can_quebec_city: "in Quebec City (Château Frontenac, fortified Old Quebec stone walls, French colonial charm)",
+      can_calgary: "in Calgary (contemporary high-rise skyline, Bow River, Rocky Mountain foothills)",
+      can_ottawa: "in Ottawa (Gothic Revival Parliament stone towers, Rideau Canal, historic brick)",
+      can_victoria: "in Victoria, British Columbia (Inner Harbour stone architecture, British colonial gardens, Pacific ocean air)",
+      can_banff: "in Banff, Alberta (alpine timber lodges, glacial turquoise water, towering granite Rocky peaks)",
+      can_halifax: "in Halifax, Nova Scotia (maritime harbor wharves, colorful weathered clapboard, historic stone citadel)",
+      can_edmonton: "in Edmonton (river valley parkland, Old Strathcona historic red-brick facades)",
+      can_winnipeg: "in Winnipeg (Exchange District terracotta masonry, Chicago-style historic architecture)",
+
+      // Brazil (12 Cities)
+      bra_rio: "in Rio de Janeiro (Copacabana curved mosaic promenade, Sugarloaf peak, lush Tijuca rainforest cliffs)",
+      bra_saopaulo: "in São Paulo (Avenida Paulista modernist monoliths, Vila Madalena street art, dense concrete horizon)",
+      bra_salvador: "in Salvador da Bahia (Pelourinho pastel colonial facades, baroque gilded churches, steep cobblestones)",
+      bra_brasilia: "in Brasília (Oscar Niemeyer monumental white concrete curves, sweeping open sky, modernist esplanades)",
+      bra_curitiba: "in Curitiba (botanical glass greenhouse dome, Araucaria pine avenues, clean modern urbanism)",
+      bra_florianopolis: "in Florianópolis (Azorean fishing villages, emerald coastal lagoons, white sand dunes)",
+      bra_belohorizonte: "in Belo Horizonte (Pampulha modernist curves, rolling iron-rich mountains, central market vitality)",
+      bra_manaus: "in Manaus (historic Teatro Amazonas belle époque opera dome, Rio Negro riverfront, Amazon basin)",
+      bra_recife: "in Recife (Recife Antigo Dutch colonial facades, mangrove waterways, Boa Viagem oceanfront)",
+      bra_paraty: "in Paraty (UNESCO preserved whitewashed colonial walls, irregular stone cobblestones, coastal fjord backdrop)",
+      bra_ouro_preto: "in Ouro Preto (dramatic baroque mountain hills, 18th-century stone churches, soapstone artistry)",
+      bra_fortaleza: "in Fortaleza (Praia de Iracema oceanfront, traditional coastal jangadas, vibrant tropical sun)",
+
+      // Europe (34 Cities)
+      eur_paris: "in Paris (Haussmannian limestone facades, ornate wrought-iron balconies, zinc mansard rooftops)",
+      eur_london: "in London (Georgian red brick, Portland stone, black iron railings, Thames river mist)",
+      eur_milan: "in Milan (Duomo marble spires, Galleria glass vaults, quiet stone courtyards, Quadrilatero della Moda)",
+      eur_rome: "in Rome (ancient Roman travertine, warm ochre palazzo facades, sunlit cobblestone piazzas)",
+      eur_florence: "in Florence (Renaissance sandstone palazzi, terracotta rooftops, historic Arno river bridges)",
+      eur_venice: "in Venice (Venetian Gothic canal palazzi, weathered Istrian stone, shimmering emerald reflections)",
+      eur_berlin: "in Berlin (Bauhaus minimalism, industrial red-brick lofts, raw concrete, wide boulevards)",
+      eur_amsterdam: "in Amsterdam (narrow gabled canal houses, red-brick bridges, serene waterway reflections)",
+      eur_barcelona: "in Barcelona (Modernisme wrought-iron curves, warm Catalan stone, Mediterranean atmosphere)",
+      eur_madrid: "in Madrid (Gran Vía neoclassical facades, historic Habsburg plazas, warm Castilian sunlight)",
+      eur_lisbon: "in Lisbon (glazed ceramic azulejo tiles, terracotta rooftops, steep cobblestone miradouros)",
+      eur_porto: "in Porto (Ribeira riverfront granite, blue azulejo cladding, Douro river gorge)",
+      eur_vienna: "in Vienna (imperial Ringstraße facades, gilded Baroque palaces, grand marble coffeehouses)",
+      eur_prague: "in Prague (Gothic spires, Charles Bridge stone statues, Bohemian cobblestone alleys)",
+      eur_budapest: "in Budapest (Art Nouveau stone facades, thermal bath porticos, Danube river bridges)",
+      eur_edinburgh: "in Edinburgh (Old Town dark volcanic stone closes, Georgian New Town sandstone elegance)",
+      eur_dublin: "in Dublin (Georgian brick townhouses with colorful painted doors, Temple Bar cobblestones)",
+      eur_copenhagen: "in Copenhagen (Nyhavn colorful timber-framed townhouses, minimalist Danish brick, canal wharves)",
+      eur_stockholm: "in Stockholm (Gamla Stan ochre facades, Baltic waterways, clean Scandinavian granite)",
+      eur_oslo: "in Oslo (fjord waterfront architecture, dark Nordic zinc, warm timber, clean northern light)",
+      eur_helsinki: "in Helsinki (National Romantic rough granite, neoclassical Senate Square marble, Baltic breeze)",
+      eur_reykjavik: "in Reykjavik (colorful corrugated iron townhouses, basalt stone harbor, crisp subarctic light)",
+      eur_zurich: "in Zurich (Limmat river stone bridges, medieval Old Town guild houses, alpine views)",
+      eur_geneva: "in Geneva (Lake Geneva promenade, Belle Époque grand hotels, distant Jura mountain ridge)",
+      eur_munich: "in Munich (Bavarian neoclassical facades, Marienplatz Gothic arches, quiet courtyards)",
+      eur_athens: "in Athens (ancient Acropolis marble colonnades, Plaka neoclassical pastel villas, Mediterranean sun)",
+      eur_santorini: "in Santorini (cliffside whitewashed volcanic cave dwellings, cobalt blue domes, caldera drop)",
+      eur_dubrovnik: "in Dubrovnik (polished limestone Stradun street, medieval fortress walls, deep Adriatic blue)",
+      eur_warsaw: "in Warsaw (reconstructed royal Old Town pastel facades, sleek high-tech skyscrapers)",
+      eur_brussels: "in Brussels (Grand Place ornate gilded guildhalls, Art Nouveau wrought iron)",
+      eur_bruges: "in Bruges (medieval Flemish brick step-gables, quiet willow-lined canals, swan waters)",
+      eur_monaco: "in Monaco (Riviera cliffside luxury villas, yacht harbor, marble casino esplanade)",
+      eur_seville: "in Seville (Mudéjar tile courtyards, orange tree plazas, ornate wrought iron balconies)",
+      eur_krakow: "in Krakow (Wawel royal castle stone, medieval Rynek Główny cloth hall, quiet cloisters)",
+
+      // Asia (22 Cities)
+      asia_tokyo: "in Tokyo (Shinjuku layered neon signage, Ginza architectural glass, quiet back-alley minimalism)",
+      asia_kyoto: "in Kyoto (Gion preserved dark wood machiya, sliding shoji screens, moss-lined stone paths)",
+      asia_osaka: "in Osaka (Dotonbori canal neon reflections, vibrant elevated flyovers, lively food alleyways)",
+      asia_seoul: "in Seoul (Bukchon hanok curved tiled eaves set against futuristic Gangnam glass skyscrapers)",
+      asia_busan: "in Busan (Gamcheon pastel hillside terraces, Haeundae coastal towers, sea breeze)",
+      asia_singapore: "in Singapore (Marina Bay tropical biophilic high-rises, Peranakan painted shophouses)",
+      asia_bangkok: "in Bangkok (Chao Phraya riverfront golden temple spires, bustling street stalls, modern skyways)",
+      asia_chiang_mai: "in Chiang Mai (Lanna teakwood temples, ancient brick moat walls, mist-veiled mountain jungle)",
+      asia_mumbai: "in Mumbai (Victorian Gothic stone arches, Marine Drive curved sea promenade, heritage charm)",
+      asia_delhi: "in New Delhi (red sandstone Mughal arches, sprawling tree-lined imperial avenues, Lodhi gardens)",
+      asia_hong_kong: "in Hong Kong (dense vertical skyscraper canyons, glowing street signs, Victoria Harbour ferries)",
+      asia_taipei: "in Taipei (Ximending neon alleys, misty mountain horizons, weathered Japanese-era red brick)",
+      asia_shanghai: "in Shanghai (The Bund 1920s neoclassical stone facades facing futuristic Pudong towers)",
+      asia_beijing: "in Beijing (historic hutong grey-brick courtyards, Forbidden City vermilion walls, modern steel arches)",
+      asia_saigon: "in Ho Chi Minh City (French colonial yellow stucco, bustling tree-lined boulevards, lush banyans)",
+      asia_hanoi: "in Hanoi (Old Quarter narrow tube houses, French colonial shutters, misty Hoan Kiem lake)",
+      asia_kuala_lumpur: "in Kuala Lumpur (Petronas stainless steel minarets, lush tropical greenery, Moorish arches)",
+      asia_jakarta: "in Jakarta (Kota Tua Dutch colonial heritage, gleaming high-rise glass corridors)",
+      asia_bali: "in Bali (Ubud) (carved volcanic stone temple split gates, emerald terraced rice paddies, frangipani blossoms)",
+      asia_manila: "in Manila (Intramuros fortified stone walls, Spanish cobblestones, Manila Bay sunset)",
+      asia_colombo: "in Colombo (Geoffrey Bawa tropical modernism, cinnamon gardens, Indian Ocean sea breeze)",
+      asia_kathmandu: "in Kathmandu (carved Newar wooden lattice windows, ancient brick pagodas, crisp Himalayan air)",
+
+      // Oceania (12 Cities)
+      oce_sydney: "in Sydney (Harbour Opera House white sails, sandstone heritage rocks, bright Pacific coastal light)",
+      oce_melbourne: "in Melbourne (bluestone laneways, Victorian cast-iron verandahs, specialty coffee arcades)",
+      oce_brisbane: "in Brisbane (Queenslander timber stilt houses, subtropical river bends, modern sandstone)",
+      oce_perth: "in Perth (Swan River waterfront, limestone heritage facades, brilliant Western Australian sunlight)",
+      oce_adelaide: "in Adelaide (historic stone cottage terraces, expansive parkland rings, sandstone churches)",
+      oce_hobart: "in Hobart (Salamanca sandstone Georgian warehouses, Mount Wellington backdrop, cold southern harbor)",
+      oce_gold_coast: "in Gold Coast (gleaming oceanfront high-rises, golden sand surf breaks, subtropical glare)",
+      oce_auckland: "in Auckland (volcanic harbour cones, coastal yacht marinas, contemporary waterfront glass)",
+      oce_wellington: "in Wellington (timber hillside cottages, steep cable car slopes, windy Cook Strait light)",
+      oce_queenstown: "in Queenstown (alpine schist stone lodges, Lake Wakatipu turquoise waters, Remarkables jagged peaks)",
+      oce_christchurch: "in Christchurch (Avon river weeping willows, contemporary low-rise architecture, lush English gardens)",
+      oce_suva: "in Suva, Fiji (South Pacific colonial timber verandas, lush rainforest backdrop, coral sea breeze)",
+
+      // The Orient (Middle East, Levant, Silk Road, North Africa - 22 Cities)
+      ori_istanbul: "in Istanbul (Bosphorus strait waters, Byzantine domes, Ottoman stone minarets, historic wooden yalıs)",
+      ori_dubai: "in Dubai (futuristic Burj glass spires, DIFC polished marble plazas, golden desert highway horizons)",
+      ori_abu_dhabi: "in Abu Dhabi (Sheikh Zayed white marble colonnades, Louvre geometric dome shade, Persian Gulf azure)",
+      ori_doha: "in Doha (Museum of Islamic Art geometric limestone, Souq Waqif textured mud-rendered walls)",
+      ori_muscat: "in Muscat (low-rise whitewashed coastal architecture, crenellated desert forts, craggy Hajar mountains)",
+      ori_riyadh: "in Riyadh (Al Masmak clay fortress, KAFD geometric glass towers, Najdi architectural motifs)",
+      ori_alula: "in AlUla (Hegra monumental carved sandstone tombs, mirrored desert architecture, golden canyon dusk)",
+      ori_cairo: "in Cairo (historic Islamic Cairo minarets, alabaster courtyards, golden Nile atmospheric dust haze)",
+      ori_alexandria: "in Alexandria (Corniche Mediterranean sea promenade, Greco-Roman heritage, vintage Art Deco cafes)",
+      ori_luxor: "in Luxor (monumental Karnak sandstone hypostyle columns, hieroglyphic reliefs, West Bank desert cliffs)",
+      ori_marrakech: "in Marrakech (ochre tadelakt clay walls, riad courtyard fountains, intricate zellij tilework, warm lantern glow)",
+      ori_casablanca: "in Casablanca (Hassan II coastal oceanfront mosque, white Mauresque Art Deco buildings)",
+      ori_fes: "in Fes (medieval walled Medina labyrinth, Chouara tanneries clay vats, carved cedar wood madrasas)",
+      ori_beirut: "in Beirut (Levantine triple-arched sandstone villas, French Mandate wrought iron, Mediterranean corniche)",
+      ori_amman: "in Amman (terraced beige limestone hillside cubes, ancient Roman theater, desert twilight)",
+      ori_petra: "in Petra (rosy sandstone Siq gorge, rock-cut Treasury facade, ancient Nabataean stone architecture)",
+      ori_jerusalem: "in Jerusalem (golden Jerusalem limestone walls, ancient arched stone passageways, olive groves)",
+      ori_samarkand: "in Samarkand (Registan square majestic azure-glazed tiles, ribbed turquoise domes, Silk Road majesty)",
+      ori_bukhara: "in Bukhara (ancient Kalyan minaret baked brickwork, desert trading domes, historic mudbrick walls)",
+      ori_isfahan: "in Isfahan (Naqsh-e Jahan turquoise mosaic tiles, Sheikh Lotfollah vaulted ceilings, Si-o-se-pol stone arches)",
+      ori_baku: "in Baku (medieval Shirvanshah limestone fortress paired with futuristic Flame Towers glass curves)",
+      ori_tbilisi: "in Tbilisi (cliffside carved wooden lace balconies, Narikala fortress, sulfur bath brick domes)"
+    };
+
+    const GEOGRAPHIC_VIBE_DATA = {
+      // Historic & Classical Architecture
+      haussmann: "Haussmannian limestone facade, ornate wrought-iron balconies, zinc mansard rooftops, classic grand boulevard scale",
+      cast_iron_soho: "historic cast-iron architectural facade, exterior fire escapes, Belgian block cobblestones, high warehouse windows",
+      georgian_brick: "refined Georgian red brickwork, classic black iron railings, white sash windows, muted diffuse overcast light",
+      classical_marble: "classical marble porticos, fluted colonnades, carved pediments, deep geometric shadow relief",
+      medieval_fortress: "ancient fortress stone, medieval cobblestone alleys, heavy timber lintels, weathered masonry patinas",
+      baroque_colonial: "weathered pastel stucco, sculpted baroque curves, decorative glazed azulejos, sun-drenched stone plazas",
+      gothic_stone: "weathered Gothic sandstone spires, pointed arches, flying buttresses, leaded windows, deep cathedral shadows",
+
+      // Modern, Industrial & Urban Atmosphere
+      modern_skyscrapers: "modernist glass curtain skyscrapers, cantilevered brushed steel beams, sharp reflective geometric angles",
+      industrial_brick: "industrial red-brick warehouse facade, black steel window mullions, exposed rivets, weathered industrial patina",
+      brutalist_concrete: "monumental board-formed raw concrete, sculptural angular monoliths, deep recessed clerestory shadows",
+      art_deco_brass: "Art Deco geometric terrazzo floors, fluted pilasters, warm polished brass filigree, streamlined stepped facades",
+      megacity_flyovers: "sprawling multi-level urban flyovers, kinetic traffic light streaks, elevated concrete piers, distant city glow",
+      narrow_neon_alleys: "narrow rain-slicked back-alley, glowing suspended neon signage, reflective wet puddle highlights, atmospheric steam",
+      urban_noir_sodium: "steamy night asphalt, high-contrast warm sodium-vapor and tungsten streetlights, deep dramatic noir shadows",
+
+      // Regional, Coastal & Environmental Archetypes
+      mediterranean_whitewash: "sun-bleached whitewashed stucco walls, terracotta roof tiles, vibrant bougainvillea, deep azure Mediterranean sea horizon",
+      tuscan_terracotta: "terracotta stone terraces, towering cypress tree avenues, rustic olive groves, warm late-afternoon golden dust",
+      traditional_timber_lattice: "traditional cedar timber lattice screens, sliding shoji partitions, tatami textures, hanging paper lanterns",
+      desert_sandstone_oasis: "carved desert sandstone rock faces, earthen adobe walls, palm frond shade, geometric slit light rays",
+      tropical_oceanfront: "coastal palm fronds, humid sea spray mist, sun-bleached driftwood, high-contrast midday tropical sunlight",
+      maritime_harbor: "active working maritime harbor, weathered wooden pier pilings, heavy mooring ropes, salty ocean fog",
+      alpine_chalet: "high-altitude alpine schist stone, weathered heavy timber log beams, steep eaves, crisp snow-reflected mountain light",
+      nordic_minimalist: "Nordic granite stone slabs, pale Douglas fir timber, mossy evergreen fringes, crisp diffuse northern daylight",
+      subtropical_courtyard: "verdant enclosed courtyard, tiered carved stone water fountain, terracotta planters, cascading tropical foliage",
+      river_embankment: "fog-veiled river embankment, arched granite stone viaducts, vintage gaslamp glow, quiet water surface",
+      oriental_geometric_mosaic: "intricate Islamic geometric zellij mosaic tiles, carved horseshoe archways, pierced brass lantern patterns, fountain courtyard"
+    };
+
+    function onCountryCityChange() {
+      const select = document.getElementById('countryCitySelect');
+      const val = select ? select.value : 'none';
       const env = document.getElementById('environmentInput');
-      if (text) {
-        env.value = env.value ? `${env.value}, ${text}` : text;
+
+      if (lastInjectedCity && env.value.includes(lastInjectedCity)) {
+        env.value = env.value.replace(lastInjectedCity, '').replace(/^,\s*|,\s*$/g, '').replace(/,\s*,/g, ',').trim();
       }
+
+      if (val !== 'none' && COUNTRY_CITY_DATA[val]) {
+        const text = COUNTRY_CITY_DATA[val];
+        lastInjectedCity = text;
+        if (!env.value.includes(text)) {
+          env.value = env.value ? `${env.value}, ${text}` : text;
+        }
+      } else {
+        lastInjectedCity = null;
+      }
+
+      // Sync backward compatibility shim
+      const legacySelect = document.getElementById('cityVibeSelect');
+      if (legacySelect) {
+        if (val.includes('paris')) legacySelect.value = 'paris';
+        else if (val.includes('tokyo')) legacySelect.value = 'tokyo';
+        else if (val.includes('nyc')) legacySelect.value = 'nyc';
+        else if (val.includes('london')) legacySelect.value = 'london';
+        else if (val.includes('milan')) legacySelect.value = 'milan';
+        else legacySelect.value = 'none';
+      }
+
       debounceCompile();
+    }
+
+    function onGeographicVibeChange() {
+      const select = document.getElementById('geographicVibeSelect');
+      const val = select ? select.value : 'none';
+      const env = document.getElementById('environmentInput');
+
+      if (lastInjectedVibe && env.value.includes(lastInjectedVibe)) {
+        env.value = env.value.replace(lastInjectedVibe, '').replace(/^,\s*|,\s*$/g, '').replace(/,\s*,/g, ',').trim();
+      }
+
+      if (val !== 'none' && GEOGRAPHIC_VIBE_DATA[val]) {
+        const text = GEOGRAPHIC_VIBE_DATA[val];
+        lastInjectedVibe = text;
+        if (!env.value.includes(text)) {
+          env.value = env.value ? `${env.value}, ${text}` : text;
+        }
+      } else {
+        lastInjectedVibe = null;
+      }
+
+      debounceCompile();
+    }
+
+    function onCityVibeChange() {
+      const val = document.getElementById('cityVibeSelect') ? document.getElementById('cityVibeSelect').value : 'none';
+      syncLegacyCityVibe(val);
+      onCountryCityChange();
+      onGeographicVibeChange();
     }
 
     function onProfileChange() {
