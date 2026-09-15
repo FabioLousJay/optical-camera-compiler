@@ -1,0 +1,60 @@
+{
+  "profile_id": "imax_msm_9802",
+  "title": "IMAX MSM 9802 15-Perf 65mm Large-Format Motion Picture Film Camera",
+  "schema_version": "2.0",
+  "purpose": "Monumental large-format 15-perf 65mm IMAX motion picture capture with extremely fine silver grain, rich silver tonal range, and monumental scale.",
+  "sensor_and_optics": {
+    "camera_system": "IMAX MSM 9802 15-Perf 65mm Large-Format Motion Picture Camera",
+    "sensor_type": "15-perf 65mm horizontal motion picture film negative (70x48.5mm active frame gate)",
+    "sensor_dimensions": "70x48.5mm monumental film gate",
+    "full_frame_equivalent": "~35mm equivalent field of view on monumental 15/70 format",
+    "lens": "IMAX Large-Format 65mm Motion Picture Optic",
+    "aperture_sweet_spot": "T4.0",
+    "iso_base": "Kodak Double-X 5222 panchromatic black-and-white negative film",
+    "dynamic_range": "14 stops analog negative dynamic range with rich silver gradation",
+    "shutter": "180-degree cinema rotary disc shutter (1/48s motion cadence)"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Cinematic feature film lighting, high-contrast chiaroscuro key with soft ambient fill, rich silver halide highlights",
+    "light_transport": "Deep physical shadow roll-off, natural highlight blooming on silver gelatin emulsion, pristine tonal separation"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Monumental 65mm large-format film detail: visible epidermal micro-texture, fine hair follicles, and fabric weave without digital sharpening",
+      "True Kodak Double-X 5222 silver halide grain structure with tactile micro-acutance",
+      "Deep obsidian blacks, rich mid-tone separation, and clean non-clipped specular highlights"
+    ],
+    "depth_and_optics": [
+      "Monumental format shallow depth of field: gentle cinematic focus falloff across three-dimensional space",
+      "Zero perspective distortion, clean large-format spherical optical projection",
+      "Natural analog edge transitions driven purely by physical lens geometry and lighting"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "video noise",
+      "compression artifacts",
+      "chromatic aberration"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "computational bokeh",
+      "beauty filter glow",
+      "blown digital highlights",
+      "crushed blacks"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce monumental 65mm 15-perf IMAX black-and-white film frame. Monumental close-up of a face, extremely fine grain, rich silver tonal range, shot on IMAX 65mm film with Kodak Double-X. Zero film title, director, or cinematographer names."
+}

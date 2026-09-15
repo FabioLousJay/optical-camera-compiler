@@ -1,0 +1,58 @@
+{
+  "profile_id": "hasselblad_xpan",
+  "title": "Hasselblad XPan Dual-Format Panoramic 35mm Camera",
+  "schema_version": "2.0",
+  "purpose": "Panoramic 2.7:1 landscape, architectural, and cinematic street photography on a full-width 24x65mm film negative with uncompromised corner-to-corner sharpness.",
+  "sensor_and_optics": {
+    "camera_system": "Hasselblad XPan Dual-Format 35mm Panoramic Rangefinder",
+    "sensor_type": "24x65mm dual-frame panoramic film negative (2.7:1 aspect ratio)",
+    "sensor_dimensions": "24x65mm panoramic film gate",
+    "full_frame_equivalent": "25mm ultra-wide horizontal field of view with normal 45mm vertical perspective",
+    "lens": "Hasselblad 45mm f/4 XPan Prime",
+    "aperture_sweet_spot": "f/8.0",
+    "iso_base": "Kodak Portra 400 or Fujifilm Velvia 50",
+    "dynamic_range": "14 stops analog negative latitude with expansive horizon dynamic range",
+    "shutter": "Vertical-travel focal plane shutter up to 1/1000s"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Expansive outdoor natural daylight, dawn or dusk horizontal sunbeams sweeping across the panoramic vista",
+    "light_transport": "Even corner-to-corner illumination with dedicated center filter roll-off, rich natural film saturation"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Expansive 2.7:1 negative resolution: resolved geological textures, horizon detail, and architectural facades",
+      "Organic silver halide grain with natural color saturation",
+      "High optical acutance across the entire 65mm image plane without digital cropping"
+    ],
+    "depth_and_optics": [
+      "Deep depth of field across the entire panoramic expanse at f/8 to f/11",
+      "True rectilinear panoramic projection with zero barrel or pincushion distortion",
+      "Authentic full-width negative rendering without artificial wide-angle stretch"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital crop",
+      "fisheye distortion",
+      "digital sharpening halos",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed textures",
+      "plastic surfaces",
+      "computational lens stretch",
+      "vignette banding"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 35mm film panoramic photograph in an ultra-wide 2.7:1 frame, full-width negative not a crop, even corner-to-corner sharpness, natural film color and grain, shot on Hasselblad XPan."
+}

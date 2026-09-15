@@ -29,6 +29,7 @@ from .models import (
     ReferenceMode,
     SceneInput,
     SeriesCohesionSpec,
+    SkinLightingModifier,
     StreakFlare,
     StressProbe,
     SuperResolutionBackend,
@@ -134,6 +135,7 @@ class OpticalCompiler:
         protect_sky_haze: bool = True,
         png_lock: Optional[Union[bool, dict, HighResPNGOutputLockSpec]] = None,
         png_min_mb: Optional[float] = None,
+        skin_lighting: Optional[Union[str, SkinLightingModifier]] = None,
         depixelate_v2: Optional[Union[bool, dict, UniversalDepixelateV2Spec]] = None,
         depix_camera: Optional[str] = None,
         depix_lens: Optional[str] = None,
@@ -229,6 +231,7 @@ class OpticalCompiler:
         mat_style = MaterialStyle.from_str(material_style) if isinstance(material_style, str) else material_style
         bg_style = BackgroundStyle.from_str(background_style) if isinstance(background_style, str) else background_style
         paper_prof = PaperProfile.from_str(paper_profile) if isinstance(paper_profile, str) else paper_profile
+        sl = SkinLightingModifier.from_str(skin_lighting) if isinstance(skin_lighting, str) else skin_lighting
         if is_4d_volumetric and not mat_style:
             mat_style = MaterialStyle.VOLUMETRIC_4D
 
@@ -414,6 +417,7 @@ class OpticalCompiler:
                 reconstruction_lock=recon_obj,
                 png_lock=png_lock_obj,
                 depixelate_v2=depix_v2_obj,
+                skin_lighting=sl,
             )
 
         else:
@@ -536,6 +540,8 @@ class OpticalCompiler:
                 scene_input.png_lock = png_lock_obj
             if depix_v2_obj is not None:
                 scene_input.depixelate_v2 = depix_v2_obj
+            if sl is not None:
+                scene_input.skin_lighting = sl
 
         # 3. Parse target engine
         engine = (

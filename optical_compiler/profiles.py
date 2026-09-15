@@ -30,6 +30,8 @@ from .models import (
     ReferenceMode,
     SceneInput,
     SensorOptics,
+    SkinLightingModifier,
+    SKIN_LIGHTING_DESCRIPTIONS,
     StreakFlare,
 )
 
@@ -312,6 +314,141 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "model",
         ],
     ),
+    (
+        "imax_msm_9802",
+        [
+            "imax",
+            "15-perf",
+            "65mm film",
+            "double-x",
+            "70mm film",
+            "monumental close-up",
+            "imax 65mm",
+        ],
+    ),
+    (
+        "arri_alexa_265",
+        [
+            "alexa 265",
+            "arri 265",
+            "65mm digital",
+            "alexa 65 vista",
+            "large-format digital vista",
+        ],
+    ),
+    (
+        "nikon_fm2",
+        [
+            "nikon fm2",
+            "fm2",
+            "nikkor 105mm",
+            "kodachrome",
+            "kodachrome 64",
+            "slide film portrait",
+        ],
+    ),
+    (
+        "contax_645",
+        [
+            "contax 645",
+            "planar 80mm",
+            "zeiss 80mm",
+            "pro 400h",
+            "fuji pro 400h",
+            "fine art wedding",
+        ],
+    ),
+    (
+        "hasselblad_xpan",
+        [
+            "hasselblad xpan",
+            "xpan",
+            "2.7:1",
+            "panoramic 35mm",
+            "24x65mm",
+            "panoramic landscape",
+        ],
+    ),
+    (
+        "deardorff_8x10",
+        [
+            "deardorff",
+            "8x10 portrait",
+            "deardorff 8x10",
+            "360mm symmar",
+            "tri-x sheet",
+            "white seamless",
+        ],
+    ),
+    (
+        "antique_view_8x10",
+        [
+            "wet-plate",
+            "wet plate",
+            "collodion",
+            "tintype",
+            "ambrotype",
+            "petzval",
+            "brass lens",
+            "southern gothic",
+        ],
+    ),
+    (
+        "contax_t2",
+        [
+            "contax t2",
+            "t2",
+            "sonnar 38mm",
+            "direct flash",
+            "night candid",
+            "snapshot flash",
+        ],
+    ),
+    (
+        "ricoh_gr_iv",
+        [
+            "ricoh gr",
+            "gr iv",
+            "gr 18.3mm",
+            "snap street",
+            "pocket camera",
+            "zone focus",
+            "gr iii",
+        ],
+    ),
+    (
+        "dji_mavic_4_pro",
+        [
+            "mavic 4 pro",
+            "dji mavic",
+            "nadir",
+            "aerial geometry",
+            "drone nadir",
+            "top-down aerial",
+        ],
+    ),
+    (
+        "mamiya_rz67",
+        [
+            "mamiya rz67",
+            "rz67",
+            "kino flo",
+            "twin kino flo",
+            "character portrait",
+            "140mm macro",
+        ],
+    ),
+    (
+        "polaroid_20x24",
+        [
+            "polaroid 20x24",
+            "20x24",
+            "giant instant",
+            "polacolor",
+            "life-size portrait",
+            "contact-scale",
+        ],
+    ),
 ]
 
 
@@ -460,6 +597,39 @@ def load_profile(
         "q3_monochrom": "leica_q3_monochrom",
         "q3m": "leica_q3_monochrom",
         "q3": "leica_q3_monochrom",
+        "imax": "imax_msm_9802",
+        "imax_65mm": "imax_msm_9802",
+        "imax_9802": "imax_msm_9802",
+        "imax_msm": "imax_msm_9802",
+        "alexa_265": "arri_alexa_265",
+        "arri_265": "arri_alexa_265",
+        "alexa265": "arri_alexa_265",
+        "fm2": "nikon_fm2",
+        "nikon_fm_2": "nikon_fm2",
+        "c645": "contax_645",
+        "contax645": "contax_645",
+        "xpan": "hasselblad_xpan",
+        "hasselblad_panoramic": "hasselblad_xpan",
+        "deardorff": "deardorff_8x10",
+        "deardorff8x10": "deardorff_8x10",
+        "wet_plate": "antique_view_8x10",
+        "wet_plate_8x10": "antique_view_8x10",
+        "antique_view": "antique_view_8x10",
+        "antique_view_camera": "antique_view_8x10",
+        "t2": "contax_t2",
+        "contaxt2": "contax_t2",
+        "gr_iv": "ricoh_gr_iv",
+        "griv": "ricoh_gr_iv",
+        "gr4": "ricoh_gr_iv",
+        "ricoh_gr": "ricoh_gr_iv",
+        "mavic_4_pro": "dji_mavic_4_pro",
+        "dji_mavic": "dji_mavic_4_pro",
+        "mavic": "dji_mavic_4_pro",
+        "rz67": "mamiya_rz67",
+        "mamiya_rz_67": "mamiya_rz67",
+        "polaroid_20x24": "polaroid_20x24",
+        "polaroid_20_24": "polaroid_20x24",
+        "polaroid20x24": "polaroid_20x24",
     }
     normalized_key = name_or_path.strip().lower().replace("-", "_").replace(" ", "_")
     target_name = PROFILE_ALIASES.get(normalized_key, name_or_path)
@@ -637,6 +807,13 @@ def apply_overrides(profile: CameraProfile, scene: SceneInput) -> CameraProfile:
             "Tonal mapping and contrast curve calibrated for fine-art exhibition print media with authentic paper Dmax response and zero digital banding."
         )
         p.lighting_and_exposure.light_transport = f"{prepress_directive}, {p.lighting_and_exposure.light_transport}"
+
+    # Specialized Skin & Texture Lighting Modifier
+    if scene.has_skin_lighting:
+        skin_light_directive = SKIN_LIGHTING_DESCRIPTIONS.get(scene.skin_lighting)
+        if skin_light_directive:
+            p.lighting_and_exposure.primary_lighting = f"{skin_light_directive}, {p.lighting_and_exposure.primary_lighting}"
+            p.micro_detail_and_physics.surface_rendering.insert(0, f"Specialized skin lighting: {skin_light_directive}.")
 
     # Policy-Safe Compliance Recovery Layer
     if scene.is_policy_safe:

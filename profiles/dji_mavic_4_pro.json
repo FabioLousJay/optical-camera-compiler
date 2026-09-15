@@ -1,0 +1,59 @@
+{
+  "profile_id": "dji_mavic_4_pro",
+  "title": "DJI Mavic 4 Pro Drone (Hasselblad 4/3)",
+  "schema_version": "2.0",
+  "purpose": "Perpendicular nadir aerial photography and architectural top-down ground geometry with Hasselblad 4/3 clarity, flat planar perspective, and zero horizon.",
+  "sensor_and_optics": {
+    "camera_system": "DJI Mavic 4 Pro Aerial Drone (Hasselblad 4/3 Sensor)",
+    "sensor_type": "100MP 4/3 CMOS sensor with Hasselblad Natural Colour Solution (HNCS)",
+    "sensor_dimensions": "17.3x13.0mm 4/3 sensor",
+    "full_frame_equivalent": "28mm equivalent wide-angle aerial perspective",
+    "lens": "Hasselblad 28mm-equivalent f/2.0-f/11 Aerial Prime",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 100 base sensitivity with 10-bit D-Log M",
+    "dynamic_range": "14 stops dynamic range with natural color gradation",
+    "shutter": "Electronic rolling shutter with high-speed freeze up to 1/8000s"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "High-noon or raking morning sun casting crisp geometric ground shadows across terrain",
+    "light_transport": "Clean natural daylight color, even edge-to-edge illumination, crisp shadow geometry without haze flare"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Ultra-fine planar detail: resolved pavement textures, crop furrows, architectural roof geometry, and water ripple facets",
+      "Hasselblad Natural Colour Solution: authentic organic earth tones, deep foliage greens, and neutral pavement grays",
+      "Clean edge acutance with zero digital sharpening halos or artifact smearing"
+    ],
+    "depth_and_optics": [
+      "Strict perpendicular 90-degree nadir top-down orientation with zero visible horizon",
+      "Pure orthogonal 2D graphic ground composition",
+      "Corner-to-corner rectilinear geometry with zero fisheye or barrel distortion"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "visible horizon",
+      "sky in frame",
+      "angled perspective",
+      "digital sharpening halos",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed textures",
+      "plastic surfaces",
+      "oversaturated colors",
+      "hazy glare"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce straight-down nadir aerial photograph from a drone, flat graphic geometry of the ground, no horizon, crisp detail across the frame, clean natural color, shot on DJI Mavic 4 Pro."
+}

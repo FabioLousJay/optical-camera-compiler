@@ -23,6 +23,7 @@ from .models import (
     SeriesCohesionSpec,
     StressProbe,
     SuperResolutionBackend,
+    SkinLightingModifier,
     TargetEngine,
     UniversalDepixelateV2Spec,
 )
@@ -31,6 +32,7 @@ from .pfep import (
     RUN_LOG_TEMPLATE,
     init_pfep_project,
 )
+from .presets import CAMERA_PRESETS, LENS_CATALOG
 from .profiles import apply_overrides, auto_select_profile, load_profile
 from .restoration import (
     EXPORT_PROFILES,
@@ -51,7 +53,7 @@ from .restoration import (
     viewing_distance_inches,
 )
 
-__version__ = "3.8.0"
+__version__ = "3.9.0"
 
 __all__ = [
     "OpticalCompiler",
@@ -64,6 +66,9 @@ __all__ = [
     "LightingSetup",
     "MicroPhysics",
     "NegativeShield",
+    "SkinLightingModifier",
+    "CAMERA_PRESETS",
+    "LENS_CATALOG",
     "CompiledPayload",
     "ContentType",
     "ReferenceMode",

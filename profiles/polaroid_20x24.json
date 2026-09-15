@@ -1,0 +1,57 @@
+{
+  "profile_id": "polaroid_20x24",
+  "title": "Polaroid 20x24 Large-Format Instant Camera",
+  "schema_version": "2.0",
+  "purpose": "Monumental 20x24-inch life-size contact-scale instant portraiture revealing individual hair translucency and full skin topography with rich, saturated analog dye transfer.",
+  "sensor_and_optics": {
+    "camera_system": "Polaroid 20x24 Large-Format Instant Camera",
+    "sensor_type": "20x24 inch giant instant photographic diffusion-transfer positive (50x60cm)",
+    "sensor_dimensions": "500x600mm monumental instant sheet gate",
+    "full_frame_equivalent": "~40mm normal field of view on monumental 20x24 format",
+    "lens": "Schneider Kreuznach 600mm f/11 Ultra-Large-Format Optic",
+    "aperture_sweet_spot": "f/16",
+    "iso_base": "Polaroid Polacolor Large-Format Instant Film (ISO 80)",
+    "dynamic_range": "12 stops instant dye diffusion latitude with dense saturated primaries",
+    "shutter": "Large-format mechanical leaf shutter with electronic studio flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "High-powered studio electronic flash units with large diffused banks, calibrated for ISO 80 life-size magnification",
+    "light_transport": "Deep saturated dye transfer colors, authentic chemical diffusion edge margins, luminous skin translucency"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Life-size 1:1 contact scale detail: translucency of individual hair strands, micro-skin topography, resolved pores, and iris fibrils without enlargement blur",
+      "Rich saturated Polacolor dye-transfer palette with deep blues, warm skin tones, and rich chocolate shadows",
+      "Authentic chemical pod spread artifacts and distinctive Polaroid border framing along plate edges"
+    ],
+    "depth_and_optics": [
+      "Monumental 20x24 format optical depth: paper-thin focal plane stopped down to f/16 for critical eye-plane sharpness",
+      "Zero optical enlargement: pure physical contact fidelity",
+      "Authentic large-format bellows perspective with zero wide-angle distortion"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "digital noise",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "computational blur",
+      "flat digital colors"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce giant 20x24 inch instant color photograph, life-size head portrait with no enlargement, extraordinary detail showing translucency of individual hairs and full skin topography, deeply saturated instant-film color, shot on a Polaroid 20x24 camera. Zero artist names."
+}

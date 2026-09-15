@@ -1,0 +1,58 @@
+{
+  "profile_id": "mamiya_rz67",
+  "title": "Mamiya RZ67 Professional 6x7 Medium Format SLR",
+  "schema_version": "2.0",
+  "purpose": "Intimate close-up character portraiture with twin vertical catchlights, resolving epidermal pores and wrinkles under soft daylight-balanced Kino Flo illumination.",
+  "sensor_and_optics": {
+    "camera_system": "Mamiya RZ67 Professional 6x7 Medium Format SLR",
+    "sensor_type": "6x7 medium format film negative (56x70mm revolving back)",
+    "sensor_dimensions": "56x70mm 6x7 medium format film gate",
+    "full_frame_equivalent": "~70mm portrait field of view with massive 6x7 negative area",
+    "lens": "Mamiya-Sekor Z 140mm f/4.5 Macro M",
+    "aperture_sweet_spot": "f/8.0",
+    "iso_base": "Kodak Professional Portra 800 color negative film",
+    "dynamic_range": "14 stops color negative latitude with organic skin tone roll-off",
+    "shutter": "Electronic leaf shutter in lens with 1/400s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Two soft vertical fluorescent light banks (Kino Flo) on both sides of the face, even frontal illumination",
+    "light_transport": "Twin vertical catchlights in pupils, even shadow-free frontal illumination revealing skin pores and character wrinkles, neutral soft background"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Tactile 6x7 medium format film resolution: resolves every skin pore, fine facial line, wrinkle, and eyebrow follicle",
+      "Kodak Portra 800 organic grain and authentic skin undertones without plastic digital smoothing",
+      "Luminous ocular wetness with distinct dual vertical Kino Flo catchlights making eyes shine"
+    ],
+    "depth_and_optics": [
+      "140mm macro optical compression: tight portrait framing with the face filling the frame",
+      "Controlled medium format depth of field at f/8: ear-to-tip of nose sharpness with soft background roll-off",
+      "Zero perspective distortion, clean classical optical projection"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "digital noise smearing",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "beauty filter glow",
+      "harsh specular hot-spots",
+      "computational bokeh"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce tight medium format color film portrait, face filling the frame, twin vertical catchlights making the eyes shine, even frontal light revealing every pore and wrinkle, neutral expression, plain background, two soft fluorescent light banks on both sides of the face, shot on Mamiya RZ67 with Portra 800. Zero photographer names."
+}

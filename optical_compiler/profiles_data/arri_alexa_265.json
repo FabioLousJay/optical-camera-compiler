@@ -1,0 +1,60 @@
+{
+  "profile_id": "arri_alexa_265",
+  "title": "ARRI ALEXA 265 Large-Format Digital Cinema Camera",
+  "schema_version": "2.0",
+  "purpose": "65mm large-format digital cinema vista with immense resolving power, clean low-noise signal, and organic film-like highlight roll-off.",
+  "sensor_and_optics": {
+    "camera_system": "ARRI ALEXA 265 Large-Format Digital Cinema Camera",
+    "sensor_type": "65mm large-format digital cinema sensor (54.12x25.58mm active area)",
+    "sensor_dimensions": "54.12x25.58mm 65mm sensor",
+    "full_frame_equivalent": "~28mm wide vista field of view on 65mm format",
+    "lens": "ARRI Prime 65 Large-Format Cine Prime",
+    "aperture_sweet_spot": "T2.8",
+    "iso_base": "EI 800 base sensitivity (EI 160-6400)",
+    "dynamic_range": "15 stops dynamic latitude with gentle LogC highlight roll-off",
+    "shutter": "180-degree cinema electronic shutter (1/48s equivalent cadence)"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Cinematic feature production lighting, balanced naturalistic key and ambient fill with organic highlight roll-off",
+    "light_transport": "Gentle highlight roll-off, subtle specular dispersion, rich shadow gradient without noise crush"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Vast 65mm cinema detail: high micro-acutance on landscapes, architecture, and skin textures without digital edge ringing",
+      "Natural film-like color science with authentic skin tones and subdued organic saturation",
+      "Extremely clean low-noise digital capture with gentle texture fidelity"
+    ],
+    "depth_and_optics": [
+      "Shallow depth of field characteristic of 65mm large-format sensors even at wide focal lengths",
+      "Sublime optical separation and three-dimensional subject isolation",
+      "Impeccable rectilinear projection with gentle optical illumination fall-off"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "video noise",
+      "compression artifacts",
+      "chromatic aberration"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "harsh electronic highlights",
+      "computational bokeh",
+      "beauty filter glow",
+      "crushed blacks"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce large-format 65mm digital cinema frame. Vast wide vista with immense detail, clean low-noise image, gentle highlight roll-off, natural film-like color, shallow depth of field despite the wide view, shot on ARRI ALEXA 265."
+}

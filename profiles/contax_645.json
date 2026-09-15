@@ -1,0 +1,58 @@
+{
+  "profile_id": "contax_645",
+  "title": "Contax 645 AF Medium Format System",
+  "schema_version": "2.0",
+  "purpose": "High-key fine art wedding and editorial medium-format film portraiture with legendary Zeiss Planar 80mm f/2 creamy separation and soft pastel color.",
+  "sensor_and_optics": {
+    "camera_system": "Contax 645 AF Medium Format Film Camera",
+    "sensor_type": "6x4.5 medium format film negative (56x41.5mm)",
+    "sensor_dimensions": "56x41.5mm medium format film gate",
+    "full_frame_equivalent": "~50mm normal field of view with massive medium format negative area",
+    "lens": "Carl Zeiss Planar T* 80mm f/2",
+    "aperture_sweet_spot": "f/2.0",
+    "iso_base": "Fujicolor Pro 400H color negative film (overexposed +1 stop)",
+    "dynamic_range": "14 stops color negative latitude with luminous highlight retention",
+    "shutter": "Electronic focal plane shutter up to 1/4000s"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Bright diffused open shade daylight, overexposed +1 stop for airy high-key luminescence",
+    "light_transport": "Soft pastel color palette, gentle micro-contrast roll-off, ethereal luminous skin tones with creamy bokeh"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Medium format analog resolution: smooth organic skin texture without digital over-sharpening",
+      "Soft pastel color palette with gentle highlight roll-off and mint-green/lavender undertones",
+      "Zeiss T* coating acutance with zero chromatic fringing"
+    ],
+    "depth_and_optics": [
+      "Extremely shallow 645 depth of field at f/2: razor-thin focal plane with buttery background melt",
+      "Dreamy subject isolation characteristic of Zeiss Planar 80mm f/2 optical formula",
+      "Authentic analog film softness without artificial blur filters"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "harsh digital contrast",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic poreless skin",
+      "harsh shadows",
+      "muddy tones",
+      "computational bokeh",
+      "beauty filter glow"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce medium format color film photograph, 80mm lens wide open at f/2, extremely shallow depth of field, overexposed one stop for bright airy high-key tones, soft pastel color, creamy background blur, shot on Contax 645 with Fuji Pro 400H."
+}

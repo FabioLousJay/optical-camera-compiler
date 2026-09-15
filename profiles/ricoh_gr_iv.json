@@ -1,0 +1,57 @@
+{
+  "profile_id": "ricoh_gr_iv",
+  "title": "Ricoh GR IV High-End Compact Camera",
+  "schema_version": "2.0",
+  "purpose": "Decisive 28mm snap street photography with deep zone-focus acutance, punchy high contrast, gritty urban texture, and spontaneous pocketable framing.",
+  "sensor_and_optics": {
+    "camera_system": "Ricoh GR IV Compact Camera (25.7MP APS-C)",
+    "sensor_type": "25.7MP APS-C CMOS sensor with zero optical low-pass filter",
+    "sensor_dimensions": "23.5x15.6mm APS-C sensor",
+    "full_frame_equivalent": "28mm wide-angle street snapshot field of view",
+    "lens": "GR Lens 18.3mm f/2.8 (28mm equivalent fixed prime)",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 200 base sensitivity with gritty high-ISO street character",
+    "dynamic_range": "14 stops dynamic range with high-contrast monochrome or positive film tone",
+    "shutter": "Leaf shutter up to 1/4000s, whisper-quiet snap focus actuation"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Dynamic urban daylight or high-contrast street shadows, available city light",
+    "light_transport": "Deep gritty contrast, punchy black levels, crisp specular edge acutance"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Razor-sharp 28mm zone focus: resolved asphalt texture, peeling paint, fabric weave, and urban grime",
+      "Punchy high micro-contrast without artificial edge haloes or smeary denoise",
+      "Authentic street documentary grit and honest human skin texture"
+    ],
+    "depth_and_optics": [
+      "Deep zone focus from foreground to background at f/5.6",
+      "Immaculate flat field with zero barrel distortion across the 28mm field of view",
+      "Spontaneous, dynamic candid street framing from hip level or eye level"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "over-smoothed denoise",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial HDR halo",
+      "computational bokeh"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 28mm wide street snapshot from a pocket camera, close quarters, deep zone focus, punchy high contrast, gritty texture, slightly spontaneous framing, shot on Ricoh GR IV."
+}

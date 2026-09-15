@@ -1,0 +1,57 @@
+{
+  "profile_id": "deardorff_8x10",
+  "title": "Deardorff 8x10 Large-Format Field View Camera",
+  "schema_version": "2.0",
+  "purpose": "Monumental 8x10 sheet film contact portraiture with infinite micro-detail, visible black film rebates, and nuanced silver tonal gradations.",
+  "sensor_and_optics": {
+    "camera_system": "Deardorff 8x10 Large-Format Field View Camera",
+    "sensor_type": "8x10 inch black-and-white sheet film negative (203x254mm)",
+    "sensor_dimensions": "203x254mm monumental sheet film gate",
+    "full_frame_equivalent": "~50mm normal field of view on 8x10 format",
+    "lens": "Schneider Kreuznach Symmar-S 360mm f/6.8",
+    "aperture_sweet_spot": "f/22",
+    "iso_base": "Kodak Professional Tri-X 320 Sheet Film",
+    "dynamic_range": "15 stops analog sheet film latitude with rich silver highlight detail",
+    "shutter": "Leaf shutter in Copal #3 with quiet mechanical actuation"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Soft even natural light, open shade or diffused north skylight, plain seamless white backdrop",
+    "light_transport": "Pristine silver tonal range, subtle epidermal shadow transitions, rich uncrushed shadow textures"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Infinite 8x10 contact-scale micro-detail: individual eyebrow hairs, skin pores, fabric fibers, and clothing seams",
+      "Authentic Kodak Tri-X silver halide micro-acutance without digital sharpening halos",
+      "Distinct black sheet film rebate border and film edge notches visible along perimeter"
+    ],
+    "depth_and_optics": [
+      "Frontal composition with tilt/shift plane alignment",
+      "Deep focus front to back on the subject with delicate edge softness outside depth plane",
+      "Zero perspective distortion, clean classical optical projection"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "digital noise smearing",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "blown digital highlights",
+      "computational blur"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce large-format 8x10 black-and-white portrait, frontal composition, extreme detail in skin/hair/clothing, black film edge border visible, soft even natural light, plain seamless white backdrop, shot on a Deardorff 8x10 with Tri-X. Zero photographer names, series titles, or artist names in prompt."
+}

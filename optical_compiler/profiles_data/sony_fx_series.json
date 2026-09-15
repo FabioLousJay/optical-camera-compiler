@@ -1,10 +1,10 @@
 {
   "profile_id": "sony_fx_series",
-  "title": "Sony FX Cinema Line Full-Frame (Venice S-Log3)",
+  "title": "Sony VENICE 2 Full-Frame Digital Cinema Camera",
   "schema_version": "2.0",
   "purpose": "Hardware-level cinema optical and sensor simulation for zero-artifact cinematic photorealism.",
   "sensor_and_optics": {
-    "camera_system": "Sony FX Cinema Line Full-Frame 4K Exmor R BSI CMOS",
+    "camera_system": "Sony VENICE 2 Full-Frame Digital Cinema Camera (Sony FX Cinema Line 8.6K 36x24mm Sensor)",
     "sensor_type": "35.6x23.8mm full-frame cinema Exmor R BSI CMOS with 15+ stops dynamic range",
     "sensor_dimensions": "35.6x23.8mm full-frame cinema sensor",
     "full_frame_equivalent": "50mm full-frame native field of view (native 16:9 framing)",

@@ -1,0 +1,57 @@
+{
+  "profile_id": "contax_t2",
+  "title": "Contax T2 Titanium Premium 35mm Compact",
+  "schema_version": "2.0",
+  "purpose": "High-contrast direct-flash night candid and street documentary with punchy Zeiss micro-contrast and raw snapshot immediacy.",
+  "sensor_and_optics": {
+    "camera_system": "Contax T2 Titanium 35mm Compact Film Camera",
+    "sensor_type": "35mm color or monochrome film negative (36x24mm)",
+    "sensor_dimensions": "36x24mm standard 35mm film gate",
+    "full_frame_equivalent": "38mm semi-wide snapshot field of view",
+    "lens": "Carl Zeiss Sonnar 38mm f/2.8 T*",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "Kodak Portra 400 (or Ilford HP5 Plus)",
+    "dynamic_range": "13 stops analog negative latitude with punchy flash contrast",
+    "shutter": "Electronic between-the-lens shutter up to 1/500s with direct flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Harsh direct on-camera flash at night, bright flash-lit subject with rapid fall-off into deep black background",
+    "light_transport": "Hard direct flash specular highlights, sharp drop-shadow contour behind subject, rich saturated color"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Tactile 35mm film grain structure with crisp Zeiss micro-contrast",
+      "Direct flash punch: glistening skin perspiration, fabric sheen, and crisp pupil reflections",
+      "Authentic snapshot contrast: punchy mid-tones with deep inky shadow drop"
+    ],
+    "depth_and_optics": [
+      "Zeiss Sonnar 38mm optical sharpness with distinct flash fall-off depth separation",
+      "Spontaneous candid wide-angle framing with subtle edge vignetting",
+      "Authentic point-and-shoot optical signature with zero computational smoothing"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "diffused softbox studio light",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "soft beauty lighting",
+      "computational bokeh"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 35mm point-and-shoot film snapshot, bright flash-lit subject falling off into a dark background, crisp contrast, casual candid framing, film grain, harsh direct on-camera flash at night, shot on Contax T2."
+}

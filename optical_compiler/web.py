@@ -14,6 +14,7 @@ from typing import Any, Optional
 from .compiler import OpticalCompiler
 from .models import SceneInput, TargetEngine
 from .profiles import list_available_profiles, load_profile
+from .presets import CAMERA_PRESETS, LENS_CATALOG
 
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
@@ -799,6 +800,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <option value="cam_hasselblad_h6d_para">Hasselblad H6D-100c // HC 100mm f/2.2 (Haute Couture Studio & Para 220)</option>
             <option value="cam_hasselblad_x2d_hncs">Hasselblad X2D II 100C // XCD 90mm f/2.5 V (HNCS 16-Bit Equestrian Editorial)</option>
             <option value="cam_fujifilm_gfx100ii_reala">Fujifilm GFX 100 II // GF 110mm f/2 (Carrara Marble Sculptor Atelier)</option>
+            <option value="cam_fujifilm_gfx100ii_ts">Fujifilm GFX 100 II // GF 30mm f/5.6 T/S (Zero-Keystone Architectural Interior)</option>
             <option value="cam_fujifilm_gfx100rf_street">FUJIFILM GFX100RF // 35mm f/4 @ f/5.6 (Fixed 102MP Archival Street)</option>
           </optgroup>
 
@@ -806,33 +808,62 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <option value="cam_leica_m11_reportage">Leica M11 60MP // Summilux-M 35mm f/1.4 FLE II (Haussmannian Street Reportage)</option>
             <option value="cam_leica_m11_noctilux">Leica M11 60MP // Noctilux-M 50mm f/0.95 (Jazz Club The King of Light)</option>
             <option value="cam_leica_m6_analog_trix">Leica M6 Classic 35mm // Summicron-M 50mm f/2 (Kodak Tri-X 400 Street)</option>
+            <option value="cam_leica_m6_cinestill_800t">Leica M6 // Summilux-M 35mm f/1.4 @ CineStill 800T (Tungsten Neon Halation Night)</option>
             <option value="cam_leica_q3_monochrom">Leica Q3 Monochrom 60.3MP // Summilux 28mm f/1.7 ASPH (Zero-CFA Archival)</option>
             <option value="cam_leica_sl2_motion_blur">Leica SL2 47.3MP // Summilux-SL 50mm f/1.4 @ f/2.8 (Stationary Subject vs Motion Trails)</option>
-            <option value="cam_leica_sl3_p_apo">Leica SL3-P Maestro IV // APO-Summicron-SL 50mm f/2 (Foreign Dispatch Reportage)</option>
+            <option value="cam_leica_sl3_p_apo">Leica SL3-P 44MP // APO-Summicron-SL 50mm f/2 (Foreign Dispatch Reportage)</option>
           </optgroup>
 
-          <optgroup label="⚡ Flagship Stacked & High-Resolution Systems">
-            <option value="cam_sony_a1_ii_flash_freeze">Sony a1 II 50.1MP // FE 85mm f/1.4 GM II (1/400s Flash Freeze Fencing)</option>
-            <option value="cam_sony_a7rv_macro_horology">Sony Alpha 7R V 61MP // FE 50mm f/1.2 GM (Horologist Macro Micro-Bench)</option>
-            <option value="cam_sony_a7rv_depixel_flat">Sony Alpha 7R V 61MP // 55mm f/1.8 ZA (Flat Copy-Stand & De-Pixelate v2.0 OCR)</option>
-            <option value="cam_canon_eos_r5_ii_vogue">Canon EOS R5 Mark II 45MP // RF 85mm f/1.2L USM (Vogue Sculptural Beauty)</option>
-            <option value="cam_canon_eos_r1_action">Canon EOS R1 Full-Frame // RF 70-200mm f/2.8L (Decisive Ballet Grand Jeté)</option>
+          <optgroup label="🦅 Wildlife & Extreme Telephoto Systems">
+            <option value="cam_nikon_z9_tele_wildlife">Nikon Z 9 // NIKKOR Z 600mm f/4 TC VR S @ 840mm (Super-Telephoto Wildlife Compression)</option>
             <option value="cam_nikon_z9_plena">Nikon Z 9 45.7MP // NIKKOR Z 135mm f/1.8 S Plena (Plena Circular Bokeh Cellist)</option>
-            <option value="cam_panasonic_s1rii_micro">Panasonic LUMIX S1R II // Lumix S 100mm f/2.8 Macro (1:1 Orchid Micro-Science)</option>
           </optgroup>
 
-          <optgroup label="🎬 Hollywood Cinema & Anamorphic Systems">
+          <optgroup label="🎬 Hollywood Cinema & 65mm Motion Picture">
+            <option value="cam_imax_msm_9802_bw">IMAX MSM 9802 15-perf 65mm // Kodak Double-X 5222 (Monumental B&W Close-Up)</option>
+            <option value="cam_arri_alexa_265_vista">ARRI ALEXA 265 // 65mm Format Sensor (Large-Format Digital Vista)</option>
             <option value="cam_arri_alexa_35_cooke">ARRI Alexa 35 ALEV 4 // Cooke S4/i 50mm T2.0 (The Cooke Look Speakeasy)</option>
             <option value="cam_arri_alexa_35_anamorphic">ARRI Alexa 35 Scope // Atlas Orion 65mm 2.0x (Cyan Streak Flare & Oval Bokeh)</option>
-            <option value="cam_sony_fx_venice_noir">Sony FX Cinema Line // FE 50mm f/1.2 GM @ f/2.8 (Venice S-Cinetone Saxophone Noir)</option>
+            <option value="cam_sony_fx_venice_noir">Sony VENICE 2 // FE 50mm f/1.2 GM @ f/2.8 (Venice S-Cinetone Saxophone Noir)</option>
           </optgroup>
 
-          <optgroup label="🎞️ Analog Sheet Film & Classic Formats">
+          <optgroup label="🎞️ Analog Sheet Film, Large & Medium Formats">
+            <option value="cam_nikon_fm2_kodachrome">Nikon FM2 // Nikkor 105mm f/2.5 AI-S @ Kodachrome 64 (Available-Light Reportage Portrait)</option>
+            <option value="cam_contax_645_wedding">Contax 645 // Zeiss Planar 80mm f/2 @ Fuji Pro 400H +1 (High-Key Fine Art Wedding)</option>
+            <option value="cam_hasselblad_xpan_panorama">Hasselblad XPan // 45mm f/4 @ 24x65mm (2.7:1 Panoramic Landscape)</option>
+            <option value="cam_deardorff_8x10_portrait">Deardorff 8x10 // Schneider Symmar-S 360mm @ Tri-X (White Seamless Open-Shade Portrait)</option>
+            <option value="cam_antique_view_8x10_collodion">8x10 Antique View Camera // Uncoated Brass Lens @ Wet-Plate Collodion (Southern Gothic Plate)</option>
             <option value="cam_linhof_4x5_architectural">Linhof Master Technika 4x5 // Schneider 150mm f/5.6 (Neoclassical Rotunda)</option>
             <option value="cam_linhof_4x5_desert">Linhof Master Technika 4x5 // Rodenstock 90mm f/4.5 (Expansive Desert Strata)</option>
             <option value="cam_pentax_67_bokeh_king">Pentax 67 II 6x7 // SMC 105mm f/2.4 (The Bokeh King Dune Ocean Portrait)</option>
             <option value="cam_pentax_67_cotswolds">Pentax 67 II 6x7 // SMC 90mm f/2.8 (Cotswolds English Country Garden)</option>
             <option value="cam_hasselblad_500cm_zeiss">Hasselblad 500C/M 6x6 // Zeiss Planar 80mm f/2.8 CF (Tuscan Chianti Vineyard)</option>
+          </optgroup>
+
+          <optgroup label="📸 Iconic Compacts & Street Documentary">
+            <option value="cam_contax_t2_candid">Contax T2 // Zeiss Sonnar 38mm f/2.8 T* (Direct-Flash Night Candid)</option>
+            <option value="cam_ricoh_gr_iv_street">Ricoh GR IV // GR 18.3mm f/2.8 (28mm Snap Street)</option>
+          </optgroup>
+
+          <optgroup label="🚁 Aerial & Nadir Geometry">
+            <option value="cam_dji_mavic_4_pro_nadir">DJI Mavic 4 Pro // Hasselblad 4/3 28mm-equiv (Nadir Aerial Geometry)</option>
+          </optgroup>
+
+          <optgroup label="🔬 Skin, Eyes & Hyperreal Portrait Masters">
+            <option value="cam_phase_one_iq4_macro_beauty">Phase One XF IQ4 150MP // Schneider 120mm LS f/4 Macro @ f/16 (1:1 Beauty Macro, Lips & Lashes)</option>
+            <option value="cam_canon_eos_r5_ii_macro_iris">Canon EOS R5 Mark II // RF 100mm f/2.8L Macro @ 1.4x f/16 Focus-Stacked (Iris & Lash Macro)</option>
+            <option value="cam_mamiya_rz67_kino_flo">Mamiya RZ67 // 140mm f/4.5 Macro @ Portra 800, Twin Kino Flo Banks (Close-Up Character Portrait)</option>
+            <option value="cam_polaroid_20x24_contact">Polaroid 20x24 // Polacolor @ Life-Size (Monumental Contact-Scale Portrait)</option>
+            <option value="cam_canon_eos_r5_ii_vogue_soft">Canon EOS R5 Mark II 45MP // RF 85mm f/1.2L @ f/1.4 (Vogue Sculptural Soft Beauty)</option>
+            <option value="cam_canon_eos_r5_ii_vogue_texture">Canon EOS R5 Mark II 45MP // RF 85mm f/1.2L @ f/8 (Vogue Deep Skin Texture Editorial)</option>
+          </optgroup>
+
+          <optgroup label="⚡ Flagship Stacked & High-Resolution Systems">
+            <option value="cam_sony_a1_ii_flash_freeze">Sony a1 II 50.1MP // FE 85mm f/1.4 GM II (1/400s Flash Freeze Fencing)</option>
+            <option value="cam_sony_a7rv_macro_horology">Sony Alpha 7R V 61MP // FE 90mm f/2.8 Macro G OSS (Horologist Macro Micro-Bench)</option>
+            <option value="cam_sony_a7rv_depixel_flat">Sony Alpha 7R V 61MP // 55mm f/1.8 ZA (Flat Copy-Stand & De-Pixelate v2.0 OCR)</option>
+            <option value="cam_canon_eos_r1_action">Canon EOS R1 Full-Frame // RF 70-200mm f/2.8L (Decisive Ballet Grand Jeté)</option>
+            <option value="cam_panasonic_s1rii_micro">Panasonic LUMIX S1R II // Lumix S 100mm f/2.8 Macro (1:1 Orchid Micro-Science)</option>
           </optgroup>
         </select>
       </div>
@@ -1440,6 +1471,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <option value="architectural_skylight">Diffused Architectural Clerestory Daylight with Clean Tonal Roll-off</option>
           </select>
         </div>
+        <div class="field-group">
+          <label for="skinLightingSelect">Skin & Texture Lighting Modifier <span class="hint">(Specialized Dermal Physics)</span></label>
+          <select id="skinLightingSelect" onchange="debounceCompile()">
+            <option value="none" selected>None / Natural Scene Falloff (Standard)</option>
+            <option value="raking_hard_key">Raking Hard Key (75–85° Grazing Angle // Micro-Relief, Follicles & Vellus Hair)</option>
+            <option value="cross_polarized_flash">Cross-Polarized Flash (90° Dual Polarizers // Zero Glare Matte Subsurface Melanin)</option>
+            <option value="hard_backlight_rim">Hard Backlight Rim (180° Kicker // Vellus Fuzz & Hair Flyaway Edge Separation)</option>
+          </select>
+        </div>
         <div class="field-row">
           <div class="field-group">
             <label for="filmStockSelect">Film Stock / Sensor Profile</label>
@@ -1945,15 +1985,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       ],
       canon_eos_r5_ii: [
         "Canon RF 85mm F1.2L USM (Reference Portrait Prime)",
+        "Canon RF 100mm f/2.8L Macro IS USM (1.4x Focus-Stacked Macro)",
         "Canon RF 50mm F1.2L USM (Micro-Contrast & Natural DOF)",
         "Canon RF 135mm F1.8L IS USM (Subject Separation & IS)"
       ],
       nikon_z9: [
+        "NIKKOR Z 600mm f/4 TC VR S @ 840mm f/5.6 (Super-Telephoto Wildlife Compression)",
         "NIKKOR Z 135mm f/1.8 S Plena (Zero Vignetting Texture Monster)",
         "NIKKOR Z 85mm f/1.2 S (Reference Portrait Prime)",
         "NIKKOR Z 50mm f/1.2 S (High-Acutance Standard)"
       ],
       phase_one_iq4: [
+        "Schneider Kreuznach 120mm LS f/4 Macro (1:1 Beauty Macro, Lips & Lashes)",
         "Schneider Kreuznach 80mm LS f/2.8 Blue Ring (Standard Reference)",
         "Schneider Kreuznach 55mm LS f/2.8 Blue Ring (Wide Architectural)",
         "Schneider Kreuznach 110mm LS f/2.8 Blue Ring (Portrait Compression)",
@@ -1991,8 +2034,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         "Leica Summicron-M 28mm f/2 ASPH (Environmental Reportage)"
       ],
       leica_m6_analog: [
-        "Leica Summicron-M 50mm f/2 Dual-Range (Classic German Micro-Contrast)",
         "Leica Summilux-M 35mm f/1.4 Pre-ASPH 'Steel Rim'",
+        "Leica Summicron-M 50mm f/2 Dual-Range (Classic German Micro-Contrast)",
+        "Leica Summicron-M 28mm f/2 ASPH (Environmental Reportage)",
         "Leica Elmarit-M 28mm f/2.8 (Compact Street)",
         "Leica Tele-Elmarit-M 90mm f/2.8 'Fat Elmarit'"
       ],
@@ -2003,12 +2047,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         "Angenieux Optimo Ultra 12x Cine Zoom (Feature Film)"
       ],
       fujifilm_gfx100ii: [
+        "Fujinon GF 30mm f/5.6 T/S (Perspective-Control Shift Lens)",
         "Fujinon GF 110mm f/2 R LM WR (Reference Portrait Prime)",
         "Fujinon GF 80mm f/1.7 R WR (Ultra-Fast Medium Format)",
         "Fujinon GF 55mm f/1.7 R WR (Natural Standard)",
         "Fujinon GF 250mm f/4 R LM OIS WR (Subject Isolation)"
       ],
       sony_a7rv: [
+        "Sony FE 90mm f/2.8 Macro G OSS (1:1 Micro-Bench Reproduction)",
         "Sony FE 50mm f/1.2 GM (G-Master Optical Reference)",
         "Sony FE 85mm f/1.4 GM II (Portrait Specialist)",
         "Sony FE 135mm f/1.8 GM (Razor-Sharp Background Dissolution)",
@@ -2062,6 +2108,60 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         "Leica APO-Summicron-SL 35mm f/2 ASPH (Environmental Reportage)",
         "Leica APO-Summicron-SL 75mm f/2 ASPH (Portrait Acutance)",
         "Leica Super-Vario-Elmar-SL 16-35mm f/3.5-4.5 ASPH (Architectural Street)"
+      ],
+      imax_msm_9802: [
+        "IMAX 65mm Large-Format Prime Lens",
+        "IMAX 65mm 50mm T2.8 Motion Picture Lens",
+        "IMAX 65mm 80mm T2.8 Motion Picture Lens"
+      ],
+      arri_alexa_265: [
+        "ARRI Rental Prime 65 S 50mm T1.8 (65mm Sensor Vista Prime)",
+        "ARRI Rental Prime 65 S 35mm T2.5 (65mm Wide Cinema Vista)",
+        "ARRI Rental Prime 65 S 80mm T1.8 (65mm Portrait Compression)"
+      ],
+      nikon_fm2: [
+        "AI-S Nikkor 105mm f/2.5 (Legendary Available-Light Portrait Prime)",
+        "AI-S Nikkor 50mm f/1.4 (Classic Mechanical Standard)",
+        "AI-S Nikkor 35mm f/2 (Photojournalism Wide)"
+      ],
+      contax_645: [
+        "Carl Zeiss Planar T* 80mm f/2 (Legendary High-Key Medium Format Prime)",
+        "Carl Zeiss Distagon T* 45mm f/2.8 (Wide Environmental)",
+        "Carl Zeiss Sonnar T* 140mm f/2.8 (Portrait Telephoto)"
+      ],
+      hasselblad_xpan: [
+        "Hasselblad 45mm f/4 for XPan (2.7:1 Panoramic Landscape Standard)",
+        "Hasselblad 30mm f/5.6 for XPan (Ultra-Wide 2.7:1 Panoramic)",
+        "Hasselblad 90mm f/4 for XPan (Telephoto 2.7:1 Panoramic)"
+      ],
+      deardorff_8x10: [
+        "Schneider Kreuznach Symmar-S 360mm f/6.8 (8x10 Large-Format Portrait Prime)",
+        "Rodenstock Apo-Ronar 300mm f/9 (Large-Format Process Acutance)",
+        "Goerz Dagor 12-inch (305mm) f/6.8 (Classic Large-Format Tone)"
+      ],
+      antique_view_8x10: [
+        "Uncoated Brass Petzval Lens ~300mm f/3.8 (Swirling Bokeh & Vignette Falloff)",
+        "Uncoated Rapid Rectilinear Brass Lens ~350mm f/8 (Wet-Plate Period Standard)"
+      ],
+      contax_t2: [
+        "Carl Zeiss Sonnar T* 38mm f/2.8 (Fixed Titanium Compact Lens)"
+      ],
+      ricoh_gr_iv: [
+        "GR Lens 18.3mm f/2.8 (28mm equivalent Snap Focus Prime)"
+      ],
+      dji_mavic_4_pro: [
+        "Hasselblad 28mm-equivalent f/2.8 Aerial Optics (Nadir Geometry Prime)",
+        "Hasselblad 70mm-equivalent Telephoto Aerial Camera",
+        "Hasselblad 166mm-equivalent Super-Telephoto Aerial Camera"
+      ],
+      mamiya_rz67: [
+        "Mamiya Sekor Z 140mm f/4.5 Macro (Close-Up Character Portrait Specialist)",
+        "Mamiya Sekor Z 110mm f/2.8 (Standard Normal Prime)",
+        "Mamiya Sekor Z 65mm f/4 L-A (Wide Environmental)"
+      ],
+      polaroid_20x24: [
+        "Schneider 600mm f/11 for Polaroid 20x24 (Life-Size 1:1 Contact Lens)",
+        "Schneider 300mm f/5.6 for Polaroid 20x24 (Environmental Contact Lens)"
       ]
     };
 
@@ -2099,6 +2199,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         lighting: "architectural_skylight",
         filmStock: "digital_raw",
         aspectRatio: "16:9"
+      },
+      cam_phase_one_iq4_macro_beauty: {
+        profile: "phase_one_iq4",
+        lens: "Schneider Kreuznach 120mm LS f/4 Macro",
+        aperture: "f/11",
+        subject: "medium format 1:1 macro beauty photograph, extreme close-up of lips and eyelashes, stopped down for depth, razor-sharp pore-level micro-detail, fine vellus hair and lash tips, high-resolution studio clarity, shot on Phase One IQ4 with Schneider 120mm macro",
+        framing: "extreme macro iris and skin detail portrait",
+        environment: "clean neutral studio environment with precision directional key strobe",
+        wardrobe: "none",
+        mood: "150MP Trichromatic macro purity, unyielding epidermal micro-detail, authentic lip vermilion borders and individual lash fibers",
+        timeWeather: "auto",
+        lighting: "strobe_para",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5",
+        skinLighting: "raking_hard_key"
       },
       cam_hasselblad_h6d_para: {
         profile: "hasselblad_h6d",
@@ -2141,6 +2256,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         lighting: "window_daylight",
         filmStock: "classic_chrome",
         aspectRatio: "4:5"
+      },
+      cam_fujifilm_gfx100ii_ts: {
+        profile: "fujifilm_gfx100ii",
+        lens: "Fujinon GF 30mm f/5.6 T/S",
+        aperture: "f/8.0",
+        subject: "medium format architectural photograph, 24mm-equivalent wide view, perspective-corrected with a shift lens so every vertical line stays parallel, level camera, deep focus front to back, high micro-detail, shot on Fujifilm GFX 100 II with GF 30mm T/S",
+        framing: "wide environmental architectural interior",
+        environment: "contemporary concrete museum interior with soaring vertical lines, smooth limestone flooring, and diffused clerestory illumination",
+        wardrobe: "none",
+        mood: "perspective-corrected shift lens acutance, zero vertical keystoning, edge-to-edge optical fidelity",
+        timeWeather: "overcast",
+        lighting: "architectural_skylight",
+        filmStock: "digital_raw",
+        aspectRatio: "4:3"
       },
       cam_fujifilm_gfx100rf_street: {
         profile: "fujifilm_gfx100rf",
@@ -2202,6 +2331,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         filmStock: "tri_x_400",
         aspectRatio: "3:2"
       },
+      cam_leica_m6_cinestill_800t: {
+        profile: "leica_m6_analog",
+        lens: "Leica Summilux-M 35mm f/1.4 Pre-ASPH 'Steel Rim'",
+        aperture: "f/1.4",
+        subject: "35mm color film photograph at night, 35mm lens wide open, tungsten-balanced negative, red-orange halation glowing around every light source, visible film grain, tungsten and neon light sources in frame, shot on Leica M6 with CineStill 800T",
+        framing: "medium close-up street documentary portrait",
+        environment: "rain-soaked Tokyo neon alleyway with glowing signs, wet reflective asphalt, and tungsten streetlamps",
+        wardrobe: "weathered dark leather coat with raindrops glistening",
+        mood: "authentic CineStill 800T remjet-removed red halation, 3200K tungsten balance, organic silver halide grain",
+        timeWeather: "night_city",
+        lighting: "neon",
+        filmStock: "cinestill_800t",
+        aspectRatio: "3:2"
+      },
       cam_leica_q3_monochrom: {
         profile: "leica_q3_monochrom",
         lens: "Leica Summilux 28mm f/1.7 ASPH",
@@ -2238,83 +2381,28 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         framing: "three-quarter documentary portrait",
         environment: "European capital city skyline under stormy twilight sky, wet railings and distant city lights",
         wardrobe: "dark navy waterproof shell over fine charcoal sweater",
-        mood: "apochromatic optical acutance, zero chromatic aberration, Maestro IV tonal depth",
+        mood: "apochromatic optical acutance, zero chromatic aberration, foreign dispatch reportage tonal depth",
         timeWeather: "blue_hour",
         lighting: "blue_hour",
         filmStock: "digital_raw",
         aspectRatio: "3:2"
       },
 
-      // 3. Flagship Stacked & High-Resolution Systems
-      cam_sony_a1_ii_flash_freeze: {
-        profile: "sony_a1_ii",
-        lens: "Sony FE 85mm F1.4 GM II (SEL85F14GM2)",
-        aperture: "f/2.8",
-        subject: "Fencing athlete paused between lunges, perspiration glistening on brow, tack-sharp near-eye pupil focus",
-        framing: "three-quarter athletic editorial portrait",
-        environment: "minimalist dark gymnasium with high directional strobe freeze and black negative fill",
-        wardrobe: "white textured fencing jacket with foil blade resting vertically",
-        mood: "1/400s electronic stacked shutter freeze, brutal near-eye sharpness, zero motion blur",
-        timeWeather: "auto",
-        lighting: "strobe_para",
-        filmStock: "digital_raw",
-        aspectRatio: "9:11"
-      },
-      cam_sony_a7rv_macro_horology: {
-        profile: "sony_a7rv",
-        lens: "Sony FE 50mm f/1.2 GM (SEL50F12GM)",
-        aperture: "f/2.8",
-        subject: "Senior watchmaker looking through brass loupe, placing tourbillon balance wheel with titanium tweezers",
-        framing: "extreme macro iris and skin detail portrait",
-        environment: "cluttered antique wooden workbench with miniature gear wheels and micro-screwdrivers",
-        wardrobe: "dark wool vest and rolled-up striped cotton shirt",
-        mood: "61MP microscopic precision, resolved epidermal pores, brass tooth reflections",
-        timeWeather: "auto",
-        lighting: "strobe_para",
-        filmStock: "digital_raw",
-        aspectRatio: "4:5"
-      },
-      cam_sony_a7rv_depixel_flat: {
-        profile: "sony_a7rv",
-        lens: "Sony FE 50mm f/1.2 GM (SEL50F12GM)",
+      // 3. Wildlife & Extreme Telephoto Systems
+      cam_nikon_z9_tele_wildlife: {
+        profile: "nikon_z9",
+        lens: "NIKKOR Z 600mm f/4 TC VR S @ 840mm f/5.6",
         aperture: "f/5.6",
-        subject: "High-resolution flat archival document reproduction and infographic restoration with crisp typography",
-        framing: "perpendicular flat copy-stand reproduction",
-        environment: "professional copy-stand studio with balanced 45-degree polarized illumination",
+        subject: "super-telephoto wildlife photograph at 840mm, strong perspective compression, subject isolated against smooth blur, fast shutter freezing motion, full-frame clarity, shot on Nikon Z 9 with NIKKOR Z 600mm TC",
+        framing: "telephoto wildlife portrait",
+        environment: "subarctic tundra bluff with dry blowing snow and distant muted mountain horizon",
         wardrobe: "none",
-        mood: "Universal De-Pixelate v2.0 protocol, zero geometric distortion, strict OCR typography preservation",
-        timeWeather: "studio_soft",
-        lighting: "strobe_softbox",
-        filmStock: "digital_raw",
-        aspectRatio: "4:5"
-      },
-      cam_canon_eos_r5_ii_vogue: {
-        profile: "canon_eos_r5_ii",
-        lens: "Canon RF 85mm F1.2L USM (Reference Portrait Prime)",
-        aperture: "f/1.4",
-        subject: "Beauty editorial model with sculptural wet-look hair, radiant luminous skin, and piercing direct gaze",
-        framing: "tight beauty headshot",
-        environment: "warm sand-colored studio seamless backdrop with diffused beauty dish key light",
-        wardrobe: "minimalist nude silk bandeau top",
-        mood: "legendary Canon skin tone warmth, creamy background defocus, tack-sharp eyelashes",
-        timeWeather: "auto",
-        lighting: "strobe_softbox",
-        filmStock: "digital_raw",
-        aspectRatio: "4:5"
-      },
-      cam_canon_eos_r1_action: {
-        profile: "canon_eos_r1",
-        lens: "Canon RF 70-200mm F2.8L IS USM Z (Action & Sports Master)",
-        aperture: "f/2.8",
-        subject: "Prima ballerina caught at the floating zenith of a grand jeté leap across sunlit stage floor",
-        framing: "dynamic full-body performance framing",
-        environment: "historic opera house rehearsal hall with tall arched windows and dusty light shafts",
-        wardrobe: "dusty rose rehearsal tulle skirt and fitted black leotard",
-        mood: "stacked full-frame instantaneous motion freeze, decisive peak moment, athletic elegance",
-        timeWeather: "window_daylight",
+        mood: "840mm extreme perspective compression, instantaneous action motion freeze, creamy background dissolution",
+        timeWeather: "overcast",
         lighting: "window_daylight",
+        shutter: "sync_1600",
         filmStock: "digital_raw",
-        aspectRatio: "16:9"
+        aspectRatio: "3:2"
       },
       cam_nikon_z9_plena: {
         profile: "nikon_z9",
@@ -2330,22 +2418,36 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         filmStock: "digital_raw",
         aspectRatio: "4:5"
       },
-      cam_panasonic_s1rii_micro: {
-        profile: "panasonic_lumix_s1rii",
-        lens: "Lumix S 100mm f/2.8 Macro (1:1 Micro-Detail Specialist)",
-        aperture: "f/5.6",
-        subject: "Botanical taxonomist dissecting rare cloud forest orchid petal with surgical micro-tweezers",
-        framing: "1:1 macro scientific portrait",
-        environment: "botany research laboratory bench with specimen glass jars and natural north daylight",
-        wardrobe: "crisp white laboratory coat and dark slate glasses",
-        mood: "micro-science optical purity, cellular petal vein relief, tactile pollen grains",
-        timeWeather: "window_daylight",
-        lighting: "window_daylight",
-        filmStock: "digital_raw",
-        aspectRatio: "4:5"
-      },
 
-      // 4. Hollywood Cinema & Anamorphic Systems
+      // 4. Hollywood Cinema & 65mm Motion Picture
+      cam_imax_msm_9802_bw: {
+        profile: "imax_msm_9802",
+        lens: "IMAX 65mm Large-Format Prime Lens",
+        aperture: "f/4.0",
+        subject: "black-and-white 65mm large-format motion picture film frame, monumental close-up of a face, extremely fine grain, rich silver tonal range, shot on IMAX 65mm film with Kodak Double-X",
+        framing: "monumental close-up portrait",
+        environment: "stark dramatic studio setting with deep shadow falloff and single high-intensity key light",
+        wardrobe: "textured dark wool high-collar coat",
+        mood: "15-perf 65mm horizontal motion picture film grandeur, immense IMAX negative scale, Kodak Double-X 5222 silver tonal latitude",
+        timeWeather: "night_city",
+        lighting: "rembrandt_key",
+        filmStock: "tri_x_400",
+        aspectRatio: "4:3"
+      },
+      cam_arri_alexa_265_vista: {
+        profile: "arri_alexa_265",
+        lens: "ARRI Rental Prime 65 S 50mm T1.8",
+        aperture: "f/2.8",
+        subject: "large-format 65mm digital cinema frame, vast wide vista with immense detail, clean low-noise image, gentle highlight roll-off, natural film-like color, shallow depth of field despite the wide view, shot on ARRI ALEXA 265",
+        framing: "wide environmental cinematic vista",
+        environment: "sweeping rugged mountain plateau under dramatic cinematic sky with low raking clouds and golden horizon",
+        wardrobe: "weathered expedition parka with fur-lined hood",
+        mood: "65mm digital cinema grandeur, 15 stops dynamic range, gentle organic highlight roll-off",
+        timeWeather: "golden_hour",
+        lighting: "golden_hour",
+        filmStock: "arri_logc4",
+        aspectRatio: "21:9"
+      },
       cam_arri_alexa_35_cooke: {
         profile: "arri_alexa_35",
         lens: "Cooke S4/i 50mm T2.0 Cine Prime ('The Cooke Look')",
@@ -2387,14 +2489,84 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         framing: "medium performance shot with deep shadows",
         environment: "intimate cellar jazz club with brick arches, subtle haze, and warm spotlight",
         wardrobe: "midnight blue velvet blazer and unbuttoned silk shirt",
-        mood: "Venice color science, S-Cinetone organic skin rendering, 180-degree cinema shutter cadence",
+        mood: "Sony VENICE 2 color science, S-Cinetone organic skin rendering, 180-degree cinema shutter cadence",
         timeWeather: "night_city",
         lighting: "tungsten_candle",
         filmStock: "digital_raw",
         aspectRatio: "16:9"
       },
 
-      // 5. Analog Sheet Film & Classic Formats
+      // 5. Analog Sheet Film, Large & Medium Formats
+      cam_nikon_fm2_kodachrome: {
+        profile: "nikon_fm2",
+        lens: "AI-S Nikkor 105mm f/2.5",
+        aperture: "f/2.8",
+        subject: "35mm color slide film portrait, 105mm lens, natural available light from one soft side source, saturated deep reds and greens, dense rich shadows, fine slide-film grain, shot on Nikon FM2 with Kodachrome 64",
+        framing: "tight head and shoulders portrait",
+        environment: "weathered earthen doorway with soft natural light entering from one side and deep shadows behind",
+        wardrobe: "vibrant red and green woven textile head wrap with weathered frayed edges",
+        mood: "legendary slide film color saturation, punchy contrast, dense shadow depth, mechanical SLR acutance",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "provia_100f",
+        aspectRatio: "3:2"
+      },
+      cam_contax_645_wedding: {
+        profile: "contax_645",
+        lens: "Carl Zeiss Planar T* 80mm f/2",
+        aperture: "f/2.0",
+        subject: "medium format color film photograph, 80mm lens wide open at f/2, extremely shallow depth of field, overexposed one stop for bright airy high-key tones, soft pastel color, creamy background blur, shot on Contax 645 with Fuji Pro 400H",
+        framing: "three-quarter fine art portrait",
+        environment: "sun-drenched open garden meadow with soft backlight filtering through olive branches",
+        wardrobe: "delicate embroidered ivory lace gown with trailing silk veil",
+        mood: "airy high-key wedding fine art, luminescent pastel greens and creamy highlights, Carl Zeiss Planar f/2 spherical dissolution",
+        timeWeather: "golden_hour",
+        lighting: "golden_hour",
+        filmStock: "portra_400",
+        aspectRatio: "4:3"
+      },
+      cam_hasselblad_xpan_panorama: {
+        profile: "hasselblad_xpan",
+        lens: "Hasselblad 45mm f/4 for XPan",
+        aperture: "f/8.0",
+        subject: "35mm film panoramic photograph in an ultra-wide 2.7:1 frame, full-width negative not a crop, even corner-to-corner sharpness, natural film color and grain, shot on Hasselblad XPan",
+        framing: "ultra-wide panoramic landscape",
+        environment: "remote Nordic coastal shoreline with wet black volcanic sand, sea stacks, and breaking white surf",
+        wardrobe: "yellow waxed fisherman raincoat",
+        mood: "authentic 24x65mm dual-format panoramic negative, cinematic 2.7:1 geometry, uncropped optical breadth",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "classic_chrome",
+        aspectRatio: "21:9"
+      },
+      cam_deardorff_8x10_portrait: {
+        profile: "deardorff_8x10",
+        lens: "Schneider Kreuznach Symmar-S 360mm f/6.8",
+        aperture: "f/11",
+        subject: "large-format 8x10 black-and-white portrait, frontal composition, extreme detail in skin/hair/clothing, black film edge border visible, soft even natural light, plain seamless white backdrop, shot on a Deardorff 8x10 with Tri-X",
+        framing: "monumental full-torso frontal portrait",
+        environment: "open shade outdoor studio with plain seamless white paper backdrop and black negative fill flags",
+        wardrobe: "heavy dark denim work jacket and distressed work shirt",
+        mood: "monumental 8x10 contact sharpness, raw human topography, archival silver gelatin tonality, authentic black film border",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "tri_x_400",
+        aspectRatio: "4:5"
+      },
+      cam_antique_view_8x10_collodion: {
+        profile: "antique_view_8x10",
+        lens: "Uncoated Brass Petzval Lens ~300mm f/3.8",
+        aperture: "f/3.8",
+        subject: "wet-plate collodion photograph on glass, antique uncoated lens with soft uneven focus and dark vignetting, silver-toned monochrome, chemical pour marks and streaks at the plate edges, brooding atmosphere, made with an antique 8x10 camera and wet-plate collodion",
+        framing: "intimate gothic headshot portrait",
+        environment: "dark nineteenth-century parlor with heavy drapery and dusty ambient daylight",
+        wardrobe: "high-neck Victorian black lace collar and dark tailored velvet frock coat",
+        mood: "authentic wet-plate ambrotype, silver collodion emulsion pour artifacts, swirling Petzval field curvature, brooding haunting stillness",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "tri_x_400",
+        aspectRatio: "4:5"
+      },
       cam_linhof_4x5_architectural: {
         profile: "linhof_technika_4x5",
         lens: "Schneider Kreuznach Apo-Symmar 150mm f/5.6 L (Museum Reference)",
@@ -2465,6 +2637,210 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         lighting: "golden_hour",
         filmStock: "portra_400",
         aspectRatio: "1:1"
+      },
+
+      // 6. Iconic Compacts & Street Documentary
+      cam_contax_t2_candid: {
+        profile: "contax_t2",
+        lens: "Carl Zeiss Sonnar T* 38mm f/2.8",
+        aperture: "f/2.8",
+        subject: "35mm point-and-shoot film snapshot, bright flash-lit subject falling off into a dark background, crisp contrast, casual candid framing, film grain, harsh direct on-camera flash at night, shot on Contax T2",
+        framing: "spontaneous candid party portrait",
+        environment: "dimly lit loft party after-hours with dark background falloff",
+        wardrobe: "black leather jacket and silver hoop earrings",
+        mood: "authentic late-night direct flash snapshot, Zeiss Sonnar contrast, instant pop aesthetic",
+        timeWeather: "night_city",
+        lighting: "hard_flash",
+        filmStock: "portra_400",
+        aspectRatio: "3:2"
+      },
+      cam_ricoh_gr_iv_street: {
+        profile: "ricoh_gr_iv",
+        lens: "GR Lens 18.3mm f/2.8",
+        aperture: "f/5.6",
+        subject: "28mm wide street snapshot from a pocket camera, close quarters, deep zone focus, punchy high contrast, gritty texture, slightly spontaneous framing, shot on Ricoh GR IV",
+        framing: "dynamic low-angle street snapshot",
+        environment: "bustling metropolitan crosswalk with pedestrians caught mid-stride and bold architectural shadows",
+        wardrobe: "dark trench coat and sneakers",
+        mood: "decisive snap-focus documentary, high-contrast black-and-white street energy, pocket camera spontaneity",
+        timeWeather: "noon_sun",
+        lighting: "window_daylight",
+        filmStock: "tri_x_400",
+        aspectRatio: "3:2"
+      },
+
+      // 7. Aerial & Nadir Geometry
+      cam_dji_mavic_4_pro_nadir: {
+        profile: "dji_mavic_4_pro",
+        lens: "Hasselblad 28mm-equivalent f/2.8 Aerial Optics",
+        aperture: "f/4.0",
+        subject: "straight-down nadir aerial photograph from a drone, flat graphic geometry of the ground, no horizon, crisp detail across the frame, clean natural color, shot on DJI Mavic 4 Pro",
+        framing: "top-down 90-degree nadir aerial frame",
+        environment: "coastal shoreline intersection where turquoise ocean waves break against geometric basalt sea cliffs and winding road",
+        wardrobe: "none",
+        mood: "pure graphic planar composition, zero perspective convergence, 100MP Hasselblad aerial color fidelity",
+        timeWeather: "noon_sun",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "4:3"
+      },
+
+      // 8. Skin, Eyes & Hyperreal Portrait Masters
+      cam_canon_eos_r5_ii_macro_iris: {
+        profile: "canon_eos_r5_ii",
+        lens: "Canon RF 100mm f/2.8L Macro IS USM",
+        aperture: "f/11",
+        subject: "extreme 1.4x macro photograph of a human eye, iris fibers and crypts in sharp detail, individual eyelashes and fine skin texture around the lid, focus-stacked so the whole iris is sharp, crisp catchlight on the cornea, shot on Canon R5 Mark II with RF 100mm macro",
+        framing: "extreme macro iris and skin detail portrait",
+        environment: "controlled studio macro bench with dedicated corneal catchlight",
+        wardrobe: "none",
+        mood: "1.4x optical magnification, focus-stacked iris crypts and ciliary zone, micro-capillary eyelid detail",
+        timeWeather: "auto",
+        lighting: "strobe_softbox",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_mamiya_rz67_kino_flo: {
+        profile: "mamiya_rz67",
+        lens: "Mamiya Sekor Z 140mm f/4.5 Macro",
+        aperture: "f/5.6",
+        subject: "tight medium format color film portrait, face filling the frame, twin vertical catchlights making the eyes shine, even frontal light revealing every pore and wrinkle, neutral expression, plain background, two soft fluorescent light banks on both sides of the face, shot on Mamiya RZ67 with Portra 800",
+        framing: "tight character headshot",
+        environment: "minimalist dark studio background with twin vertical Kino Flo fluorescent soft banks flanking the camera",
+        wardrobe: "charcoal crewneck sweater",
+        mood: "unsparing character portraiture, twin vertical fluorescent corneal catchlights, medium format 6x7 tonal gradation",
+        timeWeather: "auto",
+        lighting: "window_daylight",
+        filmStock: "portra_400",
+        aspectRatio: "4:5"
+      },
+      cam_polaroid_20x24_contact: {
+        profile: "polaroid_20x24",
+        lens: "Schneider 600mm f/11 for Polaroid 20x24",
+        aperture: "f/11",
+        subject: "giant 20x24 inch instant color photograph, life-size head portrait with no enlargement, extraordinary detail showing translucency of individual hairs and full skin topography, deeply saturated instant-film color, shot on a Polaroid 20x24 camera",
+        framing: "life-size 20x24 inch contact portrait",
+        environment: "mammoth studio camera room with neutral backdrop and high-output flash banks",
+        wardrobe: "dark textured woolen jacket",
+        mood: "monumental 1:1 contact optical scale, un-enlarged translucent hair strands, rich saturated Polacolor dye transfer",
+        timeWeather: "auto",
+        lighting: "strobe_para",
+        filmStock: "provia_100f",
+        aspectRatio: "4:5"
+      },
+      cam_canon_eos_r5_ii_vogue_soft: {
+        profile: "canon_eos_r5_ii",
+        lens: "Canon RF 85mm F1.2L USM (Reference Portrait Prime)",
+        aperture: "f/1.4",
+        subject: "Beauty editorial model with sculptural wet-look hair, radiant luminous skin, and piercing direct gaze",
+        framing: "tight beauty headshot",
+        environment: "warm sand-colored studio seamless backdrop with diffused beauty dish key light",
+        wardrobe: "minimalist nude silk bandeau top",
+        mood: "legendary Canon skin tone warmth, creamy background defocus, tack-sharp eyelashes, soft sculptural beauty",
+        timeWeather: "auto",
+        lighting: "beauty_dish",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_canon_eos_r5_ii_vogue_texture: {
+        profile: "canon_eos_r5_ii",
+        lens: "Canon RF 85mm F1.2L USM (Reference Portrait Prime)",
+        aperture: "f/8.0",
+        subject: "Beauty editorial model with sculptural hair, authentic human skin texture with resolved micro-pores and fine vellus hair, piercing direct gaze",
+        framing: "tight beauty headshot",
+        environment: "warm sand-colored studio seamless backdrop with crisp beauty dish key light and white bounce",
+        wardrobe: "minimalist nude silk bandeau top",
+        mood: "deep depth of field (~136mm DOF) resolving micro-pore architecture and unyielding dermal realism across entire facial plane",
+        timeWeather: "auto",
+        lighting: "beauty_dish",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_canon_eos_r5_ii_vogue: {
+        profile: "canon_eos_r5_ii",
+        lens: "Canon RF 85mm F1.2L USM (Reference Portrait Prime)",
+        aperture: "f/1.4",
+        subject: "Beauty editorial model with sculptural wet-look hair, radiant luminous skin, and piercing direct gaze",
+        framing: "tight beauty headshot",
+        environment: "warm sand-colored studio seamless backdrop with diffused beauty dish key light",
+        wardrobe: "minimalist nude silk bandeau top",
+        mood: "legendary Canon skin tone warmth, creamy background defocus, tack-sharp eyelashes",
+        timeWeather: "auto",
+        lighting: "beauty_dish",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+
+      // 9. Flagship Stacked & High-Resolution Systems
+      cam_sony_a1_ii_flash_freeze: {
+        profile: "sony_a1_ii",
+        lens: "Sony FE 85mm F1.4 GM II (SEL85F14GM2)",
+        aperture: "f/2.8",
+        subject: "Fencing athlete paused between lunges, perspiration glistening on brow, tack-sharp near-eye pupil focus",
+        framing: "three-quarter athletic editorial portrait",
+        environment: "minimalist dark gymnasium with high directional strobe freeze and black negative fill",
+        wardrobe: "white textured fencing jacket with foil blade resting vertically",
+        mood: "1/400s electronic stacked shutter freeze, brutal near-eye sharpness, zero motion blur",
+        timeWeather: "auto",
+        lighting: "strobe_para",
+        filmStock: "digital_raw",
+        aspectRatio: "9:11"
+      },
+      cam_sony_a7rv_macro_horology: {
+        profile: "sony_a7rv",
+        lens: "Sony FE 90mm f/2.8 Macro G OSS",
+        aperture: "f/2.8",
+        subject: "Senior watchmaker looking through brass loupe, placing tourbillon balance wheel with titanium tweezers",
+        framing: "extreme macro iris and skin detail portrait",
+        environment: "cluttered antique wooden workbench with miniature gear wheels and micro-screwdrivers",
+        wardrobe: "dark wool vest and rolled-up striped cotton shirt",
+        mood: "61MP microscopic precision, resolved epidermal pores, true 1:1 macro brass tooth reflections",
+        timeWeather: "auto",
+        lighting: "strobe_para",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_sony_a7rv_depixel_flat: {
+        profile: "sony_a7rv",
+        lens: "Sony FE 50mm f/1.2 GM (SEL50F12GM)",
+        aperture: "f/5.6",
+        subject: "High-resolution flat archival document reproduction and infographic restoration with crisp typography",
+        framing: "perpendicular flat copy-stand reproduction",
+        environment: "professional copy-stand studio with balanced 45-degree polarized illumination",
+        wardrobe: "none",
+        mood: "Universal De-Pixelate v2.0 protocol, zero geometric distortion, strict OCR typography preservation",
+        timeWeather: "studio_soft",
+        lighting: "strobe_softbox",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_canon_eos_r1_action: {
+        profile: "canon_eos_r1",
+        lens: "Canon RF 70-200mm F2.8L IS USM Z (Action & Sports Master)",
+        aperture: "f/2.8",
+        subject: "Prima ballerina caught at the floating zenith of a grand jeté leap across sunlit stage floor",
+        framing: "dynamic full-body performance framing",
+        environment: "historic opera house rehearsal hall with tall arched windows and dusty light shafts",
+        wardrobe: "dusty rose rehearsal tulle skirt and fitted black leotard",
+        mood: "stacked full-frame instantaneous motion freeze, decisive peak moment, athletic elegance",
+        timeWeather: "window_daylight",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "16:9"
+      },
+      cam_panasonic_s1rii_micro: {
+        profile: "panasonic_lumix_s1rii",
+        lens: "Lumix S 100mm f/2.8 Macro (1:1 Micro-Detail Specialist)",
+        aperture: "f/5.6",
+        subject: "Botanical taxonomist dissecting rare cloud forest orchid petal with surgical micro-tweezers",
+        framing: "1:1 macro scientific portrait",
+        environment: "botany research laboratory bench with specimen glass jars and natural north daylight",
+        wardrobe: "crisp white laboratory coat and dark slate glasses",
+        mood: "micro-science optical purity, cellular petal vein relief, tactile pollen grains",
+        timeWeather: "window_daylight",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
       }
     };
 
@@ -3097,12 +3473,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (c.lens) {
         const lensSelect = document.getElementById('lensSelect');
         const targetLensPrefix = c.lens.split(" (")[0].toLowerCase();
+        let matched = false;
         for (let i = 0; i < lensSelect.options.length; i++) {
           if (lensSelect.options[i].text.toLowerCase().includes(targetLensPrefix) ||
               lensSelect.options[i].value.toLowerCase().includes(targetLensPrefix)) {
             lensSelect.selectedIndex = i;
+            matched = true;
             break;
           }
+        }
+        if (!matched && document.getElementById('customLensInput')) {
+          document.getElementById('customLensInput').value = c.lens;
+        } else if (matched && document.getElementById('customLensInput')) {
+          document.getElementById('customLensInput').value = '';
         }
       }
 
@@ -3125,6 +3508,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
 
       // 5. Special camera features
+      if (document.getElementById('skinLightingSelect')) {
+        document.getElementById('skinLightingSelect').value = c.skinLighting || 'none';
+      }
+      if (c.shutter && document.getElementById('shutterSelect')) {
+        document.getElementById('shutterSelect').value = c.shutter;
+      }
       if (c.anamorphic !== undefined && document.getElementById('chkAnamorphic')) {
         document.getElementById('chkAnamorphic').checked = !!c.anamorphic;
         if (c.squeeze) document.getElementById('squeezeSelect').value = c.squeeze;
@@ -3490,7 +3879,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const env = document.getElementById('environmentInput');
 
       if (lastInjectedCity && env.value.includes(lastInjectedCity)) {
-        env.value = env.value.replace(lastInjectedCity, '').replace(/^,\s*|,\s*$/g, '').replace(/,\s*,/g, ',').trim();
+        env.value = env.value.replace(lastInjectedCity, '').replace(/^,\\s*|,\\s*$/g, '').replace(/,\\s*,/g, ',').trim();
       }
 
       if (val !== 'none' && COUNTRY_CITY_DATA[val]) {
@@ -3523,7 +3912,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const env = document.getElementById('environmentInput');
 
       if (lastInjectedVibe && env.value.includes(lastInjectedVibe)) {
-        env.value = env.value.replace(lastInjectedVibe, '').replace(/^,\s*|,\s*$/g, '').replace(/,\s*,/g, ',').trim();
+        env.value = env.value.replace(lastInjectedVibe, '').replace(/^,\\s*|,\\s*$/g, '').replace(/,\\s*,/g, ',').trim();
       }
 
       if (val !== 'none' && GEOGRAPHIC_VIBE_DATA[val]) {
@@ -3785,6 +4174,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         wall_surround: document.getElementById('wallSurroundInput') ? document.getElementById('wallSurroundInput').value.trim() : null,
         gallery_zone: document.getElementById('galleryZoneInput') ? document.getElementById('galleryZoneInput').value.trim() : null,
         anchor_id: document.getElementById('anchorIdInput') ? document.getElementById('anchorIdInput').value.trim() : null,
+        skin_lighting: (document.getElementById('skinLightingSelect') && document.getElementById('skinLightingSelect').value !== 'none') ? document.getElementById('skinLightingSelect').value : null,
       };
 
       try {
@@ -4548,6 +4938,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 depixelate_v2=body.get("depixelate_v2") or body.get("depix_v2", False),
                 depix_camera=body.get("depix_camera"),
                 depix_lens=body.get("depix_lens"),
+                skin_lighting=body.get("skin_lighting") or body.get("skin_lighting_modifier"),
             )
             self._send_json(payload.to_dict())
         except Exception as err:

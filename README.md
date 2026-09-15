@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Version: 3.8.0](https://img.shields.io/badge/version-3.8.0-blue.svg)](pyproject.toml)
+[![Version: 3.9.0](https://img.shields.io/badge/version-3.9.0-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 198 Passing](https://img.shields.io/badge/tests-198%20passing-brightgreen.svg)](tests/)
+[![Tests: 213 Passing](https://img.shields.io/badge/tests-213%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -802,12 +802,15 @@ python3 -m optical_compiler "De-pixelate damaged product packaging photo" \
 
 ### 13. Web Studio Console: Organized Camera Style & Ambient Style Dropdowns
 The Web Studio interactive console (`python3 -m optical_compiler.web --port 8000`) features categorized dual dropdowns for modular prompt engineering:
-* **📷 Camera Style Dropdown**:
-  * **Medium Format Titans**: Phase One XF IQ4 150MP, Hasselblad H6D-100c, Hasselblad X2D II 100C, Fujifilm GFX 100 II, FUJIFILM GFX100RF.
-  * **Leica Precision Systems**: Leica M11 60MP, Leica M6 Analog, Leica Q3 Monochrom, Leica SL2 Motion Blur, Leica SL3-P Maestro IV.
-  * **High-Speed & High-Resolution Flagships**: Sony a1 II (1/400s flash sync), Sony Alpha 7R V (61MP horology & flat copy-stand), Canon EOS R5 Mark II, Canon EOS R1 (action ballet), Nikon Z 9 Plena, Panasonic LUMIX S1R II (1:1 micro-science).
-  * **Cinema & Anamorphic Systems**: ARRI Alexa 35 (Cooke Look & 2.0x Anamorphic Scope), Sony FX Venice line.
-  * **Analog Sheet Film & Classic Formats**: Linhof Master Technika 4x5, Pentax 67 II, Hasselblad 500C/M.
+* **📷 Camera Style Dropdown (33 Hardware Rigs & Curated Presets)**:
+  * **Medium Format Rigs**: Phase One XF IQ4 150MP, Hasselblad H6D-100c, Hasselblad X2D II 100C, Fujifilm GFX 100 II, FUJIFILM GFX100RF, Contax 645 (Zeiss Planar 80mm f/2), Mamiya RZ67 (140mm Macro).
+  * **Leica & Film Look**: Leica M11 60MP, Leica M6 Analog, Leica Q3 Monochrom, Leica SL2 Motion Blur, Leica SL3-P Flagship, Nikon FM2 (Nikkor 105mm f/2.5 AI-S, Kodachrome 64).
+  * **Wildlife & Action Systems**: Nikon Z 9 Stacked Flagship (NIKKOR Z 135mm f/1.8 Plena & Arctic Fox 400mm f/2.8), Canon EOS R1 (24-70mm & Track and Field 400mm f/2.8).
+  * **Cinema & Panoramic Optics**: ARRI Alexa 35 (Cooke Look & 2.0x Anamorphic Scope), ARRI Alexa 265 (65mm Sensor, 15 Stops DR), IMAX MSM 9802 (15-Perf 65mm Motion Picture Film, Kodak Double-X 5222), Sony VENICE 2 Full-Frame (Venice S-Cinetone Noir), Hasselblad XPan (24x65mm Panoramic 2.7:1).
+  * **Analog Sheet Film & Historic Formats**: Linhof Master Technika 4x5, Deardorff 8x10 (Schneider Symmar-S 360mm, Tri-X 320 Seamless), Antique View 8x10 (Wet-Plate Collodion on Glass, Brass Petzval), Pentax 67 II (105mm f/2.4), Hasselblad 500C/M, Polaroid 20x24 (Schneider 600mm, Polacolor Life-Size Contact).
+  * **Iconic Compacts & Street**: Contax T2 (Zeiss Sonnar 38mm f/2.8 T*, Direct On-Camera Flash), Ricoh GR IV (25.7MP APS-C, GR 18.3mm f/2.8, 28mm Snap Street).
+  * **Aerial Systems**: DJI Mavic 4 Pro (100MP 4/3 Hasselblad Sensor, 28mm-Equiv Nadir Aerial).
+  * **Skin, Eyes & Hyperreal Macro Rigs**: Canon EOS R5 Mark II (RF 100mm f/2.8L Macro @ f/8.0, Micro-Pore Dermal Lock), Phase One IQ4 150MP (Schneider 120mm f/4 Macro @ f/8.0, Zero-Smoothing Forensic Dermal Lock).
 * **🌤️ Ambient Style Dropdown**:
   * **Cities & Urban Streetscapes**: Parisian Saint-Germain, Tokyo Shinjuku neon alleys, New York SoHo lofts, London Mayfair mews, Milan Brera porticos, Kyoto Gion twilight, Berlin Mitte concrete.
   * **Luxury Hospitality**: Amalfi Coast villa terraces, Manhattan modernist penthouses, Parisian Grand Palace lobbies, Kyoto luxury ryokans, Saint-Moritz alpine chalets, intimate speakeasy cocktail lounges.
@@ -849,6 +852,35 @@ The compiler provides dedicated target adapters engineered for the industry's hi
 * **👤 HUMAIN Image 1 (`--target humain` / `humain_image_1`)**:
   * Forensic human portraiture and biometric realism.
   * Subsurface dermal light transport, authentic ocular wetness, iris fibril depth, and 5-point hand biomechanical articulation to escape the uncanny valley.
+
+### 16. Expanded 33-Camera Hardware Engine & Skin Lighting Modifiers
+
+#### 🔬 12 New Ground-Truth Hardware Profiles
+1. **IMAX MSM 9802 (`imax_msm_9802`)**: 15-perf 65mm horizontal motion picture camera, Kodak Double-X 5222 panchromatic negative, monumental 70x48.5mm negative area, natural silver halide grain, zero digital compression.
+2. **ARRI Alexa 265 (`arri_alexa_265`)**: 65mm digital cinema sensor (54.12x25.58mm), 15 stops dynamic range, EI 160–6400, ARRI Prime 65 lenses, LogC4 wide color gamut.
+3. **Nikon FM2 (`nikon_fm2`)**: Fully mechanical 35mm SLR, 1/4000s honeycomb titanium shutter, Nikkor 105mm f/2.5 AI-S portrait prime, classic Kodachrome 64 slide film color saturation.
+4. **Contax 645 (`contax_645`)**: 6x4.5 medium format system, legendary Carl Zeiss Planar T* 80mm f/2, Fujifilm Pro 400H overexposed +1 stop for luminous pastel skin tones.
+5. **Hasselblad XPan (`hasselblad_xpan`)**: Dual-format panoramic 35mm rangefinder, 24x65mm negative (2.7:1 aspect ratio), Hasselblad 45mm f/4 prime with flat field sharpness.
+6. **Deardorff 8x10 (`deardorff_8x10`)**: Classical mahogany 8x10 field camera, Schneider Symmar-S 360mm f/6.8, Kodak Tri-X 320 sheet film, pure white seamless backdrop, contact print tonal graduation.
+7. **Antique View 8x10 Wet Plate (`antique_view_8x10`)**: 19th-century view camera, wet-plate collodion emulsion on black glass ambrotype, uncoated brass Petzval portrait optic with swirling radial astigmatism and chemical pour marks.
+8. **Contax T2 (`contax_t2`)**: Premium titanium 35mm compact, Carl Zeiss Sonnar 38mm f/2.8 T*, harsh direct on-camera xenon flash with rapid inverse-square falloff and raw celebrity party intimacy.
+9. **Ricoh GR IV (`ricoh_gr_iv`)**: 25.7MP APS-C high-end compact, fixed GR 18.3mm f/2.8 (28mm equivalent), deep zone-focus snap street photography with high-contrast monochrome and gritty micro-acutance.
+10. **DJI Mavic 4 Pro (`dji_mavic_4_pro`)**: Professional aerial platform, 100MP 4/3 Hasselblad CMOS sensor, 28mm equivalent nadir top-down orientation, orthogonal plane focus, HNCS color science.
+11. **Mamiya RZ67 Professional (`mamiya_rz67`)**: 6x7 medium format SLR with revolving back, Mamiya-Sekor Z 140mm f/4.5 Macro M, Kodak Portra 800, twin vertical Kino Flo daylight banks creating dual catchlights.
+12. **Polaroid 20x24 (`polaroid_20x24`)**: Monumental 235-pound instant camera, Schneider Kreuznach 600mm f/11 optic, Polacolor 20x24 peel-apart film producing life-size 1:1 contact portraits with full dermal topography.
+
+#### 💡 Skin & Texture Lighting Modifiers (`--skin-lighting`)
+Enables physical control over skin micro-relief, epidermal surface reflectance, and hair fiber transmission:
+* **`raking_hard_key`**: High-contrast, extreme side-grazing hard key light angled at 80–85° to cast micro-shadows across skin relief, accentuating epidermal pores, vellus hair, and tactile skin topography.
+* **`cross_polarized_flash`**: Polarized illumination paired with an orthogonal cross-polarizing filter on the lens. Completely cancels 100% of specular skin reflections and oily shine, revealing deep dermal pigmentation, vascular structure, and genuine bare skin color.
+  * *Physical Conflict Resolution*: Automatically disables raking specular highlights and suppresses oil/sweat shine in the prompt.
+* **`hard_backlight_rim`**: High-intensity directional rim light placed directly behind the subject, producing razor-sharp silhouette separation, edge-lighting individual hair strands, and illuminating edge translucent fibers.
+
+#### ⚖️ Strict Prompting Integrity Guarantee
+All prompts adhere strictly to hardware-level physics and optical design:
+* **Zero Artist / Director Names**: Never contains photographer, artist, director, or film title names in prompts. All visual aesthetics are achieved deterministically through optical mechanics, sensor physics, and lighting geometry.
+* **Thin-Lens Calculated Depth of Field**: Depth of field values are mathematically derived ($CoC = \text{sensor diagonal} / 1500$) rather than guessed.
+* **Forensic Dermal Integrity**: Macro profiles prohibit synthetic airbrushing, wax smoothing, and computational skin filters.
 
 ---
 

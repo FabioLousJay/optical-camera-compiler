@@ -1,0 +1,58 @@
+{
+  "profile_id": "nikon_fm2",
+  "title": "Nikon FM2 Mechanical 35mm SLR",
+  "schema_version": "2.0",
+  "purpose": "Legendary 35mm mechanical photojournalism and reportage portraiture with Nikkor optical acutance and classic slide film color saturation.",
+  "sensor_and_optics": {
+    "camera_system": "Nikon FM2 Mechanical 35mm SLR Camera",
+    "sensor_type": "35mm color reversal slide film negative (36x24mm)",
+    "sensor_dimensions": "36x24mm standard 35mm film gate",
+    "full_frame_equivalent": "105mm telephoto portrait field of view",
+    "lens": "Nikkor 105mm f/2.5 AI-S Telephoto Portrait Prime",
+    "aperture_sweet_spot": "f/2.5",
+    "iso_base": "Kodachrome 64 color reversal slide film",
+    "dynamic_range": "11 stops slide film dynamic range with dense deep shadows and saturated primaries",
+    "shutter": "Mechanical honeycomb titanium focal-plane shutter up to 1/4000s"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Natural available light from one soft side source, gentle directional fall-off with deep shadow retention",
+    "light_transport": "Saturated deep reds and greens, dense rich shadows, unclipped organic specular highlights on iris"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Fine slide-film silver dye cloud structure with razor-sharp micro-acutance",
+      "Piercing ocular clarity: sharp iris fibrils, individual eyelashes, and authentic weathered skin texture",
+      "Deep saturated primary colors with natural slide film contrast"
+    ],
+    "depth_and_optics": [
+      "Classic 105mm telephoto portrait perspective compression: flattering facial bone structure",
+      "Gentle background blur with authentic circular aperture rendering",
+      "Zero digital post-processing artifacts, authentic analog slide film look"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "digital noise",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "computational bokeh",
+      "beauty filter glow",
+      "flat modern digital color"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 35mm color slide film portrait, 105mm lens, natural available light from one soft side source, saturated deep reds and greens, dense rich shadows, fine slide-film grain, shot on Nikon FM2 with Kodachrome 64. Zero photographer names, series titles, or magazine names in prompt."
+}

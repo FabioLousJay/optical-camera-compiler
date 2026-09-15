@@ -1,0 +1,58 @@
+{
+  "profile_id": "antique_view_8x10",
+  "title": "8x10 Antique View Camera (Wet-Plate Collodion on Glass)",
+  "schema_version": "2.0",
+  "purpose": "Authentic 19th-century wet-plate collodion process with swirling Petzval perimeter bokeh, chemical edge pour marks, silver metallic luminance, and brooding Southern Gothic mood.",
+  "sensor_and_optics": {
+    "camera_system": "8x10 Antique Wood Field View Camera (Wet-Plate Collodion)",
+    "sensor_type": "8x10 inch silver iodide collodion emulsion poured on glass (ambrotype/tintype)",
+    "sensor_dimensions": "203x254mm glass plate",
+    "full_frame_equivalent": "~45mm normal field of view with characteristic optical perimeter curvature",
+    "lens": "Uncoated 19th-Century Brass Petzval Portrait Lens",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 1 equivalent wet collodion chemical sensitivity",
+    "dynamic_range": "10 stops high-contrast silver collodion response with orthochromatic blue sensitivity",
+    "shutter": "Lens cap manual exposure (2-4 seconds duration)"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Overcast natural outdoor daylight or high-intensity skylight, brooding atmospheric key",
+    "light_transport": "Orthochromatic light response, dark brooding tones, metallic silver highlight reflectivity, heavy optical corner vignetting"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Physical chemical artifacts: visible collodion pour marks, drying streaks, and silver nitrate halos along plate margins",
+      "Piercing central sharpness resolving iris catchlights and skin pores amidst swirling perimeter defocus",
+      "Silver-toned monochrome with deep obsidian shadows and luminous metallic silver mid-tones"
+    ],
+    "depth_and_optics": [
+      "Signature Petzval swirling radial bokeh and rapid optical fall-off toward plate corners",
+      "Severe optical field curvature: tack-sharp central sweet spot falling off into soft dreamlike aberration",
+      "Uncoated glass flare and organic low-contrast perimeter glow"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "digital filter overlay",
+      "modern digital clean look",
+      "color fringing"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "modern studio flash",
+      "computational bokeh"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce wet-plate collodion photograph on glass, antique uncoated lens with soft uneven focus and dark vignetting, silver-toned monochrome, chemical pour marks and streaks at the plate edges, brooding atmosphere, made with an antique 8x10 camera and wet-plate collodion. Zero photographer names."
+}

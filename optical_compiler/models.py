@@ -534,6 +534,56 @@ class GripModifier(str, Enum):
     from_string = from_str
 
 
+class SkinLightingModifier(str, Enum):
+    """Specialized lighting modifiers for dermal texture, subsurface tone, and hair translucency."""
+
+    NONE = "none"
+    RAKING_HARD_KEY = "raking_hard_key"
+    CROSS_POLARIZED_FLASH = "cross_polarized_flash"
+    HARD_BACKLIGHT_RIM = "hard_backlight_rim"
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[SkinLightingModifier]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "raking": cls.RAKING_HARD_KEY,
+            "raking_hard": cls.RAKING_HARD_KEY,
+            "raking_hard_key": cls.RAKING_HARD_KEY,
+            "non_polarized": cls.RAKING_HARD_KEY,
+            "pore_relief": cls.RAKING_HARD_KEY,
+            "vellus_relief": cls.RAKING_HARD_KEY,
+            "cross_polarized": cls.CROSS_POLARIZED_FLASH,
+            "cross_polarized_flash": cls.CROSS_POLARIZED_FLASH,
+            "cross_polar": cls.CROSS_POLARIZED_FLASH,
+            "polarized_flash": cls.CROSS_POLARIZED_FLASH,
+            "matte_subsurface": cls.CROSS_POLARIZED_FLASH,
+            "texture_suppressed": cls.CROSS_POLARIZED_FLASH,
+            "hard_backlight": cls.HARD_BACKLIGHT_RIM,
+            "hard_backlight_rim": cls.HARD_BACKLIGHT_RIM,
+            "backlight_rim": cls.HARD_BACKLIGHT_RIM,
+            "hair_rim": cls.HARD_BACKLIGHT_RIM,
+            "hair_translucency": cls.HARD_BACKLIGHT_RIM,
+            "none": cls.NONE,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for member in cls:
+            if member.value == norm or member.name.lower() == norm:
+                return member
+        return None
+
+    from_string = from_str
+
+
+SKIN_LIGHTING_DESCRIPTIONS: dict[SkinLightingModifier, str] = {
+    SkinLightingModifier.RAKING_HARD_KEY: "hard directional key light raking low across the skin, non-polarized, revealing pore relief, fine vellus hair and natural surface sheen",
+    SkinLightingModifier.CROSS_POLARIZED_FLASH: "cross-polarized flash lighting, completely matte skin with no specular shine, rich subsurface skin color with visible natural pigmentation",
+    SkinLightingModifier.HARD_BACKLIGHT_RIM: "hard backlight rim light behind the subject, individual hair strands glowing and translucent, fine flyaway hairs separated from background",
+}
+
+
 class LightingRatio(str, Enum):
     """Key-to-fill contrast ratios for commercial photography."""
 
@@ -2433,6 +2483,12 @@ class SceneInput:
     reconstruction_lock: Optional[ReconstructionLock4XSpec] = None
     png_lock: Optional[HighResPNGOutputLockSpec] = None
     depixelate_v2: Optional[UniversalDepixelateV2Spec] = None
+    skin_lighting: Optional[SkinLightingModifier] = None
+
+    @property
+    def has_skin_lighting(self) -> bool:
+        """Return True if specialized dermal/subsurface skin lighting modifier is active."""
+        return bool(self.skin_lighting and self.skin_lighting != SkinLightingModifier.NONE)
 
     @property
     def has_product_lock(self) -> bool:

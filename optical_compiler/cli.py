@@ -436,6 +436,13 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Activate conditional text removal engine when letters or captions are present in reference.",
     )
+    parser.add_argument(
+        "--skin-lighting",
+        dest="skin_lighting",
+        choices=["none", "raking_hard_key", "cross_polarized_flash", "hard_backlight_rim"],
+        default=None,
+        help="Specialized dermal/subsurface skin lighting modifier ('raking_hard_key', 'cross_polarized_flash', 'hard_backlight_rim').",
+    )
     # --- Tool 6: Print-Calibrated Prepress & Exhibition Lab Matrix ---
     parser.add_argument(
         "--paper",
@@ -984,6 +991,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         "anchor_image_id": getattr(args, "anchor_image_id", None),
         "png_lock": getattr(args, "png_lock", False) or ref_mode_choice == "universal_png_lock",
         "png_min_mb": getattr(args, "png_min_mb", None),
+        "skin_lighting": getattr(args, "skin_lighting", None),
     }
 
     if getattr(args, "print_size", None):
