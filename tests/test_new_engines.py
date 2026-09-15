@@ -73,6 +73,35 @@ class TestNewPhotorealisticEngines(unittest.TestCase):
         self.assertEqual(payload.negative_prompt, "")
         self.assertEqual(payload.unified_prompt, payload.positive_prompt)
         self.assertEqual(payload.parameters["engine"], "Adobe Firefly Image 5 / Image 4 Ultra")
+        # Character limit guarantee
+        self.assertLessEqual(len(payload.positive_prompt), 1024)
+        self.assertTrue(payload.parameters["character_budget_safe"])
+        self.assertEqual(payload.parameters["character_limit"], 1024)
+
+    def test_firefly_strict_1024_char_limit_under_massive_input(self) -> None:
+        """Verify Adobe Firefly prompt NEVER exceeds 1,024 characters under massive scene inputs."""
+        massive_scene = (
+            "A master horologist assembling a high-complication tourbillon watch with sapphire bridges "
+            "inside a historic Swiss atelier overlooking snow-capped alpine peaks at high noon. " * 8
+        )
+        massive_env = "Vast high-altitude workshop with timber workbench and brass microscopes. " * 8
+        massive_lighting = "Northern daylight from clerestory windows blending with warm 2700K task lamp illumination. " * 8
+
+        payload = self.compiler.compile(
+            scene=massive_scene,
+            environment=massive_env,
+            lighting=massive_lighting,
+            wardrobe="White linen lab coat with leather loupe strap. " * 5,
+            mood="Extreme concentration, precision and tranquil solitude. " * 5,
+            target="firefly",
+            human_skin_realism=True,
+            hand_lock=True,
+        )
+        self.assertLessEqual(len(payload.positive_prompt), 1024)
+        self.assertTrue(payload.parameters["character_budget_safe"])
+        self.assertTrue(payload.positive_prompt.endswith("."))
+        self.assertIn("Style: Authentic Professional Color Photograph", payload.positive_prompt)
+
 
     def test_flux_raw_adapter_compilation(self) -> None:
         """Verify FLUX1.1 [pro] Ultra Raw mode compilation."""

@@ -837,6 +837,8 @@ The Web Studio Section 02 (`Scene & Styling`) separates geographic location from
 The compiler provides dedicated target adapters engineered for the industry's highest-fidelity realism engines:
 * **🔴 Adobe Firefly Image 5 & 4 Ultra (`--target firefly` / `adobe_firefly`)**:
   * Commercially safe, unretouched commercial studio and editorial photography.
+  * **Strict 1,024-Character Limit Lock**: Mathematically guarantees output never exceeds Adobe Firefly's hard 1,024-character model limit (`len(prompt) <= 1024`), completely eliminating platform rejection errors.
+  * **Intelligent Progressive Condensation**: Automatically prioritizes essential optical physics, camera hardware, and skin micro-pores while shedding lower-priority filler phrases on verbose scenes.
   * Formatted without negative prompt clutter, emphasizing camera angle, authentic depth of field, natural lighting, and skin micro-pores.
 * **⚡ FLUX1.1 [pro] Ultra Raw (`--target flux_raw` / `flux_ultra_raw`)**:
   * Optimized for Black Forest Labs' native `raw=true` parameter.

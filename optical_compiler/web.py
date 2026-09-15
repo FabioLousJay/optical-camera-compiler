@@ -1839,6 +1839,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             </div>
           </div>
           <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <span id="fireflyCharBadge" style="display: none; font-size: 0.68rem; color: var(--accent-green); font-family: var(--font-mono); background: rgba(16, 185, 129, 0.12); padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3);">✓ 1,024 CHAR SAFE LOCK</span>
             <span id="targetBadge" style="font-size: 0.7rem; color: var(--accent-cyan); font-family: var(--font-mono); background: rgba(56, 189, 248, 0.1); padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.2);">IMAGEN 3 PROSE</span>
           </div>
         </div>
@@ -3810,6 +3811,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       // Display the unified prompt (positive payload + anti-artifact negative shield) in the primary output
       document.getElementById('positiveOutput').textContent = data.unified_prompt || data.positive_prompt || '';
       document.getElementById('negativeOutput').textContent = data.negative_prompt || 'None required for this engine (negative constraints are baked into the positive prompt flags).';
+
+      // Live 1,024-character limit telemetry badge for Adobe Firefly
+      const fireflyBadge = document.getElementById('fireflyCharBadge');
+      if (fireflyBadge) {
+        if (activeTarget === 'firefly') {
+          const charCount = (data.positive_prompt || '').length;
+          const isSafe = charCount <= 1024;
+          fireflyBadge.style.display = 'inline-block';
+          fireflyBadge.style.color = isSafe ? 'var(--accent-green)' : '#f87171';
+          fireflyBadge.style.background = isSafe ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.15)';
+          fireflyBadge.style.borderColor = isSafe ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)';
+          fireflyBadge.textContent = `${isSafe ? '✓' : '⚠️'} ${charCount} / 1,024 CHARS`;
+        } else {
+          fireflyBadge.style.display = 'none';
+        }
+      }
 
       // Render 100% Commercial SKU Approval Gate Live Telemetry if product lock is active
       const gateCard = document.getElementById('approvalGateCard');
