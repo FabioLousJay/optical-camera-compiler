@@ -1813,6 +1813,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div class="tabs">
           <button class="tab active" onclick="setTarget('gpt_images')">🤖 GPT Images (ChatGPT)</button>
           <button class="tab" onclick="setTarget('imagen')">♊ Gemini Images (Imagen 3)</button>
+          <button class="tab" onclick="setTarget('firefly')">🔴 Adobe Firefly 5</button>
+          <button class="tab" onclick="setTarget('flux_raw')">⚡ FLUX1.1 Ultra Raw</button>
+          <button class="tab" onclick="setTarget('runway')">🎬 Runway Gen-4</button>
+          <button class="tab" onclick="setTarget('humain')">👤 HUMAIN Image 1</button>
           <button class="tab" onclick="setTarget('midjourney')">⛵ Midjourney (v8.2)</button>
           <button class="tab" onclick="setTarget('flux')">⚡ Flux.1 (Dev/Schnell)</button>
           <button class="tab" onclick="setTarget('sdxl')">🎨 SDXL Dual</button>
@@ -3613,6 +3617,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const badgeMap = {
         gpt_images: "GPT IMAGES // MASTER EXECUTION PROMPT",
         imagen: "GEMINI IMAGES // IMAGEN 3 PROSE",
+        firefly: "ADOBE FIREFLY // IMAGE 5 / IMAGE 4 ULTRA PHOTOGRAPHY",
+        flux_raw: "FLUX1.1 [PRO] ULTRA RAW // RAW=TRUE SENSOR FIDELITY",
+        runway: "RUNWAY GEN-4 IMAGE // CINEMATIC PRODUCTION STILL",
+        humain: "HUMAIN IMAGE 1 // FORENSIC BIOMETRIC PORTRAIT",
         midjourney: "MIDJOURNEY v8.2 // RAW SPEC",
         flux: "FLUX.1 // DIRECT PHYSICAL SPEC",
         sdxl: "SDXL DUAL // POSITIVE + NEGATIVE CHANNELS",

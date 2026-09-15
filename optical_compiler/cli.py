@@ -46,7 +46,20 @@ def build_parser() -> argparse.ArgumentParser:
         "-t",
         "--target",
         default="flux",
-        choices=["gpt_images", "imagen", "midjourney", "flux", "sdxl", "raw", "json", "all"],
+        choices=[
+            "gpt_images",
+            "imagen",
+            "midjourney",
+            "flux",
+            "flux_raw",
+            "firefly",
+            "runway",
+            "humain",
+            "sdxl",
+            "raw",
+            "json",
+            "all",
+        ],
         help="Target generation model / engine (default: 'flux').",
     )
     parser.add_argument(

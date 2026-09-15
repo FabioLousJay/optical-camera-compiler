@@ -15,6 +15,10 @@ class TargetEngine(str, Enum):
     IMAGEN = "imagen"
     MIDJOURNEY = "midjourney"
     FLUX = "flux"
+    FLUX_RAW = "flux_raw"
+    FIREFLY = "firefly"
+    RUNWAY = "runway"
+    HUMAIN = "humain"
     SDXL = "sdxl"
     RAW = "raw"
     JSON_PROMPT = "json"
@@ -37,6 +41,24 @@ class TargetEngine(str, Enum):
             "mj": cls.MIDJOURNEY,
             "midjourney": cls.MIDJOURNEY,
             "flux": cls.FLUX,
+            "flux_raw": cls.FLUX_RAW,
+            "flux_ultra_raw": cls.FLUX_RAW,
+            "flux1.1_raw": cls.FLUX_RAW,
+            "flux1.1_pro_ultra_raw": cls.FLUX_RAW,
+            "flux_ultra": cls.FLUX_RAW,
+            "firefly": cls.FIREFLY,
+            "adobe_firefly": cls.FIREFLY,
+            "firefly5": cls.FIREFLY,
+            "firefly_5": cls.FIREFLY,
+            "firefly4": cls.FIREFLY,
+            "firefly_4_ultra": cls.FIREFLY,
+            "runway": cls.RUNWAY,
+            "runway_gen4": cls.RUNWAY,
+            "gen4": cls.RUNWAY,
+            "runway_image": cls.RUNWAY,
+            "humain": cls.HUMAIN,
+            "humain_image_1": cls.HUMAIN,
+            "humain1": cls.HUMAIN,
             "sdxl": cls.SDXL,
             "raw": cls.RAW,
             "json": cls.JSON_PROMPT,
@@ -2631,6 +2653,7 @@ class CompiledPayload:
             TargetEngine.GPT_IMAGES,
             TargetEngine.RAW,
             TargetEngine.JSON_PROMPT,
+            TargetEngine.FIREFLY,
         ):
             return self.positive_prompt
         if self.target_engine == TargetEngine.SDXL:

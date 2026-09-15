@@ -18,10 +18,14 @@ from ..models import (
     TargetEngine,
 )
 from .base import BaseAdapter
+from .firefly import FireflyAdapter
 from .flux import FluxAdapter
+from .flux_raw import FluxRawAdapter
 from .gpt_images import GPTImagesAdapter
+from .humain import HumainAdapter
 from .imagen import ImagenAdapter
 from .midjourney import MidjourneyAdapter
+from .runway import RunwayAdapter
 from .sdxl import SDXLAdapter
 
 
@@ -44,6 +48,10 @@ class JSONAllInOneAdapter(BaseAdapter):
         imagen_payload = ImagenAdapter().compile(scene, profile)
         mj_payload = MidjourneyAdapter().compile(scene, profile)
         flux_payload = FluxAdapter().compile(scene, profile)
+        flux_raw_payload = FluxRawAdapter().compile(scene, profile)
+        firefly_payload = FireflyAdapter().compile(scene, profile)
+        runway_payload = RunwayAdapter().compile(scene, profile)
+        humain_payload = HumainAdapter().compile(scene, profile)
         sdxl_payload = SDXLAdapter().compile(scene, profile)
 
         # 2. Extract resolved negative tokens
@@ -481,6 +489,10 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "gemini_imagen3": imagen_payload.positive_prompt,
                 "midjourney_v8_2": mj_payload.positive_prompt,
                 "flux": flux_payload.positive_prompt,
+                "flux_ultra_raw": flux_raw_payload.positive_prompt,
+                "adobe_firefly_5": firefly_payload.positive_prompt,
+                "runway_gen4": runway_payload.positive_prompt,
+                "humain_image_1": humain_payload.positive_prompt,
                 "sdxl": {
                     "positive_prompt": sdxl_payload.positive_prompt,
                     "negative_prompt": sdxl_payload.negative_prompt,

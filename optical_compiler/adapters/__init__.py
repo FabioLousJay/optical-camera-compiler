@@ -6,12 +6,16 @@ from typing import Type
 
 from ..models import TargetEngine
 from .base import BaseAdapter
+from .firefly import FireflyAdapter
 from .flux import FluxAdapter
+from .flux_raw import FluxRawAdapter
 from .gpt_images import GPTImagesAdapter
+from .humain import HumainAdapter
 from .imagen import ImagenAdapter
 from .json_prompt import JSONAllInOneAdapter
 from .midjourney import MidjourneyAdapter
 from .raw import RawSpecAdapter
+from .runway import RunwayAdapter
 from .sdxl import SDXLAdapter
 
 ADAPTER_REGISTRY: dict[TargetEngine, Type[BaseAdapter]] = {
@@ -19,6 +23,10 @@ ADAPTER_REGISTRY: dict[TargetEngine, Type[BaseAdapter]] = {
     TargetEngine.IMAGEN: ImagenAdapter,
     TargetEngine.MIDJOURNEY: MidjourneyAdapter,
     TargetEngine.FLUX: FluxAdapter,
+    TargetEngine.FLUX_RAW: FluxRawAdapter,
+    TargetEngine.FIREFLY: FireflyAdapter,
+    TargetEngine.RUNWAY: RunwayAdapter,
+    TargetEngine.HUMAIN: HumainAdapter,
     TargetEngine.SDXL: SDXLAdapter,
     TargetEngine.RAW: RawSpecAdapter,
     TargetEngine.JSON_PROMPT: JSONAllInOneAdapter,
@@ -42,6 +50,10 @@ __all__ = [
     "GPTImagesAdapter",
     "ImagenAdapter",
     "FluxAdapter",
+    "FluxRawAdapter",
+    "FireflyAdapter",
+    "RunwayAdapter",
+    "HumainAdapter",
     "SDXLAdapter",
     "MidjourneyAdapter",
     "RawSpecAdapter",

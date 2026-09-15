@@ -833,6 +833,21 @@ The Web Studio Section 02 (`Scene & Styling`) separates geographic location from
   * **Regional, Coastal & Environmental Archetypes**: Mediterranean Whitewash & Azure Horizon, Tuscan Terracotta & Cypress Avenues, Traditional Cedar Timber Lattice, Desert Sandstone Oasis & Adobe, Tropical Oceanfront Palms, Active Maritime Wharves, High Alpine Schist & Timber, Nordic Minimalist Granite & Pine, Subtropical Courtyards & Tiered Fountains, Foggy River Embankment Viaducts, Oriental Zellij Geometric Mosaics.
 * **⚡ Decoupled Combinatorial Prompting**: Easily pair any city with diverse architectural aesthetics (e.g. *Tokyo + Narrow Neon Alleys* vs. *Tokyo + Traditional Cedar Lattice* vs. *Tokyo + Modernist Glass Skyscrapers*) with automatic prompt replacement without text clutter.
 
+### 15. Next-Gen Photorealistic Model Targets
+The compiler provides dedicated target adapters engineered for the industry's highest-fidelity realism engines:
+* **🔴 Adobe Firefly Image 5 & 4 Ultra (`--target firefly` / `adobe_firefly`)**:
+  * Commercially safe, unretouched commercial studio and editorial photography.
+  * Formatted without negative prompt clutter, emphasizing camera angle, authentic depth of field, natural lighting, and skin micro-pores.
+* **⚡ FLUX1.1 [pro] Ultra Raw (`--target flux_raw` / `flux_ultra_raw`)**:
+  * Optimized for Black Forest Labs' native `raw=true` parameter.
+  * Unfiltered 16-bit raw sensor fidelity, authentic lens aberrations, organic high-ISO noise pattern, and micro-blemishes instead of synthetic AI smoothing.
+* **🎬 Runway Gen-4 Image (`--target runway` / `runway_gen4`)**:
+  * Cinematic motion picture production stills.
+  * Anamorphic lens optics (2.0x squeeze, oval bokeh, streak flares), Kodak Vision3 500T emulsion grading, and volumetric set lighting.
+* **👤 HUMAIN Image 1 (`--target humain` / `humain_image_1`)**:
+  * Forensic human portraiture and biometric realism.
+  * Subsurface dermal light transport, authentic ocular wetness, iris fibril depth, and 5-point hand biomechanical articulation to escape the uncanny valley.
+
 ---
 
 ## Python API Usage
