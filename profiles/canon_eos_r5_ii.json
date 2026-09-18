@@ -2,16 +2,16 @@
   "profile_id": "canon_eos_r5_ii",
   "title": "Canon EOS R5 Mark II Stacked Full-Frame",
   "schema_version": "2.0",
-  "purpose": "Flagship high-speed stacked full-frame portrait baseline with modern RF optical primes.",
+  "purpose": "The Canon EOS R5 Mark II has it all, with both high-resolution 45MP images and high-resolution 8K video at an impressive 60p, paired with modern RF optical primes.",
   "sensor_and_optics": {
     "camera_system": "Canon EOS R5 Mark II",
     "sensor_type": "35mm full-frame back-illuminated stacked CMOS",
-    "sensor_dimensions": "36x24mm full-frame stacked sensor (45.0MP)",
+    "sensor_dimensions": "36.0x24.0mm full-frame stacked sensor (45.0MP)",
     "full_frame_equivalent": "35mm native field of view",
     "lens": "Canon RF 85mm F1.2L USM (9/13 elements, 9 circular blades)",
     "aperture_sweet_spot": "f/5.6",
     "iso_base": "ISO 100 base sensor sensitivity",
-    "dynamic_range": "14.8 stops dynamic range with 14-bit Dual Pixel RAW",
+    "dynamic_range": "14.8 stops dynamic range with 14-bit Dual Pixel RAW and 8K 60p RAW video recording",
     "shutter": "Electronic stacked focal-plane shutter with 1/250s flash sync"
   },
   "lighting_and_exposure": {
@@ -33,18 +33,40 @@
   },
   "negative_embeddings": {
     "render_defects": [
-      "soft focus", "blur", "motion blur", "haze", "diffusion", "dreamy glow",
-      "CGI", "synthetic rendering", "3D render", "illustration", "digital sharpening halos",
-      "chromatic aberration", "denoise smearing", "compression artifacts"
+      "soft focus",
+      "blur",
+      "motion blur",
+      "haze",
+      "diffusion",
+      "dreamy glow",
+      "CGI",
+      "synthetic rendering",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression artifacts"
     ],
     "skin_and_lighting_drift": [
-      "plastic skin", "oversmoothed skin", "airbrushed skin", "heavy beauty filter",
-      "computational bokeh", "blown highlights", "crushed shadows"
+      "plastic skin",
+      "oversmoothed skin",
+      "airbrushed skin",
+      "heavy beauty filter",
+      "computational bokeh",
+      "blown highlights",
+      "crushed shadows"
     ],
     "anatomical_drift": [
-      "wide angle", "fisheye", "distorted perspective", "warped anatomy",
-      "extra fingers", "extra limbs", "duplicated body parts", "inconsistent clothing"
+      "wide angle",
+      "fisheye",
+      "distorted perspective",
+      "warped anatomy",
+      "extra fingers",
+      "extra limbs",
+      "duplicated body parts",
+      "inconsistent clothing"
     ]
   },
-  "execution_directive": "Enforce high-resolution stacked full-frame raw capture at 45MP. Prioritize eye-tracking focus lock and negative fill contrast carving."
+  "execution_directive": "Enforce high-resolution stacked full-frame raw capture at 45MP and 8K 60p optical fidelity. Prioritize eye-tracking focus lock and negative fill contrast carving."
 }

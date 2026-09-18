@@ -1,0 +1,72 @@
+{
+  "profile_id": "canon_eos_r6_iii",
+  "title": "Canon EOS R6 Mark III All-Rounder Full-Frame",
+  "schema_version": "2.0",
+  "purpose": "A top-of-the-class all-rounder for shooters who want to do anything and everything, pairing 32.5MP resolution with excellent autofocus and 7K 60p video capture.",
+  "sensor_and_optics": {
+    "camera_system": "Canon EOS R6 Mark III",
+    "sensor_type": "35mm full-frame CMOS with next-gen Dual Pixel AF (32.5MP)",
+    "sensor_dimensions": "36.0x24.0mm full-frame sensor (32.5MP)",
+    "full_frame_equivalent": "35mm native field of view",
+    "lens": "Canon RF 24-70mm F2.8L IS USM (15/21 elements, 9 circular blades)",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 100 base sensor sensitivity (extended ISO 50-204,800)",
+    "dynamic_range": "15.0 stops dynamic range with 14-bit RAW and 7K 60p oversampled capture",
+    "shutter": "Focal-plane electronic/mechanical shutter with 1/250s flash sync and next-gen burst tracking"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Dynamic balanced ambient and studio strobe illumination, 1/250s sync, ISO 100",
+    "light_transport": "Sculpted key light 45 degrees off-axis with soft rim edge separation, controlled negative fill maintaining crisp contrast modeling, true highlight retention"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Nuanced epidermal skin texture with resolved micro-pores, natural complexion tones, and signature Canon warm skin color science",
+      "Tactile material micro-relief: fabric thread weave, leather grain, brushed metal reflections, and smooth highlight roll-off",
+      "Exceptional edge acuity from L-series optics without digital edge halos or oversharpening artifacts",
+      "Editorial cleanliness with natural microcontrast, zero synthetic denoise smearing or plastic smoothing"
+    ],
+    "depth_and_optics": [
+      "Tack-sharp autofocus tracking locked on subject near eye, absolute zero motion blur on decisive action",
+      "Creamy, progressive out-of-focus transition characteristic of premium RF glass at f/2.8-f/4",
+      "Distortion-free rectilinear projection with faithful optical perspective"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "soft focus",
+      "blur",
+      "motion blur",
+      "haze",
+      "diffusion",
+      "dreamy glow",
+      "CGI",
+      "synthetic rendering",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin",
+      "oversmoothed skin",
+      "airbrushed skin",
+      "heavy beauty filter",
+      "computational bokeh",
+      "blown highlights",
+      "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "wide angle",
+      "fisheye",
+      "distorted perspective",
+      "warped anatomy",
+      "extra fingers",
+      "extra limbs",
+      "duplicated body parts",
+      "inconsistent clothing"
+    ]
+  },
+  "execution_directive": "Enforce top-of-the-class 32.5MP full-frame raw capture with next-gen eye-tracking autofocus lock, authentic Canon skin tones, and balanced tonal gradations."
+}

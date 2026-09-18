@@ -441,10 +441,18 @@ When `profile="auto"` is specified (default in ComfyUI), the compiler inspects y
    * *Optics*: Canon RF 85mm F1.2L USM, RF 70-200mm F2.8L IS USM Z, RF 400mm F2.8L IS USM.
    * *Physics*: 40 fps burst rate, $1/2000\,\text{s}$ freeze, zero rolling shutter, cross-type AF tracking.
 3. **Canon EOS R5 Mark II Stacked Full-Frame (`canon_eos_r5_ii`)**:
-   * *Sensor*: $36.0 \times 24.0\,\text{mm}$ 45.0MP back-illuminated stacked CMOS.
-   * *Optics*: Canon RF 85mm F1.2L USM at $f/5.6$ sweet spot, RF 50mm F1.2L USM, RF 135mm F1.8L IS USM.
-   * *Physics*: Accelerated capture architecture, organic skin tonal gradation, dual-pixel micro-contrast.
-4. **Nikon Z 9 Stacked Flagship Full-Frame (`nikon_z9`)**:
+   * *Sensor*: $36.0 \times 24.0\,\text{mm}$ 45.0MP back-illuminated stacked CMOS, 8K 60p RAW video capture.
+   * *Optics*: Canon RF 85mm F1.2L USM at $f/5.6$ sweet spot, RF 100mm f/2.8L Macro IS USM, RF 50mm F1.2L USM, RF 135mm F1.8L IS USM.
+   * *Physics*: Accelerated capture architecture, 8K 60p motion resolution, organic skin tonal gradation, dual-pixel micro-contrast.
+4. **Canon EOS R6 Mark III All-Rounder Full-Frame (`canon_eos_r6_iii`)**:
+   * *Sensor*: $36.0 \times 24.0\,\text{mm}$ 32.5MP full-frame CMOS, 7K 60p oversampled video capture.
+   * *Optics*: Canon RF 24-70mm F2.8L IS USM at $f/4.0$ sweet spot, RF 70-200mm F2.8L IS USM, RF 50mm F1.2L USM, RF 85mm F1.2L USM.
+   * *Physics*: Top-of-the-class all-rounder, pairing 32.5MP resolution with next-generation deep-learning autofocus tracking and rich highlight retention.
+5. **Nikon Z 5 II All-Rounder Full-Frame (`nikon_z5_ii`)**:
+   * *Sensor*: $35.9 \times 23.9\,\text{mm}$ 24.0MP full-frame CMOS, 4K 60p video capture.
+   * *Optics*: NIKKOR Z 24-70mm f/4 S at $f/5.6$ sweet spot, Z 50mm f/1.8 S, Z 24-120mm f/4 S, Z 85mm f/1.8 S.
+   * *Physics*: Fantastic all-rounder for a variety of photographers, fully-articulating touchscreen flexibility, organic dermal micro-relief, and exceptional value.
+6. **Nikon Z 9 Stacked Flagship Full-Frame (`nikon_z9`)**:
    * *Sensor*: $35.9 \times 23.9\,\text{mm}$ 45.7MP stacked CMOS (pure electronic shutter).
    * *Optics*: NIKKOR Z 135mm f/1.8 S Plena at $f/5.0$ sweet spot, Z 85mm f/1.2 S, Z 50mm f/1.2 S.
    * *Physics*: Zero rolling shutter, Plena circular bokeh geometry, base ISO 64 High-Efficiency RAW.

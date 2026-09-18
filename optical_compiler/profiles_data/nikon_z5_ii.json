@@ -1,0 +1,72 @@
+{
+  "profile_id": "nikon_z5_ii",
+  "title": "Nikon Z 5 II All-Rounder Full-Frame",
+  "schema_version": "2.0",
+  "purpose": "A fantastic all-rounder for a variety of photographers, pairing 24MP full-frame CMOS image quality with 4K 60p video, a fully-articulating touchscreen, and great value.",
+  "sensor_and_optics": {
+    "camera_system": "Nikon Z 5 II",
+    "sensor_type": "35.9x23.9mm full-frame CMOS sensor",
+    "sensor_dimensions": "35.9x23.9mm full-frame sensor (24.0MP)",
+    "full_frame_equivalent": "35mm native field of view",
+    "lens": "NIKKOR Z 24-70mm f/4 S (11/14 elements, 7 rounded blades)",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 100 base sensor sensitivity (extended ISO 50-204,800)",
+    "dynamic_range": "14.5 stops dynamic range with 14-bit NEF RAW and 4K 60p video recording",
+    "shutter": "Focal-plane mechanical and electronic front-curtain shutter with 1/200s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Natural daylight balanced with subtle off-axis flash fill, 1/200s sync, ISO 100",
+    "light_transport": "Soft directional key light 35 to 45 degrees off-axis, gentle wrap fill preserving delicate skin highlight roll-off, clean environmental separation"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Natural epidermal skin texture with authentic pore definition, fine vellus hair, and true-to-life Nikon color science",
+      "True material micro-relief: fabric weave, leather grain, and gradual highlight roll-off with generous dynamic range",
+      "Pristine optical acutance from NIKKOR Z optics without digital edge halos or unsharp masking artifacts",
+      "Clean documentary clarity without artificial smoothing, no diffusion, no haze"
+    ],
+    "depth_and_optics": [
+      "Critical focal lock on near eye with eyelashes and iris tack sharp, zero motion blur",
+      "Smooth, progressive focus roll-off characteristic of high-grade NIKKOR Z glass at f/4-f/5.6",
+      "Clean rectilinear projection and distortion-free perspective geometry"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "soft focus",
+      "blur",
+      "motion blur",
+      "haze",
+      "diffusion",
+      "dreamy glow",
+      "CGI",
+      "synthetic rendering",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin",
+      "oversmoothed skin",
+      "airbrushed skin",
+      "heavy beauty filter",
+      "computational bokeh",
+      "blown highlights",
+      "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "wide angle",
+      "fisheye",
+      "distorted perspective",
+      "warped anatomy",
+      "extra fingers",
+      "extra limbs",
+      "duplicated body parts",
+      "inconsistent clothing"
+    ]
+  },
+  "execution_directive": "Enforce versatile 24MP full-frame CMOS raw capture with authentic Nikon color science, balanced highlight/shadow roll-off, and pristine optical acutance."
+}
