@@ -157,6 +157,21 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
     (
         "phase_one_iq4",
         [
+            "phase one",
+            "phase one xf",
+            "iq4",
+            "iq4 150mp",
+            "150mp",
+            "151mp",
+            "151 mp",
+            "module a",
+            "camera module a",
+            "resolving authority",
+            "schneider 110mm",
+            "schneider kreuznach 110mm",
+            "110mm ls",
+            "opticolor",
+            "opticolor+",
             "luxury",
             "fine art",
             "museum",
@@ -169,7 +184,6 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "haute couture",
             "still life",
             "gallery",
-            "150mp",
             "trichromatic",
             "packshot",
             "commercial packshot",
@@ -241,6 +255,25 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "leica optics",
             "war correspondent",
             "investigative",
+            "apo-summicron-sl 90mm",
+            "90mm summicron-sl",
+        ],
+    ),
+    (
+        "leica_m11",
+        [
+            "leica m11",
+            "m11",
+            "m11 rangefinder",
+            "noctilux-m 75mm",
+            "75mm noctilux",
+            "apo-summicron-m 90mm",
+            "90mm summicron-m",
+            "apo-summicron-m 50mm",
+            "50mm summicron apo",
+            "summilux-m 35mm",
+            "35mm summilux-m",
+            "summilux m asph ii",
         ],
     ),
     (
@@ -260,6 +293,14 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "silver halide grain",
             "monochrome sensor",
             "black and white street",
+            "iso 100-200,000",
+            "iso 100-200000",
+            "iso 200,000",
+            "iso 200000",
+            "200,000 iso",
+            "200000 iso",
+            "60mp monochrome",
+            "60mp monochrom",
         ],
     ),
     (
@@ -300,6 +341,18 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
     (
         "hasselblad_x2d_ii_100c",
         [
+            "hasselblad x2d",
+            "x2d ii",
+            "x2d 100c",
+            "x2d",
+            "module b",
+            "camera module b",
+            "tonal realism",
+            "hncs",
+            "hasselblad natural colour",
+            "xcd 90v",
+            "90v",
+            "15.3 stops",
             "portrait",
             "beauty",
             "headshot",
@@ -312,6 +365,26 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "eyelashes",
             "glamour",
             "model",
+        ],
+    ),
+    (
+        "fujifilm_gfx100ii",
+        [
+            "gfx 100 ii",
+            "gfx100 ii",
+            "gfx100ii",
+            "gfx 100ii",
+            "module c",
+            "camera module c",
+            "portrait precision",
+            "gf 110mm",
+            "gf110mm",
+            "gf110",
+            "fujinon gf 110mm",
+            "fujinon gf110mm",
+            "87mm equivalent",
+            "cmos ii hs",
+            "three-quarter body fashion",
         ],
     ),
     (
@@ -500,34 +573,36 @@ def auto_select_profile(scene: Union[str, SceneInput]) -> str:
 # Built-in Phase One IQ4 profile fallback to ensure zero runtime file lookup issues
 PHASE_ONE_IQ4_DEFAULT = CameraProfile(
     profile_id="phase_one_iq4",
-    title="Phase One XF IQ4 150MP Trichromatic",
+    title="CAMERA MODULE A — Phase One Maximum Resolving Authority",
     schema_version="2.0",
-    purpose="Hardware-level optical and sensor simulation for zero-artifact photorealism.",
+    purpose="Maximum-fidelity full-body and three-quarter portrait rendering emphasizing resolving power, dimensional skin, individual hair definition, textile structure, deep tonal separation, and controlled studio precision.",
     sensor_and_optics=SensorOptics(
-        camera_system="Phase One XF IQ4 150MP BSI Trichromatic",
-        sensor_type="Back-Side Illuminated (BSI) CMOS Medium Format",
-        sensor_dimensions="54x40mm medium-format sensor",
-        full_frame_equivalent="~50mm full-frame equivalent normal field of view",
-        lens="Schneider Kreuznach 80mm LS f/2.8 Blue Ring",
+        camera_system="Phase One XF IQ4 150MP",
+        sensor_type="53.4 x 40.0mm BSI CMOS medium format (151 MP, 14204 x 10652, 3.76 µm pixel pitch)",
+        sensor_dimensions="53.4x40.0mm medium-format sensor",
+        full_frame_equivalent="~68mm full-frame equivalent normal portrait perspective",
+        lens="Schneider Kreuznach 110mm LS f/2.8 Blue Ring",
         aperture_sweet_spot="f/8",
-        iso_base="ISO 50 base sensor sensitivity",
-        dynamic_range="16-bit raw tonal range with 15 stops of dynamic latitude",
+        iso_base="ISO 50 base sensor sensitivity (16-bit Opticolor+)",
+        dynamic_range="16-bit Opticolor+ tonal range with 15 f-stops dynamic latitude",
         shutter="Leaf shutter with 1/1600s high-speed flash sync",
     ),
     lighting_and_exposure=LightingSetup(
-        primary_lighting="Studio strobe, 1/1600s leaf shutter sync, ISO 50 base sensor sensitivity, 16-bit raw tonal range",
-        light_transport="Key light with large parabolic modifier, deep shadows carved with black foam-core negative fill, single-axis specular catchlights",
+        primary_lighting="High-quality studio strobe, 1/1600s leaf shutter sync, ISO 50 quality baseline, 16-bit Opticolor+",
+        light_transport="Key light 35-45 degrees off camera axis, minimal controlled fill, black foam-core negative fill for dimensional modeling, subtle edge rim separation, defined photographic light preserving smooth highlight transitions on skin",
     ),
     micro_detail_and_physics=MicroPhysics(
         surface_rendering=[
             "Natural epidermal skin texture with resolved pores, fine vellus hair, and accurate subsurface scattering without artificial blur or waxy specularities",
-            "True material micro-relief: fabric weave, micro-abrasions, uncompressed specular highlight falloff",
-            "High optical acutance and MTF contrast without digital edge halos or unsharp masking artifacts",
+            "Extremely high native-looking information density without digital oversharpening; strong but natural microcontrast emerging from local tonal separation rather than halos",
+            "Dimensional rendering with authentic pores, fine facial hair, beard texture, wrinkles, folds, freckles, age spots, and subtle skin variation only where optically plausible",
+            "Resolve individual hair strands, overlapping strand groups, roots, flyaways, specular variation, and natural density without wire-like sharpening",
+            "Highest local precision at iris, eyelashes, wetline, catchlight boundaries, and natural scleral texture; preserve fabric weave, stitching, seams, fibers, embroidery, leather grain, and metallic reflectance",
         ],
         depth_and_optics=[
-            "Subtle optical falloff characteristic of large-sensor f/8 depth of field",
-            "Zero perspective distortion, clean rectilinear projection",
-            "Clean edge transitions driven purely by lighting and geometry, not artificial post-process depth slicing",
+            "Natural medium-format perspective generated through realistic camera distance; optically progressive depth transition with zero segmentation-mask blur",
+            "Believable optical defocus with continuous transitions and structurally believable highlights; crisp subject edges without cutout halos",
+            "Essentially zero chromatic aberration and zero wide-angle body distortion, oversized hands, oversized feet, stretched limbs, or receding head proportions",
         ],
     ),
     negative_embeddings=NegativeShield(
@@ -535,29 +610,54 @@ PHASE_ONE_IQ4_DEFAULT = CameraProfile(
             "CGI",
             "3D render",
             "illustration",
+            "digital oversharpening",
             "digital sharpening halos",
+            "white edge halos",
             "chromatic aberration",
             "denoise smearing",
             "compression artifacts",
+            "AI swirls",
+            "wire-like hair sharpening",
         ],
         skin_and_lighting_drift=[
+            "pore stamping",
+            "engraved skin",
+            "metallic skin",
+            "worm-like microtexture",
+            "lace-like skin patterns",
+            "synthetic repetitive pores",
+            "over-sharpened wrinkles",
+            "plastic smoothing",
+            "HDR skin",
+            "wax skin",
+            "hyper-HDR",
+            "fake depth blur",
+            "invented microdetail",
             "airbrushed skin",
-            "plastic poreless skin",
-            "glamour retouching",
             "computational bokeh",
             "beauty filter glow",
             "blown highlights",
             "crushed shadows",
         ],
         anatomical_drift=[
+            "beautification drift",
+            "body slimming unless requested",
+            "body enlargement unless requested",
+            "age reduction",
+            "face redesign",
+            "AI-perfect symmetry",
             "mutated hands",
             "extra digits",
             "fused limbs",
             "asymmetrical pupil dilation",
             "deformed facial features",
+            "wide-angle body distortion",
+            "oversized hands",
+            "oversized feet",
+            "stretched limbs",
         ],
     ),
-    execution_directive="Enforce true raw-capture fidelity from a 150MP digital back. Eliminate post-processed sharpening looks, synthetic smoothing, and non-physical lighting.",
+    execution_directive="Enforce Phase One XF + IQ4 150MP maximum resolving authority with Schneider Kreuznach 110mm LS f/2.8 Blue Ring at f/8, ISO 50. The image should feel as though enormous resolving power existed at capture, not as though a lower-resolution image was sharpened afterward. Human skin realism overrides perceived resolution; skin remains softer than eyelashes, iris, hair strands, and textiles.",
 )
 
 
@@ -579,9 +679,27 @@ def load_profile(
         return load_profile(target_id)
 
     PROFILE_ALIASES = {
+        "module_a": "phase_one_iq4",
+        "module_b": "hasselblad_x2d_ii_100c",
+        "module_c": "fujifilm_gfx100ii",
+        "phase_one": "phase_one_iq4",
+        "phase_one_iq4": "phase_one_iq4",
+        "phase_one_150mp": "phase_one_iq4",
+        "iq4": "phase_one_iq4",
+        "iq4_150mp": "phase_one_iq4",
+        "hasselblad_x2d": "hasselblad_x2d_ii_100c",
+        "hasselblad_x2d_100c": "hasselblad_x2d_ii_100c",
+        "x2d": "hasselblad_x2d_ii_100c",
+        "x2d_ii": "hasselblad_x2d_ii_100c",
+        "fujifilm_gfx100ii": "fujifilm_gfx100ii",
+        "gfx100ii": "fujifilm_gfx100ii",
+        "gfx_100ii": "fujifilm_gfx100ii",
+        "gfx100_ii": "fujifilm_gfx100ii",
         "leica_sl3": "leica_sl3_p",
         "sl3": "leica_sl3_p",
         "leica_sl3_p": "leica_sl3_p",
+        "leica_m11": "leica_m11",
+        "m11": "leica_m11",
         "sony_alpha_7r_v": "sony_a7rv",
         "sony_a7r_v": "sony_a7rv",
         "sony_a7r5": "sony_a7rv",
@@ -814,6 +932,23 @@ def apply_overrides(profile: CameraProfile, scene: SceneInput) -> CameraProfile:
         if skin_light_directive:
             p.lighting_and_exposure.primary_lighting = f"{skin_light_directive}, {p.lighting_and_exposure.primary_lighting}"
             p.micro_detail_and_physics.surface_rendering.insert(0, f"Specialized skin lighting: {skin_light_directive}.")
+
+    # Universal Medium Format Portrait Override
+    if scene.has_universal_medium_format_override:
+        p.execution_directive = (
+            f"{p.execution_directive} UNIVERSAL MASTER OVERRIDE ACTIVE: "
+            "Photographic realism above synthetic perceived resolution. "
+            "Skin realism overrides sharpening (never convert skin into the sharpest texture). "
+            "Hair resolves sharper than skin only within focal plane. "
+            "HDR means expanded recoverable tonal range, not halos or tone-mapping glow. "
+            "Deep blacks must remain dense with subtle near-black texture. "
+            "Depth of field behaves optically and progressively without segmentation blur. "
+            "Zero anatomical or identity drift."
+        )
+        p.micro_detail_and_physics.surface_rendering.insert(
+            0,
+            "Human skin realism overrides sharpening: skin must remain slightly softer than eyelashes, iris detail, individual hair strands, jewelry, fabric edges, and typography."
+        )
 
     # Policy-Safe Compliance Recovery Layer
     if scene.is_policy_safe:

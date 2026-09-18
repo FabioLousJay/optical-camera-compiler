@@ -10,12 +10,12 @@
     "full_frame_equivalent": "28mm native wide-angle field of view (with 35mm, 50mm, 75mm, 90mm digital frame lines)",
     "lens": "Leica Summilux 28mm f/1.7 ASPH with integrated optical image stabilization and dedicated macro mode (down to 17cm)",
     "aperture_sweet_spot": "f/2.8",
-    "iso_base": "ISO 125 base sensor sensitivity with pure monochromatic grain structure",
+    "iso_base": "ISO 125 base sensor sensitivity (native ISO range 100-200,000) with pure monochromatic grain structure",
     "dynamic_range": "15+ stops of monochromatic dynamic range with 14-bit uncompressed DNG raw",
     "shutter": "Leaf shutter up to 1/2000s flash sync, electronic shutter up to 1/16000s"
   },
   "lighting_and_exposure": {
-    "primary_lighting": "Pure luminance exposure with nuanced silver halide-like tonal gradient from deep charcoal blacks to luminous highlight roll-off",
+    "primary_lighting": "Pure luminance exposure with nuanced silver halide-like tonal gradient from deep charcoal blacks to luminous highlight roll-off across an expansive ISO 100-200,000 range",
     "light_transport": "True panchromatic light absorption, exceptional midtone separation, authentic micro-contrast pop without digital sharpening or color tinting"
   },
   "micro_detail_and_physics": {
@@ -64,5 +64,5 @@
       "deformed facial features"
     ]
   },
-  "execution_directive": "Enforce pure panchromatic monochrome capture from a dedicated 60.3MP monochrome sensor. Zero color filter array, zero demosaicing artifacts, authentic silver halide tonal transitions, and tack-sharp Summilux 28mm f/1.7 ASPH optical acutance."
+  "execution_directive": "Enforce pure panchromatic monochrome capture from a dedicated 60.3MP monochrome sensor with native ISO range of 100-200,000. Zero color filter array, zero demosaicing artifacts, authentic silver halide tonal transitions, and tack-sharp Summilux 28mm f/1.7 ASPH optical acutance."
 }

@@ -20,6 +20,7 @@ from ..models import (
     SceneInput,
     TargetEngine,
     IMAGE_REPAIR_PRIORITIES_BY_TYPE,
+    format_universal_medium_format_override,
 )
 from .base import BaseAdapter
 
@@ -449,6 +450,8 @@ class GPTImagesAdapter(BaseAdapter):
         cam = profile.sensor_and_optics
         color_desc = f" Color science: {cam.dynamic_range}." if cam.dynamic_range else ""
         lens_spec = cam.lens
+        if cam.full_frame_equivalent and cam.full_frame_equivalent not in lens_spec:
+            lens_spec = f"{lens_spec} ({cam.full_frame_equivalent})"
         if scene.is_anamorphic:
             squeeze = scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else "2.0x"
             flare = scene.streak_flare.value.replace("_", " ") if scene.streak_flare else "cyan/blue"
@@ -543,6 +546,10 @@ class GPTImagesAdapter(BaseAdapter):
             )
 
 
+        # Universal Medium Format Master Override
+        if scene.has_universal_medium_format_override:
+            sections.append(format_universal_medium_format_override())
+
         # 10. Negative constraints embedded in natural language
         neg_tokens = profile.negative_embeddings.all_tokens(
             include_anti_drift=is_ref,
@@ -579,6 +586,8 @@ class GPTImagesAdapter(BaseAdapter):
             "shutter": cam.shutter,
             "iso": cam.iso_base,
         }
+        if scene.has_universal_medium_format_override:
+            payload_params["universal_medium_format_override"] = True
         if scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK:
             payload_params.update({
                 "png_output_lock": True,

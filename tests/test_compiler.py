@@ -80,7 +80,7 @@ class TestOpticalCompiler(unittest.TestCase):
         self.assertEqual(payload.target_engine, TargetEngine.FLUX)
         self.assertIn("Photo of tight macro headshot of Sculptor", payload.positive_prompt)
         self.assertIn("Phase One XF IQ4", payload.positive_prompt)
-        self.assertIn("Schneider Kreuznach 80mm", payload.positive_prompt)
+        self.assertIn("Schneider Kreuznach 110mm", payload.positive_prompt)
         self.assertIn("1/1600s", payload.positive_prompt)
         # Verify negative assertions woven directly into the positive text
         self.assertIn("Eliminate plastic or poreless airbrushed skin", payload.positive_prompt)

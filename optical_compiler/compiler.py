@@ -139,6 +139,7 @@ class OpticalCompiler:
         depixelate_v2: Optional[Union[bool, dict, UniversalDepixelateV2Spec]] = None,
         depix_camera: Optional[str] = None,
         depix_lens: Optional[str] = None,
+        universal_medium_format_override: bool = False,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
 
@@ -418,6 +419,7 @@ class OpticalCompiler:
                 png_lock=png_lock_obj,
                 depixelate_v2=depix_v2_obj,
                 skin_lighting=sl,
+                universal_medium_format_override=universal_medium_format_override,
             )
 
         else:
@@ -542,6 +544,8 @@ class OpticalCompiler:
                 scene_input.depixelate_v2 = depix_v2_obj
             if sl is not None:
                 scene_input.skin_lighting = sl
+            if universal_medium_format_override:
+                scene_input.universal_medium_format_override = universal_medium_format_override
 
         # 3. Parse target engine
         engine = (
@@ -623,11 +627,21 @@ def compile_scene(
     scene: Union[str, SceneInput],
     profile_name_or_path: str = "phase_one_iq4",
     target_model: Union[str, TargetEngine] = TargetEngine.GPT_IMAGES,
+    universal_medium_format_override: bool = False,
     **kwargs: Any,
 ) -> CompiledPayload:
     """Convenience helper to initialize compiler and compile a scene in one call."""
+    if "profile" in kwargs:
+        profile_name_or_path = kwargs.pop("profile")
+    if "target" in kwargs:
+        target_model = kwargs.pop("target")
     compiler = OpticalCompiler(profile_name_or_path)
-    return compiler.compile(scene, target=target_model, **kwargs)
+    return compiler.compile(
+        scene,
+        target=target_model,
+        universal_medium_format_override=universal_medium_format_override,
+        **kwargs,
+    )
 
 
 def compile_ab_harness(
@@ -647,4 +661,89 @@ def compile_ab_harness(
         "module_b": res_b,
         "camera_a": compiler_a.base_profile.title,
         "camera_b": compiler_b.base_profile.title,
+    }
+
+
+def compile_abc_harness(
+    scene: Union[str, SceneInput],
+    module_a: str = "phase_one_iq4",
+    module_b: str = "hasselblad_x2d_ii_100c",
+    module_c: str = "fujifilm_gfx100ii",
+    target: Union[str, TargetEngine] = TargetEngine.GPT_IMAGES,
+    universal_override: bool = True,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    """Compile a 3-way side-by-side comparison harness across Medium Format photographic signatures.
+
+    Signatures evaluated:
+    - Module A (Phase One XF + IQ4 150MP): Resolving authority, 151MP BSI CMOS, 110mm LS f/2.8 @ f/8, ISO 50.
+    - Module B (Hasselblad X2D II 100C): Tonal realism & HNCS HDR, 100MP BSI CMOS, XCD 90V @ f/5.6, native ISO 50.
+    - Module C (Fujifilm GFX100 II): Portrait precision, 102MP GFX CMOS II HS, GF 110mm F2 @ f/5.6, ISO 80, 87mm compression.
+
+    Args:
+        scene: Scene description string or SceneInput instance.
+        module_a: Profile ID or CameraProfile for Module A (default 'phase_one_iq4').
+        module_b: Profile ID or CameraProfile for Module B (default 'hasselblad_x2d_ii_100c').
+        module_c: Profile ID or CameraProfile for Module C (default 'fujifilm_gfx100ii').
+        target: Target engine (default GPT_IMAGES).
+        universal_override: When True, enforce UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE across all modules.
+        **kwargs: Additional compilation parameters passed to each compiler.
+
+    Returns:
+        Dictionary with 'module_a', 'module_b', 'module_c' CompiledPayloads, camera titles, and signature summary.
+    """
+    compiler_a = OpticalCompiler(module_a)
+    compiler_b = OpticalCompiler(module_b)
+    compiler_c = OpticalCompiler(module_c)
+
+    res_a = compiler_a.compile(
+        scene,
+        target=target,
+        universal_medium_format_override=universal_override,
+        **kwargs,
+    )
+    res_b = compiler_b.compile(
+        scene,
+        target=target,
+        universal_medium_format_override=universal_override,
+        **kwargs,
+    )
+    res_c = compiler_c.compile(
+        scene,
+        target=target,
+        universal_medium_format_override=universal_override,
+        **kwargs,
+    )
+
+    return {
+        "module_a": res_a,
+        "module_b": res_b,
+        "module_c": res_c,
+        "camera_a": compiler_a.base_profile.title,
+        "camera_b": compiler_b.base_profile.title,
+        "camera_c": compiler_c.base_profile.title,
+        "universal_override_active": universal_override,
+        "signatures": {
+            "module_a": {
+                "system": "Phase One XF + IQ4 150MP",
+                "lens": "Schneider Kreuznach 110mm LS f/2.8 Blue Ring",
+                "sensor": "151MP BSI CMOS (53.4x40.0mm)",
+                "sweet_spot": "f/5.6 to f/8, ISO 50",
+                "focus": "Resolving authority: skin micro-relief, individual hair, fabric weave, dense neutral blacks",
+            },
+            "module_b": {
+                "system": "Hasselblad X2D II 100C",
+                "lens": "Hasselblad XCD 2.5/90V (71mm equiv)",
+                "sensor": "100MP BSI CMOS (43.8x32.9mm)",
+                "sweet_spot": "f/4 to f/5.6, native ISO 50",
+                "focus": "Tonal realism: HNCS HDR color, luminous highlights, shadow chromatic retention, skin never sharpest",
+            },
+            "module_c": {
+                "system": "Fujifilm GFX100 II",
+                "lens": "Fujinon GF110mmF2 R LM WR (87mm equiv)",
+                "sensor": "102MP GFX CMOS II HS (43.8x32.9mm)",
+                "sweet_spot": "f/4 to f/5.6, ISO 80 baseline",
+                "focus": "Portrait precision: 87mm perspective compression, proportional extremities, crisp focus envelope",
+            },
+        },
     }

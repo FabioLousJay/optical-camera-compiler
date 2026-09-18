@@ -19,6 +19,7 @@ from optical_compiler.models import (
     SceneInput,
     TargetEngine,
     UniversalDepixelateV2Spec,
+    normalize_lens_name,
 )
 from optical_compiler.profiles import auto_select_profile, load_profile
 
@@ -35,6 +36,7 @@ class TestLeicaQ3MonochromProfile(unittest.TestCase):
         self.assertIn("Color Filter Array", profile.sensor_and_optics.sensor_type)
         self.assertIn("Summilux 28mm f/1.7", profile.sensor_and_optics.lens)
         self.assertIn("125", profile.sensor_and_optics.iso_base)
+        self.assertIn("100-200,000", profile.sensor_and_optics.iso_base)
 
     def test_profile_aliases(self):
         aliases = ["leica_q3", "q3_monochrom", "q3m", "q3", "LEICA_Q3_MONOCHROM"]
@@ -62,6 +64,28 @@ class TestLeicaQ3MonochromProfile(unittest.TestCase):
         self.assertEqual(DEFAULT_FLAT_GRAPHIC_SELECTION["lens"], "Sony 55mm f/1.8 Sonnar T FE ZA")
         self.assertEqual(DEFAULT_MONOCHROME_SELECTION["camera"], "Leica Q3 Monochrom")
         self.assertEqual(DEFAULT_MONOCHROME_SELECTION["lens"], "Leica Summilux 28mm f/1.7 ASPH")
+
+        # Test user syntax variations for Leica lenses normalize correctly
+        self.assertEqual(
+            normalize_lens_name("Leica APO-Summicron-SL 90mm f2"),
+            "Leica APO-Summicron-SL 90mm f/2",
+        )
+        self.assertEqual(
+            normalize_lens_name("Leica 50mm f2 Summicron APO ASPH"),
+            "Leica 50mm f/2 Summicron APO ASPH",
+        )
+        self.assertEqual(
+            normalize_lens_name("Leica 75mm f1.25 Noctilux"),
+            "Leica 75mm f/1.25 Noctilux",
+        )
+        self.assertEqual(
+            normalize_lens_name("Leica 90mm f2 Summicron-M"),
+            "Leica 90mm f/2 Summicron-M",
+        )
+        self.assertEqual(
+            normalize_lens_name("Leica 35mm f/1.4 Summilux M ASPH II"),
+            "Leica 35mm f/1.4 Summilux-M ASPH II",
+        )
 
 
 class TestCameraRouterAndAutoSelection(unittest.TestCase):

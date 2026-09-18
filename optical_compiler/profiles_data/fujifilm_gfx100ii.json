@@ -1,33 +1,55 @@
 {
   "profile_id": "fujifilm_gfx100ii",
-  "title": "Fujifilm GFX 100 II 102MP Medium Format",
+  "title": "CAMERA MODULE C \u2014 Fujifilm GFX Portrait Precision",
   "schema_version": "2.0",
-  "purpose": "State-of-the-art commercial studio and editorial medium format with Fujifilm analog film simulation color science (Classic Chrome / Reala Ace).",
+  "purpose": "High-resolution body portrait rendering combining medium-format detail with stronger traditional portrait compression, crisp hair and eye definition, highly resolved textiles, and smooth large-sensor depth separation.",
+  "hardware_reference": {
+    "camera": "Fujifilm GFX100 II",
+    "sensor": {
+      "type": "GFX CMOS II HS",
+      "dimensions_mm": "43.8 x 32.9",
+      "effective_resolution": "102 MP",
+      "raw_depth": "14-bit or 16-bit RAW",
+      "standard_iso_range": "ISO 80 to 12800",
+      "extended_low_iso": "ISO 40",
+      "stabilization": "5-axis sensor-shift IBIS rated up to 8 stops under specified CIPA conditions"
+    },
+    "lens": {
+      "model": "Fujinon GF110mmF2 R LM WR",
+      "focal_length": "110 mm",
+      "full_frame_equivalent": "87 mm",
+      "maximum_aperture": "f/2",
+      "minimum_aperture": "f/22",
+      "construction": "14 elements in 9 groups including 4 ED elements",
+      "minimum_focus_distance": "0.9 m",
+      "preferred_body_portrait_aperture": "f/4 to f/5.6"
+    }
+  },
   "sensor_and_optics": {
-    "camera_system": "Fujifilm GFX 100 II (102MP CMOS II HS Sensor)",
-    "sensor_type": "43.8x32.9mm Medium Format high-speed CMOS with 16-bit RAW",
+    "camera_system": "Fujifilm GFX100 II (102MP CMOS II HS Sensor)",
+    "sensor_type": "43.8x32.9mm GFX CMOS II HS Medium Format with 14-bit or 16-bit RAW",
     "sensor_dimensions": "43.8x32.9mm medium format sensor",
-    "full_frame_equivalent": "~87mm full-frame equivalent classic portrait focal length",
-    "lens": "Fujinon GF 110mm f/2 R LM WR Reference Portrait Lens",
-    "aperture_sweet_spot": "f/2.8",
-    "iso_base": "ISO 80 base sensor sensitivity with Fujifilm Classic Chrome color profile",
-    "dynamic_range": "16-bit RAW capture with 16 stops of dynamic range",
-    "shutter": "Focal plane mechanical shutter, 1/4000s sync capability"
+    "full_frame_equivalent": "87mm full-frame equivalent classic portrait focal length",
+    "lens": "Fujinon GF110mmF2 R LM WR Reference Portrait Lens (14 elements in 9 groups with 4 ED elements)",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 80 base sensor sensitivity (extended low ISO 40)",
+    "dynamic_range": "16-bit RAW capture with recoverable highlight/shadow latitude and 8-stop IBIS",
+    "shutter": "Focal plane shutter, 5-axis sensor-shift IBIS rated up to 8 stops"
   },
   "lighting_and_exposure": {
-    "primary_lighting": "Commercial editorial studio strobe with octabox and subtle hair backlight kicker",
-    "light_transport": "Crisp dimensional separation, subtle tonal gradations, subdued saturation with rich tonal contrast"
+    "primary_lighting": "Directional studio strobe or highly controlled daylight, ISO 80 quality baseline, f/5.6 portrait aperture",
+    "light_transport": "Key light 35-45 degrees off-axis, moderate negative fill, low-intensity optional rim; maximum body dimensionality with crisp focal-plane detail and smooth background falloff"
   },
   "micro_detail_and_physics": {
     "surface_rendering": [
-      "Ultra-high resolving power: razor-sharp eyelash and corneal reflections with resolved pore fidelity",
-      "Fujifilm color chemistry: muted earthy tones, deep shadows, and luminous skin tones without synthetic magenta tint",
-      "Exceptional tactile clarity on clothing weaves, leather grain, and jewelry micro-reflections"
+      "Extremely crisp focal plane: primary eye, eyelashes, eyebrows, hairline, beard boundary, garment edge, and jewelry critically resolved with clean high-resolution edge transitions and zero white sharpening halos",
+      "High information density on skin without high-radius sharpening; natural uneven texture, pores, wrinkles, folds, freckles, age spots, and beard follicles where supported by distance and focus",
+      "Resolve individual hair strands within the true focus envelope, progressively merging fine strands into natural optical softness outside it; textiles retain weave and fiber structure without moir\u00e9-like invented patterns"
     ],
     "depth_and_optics": [
-      "Creamy, three-dimensional subject isolation characteristic of 110mm f/2 on 44x33mm silicon",
-      "Ultra-smooth spherical blur transitions without onion-ring bokeh rings",
-      "Flawless chromatic aberration suppression across high-contrast edges"
+      "Classic 87mm-equivalent portrait perspective compression with medium-format information density; natural moderate facial compression without flattening into a 2D mask",
+      "Believable chest, abdomen, shoulder, arm, and hip relationships; hands and feet remain proportional rather than growing toward the camera",
+      "Smooth spherical blur transitions and flawless chromatic aberration suppression characteristic of 4 ED optical elements"
     ]
   },
   "negative_embeddings": {
@@ -36,24 +58,113 @@
       "3D render",
       "illustration",
       "digital sharpening halos",
+      "white sharpening halo",
       "chromatic aberration",
-      "compression artifacts"
+      "compression artifacts",
+      "moir\u00e9-like invented patterns",
+      "hallucinated microtexture",
+      "synthetic sharpening",
+      "fake bokeh",
+      "telephoto flattening beyond physical plausibility",
+      "background scale drift"
     ],
     "skin_and_lighting_drift": [
       "airbrushed skin",
       "plastic poreless skin",
+      "plastic skin",
+      "false pores",
       "glamour retouching",
       "computational bokeh",
       "beauty filter glow",
+      "overprocessed HDR",
+      "HDR halos",
+      "excessive clarity",
+      "lifted muddy blacks",
+      "glowing edges",
+      "tone-mapped skin",
       "blown highlights"
     ],
     "anatomical_drift": [
+      "face beautification",
+      "body reshaping",
       "mutated hands",
       "extra digits",
       "fused limbs",
       "asymmetrical pupil dilation",
-      "deformed facial features"
+      "deformed facial features",
+      "oversized hands",
+      "oversized feet",
+      "growing hands toward camera",
+      "stretched limbs"
     ]
   },
-  "execution_directive": "Enforce Fujifilm GFX medium-format resolving power. Combine 102MP sensory micro-detail with Classic Chrome film color science and creamy GF 110mm optical falloff."
+  "capture_signature": {
+    "look": "Classic high-end portrait compression with medium-format information density.",
+    "perspective": "Longer portrait perspective than the Hasselblad 90V configuration.",
+    "working_distance": "Use sufficient camera distance for full-body framing. Never fake the 110 mm perspective from an unrealistically close viewpoint.",
+    "ideal_use": "Three-quarter portraits, full-body fashion, editorial portraiture, luxury portraiture, controlled outdoor portraiture."
+  },
+  "sharpness_model": {
+    "focus_plane": "Extremely crisp primary eye, eyelashes, eyebrows, hairline, beard boundary, garment edge and jewelry.",
+    "skin": "High information density without high-radius sharpening.",
+    "hair": "Separate fine strands from larger locks and preserve differences in strand orientation, translucency and specular response.",
+    "fabric": "Resolve weave and fiber structure without moire-like invented patterns.",
+    "edges": "Clean high-resolution edge transitions with no white sharpening halo."
+  },
+  "portrait_compression": {
+    "face": "Natural moderate compression. Do not flatten facial depth into a 2D mask.",
+    "torso": "Maintain believable chest, abdomen, shoulder, arm and hip relationships.",
+    "extremities": "Hands and feet remain proportional rather than growing toward the camera.",
+    "full_body": "Preserve natural head-to-body ratio and realistic leg length."
+  },
+  "dynamic_range_emulation": {
+    "instruction": "Prioritize recoverable-looking highlight and shadow information without assigning an invented numerical dynamic-range specification.",
+    "highlights": "Controlled specular response and smooth shoulder.",
+    "shadows": "Deep but open enough to retain texture where lighting plausibly reaches the surface.",
+    "blacks": "Dense photographic blacks without digital clipping.",
+    "local_contrast": "High microcontrast in hair, textiles and hard materials. Reduced microcontrast on skin.",
+    "prohibit": "HDR halos, excessive clarity, lifted muddy blacks, glowing edges, tone-mapped skin."
+  },
+  "skin_and_hair_precision": {
+    "skin": "Natural uneven texture, pores, wrinkles, folds, freckles, age spots, beard follicles and fine vellus hair where supported by distance and focus.",
+    "hair": "Resolve individual strands only within the true focus envelope. Outside it, progressively merge fine strands into natural optical softness.",
+    "rule": "Never use hallucinated microtexture as a substitute for genuine-looking resolution."
+  },
+  "studio_default": {
+    "iso_intent": "Low ISO quality baseline",
+    "aperture": "f/5.6",
+    "lighting": "Directional studio strobe or highly controlled daylight",
+    "key_angle": "35 to 45 degrees",
+    "negative_fill": "Moderate",
+    "rim": "Low-intensity optional rim",
+    "goal": "Maximum body dimensionality with crisp focal-plane detail and smooth background falloff."
+  },
+  "anti_drift": {
+    "lock": [
+      "identity",
+      "body type",
+      "age",
+      "face geometry",
+      "hair color",
+      "hairline",
+      "skin tone",
+      "pose",
+      "wardrobe",
+      "scene",
+      "camera elevation"
+    ],
+    "prevent": [
+      "telephoto flattening beyond physical plausibility",
+      "face beautification",
+      "body reshaping",
+      "plastic skin",
+      "false pores",
+      "overprocessed HDR",
+      "synthetic sharpening",
+      "fake bokeh",
+      "background scale drift"
+    ]
+  },
+  "signature_goal": "A brutally crisp professional portrait where sharpness is concentrated on optically appropriate structures while skin remains photographic and the 87mm-equivalent portrait perspective remains believable.",
+  "execution_directive": "Enforce Fujifilm GFX100 II portrait precision with Fujinon GF110mmF2 R LM WR (87mm FF equiv) at f/5.6, ISO 80 baseline. A brutally crisp professional portrait where sharpness is concentrated on optically appropriate structures while skin remains photographic and the 87mm-equivalent portrait perspective remains believable. Extremities and facial features remain strictly proportional."
 }

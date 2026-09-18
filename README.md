@@ -4,7 +4,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Version: 3.9.0](https://img.shields.io/badge/version-3.9.0-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 213 Passing](https://img.shields.io/badge/tests-213%20passing-brightgreen.svg)](tests/)
+[![Tests: 234 Passing](https://img.shields.io/badge/tests-234%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -304,6 +304,50 @@ Prepares generated imagery for fine-art exhibition, gallery prints, and high-Dma
 * **Gallery Exhibition Systems**:
   * **Lighting Environment Compensation (`--cct`, `--lux`, `--cri`, `--wall-surround`)**: Simulates reflective gallery display conditions (Kelvin CCT, illuminance lux, TM-30/CRI, surround reflectance).
   * **Series Cohesion Matrix (`--anchor-id`, `--gallery-zone`)**: Synchronizes midtone density, shadow depth, and highlight roll-off across multi-room gallery installations.
+
+---
+
+## 📷 Medium Format Tri-Signature Architecture & Universal Master Override
+
+The compiler provides three distinctly characterized Medium Format photographic signatures anchored in verified manufacturer hardware specifications and explicit rendering emulation logic (rather than raw spec sheets or prompt theater).
+
+| Module | Camera System & Lens | Verified Hardware Anchors | Photographic Signature | Emulation Behavior |
+| :--- | :--- | :--- | :--- | :--- |
+| **Module A** | **Phase One XF + IQ4 150MP** + Schneider Kreuznach 110mm LS f/2.8 Blue Ring | 151MP BSI CMOS (53.4 × 40.0mm), 14,204 × 10,652, 3.76µm pixel pitch, 16-bit Opticolor+, ISO 50, 15 stops DR, f/5.6–f/8 sweet spot | **Maximum Resolving Authority** | Resolving authority on skin micro-relief, fine vellus hair, beard follicles, and fabric weave; dense neutral blacks with retained shadow detail; crisp edge MTF acutance without digital oversharpening. |
+| **Module B** | **Hasselblad X2D II 100C** + Hasselblad XCD 2.5/90V | 100MP BSI CMOS (43.8 × 32.9mm), 11,656 × 8,742, 3.76µm pixel pitch, 16-bit color, native ISO 50, 15.3 stops DR, 71mm FF equiv, 1/4000s leaf shutter sync | **HNCS HDR Tonal Realism** | Hasselblad Natural Colour Solution (HNCS); luminous highlight roll-off without digital clipping; color retention in deep shadows without noise; smooth skin gradation (skin never the sharpest texture in frame). |
+| **Module C** | **Fujifilm GFX100 II** + Fujinon GF110mmF2 R LM WR | 102MP GFX CMOS II HS (43.8 × 32.9mm), 14/16-bit RAW, ISO 80–12,800 (ISO 40 ext), 8-stop IBIS, 87mm FF equiv, 14 elements in 9 groups w/ 4 ED elements | **Portrait Precision & Compression** | Classic 87mm portrait perspective compression; natural facial volume preservation without 2D flattening; proportional extremities (hands and feet do not enlarge toward camera); tack-sharp eye focus. |
+
+### 🛡️ Universal Master Override (`UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE`)
+
+When working with medium-format portraits, generative AI engines frequently over-sharpen skin, crush shadows to create fake contrast, or introduce anatomical drift. The Universal Master Override enforces non-negotiable physical rules:
+
+1. **Resolution Rule**: Generate genuine-looking high-frequency detail only where optics, focal depth, subject distance, and lighting physically support it.
+2. **Skin Realism Rule**: Skin realism strictly overrides sharpening. Skin must remain softer than eyes, hair, clothing, jewelry, and text.
+3. **Hair Resolution Rule**: Hair may resolve more sharply than skin only when within the true optical focal plane.
+4. **HDR & Tonal Rule**: HDR means expanded recoverable dynamic range, not halos, flat shadows, or tone-mapped skin.
+5. **Black Point Rule**: Dense neutral blacks with readable low-frequency texture; no lifted muddy grays or artificial shadow crushing.
+6. **Sharpness Hierarchy Rule**: Eyes, eyelashes, eyebrows, hair, beard, jewelry, fabric edges, and text carry stronger high-frequency contrast than skin.
+7. **Optical Depth Rule**: Progressive optical depth of field transition; no artificial computational segmentation-mask blur.
+8. **Detail Plausibility Rule**: Zero hallucinated microscopic detail unsupported by distance or focal plane.
+9. **Anatomy & Identity Lock Rule**: Zero changes to anatomy, age, facial geometry, body proportions, or limb scales.
+
+### 🧪 3-Way Side-by-Side Comparison Harness (`compile_abc_harness`)
+
+Evaluate all three medium format signatures simultaneously on identical scene prompts across any supported engine:
+
+```python
+from optical_compiler import compile_abc_harness
+
+harness = compile_abc_harness(
+    "Editorial three-quarter portrait of an artisan examining raw materials in natural studio light",
+    target="gpt_images",
+    universal_override=True,
+)
+
+print(harness["module_a"].positive_prompt)  # Phase One 151MP Resolving Authority
+print(harness["module_b"].positive_prompt)  # Hasselblad 100MP HNCS Tonal Realism
+print(harness["module_c"].positive_prompt)  # Fujifilm GFX100 II 87mm Portrait Precision
+```
 
 ---
 
@@ -802,9 +846,9 @@ python3 -m optical_compiler "De-pixelate damaged product packaging photo" \
 
 ### 13. Web Studio Console: Organized Camera Style & Ambient Style Dropdowns
 The Web Studio interactive console (`python3 -m optical_compiler.web --port 8000`) features categorized dual dropdowns for modular prompt engineering:
-* **📷 Camera Style Dropdown (33 Hardware Rigs & Curated Presets)**:
+* **📷 Camera Style Dropdown (38 Hardware Rigs & Curated Presets)**:
   * **Medium Format Rigs**: Phase One XF IQ4 150MP, Hasselblad H6D-100c, Hasselblad X2D II 100C, Fujifilm GFX 100 II, FUJIFILM GFX100RF, Contax 645 (Zeiss Planar 80mm f/2), Mamiya RZ67 (140mm Macro).
-  * **Leica & Film Look**: Leica M11 60MP, Leica M6 Analog, Leica Q3 Monochrom, Leica SL2 Motion Blur, Leica SL3-P Flagship, Nikon FM2 (Nikkor 105mm f/2.5 AI-S, Kodachrome 64).
+  * **Leica & Film Look**: Leica M11 60MP (FLE II, Noctilux-M 50mm f/0.95 & 75mm f/1.25, APO-Summicron-M 50mm & 90mm f/2, Summilux-M 35mm ASPH II), Leica M6 Analog, Leica Q3 Monochrom (60MP monochrome, native ISO 100-200,000, 28/35/50/75/90mm crops), Leica SL2, Leica SL3-P Flagship (APO-Summicron-SL 50mm & 90mm f/2 ASPH), Nikon FM2 (Nikkor 105mm f/2.5 AI-S, Kodachrome 64).
   * **Wildlife & Action Systems**: Nikon Z 9 Stacked Flagship (NIKKOR Z 135mm f/1.8 Plena & Arctic Fox 400mm f/2.8), Canon EOS R1 (24-70mm & Track and Field 400mm f/2.8).
   * **Cinema & Panoramic Optics**: ARRI Alexa 35 (Cooke Look & 2.0x Anamorphic Scope), ARRI Alexa 265 (65mm Sensor, 15 Stops DR), IMAX MSM 9802 (15-Perf 65mm Motion Picture Film, Kodak Double-X 5222), Sony VENICE 2 Full-Frame (Venice S-Cinetone Noir), Hasselblad XPan (24x65mm Panoramic 2.7:1).
   * **Analog Sheet Film & Historic Formats**: Linhof Master Technika 4x5, Deardorff 8x10 (Schneider Symmar-S 360mm, Tri-X 320 Seamless), Antique View 8x10 (Wet-Plate Collodion on Glass, Brass Petzval), Pentax 67 II (105mm f/2.4), Hasselblad 500C/M, Polaroid 20x24 (Schneider 600mm, Polacolor Life-Size Contact).

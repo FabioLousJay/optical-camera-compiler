@@ -1,33 +1,56 @@
 {
   "profile_id": "hasselblad_x2d_ii_100c",
-  "title": "Hasselblad X2D II 100C Medium Format",
+  "title": "CAMERA MODULE B \u2014 Hasselblad X2D II Tonal Realism",
   "schema_version": "2.0",
-  "purpose": "State-of-the-art 100MP medium-format handheld precision with 16-bit color, 15.3 stops dynamic range, and Hasselblad Natural Colour Solution (HNCS).",
+  "purpose": "Premium full-body and three-quarter portrait rendering prioritizing natural color, unusually smooth tonal transitions, extended highlight and shadow information, dimensional skin, and photographic realism.",
+  "hardware_reference": {
+    "camera": "Hasselblad X2D II 100C",
+    "sensor": {
+      "type": "BSI CMOS medium format",
+      "dimensions_mm": "43.8 x 32.9",
+      "resolution": "100 MP",
+      "native_pixel_dimensions": "11656 x 8742",
+      "pixel_pitch": "3.76 \u00b5m",
+      "color_depth": "16-bit",
+      "native_iso": 50,
+      "dynamic_range": "15.3 stops"
+    },
+    "lens": {
+      "model": "Hasselblad XCD 2.5/90V",
+      "focal_length": "90 mm",
+      "full_frame_equivalent": "71 mm",
+      "aperture_range": "f/2.5 to f/32",
+      "optical_construction": "9 elements in 6 groups including 1 aspherical element",
+      "minimum_focus_distance": "0.67 m",
+      "shutter": "Leaf shutter up to 1/4000 s with flash synchronization throughout the shutter-speed range",
+      "preferred_body_portrait_aperture": "f/4 to f/5.6"
+    }
+  },
   "sensor_and_optics": {
     "camera_system": "Hasselblad X2D II 100C Medium Format",
-    "sensor_type": "43.8x32.9mm Back-Side Illuminated (BSI) CMOS Medium Format",
-    "sensor_dimensions": "43.8x32.9mm medium format sensor (100MP)",
-    "full_frame_equivalent": "38mm-71mm medium-format perspective (0.79x crop factor)",
-    "lens": "Hasselblad XCD 2,5/90V Reference Portrait Lens stopped down to f/5.6 sweet spot",
+    "sensor_type": "43.8x32.9mm BSI CMOS Medium Format (100 MP, 11656 x 8742, 3.76 \u00b5m pixel pitch)",
+    "sensor_dimensions": "43.8x32.9mm medium format sensor",
+    "full_frame_equivalent": "71mm full-frame equivalent portrait perspective (0.79x crop factor)",
+    "lens": "Hasselblad XCD 2.5/90V Reference Portrait Lens stopped down to f/4 - f/5.6 sweet spot",
     "aperture_sweet_spot": "f/5.6",
-    "iso_base": "ISO 64 base sensor sensitivity",
+    "iso_base": "ISO 50 native sensor sensitivity",
     "dynamic_range": "16-bit raw color depth with 15.3 stops dynamic range and HNCS",
-    "shutter": "Integrated leaf shutter with up to 1/4000s flash sync and 5-axis 10-stop in-body image stabilization (IBIS)"
+    "shutter": "Integrated leaf shutter with up to 1/4000s flash sync throughout shutter-speed range"
   },
   "lighting_and_exposure": {
-    "primary_lighting": "Natural daylight balanced strobe, 1/2000s leaf shutter flash sync, base ISO 64, 16-bit raw tonal range",
-    "light_transport": "Large parabolic key modifier with subtle organic negative fill; gradual specular highlight roll-off and authentic HNCS color separation"
+    "primary_lighting": "Natural daylight balanced studio strobe, 1/4000s leaf shutter flash sync, native ISO 50, 16-bit raw tonal range",
+    "light_transport": "Large controlled key source at 35 to 45 degrees with subtle negative fill; bright but never clipped skin highlights, deep chromatically intact shadow modeling, background one to three stops below subject"
   },
   "micro_detail_and_physics": {
     "surface_rendering": [
-      "Natural epidermal skin texture with resolved pores, fine vellus hair, and accurate subsurface dermal scattering without waxy specularities",
-      "True material micro-relief: fabric weave, micro-abrasions, uncompressed specular highlight falloff",
-      "High optical acutance and MTF contrast without digital edge halos or unsharp masking artifacts"
+      "Natural color realism and smooth tonal transitions with HNCS HDR emulation; luminous skin, white fabric, and specular reflections without abrupt clipping",
+      "Nuanced midtones and authentic chromatic information retained deep into shadows; rich deep neutral blacks with readable low-frequency texture",
+      "Detail hierarchy enforcement: iris, eyelashes, eyebrows, hair strands, beard hair, fabric fibers, and jewelry resolve with critical precision while human skin remains controlled and never becomes the sharpest surface in the image"
     ],
     "depth_and_optics": [
-      "Medium-format optical dimensionality with smooth focus plane transition",
-      "Zero perspective distortion, clean rectilinear projection",
-      "Soft natural background dissolution characteristic of large-sensor optics"
+      "Natural medium-format dimensionality with strong but elegant separation without fake computational blur or hard segmentation boundaries",
+      "Moderate telephoto perspective (71mm equivalent) with flattering head-to-body geometry and zero wide-angle distortion",
+      "Smooth, optically coherent, continuous transition from sharp to soft defocus with structurally believable background structure"
     ]
   },
   "negative_embeddings": {
@@ -42,16 +65,24 @@
       "double edges",
       "ringing",
       "oversharpening",
-      "crunchy HDR"
+      "crunchy HDR",
+      "HDR halos",
+      "local-contrast glow",
+      "uniform Gaussian blur",
+      "hard segmentation boundaries"
     ],
     "skin_and_lighting_drift": [
       "airbrushed skin",
       "plastic poreless skin",
       "artificial pore carving",
+      "clarity-heavy skin",
       "computational bokeh",
       "beauty filter glow",
       "clipped highlights",
+      "over-recovered highlights",
+      "gray washed-out shadows",
       "crushed shadows",
+      "unnatural saturation",
       "unmotivated teal-orange grading"
     ],
     "anatomical_drift": [
@@ -60,8 +91,97 @@
       "fused limbs",
       "asymmetrical pupil dilation",
       "deformed facial features",
-      "invented eyelashes"
+      "invented eyelashes",
+      "wide-angle exaggeration",
+      "stretched limbs"
     ]
   },
-  "execution_directive": "Enforce Hasselblad X2D II 100C medium-format raw capture fidelity at 100MP with HNCS 16-bit color. Eliminate post-processed digital sharpening, synthetic smoothing, and non-physical lighting."
+  "capture_signature": {
+    "look": "Natural medium-format dimensionality with strong but elegant separation.",
+    "perspective": "Moderate telephoto perspective with flattering head-to-body geometry and no wide-angle exaggeration.",
+    "working_distance": "Back away rather than widening the lens whenever full-body framing requires more coverage.",
+    "focus": "Critical face and eye precision with sufficient depth to maintain realistic torso and wardrobe structure."
+  },
+  "hncs_hdr_emulation": {
+    "instruction": "Emulate the photographic goals of a high-dynamic-range natural-color medium-format workflow without fabricating a literal Hasselblad color transform.",
+    "highlights": "Preserve luminous skin, white fabric, polished metal, glass, and specular reflections without abrupt clipping.",
+    "midtones": "Exceptionally nuanced transitions and natural local contrast.",
+    "shadows": "Retain subtle chromatic information and material texture deep into the shadows.",
+    "blacks": "Rich, deep, neutral blacks with readable low-frequency texture.",
+    "prohibit": [
+      "HDR halos",
+      "gray washed-out shadows",
+      "over-recovered highlights",
+      "clarity-heavy skin",
+      "local-contrast glow",
+      "unnatural saturation"
+    ]
+  },
+  "color_rendering": {
+    "skin": "Complex natural skin chroma with smooth transitions between warm, cool, vascular, sun-exposed, and shadowed regions.",
+    "reds": "Controlled and natural. Never oversaturate cheeks, lips, ears, or fingertips.",
+    "neutrals": "Maintain clean gray, white, brown, and black material separation.",
+    "deep_color": "Saturated colors retain texture and luminance variation rather than becoming flat RGB blocks.",
+    "color_gradient": "Extremely smooth high-bit-depth-looking transitions."
+  },
+  "detail_hierarchy": {
+    "critical": [
+      "iris",
+      "eyelashes",
+      "eyebrows",
+      "hair strands",
+      "beard hair",
+      "fabric fibers",
+      "jewelry",
+      "hard material edges"
+    ],
+    "controlled": [
+      "skin pores",
+      "wrinkles",
+      "skin folds",
+      "under-eye texture",
+      "neck texture",
+      "hands"
+    ],
+    "rule": "Human skin must never become the sharpest surface in the image."
+  },
+  "depth_rendering": {
+    "subject_separation": "Strong medium-format separation without fake computational blur.",
+    "transition": "Continuous optical transition from sharp to soft.",
+    "background": "Retain recognizable spatial structure and realistic lens rendering.",
+    "bokeh": "Smooth, optically coherent, low-artifact defocus.",
+    "avoid": "Perfectly uniform Gaussian blur or hard segmentation boundaries."
+  },
+  "studio_default": {
+    "iso": 50,
+    "aperture": "f/5.6",
+    "shutter_behavior": "Leaf-shutter flash-capable portrait aesthetic",
+    "lighting": "Large controlled source with subtle negative fill",
+    "key_angle": "35 to 45 degrees",
+    "skin_highlights": "Bright but never clipped",
+    "shadow_side": "Deep, chromatically intact, and dimensional",
+    "background": "One to three stops below subject depending on scene"
+  },
+  "anti_drift": {
+    "priority_order": [
+      "identity",
+      "anatomy",
+      "expression",
+      "body proportions",
+      "skin realism",
+      "lighting physics",
+      "camera perspective",
+      "material realism",
+      "micro-detail"
+    ],
+    "never_use_detail_to_override": [
+      "identity",
+      "age",
+      "skin realism",
+      "natural anatomy",
+      "source geometry"
+    ]
+  },
+  "signature_goal": "Deep realism through tonal sophistication rather than aggressive sharpness. The result should look expensive because the transitions are precise, not because every pore has been exaggerated.",
+  "execution_directive": "Enforce Hasselblad X2D II 100C tonal realism with XCD 2.5/90V (71mm FF equiv) at f/5.6, native ISO 50, and HNCS 16-bit color. Deep realism through tonal sophistication rather than aggressive sharpness. Skin must never become the sharpest texture; preserve luminous highlights, shadow chromatic information, and rich neutral blacks."
 }

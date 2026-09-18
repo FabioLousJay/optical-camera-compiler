@@ -1,33 +1,54 @@
 {
   "profile_id": "phase_one_iq4",
-  "title": "Phase One XF IQ4 150MP Trichromatic",
+  "title": "CAMERA MODULE A \u2014 Phase One Maximum Resolving Authority",
   "schema_version": "2.0",
-  "purpose": "Hardware-level optical and sensor simulation for zero-artifact photorealism.",
+  "purpose": "Maximum-fidelity full-body and three-quarter portrait rendering emphasizing resolving power, dimensional skin, individual hair definition, textile structure, deep tonal separation, and controlled studio precision.",
+  "hardware_reference": {
+    "camera_system": "Phase One XF + IQ4 150MP",
+    "sensor": {
+      "type": "BSI CMOS medium format",
+      "dimensions_mm": "53.4 x 40.0",
+      "effective_resolution": "151 MP",
+      "native_pixel_dimensions": "14204 x 10652",
+      "pixel_pitch": "3.76 \u00b5m",
+      "color_pipeline": "16-bit Opticolor+",
+      "dynamic_range": "15 f-stops",
+      "preferred_sensitivity": "ISO 50"
+    },
+    "lens": {
+      "model": "Schneider Kreuznach 110mm LS f/2.8",
+      "type": "Leaf-shutter medium-format portrait lens",
+      "preferred_aperture_for_body_portrait": "f/5.6 to f/8",
+      "reason": "Prioritize edge-to-edge resolving authority, facial and body-plane depth, textile definition, and controlled background separation rather than extreme shallow depth of field."
+    }
+  },
   "sensor_and_optics": {
-    "camera_system": "Phase One XF IQ4 150MP BSI Trichromatic",
-    "sensor_type": "Back-Side Illuminated (BSI) CMOS Medium Format",
-    "sensor_dimensions": "54x40mm medium-format sensor",
-    "full_frame_equivalent": "~50mm full-frame equivalent normal field of view",
-    "lens": "Schneider Kreuznach 80mm LS f/2.8 Blue Ring",
+    "camera_system": "Phase One XF IQ4 150MP",
+    "sensor_type": "53.4 x 40.0mm BSI CMOS medium format (151 MP, 14204 x 10652, 3.76 \u00b5m pixel pitch)",
+    "sensor_dimensions": "53.4x40.0mm medium-format sensor",
+    "full_frame_equivalent": "~68mm full-frame equivalent normal portrait perspective",
+    "lens": "Schneider Kreuznach 110mm LS f/2.8 Blue Ring",
     "aperture_sweet_spot": "f/8",
-    "iso_base": "ISO 50 base sensor sensitivity",
-    "dynamic_range": "16-bit raw tonal range with 15 stops of dynamic latitude",
+    "iso_base": "ISO 50 base sensor sensitivity (16-bit Opticolor+)",
+    "dynamic_range": "16-bit Opticolor+ tonal range with 15 f-stops dynamic latitude",
     "shutter": "Leaf shutter with 1/1600s high-speed flash sync"
   },
   "lighting_and_exposure": {
-    "primary_lighting": "Studio strobe, 1/1600s leaf shutter sync, ISO 50 base sensor sensitivity, 16-bit raw tonal range",
-    "light_transport": "Key light with large parabolic modifier, deep shadows carved with black foam-core negative fill, single-axis specular catchlights"
+    "primary_lighting": "High-quality studio strobe, 1/1600s leaf shutter sync, ISO 50 quality baseline, 16-bit Opticolor+",
+    "light_transport": "Key light 35-45 degrees off camera axis, minimal controlled fill, black foam-core negative fill for dimensional modeling, subtle edge rim separation, defined photographic light preserving smooth highlight transitions on skin"
   },
   "micro_detail_and_physics": {
     "surface_rendering": [
       "Natural epidermal skin texture with resolved pores, fine vellus hair, and accurate subsurface scattering without artificial blur or waxy specularities",
-      "True material micro-relief: fabric weave, micro-abrasions, uncompressed specular highlight falloff",
-      "High optical acutance and MTF contrast without digital edge halos or unsharp masking artifacts"
+      "Extremely high native-looking information density without digital oversharpening; strong but natural microcontrast emerging from local tonal separation rather than halos",
+      "Dimensional rendering with authentic pores, fine facial hair, beard texture, wrinkles, folds, freckles, age spots, and subtle skin variation only where optically plausible",
+      "Resolve individual hair strands, overlapping strand groups, roots, flyaways, specular variation, and natural density without wire-like sharpening",
+      "Highest local precision at iris, eyelashes, wetline, catchlight boundaries, and natural scleral texture; preserve fabric weave, stitching, seams, fibers, embroidery, leather grain, and metallic reflectance"
     ],
     "depth_and_optics": [
-      "Subtle optical falloff characteristic of large-sensor f/8 depth of field",
-      "Zero perspective distortion, clean rectilinear projection",
-      "Clean edge transitions driven purely by lighting and geometry, not artificial post-process depth slicing"
+      "Natural medium-format perspective generated through realistic camera distance; optically progressive depth transition with zero segmentation-mask blur",
+      "Believable optical defocus with continuous transitions and structurally believable highlights; crisp subject edges without cutout halos",
+      "Essentially zero chromatic aberration and zero wide-angle body distortion, oversized hands, oversized feet, stretched limbs, or receding head proportions"
     ]
   },
   "negative_embeddings": {
@@ -35,27 +56,144 @@
       "CGI",
       "3D render",
       "illustration",
+      "digital oversharpening",
       "digital sharpening halos",
+      "white edge halos",
       "chromatic aberration",
       "denoise smearing",
-      "compression artifacts"
+      "compression artifacts",
+      "AI swirls",
+      "wire-like hair sharpening"
     ],
     "skin_and_lighting_drift": [
+      "pore stamping",
+      "engraved skin",
+      "metallic skin",
+      "worm-like microtexture",
+      "lace-like skin patterns",
+      "synthetic repetitive pores",
+      "over-sharpened wrinkles",
+      "plastic smoothing",
+      "HDR skin",
+      "wax skin",
+      "hyper-HDR",
+      "fake depth blur",
+      "invented microdetail",
       "airbrushed skin",
-      "plastic poreless skin",
-      "glamour retouching",
       "computational bokeh",
       "beauty filter glow",
       "blown highlights",
       "crushed shadows"
     ],
     "anatomical_drift": [
+      "beautification drift",
+      "body slimming unless requested",
+      "body enlargement unless requested",
+      "age reduction",
+      "face redesign",
+      "AI-perfect symmetry",
       "mutated hands",
       "extra digits",
       "fused limbs",
       "asymmetrical pupil dilation",
-      "deformed facial features"
+      "deformed facial features",
+      "wide-angle body distortion",
+      "oversized hands",
+      "oversized feet",
+      "stretched limbs"
     ]
   },
-  "execution_directive": "Enforce true raw-capture fidelity from a 150MP digital back. Eliminate post-processed sharpening looks, synthetic smoothing, and non-physical lighting."
+  "capture_signature": {
+    "camera_position": "Natural portrait camera height. Avoid low-angle enlargement or high-angle compression unless explicitly requested.",
+    "working_distance": "Increase physical camera-to-subject distance sufficiently to preserve natural head-to-body proportions and avoid wide-angle perspective distortion.",
+    "framing_priority": [
+      "three-quarter body",
+      "full body",
+      "editorial environmental portrait"
+    ],
+    "focus_priority": "Primary eye and facial plane critically resolved while maintaining sufficient depth for chest, torso, hands, clothing, and major body contours.",
+    "motion_behavior": "Zero subject-motion smear. Hair strands and eyelashes remain individually resolved where physically within depth of field."
+  },
+  "rendering_emulation": {
+    "resolution_character": "Extremely high native-looking information density without digital oversharpening.",
+    "microcontrast": "Strong but natural microcontrast. Fine detail must emerge from local tonal separation rather than halos.",
+    "dimensionality": "Large-sensor dimensional rendering with smooth near-to-far transitions and strong three-dimensional separation.",
+    "skin": "Resolve authentic pores, fine facial hair, beard texture, wrinkles, folds, freckles, age spots, and subtle skin variation only where optically plausible.",
+    "hair": "Resolve individual strands, overlapping strand groups, roots, flyaways, specular variation, and natural density without wire-like sharpening.",
+    "eyes": "Highest local precision at iris, eyelashes, wetline, catchlight boundaries, and natural scleral texture.",
+    "fabric": "Preserve weave, stitching, seams, fibers, embroidery, leather grain, metallic surfaces, and material-specific reflectance."
+  },
+  "tonal_pipeline": {
+    "highlight_behavior": "Long, controlled highlight roll-off with retained specular structure whenever physically recoverable.",
+    "shadow_behavior": "Deep shadows with progressive tonal information rather than lifted gray blacks.",
+    "black_behavior": "Dense neutral blacks with retained near-black texture. Do not crush shadow information simply to create perceived contrast.",
+    "hdr_behavior": "Natural high-dynamic-range capture aesthetic. No HDR halos, tone-mapping glow, crunchy local contrast, or artificial shadow lifting.",
+    "color_depth": "Smooth high-bit-depth-looking tonal transitions with minimal banding or posterization.",
+    "skin_tonality": "Complex red, yellow, brown, olive, pink, and neutral undertone variation preserved without orange cast or synthetic uniformity."
+  },
+  "skin_realism_override": {
+    "priority": "Human skin realism overrides perceived resolution and sharpening.",
+    "rule": "Skin must remain slightly softer than eyelashes, iris detail, individual hair strands, jewelry, fabric edges, typography, and hard architecture.",
+    "prohibit": [
+      "pore stamping",
+      "engraved skin",
+      "metallic skin",
+      "worm-like microtexture",
+      "lace-like skin patterns",
+      "AI swirls",
+      "synthetic repetitive pores",
+      "over-sharpened wrinkles",
+      "plastic smoothing",
+      "HDR skin"
+    ]
+  },
+  "optical_constraints": {
+    "perspective": "Natural medium-format perspective generated through realistic camera distance. Never simulate medium format by artificially stretching facial features.",
+    "depth_of_field": "Optically progressive depth transition. No segmentation-mask blur.",
+    "bokeh": "Natural optical defocus with continuous transitions and structurally believable highlights.",
+    "chromatic_aberration": "Essentially absent except for microscopic physically plausible residual behavior.",
+    "edge_behavior": "Crisp subject edges without cutout halos.",
+    "distortion": "No wide-angle body distortion, oversized hands, oversized feet, stretched limbs, or receding head proportions."
+  },
+  "studio_default": {
+    "exposure_intent": "ISO 50 quality baseline",
+    "aperture": "f/8",
+    "lighting": "High-quality studio strobe",
+    "key_geometry": "35 to 45 degrees off camera axis",
+    "fill": "Minimal controlled fill",
+    "negative_fill": "Use to strengthen dimensional facial and body modeling",
+    "rim": "Subtle optional edge separation",
+    "light_quality": "Defined but photographic. Preserve smooth highlight transitions on skin.",
+    "background": "Maintain real depth and material response. Never replace spatial depth with artificial blur."
+  },
+  "anti_drift": {
+    "preserve": [
+      "subject identity",
+      "age",
+      "body proportions",
+      "anatomical geometry",
+      "skin tone",
+      "hairline",
+      "hair texture",
+      "wardrobe",
+      "pose",
+      "camera viewpoint",
+      "lighting direction"
+    ],
+    "forbid": [
+      "beautification drift",
+      "body slimming unless requested",
+      "body enlargement unless requested",
+      "age reduction",
+      "face redesign",
+      "AI-perfect symmetry",
+      "wax skin",
+      "hyper-HDR",
+      "fake depth blur",
+      "oversharpened skin",
+      "invented microdetail"
+    ]
+  },
+  "signature_goal": "The image should feel as though enormous resolving power existed at capture, not as though a lower-resolution image was sharpened afterward.",
+  "execution_directive": "Enforce Phase One XF + IQ4 150MP maximum resolving authority with Schneider Kreuznach 110mm LS f/2.8 Blue Ring at f/8, ISO 50. The image should feel as though enormous resolving power existed at capture, not as though a lower-resolution image was sharpened afterward. Human skin realism overrides perceived resolution; skin remains softer than eyelashes, iris, hair strands, and textiles."
 }

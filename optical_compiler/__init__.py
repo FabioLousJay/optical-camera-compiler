@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from .compiler import OpticalCompiler, compile_ab_harness, compile_scene
+from .compiler import OpticalCompiler, compile_ab_harness, compile_abc_harness, compile_scene
 from .models import (
+    UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE,
     CameraProfile,
     CaptureMode,
     CompiledPayload,
@@ -26,6 +27,7 @@ from .models import (
     SkinLightingModifier,
     TargetEngine,
     UniversalDepixelateV2Spec,
+    format_universal_medium_format_override,
 )
 from .pfep import (
     PROMPT_TEMPLATES,
@@ -59,6 +61,9 @@ __all__ = [
     "OpticalCompiler",
     "compile_scene",
     "compile_ab_harness",
+    "compile_abc_harness",
+    "UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE",
+    "format_universal_medium_format_override",
     "UniversalDepixelateV2Spec",
     "SceneInput",
     "CameraProfile",

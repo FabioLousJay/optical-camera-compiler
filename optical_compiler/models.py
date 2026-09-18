@@ -1015,6 +1015,65 @@ APPROVED_RESTORATION_LENSES: list[str] = [
     "Leica Q3 Monochrom Summilux 28mm f/1.7 ASPH",
 ]
 
+RESTORATION_LENS_ALIASES: dict[str, str] = {
+    # Leica APO-Summicron-SL 90mm f/2 variants
+    "leica apo-summicron-sl 90mm f2": "Leica APO-Summicron-SL 90mm f/2",
+    "leica apo summicron sl 90mm f2": "Leica APO-Summicron-SL 90mm f/2",
+    "leica apo-summicron-sl 90mm f/2 asph": "Leica APO-Summicron-SL 90mm f/2",
+    "leica apo-summicron-sl 90mm f2 asph": "Leica APO-Summicron-SL 90mm f/2",
+    "apo-summicron-sl 90mm f/2": "Leica APO-Summicron-SL 90mm f/2",
+    "apo-summicron-sl 90mm f2": "Leica APO-Summicron-SL 90mm f/2",
+
+    # Leica 50mm f/2 Summicron APO ASPH variants
+    "leica 50mm f2 summicron apo asph": "Leica 50mm f/2 Summicron APO ASPH",
+    "leica 50mm f/2 summicron apo asph": "Leica 50mm f/2 Summicron APO ASPH",
+    "leica apo-summicron-m 50mm f/2 asph": "Leica 50mm f/2 Summicron APO ASPH",
+    "leica apo-summicron-m 50mm f2 asph": "Leica 50mm f/2 Summicron APO ASPH",
+    "leica apo summicron m 50mm f2 asph": "Leica 50mm f/2 Summicron APO ASPH",
+    "apo-summicron-m 50mm f/2": "Leica 50mm f/2 Summicron APO ASPH",
+
+    # Leica 75mm f/1.25 Noctilux variants
+    "leica 75mm f1.25 noctilux": "Leica 75mm f/1.25 Noctilux",
+    "leica 75mm f/1.25 noctilux": "Leica 75mm f/1.25 Noctilux",
+    "leica noctilux-m 75mm f/1.25 asph": "Leica 75mm f/1.25 Noctilux",
+    "leica noctilux-m 75mm f1.25 asph": "Leica 75mm f/1.25 Noctilux",
+    "leica noctilux 75mm f1.25": "Leica 75mm f/1.25 Noctilux",
+    "noctilux-m 75mm f/1.25": "Leica 75mm f/1.25 Noctilux",
+
+    # Leica 90mm f/2 Summicron-M variants
+    "leica 90mm f2 summicron-m": "Leica 90mm f/2 Summicron-M",
+    "leica 90mm f/2 summicron-m": "Leica 90mm f/2 Summicron-M",
+    "leica 90mm f2 summicron m": "Leica 90mm f/2 Summicron-M",
+    "leica apo-summicron-m 90mm f/2 asph": "Leica 90mm f/2 Summicron-M",
+    "leica apo-summicron-m 90mm f2 asph": "Leica 90mm f/2 Summicron-M",
+    "leica apo summicron m 90mm f2 asph": "Leica 90mm f/2 Summicron-M",
+    "apo-summicron-m 90mm f/2": "Leica 90mm f/2 Summicron-M",
+
+    # Leica 35mm f/1.4 Summilux-M ASPH II variants
+    "leica 35mm f/1.4 summilux m asph ii": "Leica 35mm f/1.4 Summilux-M ASPH II",
+    "leica 35mm f1.4 summilux m asph ii": "Leica 35mm f/1.4 Summilux-M ASPH II",
+    "leica 35mm f/1.4 summilux-m asph ii": "Leica 35mm f/1.4 Summilux-M ASPH II",
+    "leica 35mm f1.4 summilux-m asph ii": "Leica 35mm f/1.4 Summilux-M ASPH II",
+    "leica summilux-m 35mm f/1.4 asph fle ii": "Leica 35mm f/1.4 Summilux-M ASPH II",
+    "leica summilux-m 35mm f/1.4 asph ii": "Leica 35mm f/1.4 Summilux-M ASPH II",
+    "summilux-m 35mm f/1.4 asph ii": "Leica 35mm f/1.4 Summilux-M ASPH II",
+}
+
+
+def normalize_lens_name(lens_name: Optional[str]) -> Optional[str]:
+    """Normalize colloquial and alias lens names to their canonical approved representation."""
+    if not lens_name:
+        return lens_name
+    cleaned = lens_name.strip()
+    key = cleaned.lower()
+    if key in RESTORATION_LENS_ALIASES:
+        return RESTORATION_LENS_ALIASES[key]
+    for approved in APPROVED_RESTORATION_LENSES:
+        if approved.lower() == key:
+            return approved
+    return cleaned
+
+
 DEFAULT_FLAT_GRAPHIC_SELECTION: dict[str, str] = {
     "camera_class": "Sony Alpha 7R V",
     "camera": "Sony Alpha 7R V",
@@ -1196,8 +1255,12 @@ class UniversalDepixelateV2Spec:
             self.selected_camera = self.camera_class
 
         if self.selected_lens and not self.lens:
-            self.lens = self.selected_lens
+            self.lens = normalize_lens_name(self.selected_lens)
         elif self.lens and not self.selected_lens:
+            self.lens = normalize_lens_name(self.lens)
+            self.selected_lens = self.lens
+        elif self.lens:
+            self.lens = normalize_lens_name(self.lens)
             self.selected_lens = self.lens
 
         if hasattr(self.content_type, "value"):
@@ -2362,6 +2425,40 @@ class NegativeShield:
         return tokens
 
 
+UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE: dict[str, str] = {
+    "priority": "Photographic realism above synthetic perceived resolution.",
+    "resolution_rule": "Generate genuine-looking high-frequency information only where the optics, focus distance, depth of field, material and lighting would reveal it.",
+    "skin_rule": "Skin realism overrides sharpening. Never convert skin into the sharpest texture in the frame.",
+    "hair_rule": "Hair may resolve more sharply than skin when it falls within the focal plane.",
+    "hdr_rule": "HDR means expanded recoverable tonal information, not glowing edges, flat shadows, excessive clarity or tone-mapped skin.",
+    "black_rule": "Deep blacks must remain deep. Preserve subtle near-black texture without washing the black point toward gray.",
+    "sharpness_rule": "Eyes, eyelashes, eyebrows, hair, beard, jewelry, fabric edges, text and hard surfaces may carry stronger high-frequency contrast than skin.",
+    "depth_rule": "Depth of field must behave optically and progressively. Never use segmentation-mask blur.",
+    "detail_rule": "Do not hallucinate microscopic information that the scene, focal plane or camera distance could not plausibly resolve.",
+    "anatomy_rule": "Resolution enhancement must never change anatomy, identity, age, body proportions, facial geometry or pose.",
+    "final_aesthetic": "Deep realism, high dimensionality, clean microcontrast, natural color separation, precise highlight roll-off, dense blacks, high resolving power and zero obvious AI texture.",
+}
+
+
+def format_universal_medium_format_override() -> str:
+    """Format the Universal Medium Format Portrait Override into an authoritative execution directive block."""
+    lines = [
+        "UNIVERSAL MEDIUM FORMAT PORTRAIT OVERRIDE:",
+        f"- [PRIORITY]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['priority']}",
+        f"- [RESOLUTION RULE]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['resolution_rule']}",
+        f"- [SKIN REALISM RULE]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['skin_rule']}",
+        f"- [HAIR RESOLUTION RULE]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['hair_rule']}",
+        f"- [HDR & TONAL RULE]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['hdr_rule']}",
+        f"- [BLACK POINT RULE]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['black_rule']}",
+        f"- [SHARPNESS HIERARCHY RULE]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['sharpness_rule']}",
+        f"- [OPTICAL DEPTH RULE]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['depth_rule']}",
+        f"- [DETAIL PLAUSIBILITY RULE]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['detail_rule']}",
+        f"- [ANATOMY & IDENTITY LOCK RULE]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['anatomy_rule']}",
+        f"- [FINAL AESTHETIC GOAL]: {UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE['final_aesthetic']}",
+    ]
+    return "\n".join(lines)
+
+
 @dataclass
 class CameraProfile:
     """Hardware camera profile encapsulating optical, sensor, and physical constraints."""
@@ -2374,7 +2471,7 @@ class CameraProfile:
     )
     sensor_and_optics: SensorOptics = field(
         default_factory=lambda: SensorOptics(
-            camera_system="Phase One XF IQ4 150MP BSI Trichromatic"
+            camera_system="Phase One XF + IQ4 150MP"
         )
     )
     lighting_and_exposure: LightingSetup = field(default_factory=LightingSetup)
@@ -2383,6 +2480,26 @@ class CameraProfile:
     execution_directive: str = (
         "Enforce true raw-capture fidelity from a 150MP digital back. Eliminate post-processed sharpening looks, synthetic smoothing, and non-physical lighting."
     )
+    hardware_reference: dict[str, Any] = field(default_factory=dict)
+    capture_signature: dict[str, Any] = field(default_factory=dict)
+    rendering_emulation: dict[str, Any] = field(default_factory=dict)
+    tonal_pipeline: dict[str, Any] = field(default_factory=dict)
+    skin_realism_override: dict[str, Any] = field(default_factory=dict)
+    optical_constraints: dict[str, Any] = field(default_factory=dict)
+    studio_default: dict[str, Any] = field(default_factory=dict)
+    anti_drift: dict[str, Any] = field(default_factory=dict)
+    signature_goal: str = ""
+    # Module B specific emulation logic
+    hncs_hdr_emulation: dict[str, Any] = field(default_factory=dict)
+    color_rendering: dict[str, Any] = field(default_factory=dict)
+    detail_hierarchy: dict[str, Any] = field(default_factory=dict)
+    depth_rendering: dict[str, Any] = field(default_factory=dict)
+    # Module C specific emulation logic
+    sharpness_model: dict[str, Any] = field(default_factory=dict)
+    portrait_compression: dict[str, Any] = field(default_factory=dict)
+    dynamic_range_emulation: dict[str, Any] = field(default_factory=dict)
+    skin_and_hair_precision: dict[str, Any] = field(default_factory=dict)
+    extra_fields: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> CameraProfile:
@@ -2400,6 +2517,19 @@ class CameraProfile:
         if "content_and_branding_drift" in neg_data and "branding_and_text" not in neg_data:
             neg_data["branding_and_text"] = neg_data.pop("content_and_branding_drift")
 
+        defined_keys = {
+            "profile_id", "title", "schema_version", "purpose",
+            "sensor_and_optics", "lighting_and_exposure", "micro_detail_and_physics",
+            "negative_embeddings", "execution_directive", "hardware_reference",
+            "capture_signature", "rendering_emulation", "tonal_pipeline",
+            "skin_realism_override", "optical_constraints", "studio_default",
+            "anti_drift", "signature_goal", "hncs_hdr_emulation", "color_rendering",
+            "detail_hierarchy", "depth_rendering", "sharpness_model",
+            "portrait_compression", "dynamic_range_emulation", "skin_and_hair_precision",
+            "extra_fields"
+        }
+        extra_data = {k: v for k, v in data.items() if k not in defined_keys}
+
         return cls(
             profile_id=data.get("profile_id", "custom"),
             title=data.get("title", "Custom Profile"),
@@ -2410,11 +2540,32 @@ class CameraProfile:
             micro_detail_and_physics=MicroPhysics(**_filter(MicroPhysics, micro_data)),
             negative_embeddings=NegativeShield(**_filter(NegativeShield, neg_data)),
             execution_directive=data.get("execution_directive", ""),
+            hardware_reference=data.get("hardware_reference", {}),
+            capture_signature=data.get("capture_signature", {}),
+            rendering_emulation=data.get("rendering_emulation", {}),
+            tonal_pipeline=data.get("tonal_pipeline", {}),
+            skin_realism_override=data.get("skin_realism_override", {}),
+            optical_constraints=data.get("optical_constraints", {}),
+            studio_default=data.get("studio_default", {}),
+            anti_drift=data.get("anti_drift", {}),
+            signature_goal=data.get("signature_goal", ""),
+            hncs_hdr_emulation=data.get("hncs_hdr_emulation", {}),
+            color_rendering=data.get("color_rendering", {}),
+            detail_hierarchy=data.get("detail_hierarchy", {}),
+            depth_rendering=data.get("depth_rendering", {}),
+            sharpness_model=data.get("sharpness_model", {}),
+            portrait_compression=data.get("portrait_compression", {}),
+            dynamic_range_emulation=data.get("dynamic_range_emulation", {}),
+            skin_and_hair_precision=data.get("skin_and_hair_precision", {}),
+            extra_fields=extra_data,
         )
 
     def to_dict(self) -> dict[str, Any]:
         """Convert CameraProfile into dictionary representation."""
-        return asdict(self)
+        base = asdict(self)
+        extras = base.pop("extra_fields", {})
+        base.update(extras)
+        return base
 
 
 @dataclass
@@ -2484,6 +2635,12 @@ class SceneInput:
     png_lock: Optional[HighResPNGOutputLockSpec] = None
     depixelate_v2: Optional[UniversalDepixelateV2Spec] = None
     skin_lighting: Optional[SkinLightingModifier] = None
+    universal_medium_format_override: bool = False
+
+    @property
+    def has_universal_medium_format_override(self) -> bool:
+        """Return True if the universal medium format portrait override is active."""
+        return bool(self.universal_medium_format_override)
 
     @property
     def has_skin_lighting(self) -> bool:

@@ -315,6 +315,16 @@ class FluxAdapter(BaseAdapter):
             )
         if scene.min_file_mb:
             sections.append(f"Minimum uncompressed output target: {scene.min_file_mb:.1f} MB.")
+        if scene.has_universal_medium_format_override:
+            sections.append(
+                "Universal Master Override: Photographic realism above synthetic resolution. "
+                "Skin realism strictly overrides sharpening (skin remains softer than eyes, hair, jewelry, and text). "
+                "Hair resolves sharper than skin only within the focal plane. "
+                "HDR means expanded recoverable tonal range, not halos or tone-mapped skin. "
+                "Dense neutral blacks with readable low-frequency texture. "
+                "Optically progressive depth transition without computational blur. "
+                "Zero anatomical, proportion, or identity drift."
+            )
 
         # 6. Natural language negative constraints (Flux thrives on explicit negative assertions in context)
 
