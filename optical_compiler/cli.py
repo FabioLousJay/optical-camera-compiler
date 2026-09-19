@@ -700,14 +700,94 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Automatically copy positive prompt to macOS clipboard (via pbcopy).",
     )
+    parser.add_argument(
+        "--recommend",
+        dest="recommend_prompt",
+        metavar="PROMPT",
+        help="Run AI Rig Advisor: analyze prompt and recommend top 3 optical packages with anti-drift quality gate.",
+    )
 
     return parser
 
 
 def main(argv: Optional[list[str]] = None) -> int:
     """CLI entrypoint."""
+    raw_args = list(argv) if argv is not None else sys.argv[1:]
+    if raw_args and raw_args[0] == "recommend":
+        rec_prompt = ""
+        is_json = False
+        remaining = raw_args[1:]
+        idx = 0
+        while idx < len(remaining):
+            arg = remaining[idx]
+            if arg == "--json":
+                is_json = True
+            elif not arg.startswith("-") and not rec_prompt:
+                rec_prompt = arg
+            idx += 1
+
+        if not rec_prompt:
+            sys.stderr.write("Error: Please provide a prompt to recommend rigs for. Example: optical-compiler recommend 'A master watchmaker assembling gears...'\n")
+            return 1
+
+        from .intelligence import PromptIntelligenceEngine
+        recs = PromptIntelligenceEngine.recommend_rigs(rec_prompt)
+        if is_json:
+            print(json.dumps([r.to_dict() for r in recs], indent=2))
+        else:
+            print("=" * 80)
+            print("  OPTICAL CAMERA COMPILER // AI RIG ADVISOR (TOP 3 OPTICAL PACKAGES)")
+            print("=" * 80)
+            print(f'Input Prompt: "{rec_prompt}"\n')
+            for r in recs:
+                print("-" * 80)
+                print(f"[{r.tier_name}] {r.title}")
+                print("-" * 80)
+                print(f"  📷 Camera:       {r.camera_name}")
+                print(f"  🔍 Lens:         {r.lens}")
+                print(f"  ⭕ Aperture/DOF: {r.aperture} — {r.depth_of_field}")
+                print(f"  💡 Lighting:     {r.lighting}")
+                print(f"  📐 Aspect Ratio: {r.aspect_ratio}")
+                print(f"  🎞️ Film Stock:   {r.film_stock}")
+                print(f"  ✨ Enhanced:     {r.enhanced_scene}")
+                print(f"  💡 Rationale:    {r.rationale}")
+                if r.quality_gate:
+                    print(f"  🛡️ Quality Gate: {r.quality_gate.summary} (Score: {r.quality_gate.overall_score}/100)")
+                print()
+            print("=" * 80)
+        return 0
+
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    # Handle --recommend flag
+    if getattr(args, "recommend_prompt", None):
+        from .intelligence import PromptIntelligenceEngine
+        recs = PromptIntelligenceEngine.recommend_rigs(args.recommend_prompt)
+        if args.json:
+            print(json.dumps([r.to_dict() for r in recs], indent=2))
+        else:
+            print("=" * 80)
+            print("  OPTICAL CAMERA COMPILER // AI RIG ADVISOR (TOP 3 OPTICAL PACKAGES)")
+            print("=" * 80)
+            print(f'Input Prompt: "{args.recommend_prompt}"\n')
+            for r in recs:
+                print("-" * 80)
+                print(f"[{r.tier_name}] {r.title}")
+                print("-" * 80)
+                print(f"  📷 Camera:       {r.camera_name}")
+                print(f"  🔍 Lens:         {r.lens}")
+                print(f"  ⭕ Aperture/DOF: {r.aperture} — {r.depth_of_field}")
+                print(f"  💡 Lighting:     {r.lighting}")
+                print(f"  📐 Aspect Ratio: {r.aspect_ratio}")
+                print(f"  🎞️ Film Stock:   {r.film_stock}")
+                print(f"  ✨ Enhanced:     {r.enhanced_scene}")
+                print(f"  💡 Rationale:    {r.rationale}")
+                if r.quality_gate:
+                    print(f"  🛡️ Quality Gate: {r.quality_gate.summary} (Score: {r.quality_gate.overall_score}/100)")
+                print()
+            print("=" * 80)
+        return 0
 
     # 0. Handle PFEP project initialization if requested
     if getattr(args, "init_pfep", None):

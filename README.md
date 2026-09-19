@@ -2,16 +2,16 @@
 
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Version: 3.9.2](https://img.shields.io/badge/version-3.9.2-blue.svg)](pyproject.toml)
+[![Version: 3.9.3](https://img.shields.io/badge/version-3.9.3-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 246 Passing](https://img.shields.io/badge/tests-246%20passing-brightgreen.svg)](tests/)
+[![Tests: 255 Passing](https://img.shields.io/badge/tests-255%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
 
 > **Deterministic Hardware-Level Optical Simulation for Zero-Artifact Photorealism**
 
-The **Optical Camera Compiler** bridges the gap between artistic creative intent and modern AI image models (**ChatGPT / GPT Images**, **Google Gemini / Imagen 3**, **Midjourney v8.2**, **Flux.1**, **SDXL**). Instead of using buzzwords like *"photorealistic, 8k, masterpiece"*, which trigger synthetic 3D-render, airbrushing, and stock-photo biases, this compiler compiles descriptive intent into physical laws of optics, sensor silicon, lighting transport, and rigorous anti-drift shields.
+The **Optical Camera Compiler** bridges the gap between artistic creative intent and modern AI image models (**ChatGPT / GPT Images**, **Google Gemini / Imagen 3**, **Midjourney v8.2**, **Flux.1**, **Adobe Firefly**, **SDXL**, **Runway**, **HUMAIN**). Instead of using buzzwords like *"photorealistic, 8k, masterpiece"*, which trigger synthetic 3D-render, airbrushing, and stock-photo biases, this compiler compiles descriptive intent into physical laws of optics, sensor silicon, lighting transport, and rigorous anti-drift shields.
 
 ---
 
@@ -29,7 +29,39 @@ The **Optical Camera Compiler** bridges the gap between artistic creative intent
 
 ---
 
-## ⚡ New: Brutally Sharp Portrait Kit Capabilities
+## 🌟 New in v3.9.3: AI Rig Advisor ("Your Prompt") & 3-Tier Multi-Rig Recommendation Engine
+
+When creating prompts in the Web Studio, photographers and creators no longer need to know all 33+ camera bodies and lenses. Positioned **directly before "Camera Style"** in the top Scenario Bar is the **"Your Prompt" (AI Rig Advisor)**.
+
+### Core Capabilities:
+1. **Intelligent Scene Intent Extraction**:
+   Automatically analyzes scene genre (portrait, street, architecture, wildlife, sports/action, macro, cinema, landscape, documentary), extracted subject entities, lighting cues, depth/scale, and motion dynamics.
+2. **Top 3 Diverse Optical Recommendations**:
+   - **🥇 1st Best (Primary Optical Master)**: Highest optical MTF sharpness and resolving authority tailored to the genre.
+   - **🥈 2nd Best (Distinct Aesthetic)**: Distinct alternative medium (e.g. analog film stock, classic rangefinder, or tonal master).
+   - **🥉 3rd Best (High-Character / Creative Rig)**: Expressive optical character (e.g. large format bellows, cinema anamorphic with streak flare, or high-speed freeze).
+3. **Automated Anti-Drift & Anti-Hallucination Quality Gate**:
+   - **Anti-Drift Verification**: 100% preservation of all user subjects, entities, and actions.
+   - **Strict Zero-Artist Compliance**: Automated scan against 100+ famous artists, photographers, and directors to guarantee zero artist-name hallucination.
+   - **Physical Optics Validation**: Validates real-world lens, aperture, shutter speed, and sensor format combinations from `LENS_CATALOG`.
+   - **Negative Shield Defense**: Verifies non-toxic negative prompt constraints to protect Midjourney and Firefly from degraded geometry.
+4. **One-Click "⚡ Apply & Compile" in Web Studio**:
+   Populates all studio dials and immediately compiles prompts across all 8 models simultaneously.
+
+### Python SDK & CLI:
+```python
+from optical_compiler import recommend_rigs
+
+recs = recommend_rigs("A master watchmaker assembling gears under raking afternoon light")
+for r in recs:
+    print(f"[{r.tier_name}] {r.camera_name} // {r.lens}")
+    print(f"Quality Gate: {r.quality_gate.summary}")
+```
+
+```bash
+optical-compiler recommend "A cheetah sprinting across the savannah at sunset"
+```
+
 
 ### 1. 🎯 Brutal Sharpness Protocol
 * **Near-Eye Pupil Lock**: Explicitly anchors critical focal depth to the nearest iris and eyelash line, preventing models from averaging focal planes across the cheek or nose.

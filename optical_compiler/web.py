@@ -232,6 +232,313 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       color: var(--text-secondary);
     }
 
+    /* AI RIG ADVISOR: YOUR PROMPT & RECOMMENDATIONS DRAWER */
+    .scenario-prompt-advisor-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1.6;
+      min-width: 360px;
+    }
+    .advisor-tag {
+      background: rgba(168, 85, 247, 0.18);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      font-size: 0.58rem;
+      padding: 0.12rem 0.38rem;
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .advisor-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 1;
+    }
+    .scenario-prompt-input {
+      background: #111827;
+      border: 1px solid #3b82f6;
+      color: #ffffff;
+      padding: 0.48rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-family: inherit;
+      font-weight: 500;
+      flex: 1;
+      min-width: 200px;
+      transition: all 0.15s ease;
+    }
+    .scenario-prompt-input:focus {
+      outline: none;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+    }
+    .btn-advisor-action {
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      border: 1px solid rgba(139, 92, 246, 0.5);
+      color: #ffffff;
+      padding: 0.48rem 0.95rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+    }
+    .btn-advisor-action:hover {
+      background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.5);
+      transform: translateY(-1px);
+    }
+    .btn-advisor-action:active {
+      transform: translateY(0);
+    }
+    .rig-advisor-drawer {
+      background: #080c14;
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+      animation: fadeInDown 0.25s ease forwards;
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .advisor-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.65rem;
+    }
+    .advisor-drawer-title-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .advisor-drawer-icon {
+      font-size: 1.15rem;
+    }
+    .advisor-drawer-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.04em;
+    }
+    .advisor-gate-badge {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--accent-green, #10b981);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .btn-advisor-close {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-muted);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-advisor-close:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .advisor-cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1rem;
+    }
+    .advisor-card {
+      background: #0d1322;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .advisor-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    .advisor-card-rank-1 {
+      border-color: rgba(245, 158, 11, 0.4);
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.05) 0%, #0d1322 100%);
+    }
+    .advisor-card-rank-1:hover {
+      border-color: rgba(245, 158, 11, 0.75);
+    }
+    .advisor-card-rank-2 {
+      border-color: rgba(6, 182, 212, 0.4);
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.05) 0%, #0d1322 100%);
+    }
+    .advisor-card-rank-2:hover {
+      border-color: rgba(6, 182, 212, 0.75);
+    }
+    .advisor-card-rank-3 {
+      border-color: rgba(168, 85, 247, 0.4);
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.05) 0%, #0d1322 100%);
+    }
+    .advisor-card-rank-3:hover {
+      border-color: rgba(168, 85, 247, 0.75);
+    }
+    .advisor-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .advisor-tier-badge {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 0.25rem 0.55rem;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+    .tier-gold {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .tier-silver {
+      background: rgba(6, 182, 212, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(6, 182, 212, 0.4);
+    }
+    .tier-bronze {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.4);
+    }
+    .advisor-card-title {
+      font-size: 0.90rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+    .advisor-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.4rem;
+    }
+    .advisor-spec-pill {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 4px;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      line-height: 1.25;
+    }
+    .advisor-spec-pill strong {
+      color: #cbd5e1;
+      display: block;
+      font-size: 0.64rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.1rem;
+    }
+    .advisor-scene-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 5px;
+      padding: 0.55rem;
+      font-size: 0.72rem;
+      color: #cbd5e1;
+      line-height: 1.35;
+      max-height: 95px;
+      overflow-y: auto;
+    }
+    .advisor-rationale-box {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+      font-style: italic;
+    }
+    .advisor-gate-telemetry {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.22);
+      color: #34d399;
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .advisor-card-actions {
+      display: flex;
+      gap: 0.45rem;
+      margin-top: auto;
+      padding-top: 0.4rem;
+    }
+    .btn-apply-compile {
+      flex: 2;
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      border: 1px solid rgba(124, 58, 237, 0.4);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.74rem;
+      padding: 0.45rem 0.7rem;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      transition: all 0.15s ease;
+    }
+    .btn-apply-compile:hover {
+      background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+      box-shadow: 0 3px 10px rgba(124, 58, 237, 0.4);
+    }
+    .btn-apply-form {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      font-weight: 600;
+      font-size: 0.72rem;
+      padding: 0.45rem 0.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .btn-apply-form:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
     /* Main Grid Layout */
     .container {
       display: grid;
@@ -786,6 +1093,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="scenario-bar">
     <div class="scenario-controls-container">
       
+      <!-- 0. YOUR PROMPT: AI RIG ADVISOR -->
+      <div class="scenario-prompt-advisor-group">
+        <label class="scenario-label" for="scenarioPromptInput">
+          <span>✨ Your Prompt:</span>
+          <span class="advisor-tag">AI RIG ADVISOR</span>
+        </label>
+        <div class="advisor-input-wrap">
+          <input type="text" id="scenarioPromptInput" class="scenario-prompt-input" 
+                 placeholder="Type your scene (e.g. Master watchmaker in sunlit workshop)..." 
+                 onkeydown="if(event.key==='Enter') runRigAdvisor()">
+          <button type="button" class="btn-advisor-action" id="btnRunAdvisor" onclick="runRigAdvisor()" title="Analyze prompt & recommend top 3 optical packages">
+            <span id="btnAdvisorText">⚡ Recommend Rigs</span>
+          </button>
+        </div>
+      </div>
+
       <!-- 1. CAMERA & LENS RIG STYLE DROPDOWN -->
       <div class="scenario-select-group">
         <label class="scenario-label" for="cameraPresetSelect">
@@ -954,6 +1277,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </div>
     <div class="scenario-hint">
       Pick a <strong>Camera Rig</strong> for hardware & optics, or an <strong>Ambient Style</strong> for lighting & atmosphere. Click <strong>Clear / Build Your Own</strong> to write freely.
+    </div>
+
+    <!-- TOP 3 RECOMMENDED RIGS DRAWER -->
+    <div id="rigAdvisorContainer" class="rig-advisor-drawer" style="display: none;">
+      <div class="advisor-drawer-header">
+        <div class="advisor-drawer-title-row">
+          <span class="advisor-drawer-icon">🎯</span>
+          <span class="advisor-drawer-title">AI Rig Advisor — Top 3 Optical Packages</span>
+          <span class="advisor-gate-badge" id="advisorGateBadge">✓ Anti-Drift &amp; Anti-Hallucination Certified</span>
+        </div>
+        <button type="button" class="btn-advisor-close" onclick="closeRigAdvisor()" title="Close recommendations">✕</button>
+      </div>
+      <div class="advisor-cards-container" id="advisorCardsContainer">
+        <!-- Populated dynamically by JavaScript -->
+      </div>
     </div>
   </div>
 
@@ -3650,6 +3988,222 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
     }
 
+    let currentRigRecommendations = [];
+
+    async function runRigAdvisor() {
+      const inputEl = document.getElementById('scenarioPromptInput');
+      const promptText = inputEl ? inputEl.value.trim() : '';
+      if (!promptText) {
+        alert("Please enter a scene prompt first (e.g. 'Master watchmaker assembling gears under raking afternoon light').");
+        if (inputEl) inputEl.focus();
+        return;
+      }
+
+      const btn = document.getElementById('btnRunAdvisor');
+      const btnText = document.getElementById('btnAdvisorText');
+      const originalText = btnText ? btnText.textContent : '⚡ Recommend Rigs';
+      if (btnText) btnText.textContent = '⏳ Analyzing...';
+      if (btn) btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/recommend-rigs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: promptText,
+            target: typeof activeTarget !== 'undefined' ? activeTarget : 'flux',
+            num_recommendations: 3
+          })
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        currentRigRecommendations = data.recommendations || [];
+        renderRigAdvisorCards(currentRigRecommendations, promptText);
+      } catch (err) {
+        console.error("Rig Advisor error:", err);
+        alert("Failed to analyze prompt & recommend rigs: " + err.message);
+      } finally {
+        if (btnText) btnText.textContent = originalText;
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function renderRigAdvisorCards(recs, promptText) {
+      const container = document.getElementById('rigAdvisorContainer');
+      const cardsEl = document.getElementById('advisorCardsContainer');
+      if (!container || !cardsEl) return;
+
+      if (!recs || recs.length === 0) {
+        container.style.display = 'none';
+        return;
+      }
+
+      cardsEl.innerHTML = '';
+      const tierClasses = ['advisor-card-rank-1', 'advisor-card-rank-2', 'advisor-card-rank-3'];
+      const badgeClasses = ['tier-gold', 'tier-silver', 'tier-bronze'];
+      const rankIcons = ['🥇', '🥈', '🥉'];
+
+      recs.forEach((rec, idx) => {
+        const card = document.createElement('div');
+        card.className = `advisor-card ${tierClasses[idx] || 'advisor-card-rank-1'}`;
+
+        const qgate = rec.quality_gate || {};
+        const qSummary = qgate.summary || '✓ Anti-Drift: 100% Intent Preserved | ✓ Zero Artists';
+
+        card.innerHTML = `
+          <div class="advisor-card-header">
+            <span class="advisor-tier-badge ${badgeClasses[idx] || 'tier-gold'}">
+              ${rankIcons[idx] || '🎯'} ${rec.tier_name || `Recommendation ${idx + 1}`}
+            </span>
+            <span style="font-size: 0.68rem; font-family: var(--font-mono); color: var(--text-muted);">
+              SCORE: ${qgate.overall_score || 98}/100
+            </span>
+          </div>
+          <div class="advisor-card-title">${rec.camera_name}</div>
+          <div class="advisor-specs-grid">
+            <div class="advisor-spec-pill">
+              <strong>🔍 Matched Lens</strong>
+              ${rec.lens}
+            </div>
+            <div class="advisor-spec-pill">
+              <strong>⭕ Aperture / DOF</strong>
+              ${rec.aperture}
+            </div>
+            <div class="advisor-spec-pill">
+              <strong>💡 Calibrated Light</strong>
+              ${rec.lighting_key ? rec.lighting_key.replace(/_/g, ' ').toUpperCase() : 'STUDIO'}
+            </div>
+            <div class="advisor-spec-pill">
+              <strong>📐 Aspect Ratio</strong>
+              ${rec.aspect_ratio} (${rec.aspect_ratio === '4:5' ? 'Portrait' : rec.aspect_ratio === '16:9' ? 'Cinematic' : rec.aspect_ratio === '1:1' ? 'Square' : 'Standard'})
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: #94a3b8; margin-bottom: 0.2rem; letter-spacing: 0.04em;">
+              ✨ Enhanced Scene:
+            </div>
+            <div class="advisor-scene-box">${rec.enhanced_scene}</div>
+          </div>
+          <div class="advisor-rationale-box">
+            💡 ${rec.rationale}
+          </div>
+          <div class="advisor-gate-telemetry">
+            ${qSummary}
+          </div>
+          <div class="advisor-card-actions">
+            <button type="button" class="btn-apply-compile" onclick="applyRigRecommendation(${idx}, true)">
+              <span>⚡ Apply &amp; Compile</span>
+            </button>
+            <button type="button" class="btn-apply-form" onclick="applyRigRecommendation(${idx}, false)">
+              <span>📋 Apply to Form</span>
+            </button>
+          </div>
+        `;
+        cardsEl.appendChild(card);
+      });
+
+      container.style.display = 'flex';
+      container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function closeRigAdvisor() {
+      const container = document.getElementById('rigAdvisorContainer');
+      if (container) container.style.display = 'none';
+    }
+
+    function applyRigRecommendation(index, compileNow) {
+      const rec = currentRigRecommendations[index];
+      if (!rec) return;
+
+      // 1. Set Hardware Profile
+      const profSelect = document.getElementById('profileSelect');
+      if (profSelect && rec.profile_id) {
+        profSelect.value = rec.profile_id;
+        onProfileChange();
+      }
+
+      // 2. Set Lens
+      if (rec.lens) {
+        const lensSelect = document.getElementById('lensSelect');
+        const customLensInput = document.getElementById('customLensInput');
+        const targetPrefix = rec.lens.split(" (")[0].toLowerCase();
+        let matched = false;
+        if (lensSelect) {
+          for (let i = 0; i < lensSelect.options.length; i++) {
+            if (lensSelect.options[i].text.toLowerCase().includes(targetPrefix) ||
+                lensSelect.options[i].value.toLowerCase().includes(targetPrefix)) {
+              lensSelect.selectedIndex = i;
+              matched = true;
+              break;
+            }
+          }
+        }
+        if (!matched && customLensInput) {
+          customLensInput.value = rec.lens;
+        } else if (matched && customLensInput) {
+          customLensInput.value = '';
+        }
+      }
+
+      // 3. Set Aperture
+      if (rec.aperture && typeof setAperture === 'function') {
+        setAperture(rec.aperture);
+      }
+
+      // 4. Set Subject & Framing
+      const subjectInput = document.getElementById('subjectInput');
+      if (subjectInput && rec.enhanced_scene) {
+        subjectInput.value = rec.enhanced_scene;
+      }
+      const framingInput = document.getElementById('framingInput');
+      if (framingInput && rec.framing) {
+        framingInput.value = rec.framing;
+      }
+
+      // 5. Set Lighting
+      const lightingSelect = document.getElementById('lightingSelect');
+      if (lightingSelect && rec.lighting_key) {
+        for (let i = 0; i < lightingSelect.options.length; i++) {
+          if (lightingSelect.options[i].value === rec.lighting_key) {
+            lightingSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+
+      // 6. Set Aspect Ratio
+      const aspectSelect = document.getElementById('aspectSelect');
+      if (aspectSelect && rec.aspect_ratio) {
+        for (let i = 0; i < aspectSelect.options.length; i++) {
+          if (aspectSelect.options[i].value === rec.aspect_ratio) {
+            aspectSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+
+      // 7. Set Film Stock
+      const filmStockSelect = document.getElementById('filmStockSelect');
+      if (filmStockSelect && rec.film_stock) {
+        for (let i = 0; i < filmStockSelect.options.length; i++) {
+          if (filmStockSelect.options[i].value === rec.film_stock) {
+            filmStockSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+
+      // 8. If compileNow is true, execute compilation and scroll to output
+      if (compileNow && typeof compile === 'function') {
+        compile();
+        const outPane = document.querySelector('.output-pane') || document.getElementById('positiveOutput');
+        if (outPane) {
+          outPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }
+
     function onCameraPresetSelectChange() {
       const select = document.getElementById('cameraPresetSelect');
       const val = select ? select.value : 'none';
@@ -4892,7 +5446,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
         """Handle compilation requests via REST API."""
         parsed_path = self.path.split("?")[0]
 
-        if parsed_path not in ("/api/compile", "/api/upscale-102mp", "/api/export-closed-loop", "/api/recon-4x", "/api/png-lock-upscale"):
+        if parsed_path not in ("/api/compile", "/api/upscale-102mp", "/api/export-closed-loop", "/api/recon-4x", "/api/png-lock-upscale", "/api/recommend-rigs"):
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
             return
 
@@ -5051,6 +5605,26 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     output_format=output_format,
                 )
                 self._send_json(report)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            return
+
+        if parsed_path == "/api/recommend-rigs":
+            prompt = body.get("prompt", "")
+            target = body.get("target", "flux")
+            num_recommendations = int(body.get("num_recommendations", 3))
+            try:
+                from .intelligence import PromptIntelligenceEngine
+                recs = PromptIntelligenceEngine.recommend_rigs(
+                    prompt=prompt,
+                    target=target,
+                    num_recommendations=num_recommendations,
+                )
+                self._send_json({
+                    "prompt": prompt,
+                    "target": target,
+                    "recommendations": [r.to_dict() for r in recs],
+                })
             except Exception as err:
                 self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
             return

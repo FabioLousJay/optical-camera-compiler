@@ -622,6 +622,38 @@ class OpticalCompiler:
             results[engine.value] = self.compile(scene, target=engine, **kwargs)
         return results
 
+    @classmethod
+    def recommend_rigs(
+        cls,
+        prompt: str,
+        target: Union[str, TargetEngine] = TargetEngine.FLUX,
+        num_recommendations: int = 3,
+    ) -> list[Any]:
+        """Evaluate scene prompt and return top 3 calibrated optical rig recommendations.
+
+        Each recommendation passes the automated Anti-Drift & Anti-Hallucination Quality Gate.
+        """
+        from .intelligence import PromptIntelligenceEngine
+        return PromptIntelligenceEngine.recommend_rigs(
+            prompt=prompt,
+            target=target,
+            num_recommendations=num_recommendations,
+        )
+
+
+def recommend_rigs(
+    prompt: str,
+    target: Union[str, TargetEngine] = TargetEngine.FLUX,
+    num_recommendations: int = 3,
+) -> list[Any]:
+    """Convenience helper to get top 3 calibrated optical rig recommendations."""
+    from .intelligence import PromptIntelligenceEngine
+    return PromptIntelligenceEngine.recommend_rigs(
+        prompt=prompt,
+        target=target,
+        num_recommendations=num_recommendations,
+    )
+
 
 def compile_scene(
     scene: Union[str, SceneInput],

@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
-from .compiler import OpticalCompiler, compile_ab_harness, compile_abc_harness, compile_scene
+from .compiler import OpticalCompiler, compile_ab_harness, compile_abc_harness, compile_scene, recommend_rigs
+from .intelligence import (
+    PromptIntelligenceEngine,
+    QualityGateResult,
+    RigRecommendation,
+    SceneIntent,
+)
 from .models import (
     UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE,
     CameraProfile,
@@ -55,13 +61,18 @@ from .restoration import (
     viewing_distance_inches,
 )
 
-__version__ = "3.9.0"
+__version__ = "3.9.3"
 
 __all__ = [
     "OpticalCompiler",
     "compile_scene",
     "compile_ab_harness",
     "compile_abc_harness",
+    "recommend_rigs",
+    "PromptIntelligenceEngine",
+    "QualityGateResult",
+    "RigRecommendation",
+    "SceneIntent",
     "UNIVERSAL_MEDIUM_FORMAT_PORTRAIT_OVERRIDE",
     "format_universal_medium_format_override",
     "UniversalDepixelateV2Spec",
