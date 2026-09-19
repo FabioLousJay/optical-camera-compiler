@@ -50,7 +50,13 @@ class HumainAdapter(BaseAdapter):
             )
         else:
             framing = scene.framing or "Intimate headshot portrait"
-            clauses.append(f"{framing} of {scene.subject}.")
+            is_portrait = any(k in f"{scene.framing} {scene.subject}".lower() for k in (
+                "portrait", "headshot", "close-up", "male", "female", "man", "woman", "person",
+                "model", "dancer", "worker", "craftsman", "people", "two", "face", "beauty", "editorial"
+            ))
+            has_explicit_rear = any(k in (scene.camera_angle or "").lower() for k in ("behind", "rear", "from back", "back view"))
+            gaze_clause = ", facing camera with direct eye contact, natural dignified expression and posture" if (is_portrait and not has_explicit_rear) else ""
+            clauses.append(f"{framing} of {scene.subject}{gaze_clause}.")
 
         # 2. Styling, Expression & Setting
         if scene.environment:
@@ -78,13 +84,27 @@ class HumainAdapter(BaseAdapter):
             )
 
         # 6. Camera Optics & Lighting
-        camera = optics.camera_system
-        lens = scene.lens or optics.lens
+        camera = optics.camera_system.split("(")[0].strip()
+        lens = (scene.lens or optics.lens).split("(")[0].strip()
         aperture = scene.aperture or optics.aperture_sweet_spot
         lighting_desc = scene.lighting or f"{lighting.primary_lighting}. {lighting.light_transport}."
 
+        f_num = 5.6
+        try:
+            if "f/" in aperture:
+                f_num = float(aperture.replace("f/", "").split()[0])
+            elif "T" in aperture:
+                f_num = float(aperture.replace("T", "").split()[0])
+        except Exception:
+            f_num = 5.6
+
+        if f_num <= 2.8:
+            dof_clause = "shallow optical depth of field with creamy background bokeh"
+        else:
+            dof_clause = "tack-sharp optical sweet-spot depth of field with edge-to-edge clarity"
+
         clauses.append(
-            f"Shot on {camera} using {lens} at {aperture}. Focus locked on the nearest eye with micro-fine sharpness. "
+            f"Shot on {camera} using {lens} at {aperture}, featuring {dof_clause}. Focus locked on the nearest eye with micro-fine sharpness. "
             f"Lighting: {lighting_desc}, revealing true organic skin depth without harsh digital clipping."
         )
 

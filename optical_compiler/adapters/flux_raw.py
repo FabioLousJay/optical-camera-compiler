@@ -56,7 +56,13 @@ class FluxRawAdapter(BaseAdapter):
             )
         else:
             framing = scene.framing or "A natural photograph"
-            sentences.append(f"{framing} of {scene.subject}.")
+            is_portrait = any(k in f"{scene.framing} {scene.subject}".lower() for k in (
+                "portrait", "headshot", "close-up", "male", "female", "man", "woman", "person",
+                "model", "dancer", "worker", "craftsman", "people", "two", "face", "beauty", "editorial"
+            )) and not is_product_lock
+            has_explicit_rear = any(k in (scene.camera_angle or "").lower() for k in ("behind", "rear", "from back", "back view"))
+            gaze_clause = ", facing camera with direct eye contact, natural un-posed expression and posture" if (is_portrait and not has_explicit_rear) else ""
+            sentences.append(f"{framing} of {scene.subject}{gaze_clause}.")
 
         # 2. Environmental & Atmospheric Setting
         env_details: List[str] = []
@@ -70,13 +76,27 @@ class FluxRawAdapter(BaseAdapter):
             sentences.append("The subject is " + ", ".join(env_details) + ".")
 
         # 3. Camera Rig & Physical Optical Attributes
+        clean_camera = optics.camera_system.split("(")[0].strip()
+        clean_lens = (scene.lens or optics.lens).split("(")[0].strip()
         aperture = scene.aperture or optics.aperture_sweet_spot
-        lens = scene.lens or optics.lens
-        camera = optics.camera_system
+
+        f_num = 5.6
+        try:
+            if "f/" in aperture:
+                f_num = float(aperture.replace("f/", "").split()[0])
+            elif "T" in aperture:
+                f_num = float(aperture.replace("T", "").split()[0])
+        except Exception:
+            f_num = 5.6
+
+        if f_num <= 2.8:
+            dof_clause = "shallow optical depth of field with creamy background blur and subject isolation"
+        else:
+            dof_clause = "deep optical sweet-spot depth of field with sharp edge-to-edge clarity throughout"
 
         sentences.append(
-            f"Shot on {camera} equipped with {lens} at {aperture}. "
-            f"True optical depth of field with natural focus falloff, subtle peripheral vignetting, and authentic lens aberrations."
+            f"Shot on {clean_camera} equipped with {clean_lens} at {aperture}. "
+            f"True optical depth of field featuring {dof_clause}, natural focus falloff, subtle peripheral vignetting, and authentic lens aberrations."
         )
 
         # 4. Lighting & Exposure

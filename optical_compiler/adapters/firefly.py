@@ -63,17 +63,17 @@ class FireflyAdapter(BaseAdapter):
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
         is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
 
-        # 1. Platform Policy & Style
-        style_clause = "Style: Authentic Professional Color Photograph."
-        policy_clause = (
-            "Tasteful editorial photographic execution adhering to commercial safety standards."
-            if scene.is_policy_safe
-            else None
-        )
+        # 1. Subject, Gaze & Staging
+        is_portrait = any(k in f"{scene.framing} {scene.subject}".lower() for k in (
+            "portrait", "headshot", "close-up", "male", "female", "man", "woman", "person",
+            "model", "dancer", "worker", "craftsman", "people", "two", "face", "beauty", "editorial"
+        )) and not is_product_lock
 
-        # 2. Framing & Subject
+        has_explicit_rear = any(k in (scene.camera_angle or "").lower() for k in ("behind", "rear", "from back", "back view"))
+        gaze_str = ", facing camera with direct eye contact, natural dignified expression and posture" if (is_portrait and not has_explicit_rear) else ""
+
         if is_outpaint:
-            subject_clause = (
+            subject_sentence = (
                 f"Full-length head-to-toe editorial portrait of {scene.subject}, standing grounded with visible footwear, "
                 f"maintaining face, hair, and wardrobe texture from reference."
             )
@@ -83,124 +83,101 @@ class FireflyAdapter(BaseAdapter):
                 parts.append(f"finish: {scene.material_finish}")
             if scene.sku_color:
                 parts.append(f"color: {scene.sku_color}")
-            subject_clause = ", ".join(parts) + "."
+            subject_sentence = ", ".join(parts) + "."
         elif is_identity_lock:
-            subject_clause = (
-                f"Documentary photographic portrait of {scene.subject}, strictly maintaining facial identity and bone structure."
+            subject_sentence = (
+                f"Documentary photographic portrait of {scene.subject}{gaze_str}, strictly maintaining facial identity and bone structure."
             )
         else:
-            framing_str = scene.framing or "Eye-level editorial portrait"
-            subject_clause = f"{framing_str} of {scene.subject}."
+            framing_str = scene.framing or "Editorial photographic portrait"
+            env_str = f", set in {scene.environment}" if scene.environment else ""
+            attire_str = f", wearing {scene.wardrobe}" if scene.wardrobe else ""
+            mood_str = f", {scene.mood}" if scene.mood else ""
+            morph_str = f", realistic heavyset plus-size build with authentic weight distribution {scene.weight_lb}lbs" if (scene.has_body_morphology and scene.weight_lb) else ""
+            subject_sentence = f"{framing_str} of {scene.subject}{gaze_str}{morph_str}{env_str}{attire_str}{mood_str}."
 
-        # 3. Setting & Styling
-        setting_clause = f"Setting: {scene.environment}." if scene.environment else None
-        attire_clause = f"Attire: {scene.wardrobe}." if scene.wardrobe else None
-        mood_clause = f"Mood: {scene.mood}." if scene.mood else None
-
-        # 4. Camera & Optical Physics
-        # Strip long hardware marketing parentheticals to conserve budget
+        # 2. Camera, Optics & Concrete Depth of Field
         clean_camera = optics.camera_system.split("(")[0].strip()
         aperture = scene.aperture or optics.aperture_sweet_spot
-        lens = scene.lens or optics.lens
+        lens = (scene.lens or optics.lens).split("(")[0].strip()
 
-        optics_clause = (
-            f"Shot on {clean_camera} with {lens} at {aperture}. "
-            f"Natural optical depth of field with sharp focus and creamy background bokeh."
+        f_num = 5.6
+        try:
+            if "f/" in aperture:
+                f_num = float(aperture.replace("f/", "").split()[0])
+            elif "T" in aperture:
+                f_num = float(aperture.replace("T", "").split()[0])
+        except Exception:
+            f_num = 5.6
+
+        depth_phrase = (
+            "shallow optical depth of field with sharp subject focus and creamy background bokeh"
+            if f_num <= 2.8
+            else "natural optical depth of field with sharp edge-to-edge optical sweet-spot clarity"
         )
 
-        # 5. Hand Precision Gate
-        hand_clause = (
-            "Anatomically correct hands with exactly five distinct fingers, natural joint creases."
-            if scene.has_hand_lock
-            else None
-        )
+        lighting_raw = scene.lighting or f"{lighting.primary_lighting}"
+        lighting_clean = " ".join(lighting_raw.strip().split()).rstrip(".")
 
-        # 6. Lighting & Atmosphere
-        lighting_raw = scene.lighting or f"{lighting.primary_lighting}. {lighting.light_transport}."
-        lighting_clean = " ".join(lighting_raw.strip().split())
-        lighting_clause = f"Lighting: {lighting_clean}, with soft shadow transitions."
+        optics_sentence = f"Shot on {clean_camera} with {lens} at {aperture}, illuminated by {lighting_clean}, featuring {depth_phrase}."
 
-        # 7. Skin & Texture Realism (Anti-AI smoothing)
+        # 3. Micro-Texture, Skin Realism & Acutance
+        hand_phrase = " Anatomically correct hands with exactly five distinct fingers, natural joint creases." if scene.has_hand_lock else ""
+
         if scene.human_skin_realism:
-            skin_clause = (
-                "Natural human skin realism: visible fine pores, subtle skin texture, and authentic subsurface scattering without airbrushing."
+            texture_sentence = (
+                f"Tack-sharp focus on near eye, natural human skin realism with visible fine pores, authentic subsurface scattering, "
+                f"realistic uncompressed fabric weave, natural color grading.{hand_phrase}"
             )
         else:
-            skin_clause = "Crisp unretouched textures, realistic fabric weave, natural skin tones, optical clarity."
+            texture_sentence = (
+                f"Tack-sharp focus on near eye, crisp unretouched micro-textures, authentic fabric weave, "
+                f"clean optical acutance, natural commercial color grading.{hand_phrase}"
+            )
 
-        # 8. Copy-Space
         copy_clause = (
             f"Commercial layout with reserved negative copy space along the {scene.copy_space.value}."
             if scene.copy_space
             else None
         )
 
-        # Prioritized Assembly:
-        # Priority tiers from highest (must keep) to lowest (first to drop if over budget)
-        tier_essential = [style_clause, subject_clause, optics_clause]
-        tier_high = [lighting_clause, setting_clause]
-        tier_medium = [skin_clause, hand_clause]
-        tier_standard = [attire_clause, mood_clause, policy_clause, copy_clause]
+        # Prioritized Assembly
+        candidates = [subject_sentence, optics_sentence, texture_sentence]
+        if copy_clause:
+            candidates.append(copy_clause)
 
-        # Start with all active clauses
-        all_clauses = [
-            style_clause,
-            policy_clause,
-            subject_clause,
-            setting_clause,
-            attire_clause,
-            mood_clause,
-            optics_clause,
-            hand_clause,
-            lighting_clause,
-            skin_clause,
-            copy_clause,
-        ]
-        active_clauses = [c for c in all_clauses if c]
+        candidate_text = " ".join(candidates)
 
-        candidate = " ".join(active_clauses)
+        # Progressive condensation if budget exceeded
+        if len(candidate_text) > self.SAFE_TARGET_BUDGET and copy_clause:
+            candidates.remove(copy_clause)
+            candidate_text = " ".join(candidates)
 
-        # If candidate exceeds safe budget, progressively shed lower-priority clauses
-        if len(candidate) > self.SAFE_TARGET_BUDGET:
-            # Step 1: Drop policy & copy space
-            shed_list = [c for c in active_clauses if c not in (policy_clause, copy_clause)]
-            candidate = " ".join(shed_list)
+        if len(candidate_text) > self.SAFE_TARGET_BUDGET:
+            # Condense optics sentence
+            optics_condensed = f"Shot on {clean_camera}, {lens} at {aperture}, {depth_phrase}."
+            candidates = [subject_sentence, optics_condensed, texture_sentence]
+            candidate_text = " ".join(candidates)
 
-        if len(candidate) > self.SAFE_TARGET_BUDGET:
-            # Step 2: Drop mood
-            shed_list = [c for c in shed_list if c != mood_clause]
-            candidate = " ".join(shed_list)
+        if len(candidate_text) > self.SAFE_TARGET_BUDGET:
+            # Condense texture sentence
+            texture_condensed = "Tack-sharp focus on near eye, authentic skin texture with visible micro-pores, natural color grading."
+            candidates = [subject_sentence, optics_condensed, texture_condensed]
+            candidate_text = " ".join(candidates)
 
-        if len(candidate) > self.SAFE_TARGET_BUDGET:
-            # Step 3: Drop attire
-            shed_list = [c for c in shed_list if c != attire_clause]
-            candidate = " ".join(shed_list)
+        # Final ironclad boundary enforcement: strictly <= 1024 chars
+        positive_prompt = self.enforce_firefly_limit(candidate_text, max_chars=self.MAX_CHAR_LIMIT)
 
-        if len(candidate) > self.SAFE_TARGET_BUDGET:
-            # Step 4: Condense lighting clause
-            condensed_lighting = f"Lighting: {lighting.primary_lighting}."
-            shed_list = [
-                condensed_lighting if c == lighting_clause else c
-                for c in shed_list
-            ]
-            candidate = " ".join(shed_list)
-
-        if len(candidate) > self.SAFE_TARGET_BUDGET:
-            # Step 5: Condense optics clause
-            condensed_optics = f"Shot on {clean_camera}, {lens} at {aperture}, shallow depth of field."
-            shed_list = [
-                condensed_optics if c == optics_clause else c
-                for c in shed_list
-            ]
-            candidate = " ".join(shed_list)
-
-        # Final Ironclad Boundary Enforcement: Strictly guarantee <= 1,024 characters
-        positive_prompt = self.enforce_firefly_limit(candidate, max_chars=self.MAX_CHAR_LIMIT)
+        # Clean, effective negative prompt for Adobe Firefly's "Exclude from image" box
+        negative_prompt = (
+            "illustration, 3d render, cartoon, painting, drawing, anime, plastic skin, airbrushed, "
+            "oversmoothed, blurry, digital distortion, watermark, text, signature"
+        )
 
         return CompiledPayload(
             target_engine=self.target_engine,
             positive_prompt=positive_prompt,
-            negative_prompt="",  # Adobe Firefly does not support negative prompts
+            negative_prompt=negative_prompt,
             parameters={
                 "engine": "Adobe Firefly Image 5 / Image 4 Ultra",
                 "aspect_ratio": scene.aspect_ratio,
@@ -213,6 +190,7 @@ class FireflyAdapter(BaseAdapter):
                 "character_limit": self.MAX_CHAR_LIMIT,
                 "character_count": len(positive_prompt),
                 "character_budget_safe": len(positive_prompt) <= self.MAX_CHAR_LIMIT,
+                "exclude_from_image": negative_prompt,
             },
             metadata={
                 "model_family": "adobe_firefly",

@@ -127,6 +127,14 @@ class SDXLAdapter(BaseAdapter):
             scene_str += ", restrained black-and-white indie-cinema monochrome, fine organic film grain"
         pos_chunks.append(scene_str)
 
+        is_portrait = any(k in f"{scene.framing} {scene.subject}".lower() for k in (
+            "portrait", "headshot", "close-up", "male", "female", "man", "woman", "person",
+            "model", "dancer", "worker", "craftsman", "people", "two", "face", "beauty", "editorial"
+        )) and not is_product_lock and not is_recon_4x and not is_depixelate_v2
+        has_explicit_rear = any(k in (scene.camera_angle or "").lower() for k in ("behind", "rear", "from back", "back view"))
+        if is_portrait and not has_explicit_rear:
+            pos_chunks.append("facing camera, direct eye contact, natural dignified expression and posture")
+
         if scene.has_copy_space:
             if scene.copy_space and scene.copy_space != CopySpace.NONE:
                 pos_chunks.append(f"asymmetric commercial copy space in {scene.copy_space.value.replace('_', ' ')}")
@@ -162,9 +170,28 @@ class SDXLAdapter(BaseAdapter):
             pos_chunks.append(f"print-calibrated exhibition prepress {paper_name}")
 
         # Hardware & Optics
+        clean_camera = optics.camera_system.split("(")[0].strip()
+        clean_lens = (scene.lens or optics.lens).split("(")[0].strip()
+        aperture_val = scene.aperture or optics.aperture_sweet_spot
+
+        f_num = 5.6
+        try:
+            if "f/" in aperture_val:
+                f_num = float(aperture_val.replace("f/", "").split()[0])
+            elif "T" in aperture_val:
+                f_num = float(aperture_val.replace("T", "").split()[0])
+        except Exception:
+            f_num = 5.6
+
+        if f_num <= 2.8:
+            dof_token = "shallow optical depth of field with creamy background blur"
+        else:
+            dof_token = "sharp edge-to-edge optical sweet-spot depth of field"
+
         hardware_tokens = [
-            f"raw photograph captured on {optics.camera_system}",
-            f"{optics.lens} at {optics.aperture_sweet_spot}",
+            f"raw photograph captured on {clean_camera}",
+            f"{clean_lens} at {aperture_val}",
+            dof_token,
             optics.sensor_dimensions,
             optics.shutter,
             optics.iso_base,

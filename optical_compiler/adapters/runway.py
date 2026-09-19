@@ -54,7 +54,13 @@ class RunwayAdapter(BaseAdapter):
             )
         else:
             framing = scene.framing or "Medium cinematic shot"
-            parts.append(f"{framing} of {scene.subject}.")
+            is_portrait = any(k in f"{scene.framing} {scene.subject}".lower() for k in (
+                "portrait", "headshot", "close-up", "male", "female", "man", "woman", "person",
+                "model", "dancer", "worker", "craftsman", "people", "two", "face", "beauty", "editorial"
+            )) and not is_product_lock
+            has_explicit_rear = any(k in (scene.camera_angle or "").lower() for k in ("behind", "rear", "from back", "back view"))
+            gaze_clause = ", facing camera with direct eye contact, natural cinematic posture" if (is_portrait and not has_explicit_rear) else ""
+            parts.append(f"{framing} of {scene.subject}{gaze_clause}.")
 
         # 2. Environment & Mise-en-scène
         if scene.environment:
@@ -65,21 +71,34 @@ class RunwayAdapter(BaseAdapter):
             parts.append(f"Dramatic tone: {scene.mood}.")
 
         # 3. Cinema Camera Rig & Optical Simulation
-        camera = optics.camera_system
-        lens = scene.lens or optics.lens
+        camera = optics.camera_system.split("(")[0].strip()
+        lens = (scene.lens or optics.lens).split("(")[0].strip()
         aperture = scene.aperture or optics.aperture_sweet_spot
+
+        f_num = 5.6
+        try:
+            if "f/" in aperture:
+                f_num = float(aperture.replace("f/", "").split()[0])
+            elif "T" in aperture:
+                f_num = float(aperture.replace("T", "").split()[0])
+        except Exception:
+            f_num = 5.6
+
+        if f_num <= 2.8:
+            dof_text = "Shallow depth of field with creamy background bokeh, natural optical falloff, and smooth cinematic focus transition."
+        else:
+            dof_text = "Deep cinematic depth of field with sharp edge-to-edge optical acutance and clear environmental focus throughout."
 
         if scene.is_anamorphic:
             squeeze = scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else "2.0x"
             flare = scene.streak_flare.value if scene.streak_flare else "subtle horizontal streak flares"
             parts.append(
                 f"Shot on cinema camera {camera} with {lens} {squeeze} anamorphic optics at {aperture}. "
-                f"Cylindrical lens characteristics: oval background bokeh, gentle barrel distortion, and {flare}."
+                f"Cylindrical lens characteristics: vertical 2:1 elliptical oval background bokeh, gentle barrel distortion, and {flare}."
             )
         else:
             parts.append(
-                f"Shot on cinema camera {camera} with prime cinema lens {lens} at {aperture}. "
-                f"Shallow depth of field, natural optical falloff, and smooth cinematic focus transition."
+                f"Shot on cinema camera {camera} with prime cinema lens {lens} at {aperture}. {dof_text}"
             )
 
         # 4. Cinematic Lighting & Volumetrics

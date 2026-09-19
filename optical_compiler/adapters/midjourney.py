@@ -40,7 +40,7 @@ class MidjourneyAdapter(BaseAdapter):
         is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
         is_png_lock = bool((ref and ref.mode == ReferenceMode.UNIVERSAL_PNG_LOCK) or scene.has_png_lock)
 
-        # 1. Subject description
+        # 1. Subject description and mandatory gaze anchor
         core_elements = []
         if is_outpaint:
             core_elements.append(
@@ -62,8 +62,8 @@ class MidjourneyAdapter(BaseAdapter):
         elif is_depixelate_v2:
             spec = scene.depixelate_v2
             ctype = spec.content_type if spec else "photograph"
-            cam_str = spec.selected_camera if (spec and spec.selected_camera) else optics.camera_system
-            lens_str = spec.selected_lens if (spec and spec.selected_lens) else optics.lens
+            cam_str = (spec.selected_camera if (spec and spec.selected_camera) else optics.camera_system).split("(")[0].strip()
+            lens_str = (spec.selected_lens if (spec and spec.selected_lens) else optics.lens).split("(")[0].strip()
             core_elements.append(
                 f"Universal De-Pixelate v2.0 restoration, content type {ctype}, single source of truth, "
                 f"strict OCR text and geometry lock, evidence-anchored detail reconstruction, shot on {cam_str} {lens_str}"
@@ -106,6 +106,17 @@ class MidjourneyAdapter(BaseAdapter):
         else:
             core_elements.append(scene.subject)
 
+        # Mandatory Subject Gaze & Orientation Anchor:
+        # Prevents subjects from turning their backs or looking away from the camera
+        is_portrait = any(k in f"{scene.framing} {scene.subject}".lower() for k in (
+            "portrait", "headshot", "close-up", "male", "female", "man", "woman", "person",
+            "model", "dancer", "worker", "craftsman", "people", "two", "face", "beauty", "editorial"
+        )) and not is_product_lock and not is_recon_4x and not is_depixelate_v2
+
+        has_explicit_rear_angle = any(k in (scene.camera_angle or "").lower() for k in ("behind", "rear", "from back", "back view"))
+        if is_portrait and not has_explicit_rear_angle:
+            core_elements.append("facing camera, direct eye contact, natural dignified expression and posture")
+
         if scene.has_hand_lock:
             grip_desc = scene.grip_type.value.replace("_", " ") if scene.grip_type else "ergonomic grip"
             details = f" {scene.hand_details}" if scene.hand_details else ""
@@ -124,10 +135,9 @@ class MidjourneyAdapter(BaseAdapter):
             core_elements.append("dignified tasteful portrait, safe ethical fine-art styling")
 
         if scene.has_body_morphology:
-            regions = scene.body_volume or (", ".join(scene.body_morphology.volume_regions) if scene.body_morphology and scene.body_morphology.volume_regions else "biceps, chest, gut")
             wt = f" {scene.weight_lb}lbs" if scene.weight_lb else ""
             core_elements.append(
-                f"proportional {regions} volume calibration{wt}, natural bilateral asymmetry, realistic soft-tissue gravity and seated compression, authentic weight distribution"
+                f"realistic heavyset plus-size body build{wt}, authentic natural weight distribution, natural posture"
             )
 
         if scene.has_material_style:
@@ -149,14 +159,33 @@ class MidjourneyAdapter(BaseAdapter):
 
         prompt_parts = [", ".join(core_elements)]
 
-        # 2. Camera, glass, and sensor specifications
+        # 2. Camera, glass, and optical visual consequences (no catalog serial numbers)
+        clean_camera = optics.camera_system.split("(")[0].strip()
+        clean_lens = (scene.lens or optics.lens).split("(")[0].strip()
+        aperture_val = scene.aperture or optics.aperture_sweet_spot
+
         camera_tokens = [
-            f"shot on {optics.camera_system}",
-            f"{optics.lens} at {optics.aperture_sweet_spot}",
-            f"{optics.sensor_dimensions}",
-            f"{optics.shutter}",
-            f"{optics.iso_base}",
+            f"shot on {clean_camera}",
+            f"{clean_lens} at {aperture_val}",
         ]
+        if optics.sensor_dimensions:
+            camera_tokens.append(optics.sensor_dimensions)
+
+        # Translate aperture number into concrete optical depth consequence
+        f_num = 5.6
+        try:
+            if "f/" in aperture_val:
+                f_num = float(aperture_val.replace("f/", "").split()[0])
+            elif "T" in aperture_val:
+                f_num = float(aperture_val.replace("T", "").split()[0])
+        except Exception:
+            f_num = 5.6
+
+        if f_num <= 2.8:
+            camera_tokens.append("shallow optical depth of field with creamy background blur")
+        else:
+            camera_tokens.append("sharp edge-to-edge optical sweet-spot depth of field")
+
         if scene.is_anamorphic:
             squeeze = scene.anamorphic_squeeze.value if scene.anamorphic_squeeze else "2.0x"
             flare = scene.streak_flare.value.replace("_", " ") if scene.streak_flare else "cyan/blue"
@@ -169,21 +198,48 @@ class MidjourneyAdapter(BaseAdapter):
             ])
         if scene.optical_filter:
             camera_tokens.append(scene.optical_filter)
+
+        # Concrete film stock and sensor color science visual consequences
         if scene.film_stock:
             camera_tokens.append(f"{scene.film_stock} color profile")
+        elif "kodachrome" in optics.camera_system.lower() or "fm2" in optics.camera_system.lower():
+            camera_tokens.append("Kodachrome 64 color saturation, rich warm slide film tones")
+        elif "fuji pro 400h" in optics.camera_system.lower() or "contax 645" in optics.camera_system.lower():
+            camera_tokens.append("Fujifilm Pro 400H luminous pastel skin tones, airy soft highlights")
+        elif "portra" in optics.camera_system.lower() or "rz67" in optics.camera_system.lower():
+            camera_tokens.append("Kodak Portra 800 warm golden skin tones, fine analog grain")
+        elif "monochrom" in optics.camera_system.lower() or "q3" in optics.camera_system.lower() or scene.is_monochrome:
+            camera_tokens.append("pure panchromatic black-and-white luminance, deep blacks and luminous midtones")
+        elif "imax" in optics.camera_system.lower():
+            camera_tokens.append("monumental 65mm motion picture scale, organic film grain, rich silver tonal depth")
+        elif "polaroid" in optics.camera_system.lower():
+            camera_tokens.append("life-size 1:1 contact portrait scale, rich instant dye transfer tonality")
+        elif "contax t2" in optics.camera_system.lower():
+            camera_tokens.append("direct on-camera xenon flash with rapid falloff, high-glamour snapshot intimacy")
+        elif "phase one" in optics.camera_system.lower() or "hasselblad" in optics.camera_system.lower() or "gfx" in optics.camera_system.lower():
+            camera_tokens.append("16-bit medium-format raw dynamic range, smooth highlight roll-off")
         else:
-            camera_tokens.append("16-bit raw capture")
+            camera_tokens.append("16-bit raw capture, natural color science")
+
         prompt_parts.extend(camera_tokens)
 
         # 3. Studio lighting and physical texture
-        lighting_tokens = [
-            lighting.primary_lighting,
+        lighting_tokens = []
+        if "xenon flash" in (lighting.primary_lighting or "").lower() or "t2" in optics.camera_system.lower():
+            lighting_tokens.append("harsh direct on-camera flash casting crisp defined shadows")
+        elif scene.lighting:
+            lighting_tokens.append(scene.lighting)
+        else:
+            lighting_tokens.append(lighting.primary_lighting)
+
+        lighting_tokens.extend([
             "negative fill flags",
-            "organic human skin realism overriding artificial clarity",
+            "natural skin texture with visible micro-pores",
+            "subtle subsurface dermal scattering",
             "fine vellus hair",
-            "subsurface scattering",
             "natural material micro-relief",
-        ]
+        ])
+
         if scene.lighting_ratio:
             lighting_tokens.append(f"{scene.lighting_ratio.value} lighting contrast ratio")
         if scene.gobo:
@@ -227,7 +283,6 @@ class MidjourneyAdapter(BaseAdapter):
             prompt_parts.append(f"series cohesion anchor {sc.anchor_image_id or 'master'} zone {sc.gallery_zone or 'gallery'}")
 
         # 4. Midjourney flags
-
         effective_ar = "2.39:1" if (scene.is_anamorphic and scene.aspect_ratio in ("4:5", "2.39:1")) else scene.aspect_ratio
         flags = [
             f"--ar {effective_ar}",
@@ -251,18 +306,23 @@ class MidjourneyAdapter(BaseAdapter):
         elif is_outpaint:
             flags.extend(["--cref [REFERENCE_IMAGE_URL]", "--cw 100"])
 
-        # Negative items for --no flag
+        # 5. Non-Toxic Surgical Negative Prompt Defense for Midjourney
+        # Strictly universal synthetic render flaws. NEVER include anatomy, face, forehead, neck, or cheek nouns.
         banned_mj = [
             "plastic skin",
             "airbrushed",
-            "glamour retouch",
+            "oversmoothed",
             "CGI",
             "3D render",
             "illustration",
-            "digital sharpening",
-            "computational bokeh",
-            "blown highlights",
+            "cartoon",
+            "drawing",
+            "painting",
+            "anime",
+            "blurry",
+            "digital sharpening halos",
         ]
+
         if is_recon_4x:
             banned_mj.extend([
                 "generative hallucination",
@@ -273,41 +333,34 @@ class MidjourneyAdapter(BaseAdapter):
                 "sky halos",
                 "stacking artifacts",
             ])
+
         if scene.human_skin_realism or is_depixelate:
             banned_mj.extend([
                 "pore stamping",
                 "engraved skin",
                 "embossed skin",
                 "carved skin",
-                "swirl texture",
                 "repeating micro-patterns",
-                "lace-like facial texture",
-                "worm-like texture",
                 "AI skin grain",
                 "hyper-sharpened pores",
                 "overprocessed HDR skin",
-                "synthetic cheek texture",
-                "fake forehead texture",
-                "fake neck texture",
                 "decorative skin detail",
                 "Velvia punch",
                 "Classic Chrome grading",
                 "Acros conversion",
-                "fake shallow depth of field",
-                "synthetic bokeh balls",
             ])
+
         if scene.suppress_text_branding and not is_product_lock:
             banned_mj.extend([
-                "text",
                 "watermark",
                 "logo",
                 "brand name",
                 "typography",
-                "letters",
-                "words",
+                "text",
                 "signature",
                 "label",
             ])
+
         if is_depixelate_v2:
             banned_mj.extend([
                 "restyling",
@@ -324,6 +377,7 @@ class MidjourneyAdapter(BaseAdapter):
                 "composition alteration",
                 "decorative filtering",
             ])
+
         if is_restore or is_transform or is_outpaint or is_depixelate or is_depixelate_v2 or is_identity_lock:
             banned_mj.extend([
                 "facial morphing",
@@ -335,6 +389,7 @@ class MidjourneyAdapter(BaseAdapter):
                 "body slimming",
                 "facial reshaping",
             ])
+
         if is_product_lock:
             banned_mj.extend([
                 "wrong cap",
@@ -347,24 +402,31 @@ class MidjourneyAdapter(BaseAdapter):
                 "warped bottle",
                 "distorted packaging",
             ])
+
         if scene.has_hand_lock:
             banned_mj.extend([
+                "extra fingers",
                 "fused digits",
-                "clipping fingers",
-                "extra phalanges",
-                "rubber knuckles",
-                "dislocated thumb",
                 "six fingers",
                 "four fingers",
-                "deformed fingernails",
-                "webbed fingers",
-                "missing knuckles",
-                "amorphous fingertip pads",
+                "deformed hands",
             ])
+
+        if scene.is_policy_safe:
+            banned_mj.extend(["revealing", "provocative", "inappropriate"])
+
         if scene.is_monochrome:
             banned_mj.extend(["color", "sepia", "warm tint"])
+
         if is_slow_shutter:
-            banned_mj.extend(["ghost faces", "melted bodies", "duplicated people", "uniform smear wall", "blur on subject"])
+            banned_mj.extend([
+                "ghost faces",
+                "melted bodies",
+                "duplicated people",
+                "uniform smear wall",
+                "blur on subject",
+            ])
+
         if is_outpaint:
             banned_mj.extend([
                 "mismatched shoes",
@@ -373,15 +435,19 @@ class MidjourneyAdapter(BaseAdapter):
                 "deformed footwear",
                 "wrong shadows",
             ])
+
         if scene.has_body_morphology:
             banned_mj.extend([
-                "extreme bodybuilding", "comic book muscles", "balloon muscles", "impossible muscle insertions",
-                "hyper-vascularity", "body distortion", "grotesque proportions", "unnatural anatomy",
+                "extreme bodybuilding",
+                "comic book muscles",
+                "balloon muscles",
+                "impossible muscle insertions",
+                "hyper-vascularity",
             ])
+
         if scene.remove_text_when_present:
             banned_mj.extend(["text", "typography", "letters", "writing", "words", "captions"])
-        if scene.is_policy_safe:
-            banned_mj.extend(["provocative", "inappropriate", "revealing", "gratuitous"])
+
         if is_png_lock:
             banned_mj.extend([
                 "forced palette reduction",
@@ -397,6 +463,7 @@ class MidjourneyAdapter(BaseAdapter):
                 "flattened textures",
                 "compression damage",
             ])
+
         if scene.custom_negatives:
             banned_mj.extend(scene.custom_negatives)
 

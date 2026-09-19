@@ -146,10 +146,17 @@ class ImagenAdapter(BaseAdapter):
             else:
                 scene_elements.append(f"depicting {scene.subject}")
         else:
+            is_portrait = any(k in f"{scene.framing} {scene.subject}".lower() for k in (
+                "portrait", "headshot", "close-up", "male", "female", "man", "woman", "person",
+                "model", "dancer", "worker", "craftsman", "people", "two", "face", "beauty", "editorial"
+            )) and not is_product_lock and not is_recon_4x and not is_depixelate_v2
+            has_explicit_rear = any(k in (scene.camera_angle or "").lower() for k in ("behind", "rear", "from back", "back view"))
+            gaze_clause = ", facing camera with direct eye contact, natural dignified expression and posture" if (is_portrait and not has_explicit_rear) else ""
+
             if scene.framing:
-                scene_elements.append(f"A {scene.framing} of {scene.subject}")
+                scene_elements.append(f"A {scene.framing} of {scene.subject}{gaze_clause}")
             else:
-                scene_elements.append(f"Photograph of {scene.subject}")
+                scene_elements.append(f"Photograph of {scene.subject}{gaze_clause}")
 
         if scene.environment:
             scene_elements.append(f"situated in {scene.environment}")
@@ -264,8 +271,26 @@ class ImagenAdapter(BaseAdapter):
         ref_prose = (" " + " ".join(ref_directives)) if ref_directives else ""
 
         # 2. Optical rig description in natural photography prose
+        clean_camera = optics.camera_system.split("(")[0].strip()
+        clean_lens = (scene.lens or optics.lens).split("(")[0].strip()
+        aperture_val = scene.aperture or optics.aperture_sweet_spot
+
+        f_num = 5.6
+        try:
+            if "f/" in aperture_val:
+                f_num = float(aperture_val.replace("f/", "").split()[0])
+            elif "T" in aperture_val:
+                f_num = float(aperture_val.replace("T", "").split()[0])
+        except Exception:
+            f_num = 5.6
+
+        if f_num <= 2.8:
+            aperture_prose = f"wide open at {aperture_val} yielding a shallow optical depth of field with creamy background bokeh and clear subject isolation"
+        else:
+            aperture_prose = f"stopped down to its {aperture_val} optical sweet spot with deep edge-to-edge sharpness and clarity throughout"
+
         optical_components = [
-            f"Captured with a {optics.camera_system} utilizing a {optics.lens} stopped down to its {optics.aperture_sweet_spot} optical sweet spot.",
+            f"Captured with a {clean_camera} utilizing a {clean_lens} {aperture_prose}.",
             f"Framed with a {optics.sensor_dimensions} ({optics.full_frame_equivalent}), utilizing {optics.shutter} and {optics.iso_base}."
         ]
         if scene.is_anamorphic:

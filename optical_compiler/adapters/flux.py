@@ -175,7 +175,13 @@ class FluxAdapter(BaseAdapter):
                 f"feature drift, phantom limbs, or identity divergence while rendering new environmental context."
             )
         else:
-            sections.append(f"Photo of {subject_desc}.")
+            is_portrait = any(k in f"{scene.framing} {scene.subject}".lower() for k in (
+                "portrait", "headshot", "close-up", "male", "female", "man", "woman", "person",
+                "model", "dancer", "worker", "craftsman", "people", "two", "face", "beauty", "editorial"
+            )) and not is_product_lock and not is_recon_4x and not is_depixelate_v2
+            has_explicit_rear = any(k in (scene.camera_angle or "").lower() for k in ("behind", "rear", "from back", "back view"))
+            gaze_clause = ", facing camera with direct eye contact, natural dignified expression and posture" if (is_portrait and not has_explicit_rear) else ""
+            sections.append(f"Photo of {subject_desc}{gaze_clause}.")
         if scene.camera_angle:
             sections.append(f"Angle and perspective: {scene.camera_angle}.")
         if scene.has_copy_space:
@@ -225,8 +231,26 @@ class FluxAdapter(BaseAdapter):
             sections.append(f"Print-calibrated exhibition prepress specification for {paper_name}, preserving tonal gradient depth, Dmax response, and zero digital banding.")
 
         # 2. Exact physical camera rig
+        clean_camera = optics.camera_system.split("(")[0].strip()
+        clean_lens = (scene.lens or optics.lens).split("(")[0].strip()
+        aperture_val = scene.aperture or optics.aperture_sweet_spot
+
+        f_num = 5.6
+        try:
+            if "f/" in aperture_val:
+                f_num = float(aperture_val.replace("f/", "").split()[0])
+            elif "T" in aperture_val:
+                f_num = float(aperture_val.replace("T", "").split()[0])
+        except Exception:
+            f_num = 5.6
+
+        if f_num <= 2.8:
+            dof_clause = "yielding shallow optical depth of field with creamy background bokeh and clear subject isolation,"
+        else:
+            dof_clause = "yielding sharp edge-to-edge optical sweet-spot depth of field with crisp focus throughout,"
+
         camera_parts = [
-            f"Shot on a {optics.camera_system}, {optics.lens} set to {optics.aperture_sweet_spot},",
+            f"Shot on a {clean_camera}, {clean_lens} set to {aperture_val}, {dof_clause}",
             f"{optics.sensor_dimensions} with {optics.full_frame_equivalent}.",
             f"{optics.iso_base}, {optics.shutter}."
         ]

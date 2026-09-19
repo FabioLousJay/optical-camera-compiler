@@ -170,6 +170,13 @@ class GPTImagesAdapter(BaseAdapter):
                 base_instr += f" Wardrobe: {scene.wardrobe}."
             if scene.framing:
                 base_instr += f" Framing: {scene.framing}."
+            is_portrait = any(k in f"{scene.framing} {scene.subject}".lower() for k in (
+                "portrait", "headshot", "close-up", "male", "female", "man", "woman", "person",
+                "model", "dancer", "worker", "craftsman", "people", "two", "face", "beauty", "editorial"
+            )) and not (scene.has_product_lock or ref_mode == ReferenceMode.PRODUCT_LOCK)
+            has_explicit_rear = any(k in (scene.camera_angle or "").lower() for k in ("behind", "rear", "from back", "back view"))
+            if is_portrait and not has_explicit_rear:
+                base_instr += " Gaze and posture: Facing camera with direct eye contact, natural dignified expression and posture."
             sections.append(base_instr)
 
         # Camera angle & framing block
@@ -463,9 +470,26 @@ class GPTImagesAdapter(BaseAdapter):
         else:
             anamorphic_optics = " Clean rectilinear projection with zero perspective distortion."
 
+        aperture_val = scene.aperture or cam.aperture_sweet_spot
+        lens_target = scene.lens or lens_spec
+
+        f_num = 5.6
+        try:
+            if "f/" in aperture_val:
+                f_num = float(aperture_val.replace("f/", "").split()[0])
+            elif "T" in aperture_val:
+                f_num = float(aperture_val.replace("T", "").split()[0])
+        except Exception:
+            f_num = 5.6
+
+        if f_num <= 2.8:
+            dof_desc = f" Shallow depth-of-field outcome: creamy background bokeh and subject isolation at {aperture_val}."
+        else:
+            dof_desc = f" Deep depth-of-field outcome: sharp edge-to-edge optical sweet spot acutance at {aperture_val}."
+
         camera_block = (
             f"Camera hardware: Shot on {cam.camera_system}. "
-            f"Lens: {lens_spec} set to {cam.aperture_sweet_spot}. "
+            f"Lens: {lens_target} set to {aperture_val}.{dof_desc} "
             f"Sensor: {cam.sensor_dimensions}, {cam.sensor_type}. "
             f"Exposure: {cam.shutter}, base {cam.iso_base}.{color_desc}"
             f"{anamorphic_optics}"

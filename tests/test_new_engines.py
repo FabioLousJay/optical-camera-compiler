@@ -64,14 +64,15 @@ class TestNewPhotorealisticEngines(unittest.TestCase):
             hand_lock=True,
         )
         self.assertEqual(payload.target_engine, TargetEngine.FIREFLY)
-        self.assertIn("Style: Authentic Professional Color Photograph", payload.positive_prompt)
+        self.assertIn("Editorial portrait of an architect", payload.positive_prompt)
+        self.assertIn("facing camera with direct eye contact", payload.positive_prompt)
         self.assertIn("Sony a1 II", payload.positive_prompt)
-        self.assertIn("Natural optical depth of field", payload.positive_prompt)
-        self.assertIn("Natural human skin realism: visible fine pores", payload.positive_prompt)
+        self.assertIn("optical depth of field", payload.positive_prompt)
+        self.assertIn("fine pores", payload.positive_prompt)
         self.assertIn("Anatomically correct hands with exactly five distinct fingers", payload.positive_prompt)
-        # Firefly does not use negative prompt channel
-        self.assertEqual(payload.negative_prompt, "")
-        self.assertEqual(payload.unified_prompt, payload.positive_prompt)
+        # Exclude from image negative prompt
+        self.assertIn("illustration", payload.negative_prompt)
+        self.assertIn("plastic skin", payload.negative_prompt)
         self.assertEqual(payload.parameters["engine"], "Adobe Firefly Image 5 / Image 4 Ultra")
         # Character limit guarantee
         self.assertLessEqual(len(payload.positive_prompt), 1024)
@@ -100,7 +101,7 @@ class TestNewPhotorealisticEngines(unittest.TestCase):
         self.assertLessEqual(len(payload.positive_prompt), 1024)
         self.assertTrue(payload.parameters["character_budget_safe"])
         self.assertTrue(payload.positive_prompt.endswith("."))
-        self.assertIn("Style: Authentic Professional Color Photograph", payload.positive_prompt)
+        self.assertIn("Editorial photographic portrait", payload.positive_prompt)
 
 
     def test_flux_raw_adapter_compilation(self) -> None:
@@ -168,7 +169,7 @@ class TestNewPhotorealisticEngines(unittest.TestCase):
         self.assertIn("runway_gen4", compiled_prompts)
         self.assertIn("humain_image_1", compiled_prompts)
 
-        self.assertIn("Style: Authentic Professional Color Photograph", compiled_prompts["adobe_firefly_5"])
+        self.assertIn("Editorial photographic portrait", compiled_prompts["adobe_firefly_5"])
         self.assertIn("Captured in 16-bit raw mode", compiled_prompts["flux_ultra_raw"])
         self.assertIn("Cinematic motion picture still", compiled_prompts["runway_gen4"])
         self.assertIn("Forensic human portrait photography", compiled_prompts["humain_image_1"])
