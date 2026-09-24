@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Version: 3.9.3](https://img.shields.io/badge/version-3.9.3-blue.svg)](pyproject.toml)
+[![Version: 3.9.4](https://img.shields.io/badge/version-3.9.4-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 255 Passing](https://img.shields.io/badge/tests-255%20passing-brightgreen.svg)](tests/)
+[![Tests: 265 Passing](https://img.shields.io/badge/tests-265%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
 [![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
@@ -29,9 +29,24 @@ The **Optical Camera Compiler** bridges the gap between artistic creative intent
 
 ---
 
-## 🌟 New in v3.9.3: AI Rig Advisor ("Your Prompt") & 3-Tier Multi-Rig Recommendation Engine
+## 📸 New in v3.9.4: 6 Specialized Camera Systems & Optical Research Suite
 
-When creating prompts in the Web Studio, photographers and creators no longer need to know all 33+ camera bodies and lenses. Positioned **directly before "Camera Style"** in the top Scenario Bar is the **"Your Prompt" (AI Rig Advisor)**.
+v3.9.4 incorporates deep photographic research, matched real-world lenses, and calibrated visual consequence profiles for 6 iconic compact, rangefinder, and weather-sealed camera systems, expanding the hardware catalog to **39+ production camera systems**:
+
+| Camera Profile | Sensor Format & Optics | Signature Color Science & Aesthetic | Calibrated Scenario Preset |
+| :--- | :--- | :--- | :--- |
+| **Canon PowerShot G7 X Mark III** (`canon_powershot_g7x_iii`) | 20.1MP 1.0-Type stacked CMOS (13.2x8.8mm), 24-100mm equiv f/1.8-2.8 IS, built-in ND | Canon warm skin tones, punchy reds/magentas, direct xenon snapshot flash, deep 1-inch environmental focus | `cam_canon_g7x_iii_flash`: Direct Flash Tokyo Izakaya Snapshot |
+| **Fujifilm X-E5** (`fujifilm_x_e5`) | 40.2MP APS-C X-Trans CMOS 5 HR (23.5x15.7mm), FUJINON XF 27mm f/2.8 R WR pancake | Dedicated Film Simulation dial (Reala Ace, Classic Chrome, ACROS), organic silver grain, rangefinder street rhythm | `cam_fujifilm_xe5_reala_street`: Reala Ace Kyoto Gion Rangefinder Street |
+| **Nikon Z50 II** (`nikon_z50_ii`) | 20.9MP DX APS-C without OLPF (23.5x15.7mm), EXPEED 7 processor, NIKKOR Z DX 24mm f/1.7 | Dedicated Picture Control button recipes, neutral chromatic fidelity, AI subject tracking lock, agile documentary | `cam_nikon_z50_ii_street`: Picture Control Ceramicist Workshop |
+| **OM System OM-5 Mark II** (`om_system_om5_ii`) | 20.0MP Micro Four Thirds Live MOS, TruePic IX, IP53 weather sealed, M.Zuiko 12-40mm f/2.8 PRO II | 7.5-stop Sync IS, Handheld 50MP High-Res, deep MFT botanical/mountain focus, rich natural earthy greens | `cam_om_system_om5_ii_wild`: IP53 Rainforest Mist Expedition |
+| **Panasonic Lumix G97** (`panasonic_lumix_g97`) | 20.3MP Micro Four Thirds Live MOS without LPF, Venus Engine, Leica DG 12-60mm f/2.8-4.0 | 5-axis Dual I.S. 2, pre-installed V-Log L profile, Leica optical micro-contrast pop, hybrid travel documentary | `cam_lumix_g97_hybrid_doc`: V-Log L Florentine Leather Artisan |
+| **Sony Alpha 7C II** (`sony_a7c_ii`) | 33.0MP Full-Frame Exmor R BSI (35.9x23.9mm), BIONZ XR + AI Unit, Sony FE 40mm F2.5 G | Cinematic S-Cinetone skin tone modeling, Creative Looks (FL, IN), 7.0-stop IBIS, compact full-frame planar isolation | `cam_sony_a7c_ii_cinetone`: S-Cinetone Milan Street Style |
+
+---
+
+## 🌟 AI Rig Advisor ("Your Prompt") & 3-Tier Multi-Rig Recommendation Engine
+
+When creating prompts in the Web Studio, photographers and creators no longer need to know all 39+ camera bodies and lenses. Positioned **directly before "Camera Style"** in the top Scenario Bar is the **"Your Prompt" (AI Rig Advisor)**.
 
 ### Core Capabilities:
 1. **Intelligent Scene Intent Extraction**:

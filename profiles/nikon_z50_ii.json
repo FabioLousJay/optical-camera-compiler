@@ -1,0 +1,61 @@
+{
+  "profile_id": "nikon_z50_ii",
+  "title": "Nikon Z50 II Agile DX Mirrorless Camera",
+  "schema_version": "2.0",
+  "purpose": "Dynamic street, travel, and creative content creation powered by EXPEED 7 subject tracking, dedicated Picture Control button recipes, and razor-sharp DX NIKKOR optics without an optical low-pass filter.",
+  "sensor_and_optics": {
+    "camera_system": "Nikon Z50 II DX Mirrorless (20.9MP APS-C)",
+    "sensor_type": "20.9MP DX-format CMOS sensor with EXPEED 7 flagship processor",
+    "sensor_dimensions": "23.5x15.7mm APS-C sensor (1.5x crop factor)",
+    "full_frame_equivalent": "36mm classic documentary field of view",
+    "lens": "NIKKOR Z DX 24mm f/1.7 (36mm equivalent fast prime)",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 100 base sensitivity (extended ISO 100-51,200)",
+    "dynamic_range": "13.5 stops dynamic range with 14-bit NEF RAW capture",
+    "shutter": "Focal-plane electronic/mechanical shutter up to 1/4000s, 1/200s flash sync, high-speed 30fps burst tracking"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Dynamic street ambient daylight, directional workshop lighting, or twilight available light",
+    "light_transport": "Truthful Nikon color fidelity, clean highlight roll-off, customized Imaging Cloud Picture Control profiles, balanced tonal gradations"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "High optical acutance without an optical low-pass filter: crisp architectural lines, tactile clothing textures, and authentic human skin detail",
+      "Flagship EXPEED 7 demosaicing delivering clean micro-contrast and artifact-free fine details",
+      "Neutral, truthful Nikon chromatic reproduction with accurate skin tones and foliage rendition"
+    ],
+    "depth_and_optics": [
+      "Pleasing background blur and subject separation at f/1.7, smoothly transitioning to tack-sharp environmental context at f/4.0-f/5.6",
+      "Zero geometric distortion with precise rectilinear lens correction",
+      "Agile, responsive eye-level or waist-level articulating screen perspectives for candid human interactions"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "over-smoothed denoise",
+      "compression artifacts",
+      "chromatic aberration",
+      "synthetic glow"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial HDR halo",
+      "computational bokeh",
+      "blown out highlights",
+      "crushed muddy shadows"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 20.9MP DX APS-C capture, EXPEED 7 razor edge acutance, faithful Nikon Picture Control color science, agile documentary framing, and natural depth of field, shot on Nikon Z50 II."
+}

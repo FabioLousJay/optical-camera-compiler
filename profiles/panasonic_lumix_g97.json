@@ -1,0 +1,61 @@
+{
+  "profile_id": "panasonic_lumix_g97",
+  "title": "Panasonic Lumix G97 Hybrid MFT Camera",
+  "schema_version": "2.0",
+  "purpose": "Agile documentary travel, environmental portraiture, and hybrid cinematic video capture powered by a 20.3MP Live MOS sensor without low-pass filter, 5-axis Dual I.S. 2, and Leica DG high-microcontrast optics.",
+  "sensor_and_optics": {
+    "camera_system": "Panasonic Lumix G97 Hybrid (20.3MP Micro Four Thirds)",
+    "sensor_type": "20.3MP Micro Four Thirds Digital Live MOS sensor without low-pass filter with Venus Engine",
+    "sensor_dimensions": "17.4x13.0mm Micro Four Thirds sensor (2.0x crop factor)",
+    "full_frame_equivalent": "24-120mm equivalent travel documentary field of view",
+    "lens": "Leica DG Vario-Elmarit 12-60mm f/2.8-4.0 ASPH POWER O.I.S. (24-120mm FF equivalent)",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 200 base sensitivity (extended ISO 100-25,600)",
+    "dynamic_range": "13.0 stops dynamic range with 12-bit RAW and pre-installed V-Log L profile",
+    "shutter": "Electromagnetic drive focal-plane mechanical shutter to 1/4000s, electronic shutter to 1/16,000s, 5-axis Dual I.S. 2 (5.0 stops)"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Available documentary daylight, artisan workshop ambient, or golden travel sunset light",
+    "light_transport": "Signature Leica optical micro-contrast, wide V-Log L highlight latitude, smooth midtone transitions with rich dimensional modeling"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Crisp edge acutance from Leica-certified optics: tactile woodworking shavings, woven textiles, weathered stone surfaces, and natural human skin pores without digital oversharpening",
+      "Cinematic color science with natural, balanced skin tones and faithful environmental ambiance",
+      "Clean sensor demosaicing with subtle organic noise texture in deep shadows"
+    ],
+    "depth_and_optics": [
+      "Controlled Micro Four Thirds depth of field providing balanced subject pop at f/2.8 while maintaining legible background storytelling context",
+      "Immaculate optical correction with zero spherical aberration or optical low-pass smearing",
+      "Documentary eye-level or chest-level angle capturing authentic human craftsmanship and cultural narratives"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "over-smoothed denoise",
+      "compression artifacts",
+      "chromatic aberration",
+      "synthetic glow"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial HDR halo",
+      "computational bokeh",
+      "blown out highlights",
+      "crushed muddy shadows"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 20.3MP Micro Four Thirds hybrid documentary capture, Leica DG optical acutance, V-Log L tonal gradations, authentic cultural textures, and balanced storytelling depth of field, shot on Panasonic Lumix G97."
+}

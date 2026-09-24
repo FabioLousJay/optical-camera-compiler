@@ -1,0 +1,61 @@
+{
+  "profile_id": "om_system_om5_ii",
+  "title": "OM System OM-5 Mark II Rugged Outdoor Camera",
+  "schema_version": "2.0",
+  "purpose": "All-weather outdoor wilderness expedition, environmental landscape, and macro photography featuring IP53 splashproof sealing, 7.5-stop Sync IS, 50MP handheld high-resolution shot, and deep Micro Four Thirds depth of field.",
+  "sensor_and_optics": {
+    "camera_system": "OM System OM-5 Mark II (20.0MP Micro Four Thirds Live MOS)",
+    "sensor_type": "20.0MP Micro Four Thirds Live MOS sensor with TruePic IX processor (50MP Handheld High-Res Mode)",
+    "sensor_dimensions": "17.4x13.0mm Micro Four Thirds sensor (2.0x crop factor)",
+    "full_frame_equivalent": "24-80mm equivalent professional standard zoom field of view",
+    "lens": "M.Zuiko Digital ED 12-40mm f/2.8 PRO II (24-80mm FF equivalent, IP53 weather sealed)",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 200 base sensitivity (extended Low 64 - 25,600)",
+    "dynamic_range": "13.0 stops dynamic range (expanded with computational Live ND16 and Handheld High-Res)",
+    "shutter": "Focal-plane mechanical shutter to 1/8000s, electronic shutter to 1/32,000s, 7.5-stop Sync IS"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Rugged outdoor atmospheric weather: rainforest mist, mountain fog, raking alpine sunrise, or rainy wilderness daylight",
+    "light_transport": "Rich earthy greens and foliage tones, natural shadow density, computational highlight retention with Live ND16 motion smoothing"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Intense botanical and geological micro-texture: moss filaments, damp granite stone, water droplets on foliage, and bark striations",
+      "Immense resolving authority in 50MP Handheld High-Res mode with zero motion jitter due to 7.5-stop Sync IS",
+      "Vibrant, true-to-life nature color science with organic foliage tones and atmospheric moisture rendition"
+    ],
+    "depth_and_optics": [
+      "Deep inherent Micro Four Thirds depth of field, maintaining sharp foreground foliage to distant mountain ridges at f/4.0-f/5.6 without diffraction softening",
+      "Exceptional close-focus magnification with crisp edge acutance across the entire frame",
+      "Rugged eye-level or low-angle ground perspective capturing immersive wilderness scale"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "over-smoothed denoise",
+      "compression artifacts",
+      "chromatic aberration",
+      "synthetic glow"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial HDR halo",
+      "computational bokeh",
+      "blown out highlights",
+      "crushed muddy shadows"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 20MP Micro Four Thirds outdoor expedition capture, deep environmental depth of field, razor-sharp botanical and rock textures, atmospheric moisture, and natural earthy tones, shot on OM System OM-5 Mark II."
+}

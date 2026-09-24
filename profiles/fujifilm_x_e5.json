@@ -1,0 +1,61 @@
+{
+  "profile_id": "fujifilm_x_e5",
+  "title": "Fujifilm X-E5 Rangefinder-Style Mirrorless Camera",
+  "schema_version": "2.0",
+  "purpose": "Discreet, high-acutance street reportage and documentary photography leveraging 40.2MP X-Trans CMOS 5 HR resolution, dedicated Film Simulation dial, and compact pancake optics.",
+  "sensor_and_optics": {
+    "camera_system": "Fujifilm X-E5 Rangefinder Mirrorless (40.2MP APS-C X-Trans)",
+    "sensor_type": "40.2MP APS-C X-Trans CMOS 5 HR back-illuminated sensor with X-Processor 5",
+    "sensor_dimensions": "23.5x15.7mm APS-C sensor (1.5x crop factor)",
+    "full_frame_equivalent": "40mm street documentary field of view",
+    "lens": "FUJINON XF 27mm f/2.8 R WR (41mm equivalent compact pancake prime)",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 125 base sensitivity (extended ISO 64-51,200)",
+    "dynamic_range": "14.0 stops dynamic range with 14-bit RAF RAW and Film Simulation curve tuning",
+    "shutter": "Focal-plane mechanical shutter up to 1/4000s, electronic shutter to 1/180,000s, 7.0-stop IBIS"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Available natural street light, raking late-afternoon sun, or ambient urban shadow contrast",
+    "light_transport": "Signature Fujifilm film simulation tonal curves (Reala Ace, Classic Chrome, Nostalgic Neg, ACROS), organic highlight roll-off, rich shadow gradations with natural micro-contrast"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Extreme 40.2MP APS-C micro-acutance resolving fine cobblestone weave, architectural plaster, fabric threads, and honest human facial pores without an optical low-pass filter",
+      "Authentic Fujifilm film simulation color science with tactile micro-grain structure reminiscent of silver halide film",
+      "Zero moiré artifacts owing to the randomized X-Trans color filter array pattern and high sensor pixel density"
+    ],
+    "depth_and_optics": [
+      "Balanced APS-C depth of field offering generous zone-focus depth at f/5.6 while maintaining gentle optical separation at f/2.8",
+      "Natural rectilinear geometry with zero distortion across the 40mm equivalent street perspective",
+      "Discreet, eye-level rangefinder-style framing capturing candid, unposed human moments"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "over-smoothed denoise",
+      "compression artifacts",
+      "chromatic aberration",
+      "synthetic glow"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial HDR halo",
+      "computational bokeh",
+      "blown out highlights",
+      "crushed muddy shadows"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 40.2MP APS-C X-Trans 5 HR street rangefinder capture, authentic Fujifilm film simulation color science (Reala Ace / Classic Chrome), fine organic micro-grain, tactile urban textures, and unposed documentary timing, shot on Fujifilm X-E5."
+}

@@ -1177,6 +1177,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <optgroup label="📸 Iconic Compacts & Street Documentary">
             <option value="cam_contax_t2_candid">Contax T2 // Zeiss Sonnar 38mm f/2.8 T* (Direct-Flash Night Candid)</option>
             <option value="cam_ricoh_gr_iv_street">Ricoh GR IV // GR 18.3mm f/2.8 (28mm Snap Street)</option>
+            <option value="cam_canon_g7x_iii_flash">Canon G7 X Mark III // 24-100mm f/1.8-2.8 @ 24mm f/4.0 (Direct Flash Tokyo Izakaya Snapshot)</option>
+            <option value="cam_fujifilm_xe5_reala_street">Fujifilm X-E5 40.2MP // XF 27mm f/2.8 R WR @ f/5.6 (Reala Ace Kyoto Gion Rangefinder Street)</option>
+            <option value="cam_sony_a7c_ii_cinetone">Sony Alpha 7C II 33MP // FE 40mm F2.5 G @ f/2.8 (S-Cinetone Milan Street Style)</option>
+            <option value="cam_nikon_z50_ii_street">Nikon Z50 II 20.9MP // NIKKOR Z DX 24mm f/1.7 @ f/2.8 (Picture Control Ceramicist Workshop)</option>
+          </optgroup>
+
+          <optgroup label="🌲 Weather-Sealed Adventure & Hybrid Documentary">
+            <option value="cam_om_system_om5_ii_wild">OM System OM-5 Mark II // M.Zuiko 12-40mm f/2.8 PRO II @ f/4.0 (IP53 Rainforest Mist Expedition)</option>
+            <option value="cam_lumix_g97_hybrid_doc">Panasonic Lumix G97 // Leica DG 12-60mm f/2.8-4.0 @ f/4.0 (V-Log L Florentine Leather Artisan)</option>
           </optgroup>
 
           <optgroup label="🚁 Aerial & Nadir Geometry">
@@ -3377,6 +3386,90 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         lighting: "window_daylight",
         filmStock: "digital_raw",
         aspectRatio: "4:5"
+      },
+      cam_canon_g7x_iii_flash: {
+        profile: "canon_powershot_g7x_iii",
+        lens: "Integrated 8.8-36.8mm f/1.8-2.8 IS Lens @ 24mm f/1.8 equiv (Fast Wide Snapshot)",
+        aperture: "f/4.0",
+        subject: "Friends laughing over shared plates of yakitori, tactile steam rising, honest human micro-expressions, candid unposed joy",
+        framing: "spontaneous intimate snapshot medium portrait",
+        environment: "Bustling Tokyo Shinjuku Omoide Yokocho izakaya with red paper lanterns, smoky timber stalls, and dark night exterior",
+        wardrobe: "casual oversized wool sweaters, vintage denim, and worn canvas tote",
+        mood: "Direct on-camera xenon snapshot flash, warm Canon skin tones, rapid shadow falloff, deep 1-inch sensor environmental focus, authentic travel candid",
+        timeWeather: "night",
+        lighting: "hard_flash",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_fujifilm_xe5_reala_street: {
+        profile: "fujifilm_x_e5",
+        lens: "FUJINON XF 27mm f/2.8 R WR (41mm equivalent Pancake Street Prime)",
+        aperture: "f/5.6",
+        subject: "A kimono textile weaver walking past wooden machiya townhouses, holding a bamboo parasol, peaceful contemplative expression",
+        framing: "eye-level rangefinder street documentary",
+        environment: "Rain-washed cobblestone street in Kyoto Gion district with lattice wood facades, weeping willow branches, and soft ambient reflections",
+        wardrobe: "hand-spun indigo cotton noragi jacket and linen hakama trousers",
+        mood: "Fujifilm Reala Ace film simulation, 40.2MP X-Trans micro-acutance without anti-aliasing filter, organic silver halide grain, truthful shadow nuances",
+        timeWeather: "afternoon",
+        lighting: "window_daylight",
+        filmStock: "classic_chrome",
+        aspectRatio: "3:2"
+      },
+      cam_nikon_z50_ii_street: {
+        profile: "nikon_z50_ii",
+        lens: "NIKKOR Z DX 24mm f/1.7 (36mm equivalent Fast Prime)",
+        aperture: "f/2.8",
+        subject: "Young artisanal ceramicist inspecting a freshly thrown stoneware vase on a pottery wheel, fine clay speckles on fingertips and apron",
+        framing: "three-quarter documentary artisan portrait",
+        environment: "Sunlit loft pottery workshop with drying shelves of terra cotta and celadon pottery, dust motes in sunbeams",
+        wardrobe: "heavy natural canvas work apron over a washed denim shirt",
+        mood: "Nikon Picture Control documentary profile, EXPEED 7 razor edge acutance, honest neutral skin tones, agile APS-C depth of field",
+        timeWeather: "afternoon",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_om_system_om5_ii_wild: {
+        profile: "om_system_om5_ii",
+        lens: "M.Zuiko Digital ED 12-40mm f/2.8 PRO II (24-80mm equivalent Weatherproof Standard)",
+        aperture: "f/4.0",
+        subject: "A wilderness ecologist in waterproof technical gear studying moisture-rich alpine moss and lichens beside a roaring glacial stream",
+        framing: "environmental medium landscape portrait",
+        environment: "Pacific Northwest temperate rainforest shrouded in swirling mountain mist, moss-draped ancient cedar trees, damp volcanic rock",
+        wardrobe: "deep forest-green weatherproof Gore-Tex shell, technical trail trousers, waterproof hiking boots",
+        mood: "OM System IP53 rugged weather-sealed capture, 7.5-stop Sync IS handheld sharpness, deep Micro Four Thirds depth of field, vibrant natural greens",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "4:3"
+      },
+      cam_lumix_g97_hybrid_doc: {
+        profile: "panasonic_lumix_g97",
+        lens: "Leica DG Vario-Elmarit 12-60mm f/2.8-4.0 ASPH POWER O.I.S. (24-120mm equivalent Travel Standard)",
+        aperture: "f/4.0",
+        subject: "Master leather craftsman beveling the edge of a bespoke bridle leather saddle, tactile grain, brass rivets, focused artisan dedication",
+        framing: "three-quarter craft documentary portrait",
+        environment: "Historic Florentine leather workshop with aged wooden workbenches, rows of specialized cutting awls, and warm tungsten worklamps",
+        wardrobe: "worn oiled leather apron over rolled-up chambray work shirt",
+        mood: "Panasonic Lumix G97 V-Log L wide tonal latitude, Leica DG optical acutance, Dual I.S. 2 stability, cinematic shadow roll-off and rich tactile leather grain",
+        timeWeather: "afternoon",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_sony_a7c_ii_cinetone: {
+        profile: "sony_a7c_ii",
+        lens: "Sony FE 40mm F2.5 G (SEL40F25G Compact Street Prime)",
+        aperture: "f/2.8",
+        subject: "Contemporary fashion stylist with sleek tailored blazer crossing an avenue, confident stride, dynamic eye contact",
+        framing: "three-quarter street editorial portrait",
+        environment: "Milan Via Montenapoleone fashion district with neoclassical stone colonnades, luxury storefront reflections, and clean golden-hour backlight",
+        wardrobe: "charcoal tailored double-breasted wool blazer, silk scarf, minimalist silver jewelry",
+        mood: "Sony A7C II 33MP full-frame planar isolation, S-Cinetone cinematic skin modeling, BIONZ XR AI eye-tracking acutance, compact rangefinder street elegance",
+        timeWeather: "golden_hour",
+        lighting: "golden_hour",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
       }
     };
 

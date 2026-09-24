@@ -166,6 +166,12 @@ PROFILE_DISPLAY_NAMES: dict[str, str] = {
     "arri_alexa_265": "ARRI ALEXA 265",
     "sony_fx_series": "Sony VENICE 2",
     "imax_msm_9802": "IMAX MSM 9802 15-Perf 65mm",
+    "canon_powershot_g7x_iii": "Canon PowerShot G7 X Mark III",
+    "fujifilm_x_e5": "Fujifilm X-E5 40.2MP",
+    "nikon_z50_ii": "Nikon Z50 II 20.9MP",
+    "om_system_om5_ii": "OM System OM-5 Mark II",
+    "panasonic_lumix_g97": "Panasonic Lumix G97 Hybrid",
+    "sony_a7c_ii": "Sony Alpha 7C II 33MP",
 }
 
 # Default sweet spots for profiles
@@ -566,6 +572,78 @@ DEFAULT_HARDWARE_SPECS: dict[str, dict[str, Any]] = {
         "angle": "eye-level monumental",
         "medium_type": "cinema_large_format",
     },
+    "canon_powershot_g7x_iii": {
+        "lens": "Integrated 8.8-36.8mm f/1.8-2.8 IS Lens @ 24mm equiv",
+        "aperture": "f/4.0",
+        "dof": "Deep environmental 1-inch sensor focus with rapid flash falloff, intimate snapshot perspective, and natural background storytelling",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "hard_flash",
+        "lighting": "Direct On-Camera Xenon Snapshot Flash with Crisp Inverse-Square Falloff",
+        "framing": "spontaneous intimate snapshot medium portrait",
+        "angle": "eye-level candid",
+        "medium_type": "compact_point_and_shoot",
+    },
+    "fujifilm_x_e5": {
+        "lens": "FUJINON XF 27mm f/2.8 R WR",
+        "aperture": "f/5.6",
+        "dof": "Tactile 40.2MP APS-C X-Trans micro-acutance without anti-aliasing filter, organic film grain, and balanced zone-focus depth",
+        "aspect_ratio": "3:2",
+        "film_stock": "classic_chrome",
+        "lighting_key": "window_daylight",
+        "lighting": "Available Directional Natural Street Light with Organic Shadow Nuances",
+        "framing": "medium rangefinder street documentary",
+        "angle": "eye-level rangefinder perspective",
+        "medium_type": "aps_c_rangefinder",
+    },
+    "nikon_z50_ii": {
+        "lens": "NIKKOR Z DX 24mm f/1.7",
+        "aperture": "f/2.8",
+        "dof": "Crisp EXPEED 7 optical acutance with smooth subject isolation at f/1.7-f/2.8 and neutral color fidelity",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "window_daylight",
+        "lighting": "Available Workshop Natural Daylight with Soft Room Diffusion",
+        "framing": "three-quarter documentary artisan portrait",
+        "angle": "eye-level honest documentary",
+        "medium_type": "aps_c_mirrorless",
+    },
+    "om_system_om5_ii": {
+        "lens": "M.Zuiko Digital ED 12-40mm f/2.8 PRO II",
+        "aperture": "f/4.0",
+        "dof": "Deep Micro Four Thirds wilderness depth keeping foreground botanical textures to mountain ridges in sharp focus with 7.5-stop Sync IS",
+        "aspect_ratio": "4:3",
+        "film_stock": "digital_raw",
+        "lighting_key": "window_daylight",
+        "lighting": "Atmospheric Misty Mountain Daylight with Natural Earthy Contrast",
+        "framing": "environmental medium wilderness landscape",
+        "angle": "eye-level rugged expedition",
+        "medium_type": "mft_weatherproof",
+    },
+    "panasonic_lumix_g97": {
+        "lens": "Leica DG Vario-Elmarit 12-60mm f/2.8-4.0 ASPH POWER O.I.S.",
+        "aperture": "f/4.0",
+        "dof": "Leica DG optical micro-contrast with V-Log L wide tonal latitude and balanced Micro Four Thirds storytelling depth",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "window_daylight",
+        "lighting": "Natural Documentary Ambient Daylight with Soft Directional Side-Fill",
+        "framing": "three-quarter craft documentary portrait",
+        "angle": "chest-level documentary angle",
+        "medium_type": "mft_hybrid",
+    },
+    "sony_a7c_ii": {
+        "lens": "Sony FE 40mm F2.5 G (SEL40F25G)",
+        "aperture": "f/2.8",
+        "dof": "Shallow 33MP full-frame planar subject isolation with cinematic S-Cinetone skin modeling and BIONZ XR AI eye tracking",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "golden_hour",
+        "lighting": "Low-Angle Golden Hour Urban Backlight with Subtle Rim Separation",
+        "framing": "three-quarter street editorial portrait",
+        "angle": "eye-level dynamic street perspective",
+        "medium_type": "compact_full_frame",
+    },
 }
 
 
@@ -688,16 +766,18 @@ class PromptIntelligenceEngine:
         if intent.primary_genre in ("portrait", "fashion", "documentary"):
             if profile_id in ("phase_one_iq4", "hasselblad_x2d_ii_100c", "fujifilm_gfx100ii"):
                 score += 35.0  # Flagship medium format resolves unmatched skin and fabric
-            elif profile_id in ("canon_eos_r5_ii", "nikon_z9", "leica_sl3_p", "leica_m11"):
+            elif profile_id in ("canon_eos_r5_ii", "nikon_z9", "leica_sl3_p", "leica_m11", "sony_a7c_ii"):
                 score += 25.0
             elif profile_id in ("pentax_67ii", "contax_645", "hasselblad_500cm", "mamiya_rz67"):
                 score += 30.0  # Analog character portraits
+            elif profile_id in ("panasonic_lumix_g97", "nikon_z50_ii", "fujifilm_x_e5"):
+                score += 25.0  # Tactile artisan/travel documentary
 
         elif intent.primary_genre == "street":
-            if profile_id in ("leica_m11", "leica_m6_analog", "ricoh_gr_iv", "fujifilm_gfx100rf"):
+            if profile_id in ("leica_m11", "leica_m6_analog", "ricoh_gr_iv", "fujifilm_gfx100rf", "fujifilm_x_e5"):
                 score += 40.0
-            elif profile_id in ("contax_t2", "nikon_fm2", "leica_q3_monochrom"):
-                score += 30.0
+            elif profile_id in ("contax_t2", "nikon_fm2", "leica_q3_monochrom", "canon_powershot_g7x_iii", "sony_a7c_ii", "nikon_z50_ii"):
+                score += 35.0
 
         elif intent.primary_genre == "architecture":
             if profile_id in ("linhof_technika_4x5", "fujifilm_gfx100ii", "phase_one_iq4"):
@@ -714,8 +794,8 @@ class PromptIntelligenceEngine:
         elif intent.primary_genre == "macro_detail":
             if profile_id in ("panasonic_lumix_s1rii", "sony_a7rv", "phase_one_iq4", "canon_eos_r5_ii"):
                 score += 45.0
-            elif profile_id == "mamiya_rz67":
-                score += 30.0
+            elif profile_id in ("mamiya_rz67", "om_system_om5_ii"):
+                score += 35.0
 
         elif intent.primary_genre == "cinema":
             if profile_id in ("arri_alexa_35", "arri_alexa_265", "sony_fx_series", "imax_msm_9802"):
@@ -726,14 +806,35 @@ class PromptIntelligenceEngine:
         elif intent.primary_genre == "landscape":
             if profile_id in ("hasselblad_xpan", "deardorff_8x10", "linhof_technika_4x5", "phase_one_iq4"):
                 score += 35.0
-            elif profile_id in ("fujifilm_gfx100ii", "hasselblad_x2d_ii_100c"):
-                score += 30.0
+            elif profile_id in ("fujifilm_gfx100ii", "hasselblad_x2d_ii_100c", "om_system_om5_ii"):
+                score += 35.0
 
         elif intent.primary_genre == "still_life":
             if profile_id in ("phase_one_iq4", "sony_a7rv", "hasselblad_x2d_ii_100c"):
                 score += 40.0
 
-        # Special flag affinities
+        # Special flag and keyword affinities
+        prompt_lower = intent.raw_prompt.lower()
+        if any(w in prompt_lower for w in ["mist", "rain", "weather", "waterfall", "wilderness", "hike", "hiking", "alpine", "expedition", "outdoor", "moss"]):
+            if profile_id == "om_system_om5_ii":
+                score += 40.0
+
+        if any(w in prompt_lower for w in ["vlog", "snapshot", "flash", "party", "izakaya", "café", "casual", "friends", "yokocho"]):
+            if profile_id == "canon_powershot_g7x_iii":
+                score += 40.0
+
+        if any(w in prompt_lower for w in ["craft", "artisan", "workshop", "leather", "pottery", "woodworking", "ceramicist"]):
+            if profile_id in ("panasonic_lumix_g97", "nikon_z50_ii"):
+                score += 35.0
+
+        if any(w in prompt_lower for w in ["reala", "film simulation", "classic chrome", "fuji", "gion", "kyoto", "machiya"]):
+            if profile_id == "fujifilm_x_e5":
+                score += 45.0
+
+        if any(w in prompt_lower for w in ["s-cinetone", "compact full frame", "milan", "street style", "street fashion", "fashion stylist"]):
+            if profile_id == "sony_a7c_ii":
+                score += 40.0
+
         if intent.is_monochrome_intent:
             if profile_id in ("leica_q3_monochrom", "imax_msm_9802", "deardorff_8x10", "antique_view_8x10", "leica_m6_analog"):
                 score += 40.0

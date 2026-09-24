@@ -1,0 +1,61 @@
+{
+  "profile_id": "canon_powershot_g7x_iii",
+  "title": "Canon PowerShot G7 X Mark III Compact Camera",
+  "schema_version": "2.0",
+  "purpose": "Spontaneous, high-intimacy lifestyle and travel snapshot photography with natural skin warmth, built-in ND filter versatility, deep 1-inch sensor depth of field, and direct on-camera flash character.",
+  "sensor_and_optics": {
+    "camera_system": "Canon PowerShot G7 X Mark III (20.1MP 1.0-Type Stacked CMOS)",
+    "sensor_type": "20.1MP 1.0-inch stacked CMOS sensor with DIGIC 8 image processor",
+    "sensor_dimensions": "13.2x8.8mm 1.0-type stacked sensor (2.7x crop factor)",
+    "full_frame_equivalent": "24-100mm equivalent field of view",
+    "lens": "Integrated 8.8-36.8mm f/1.8-2.8 IS Lens (24-100mm FF equivalent, 4.2x optical zoom, built-in 3-stop ND filter)",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 125 base sensitivity (extended ISO 125-12,800)",
+    "dynamic_range": "12.5 stops dynamic range with 14-bit CR3 RAW capture",
+    "shutter": "Electronic/mechanical leaf shutter up to 1/25,600s, 1/2000s flash sync, whisper-quiet actuation"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Direct on-camera pop-up flash or vibrant golden-hour travel ambient light",
+    "light_transport": "Signature Canon warm tonal roll-off, vibrant reds and amber hues, specular highlight sheen with rapid inverse-square flash falloff in dark interiors"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Authentic Canon color science: flattering warm skin tones, lifelike epidermal translucency, and natural rosy undertones without synthetic beauty smoothing",
+      "Crisp optical micro-contrast across casual textiles, café tabletops, street food textures, and intimate environmental details",
+      "Clean DIGIC 8 demosaicing with honest micro-grain and zero heavy-handed digital denoise smearing"
+    ],
+    "depth_and_optics": [
+      "Deep environmental focus inherent to 1.0-type sensor physics, keeping both subject and immediate background context in sharp narrative legibility at f/2.8-f/4.0",
+      "Gentle circular optical bokeh when shooting close-up macros at 24mm f/1.8 or 100mm f/2.8",
+      "Spontaneous, eye-level or chest-level pocket camera framing with slight wide-angle peripheral intimacy"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "over-smoothed denoise",
+      "compression artifacts",
+      "chromatic aberration",
+      "synthetic glow"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial HDR halo",
+      "computational bokeh",
+      "blown out highlights",
+      "crushed muddy shadows"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 20.1MP 1-inch stacked CMOS snapshot aesthetic, spontaneous pocketable framing, deep environmental depth of field, authentic Canon warm skin tones, and honest direct-flash or golden ambient light, shot on Canon PowerShot G7 X Mark III."
+}

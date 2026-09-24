@@ -1,0 +1,61 @@
+{
+  "profile_id": "sony_a7c_ii",
+  "title": "Sony Alpha 7C II Compact Full-Frame Camera",
+  "schema_version": "2.0",
+  "purpose": "Lightweight full-frame street editorial, fashion portraiture, and travel reportage powered by a 33.0MP Exmor R BSI CMOS sensor, dedicated AI autofocus unit, and cinematic S-Cinetone color science in a compact rangefinder-style chassis.",
+  "sensor_and_optics": {
+    "camera_system": "Sony Alpha 7C II Compact Full-Frame (33.0MP Exmor R BSI)",
+    "sensor_type": "33.0MP 35mm full-frame back-illuminated Exmor R CMOS sensor with BIONZ XR & AI Processing Unit",
+    "sensor_dimensions": "35.9x23.9mm full-frame sensor (1.0x crop factor)",
+    "full_frame_equivalent": "40mm street editorial standard field of view",
+    "lens": "Sony FE 40mm F2.5 G (SEL40F25G compact prime)",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 100 base sensitivity (extended ISO 50-204,800)",
+    "dynamic_range": "15.0 stops dynamic range with 14-bit ARW RAW and S-Cinetone / Creative Look FL",
+    "shutter": "Electronic front-curtain mechanical shutter to 1/4000s, electronic to 1/8000s, 7.0-stop IBIS"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Dynamic urban street light, diffused café window illumination, or high-contrast architectural twilight",
+    "light_transport": "S-Cinetone cinematic skin tone modeling, Creative Look filmic contrast, gentle highlight roll-off, deep clean shadow retrieval"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Exquisite 33.0MP full-frame resolving power: fine epidermal skin texture, detailed clothing weave, brushed metallic accessories, and crisp urban architecture",
+      "AI Processing Unit tracking lock guaranteeing pin-sharp iris focus even during dynamic walking or glancing angles",
+      "G-series optical purity with circular 7-blade aperture rendering smooth, circular bokeh without onion-ring artifacts"
+    ],
+    "depth_and_optics": [
+      "Shallow full-frame planar isolation separating subject from bustling city backgrounds at f/2.5-f/2.8",
+      "Natural rectilinear geometry across the versatile 40mm focal length",
+      "Spontaneous eye-level rangefinder-style framing combining documentary agility with full-frame optical presence"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "over-smoothed denoise",
+      "compression artifacts",
+      "chromatic aberration",
+      "synthetic glow"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "artificial HDR halo",
+      "computational bokeh",
+      "blown out highlights",
+      "crushed muddy shadows"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce 33.0MP full-frame BSI capture, AI-locked eye acutance, cinematic S-Cinetone skin tones, compact street rangefinder perspective, and natural full-frame subject separation, shot on Sony Alpha 7C II."
+}

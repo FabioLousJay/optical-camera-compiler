@@ -61,7 +61,7 @@ from .restoration import (
     viewing_distance_inches,
 )
 
-__version__ = "3.9.3"
+__version__ = "3.9.4"
 
 __all__ = [
     "OpticalCompiler",
