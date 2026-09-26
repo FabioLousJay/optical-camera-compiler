@@ -314,6 +314,72 @@ class TestWebStudioHandler(unittest.TestCase):
         self.assertIn("onCountryCityChange", html)
         self.assertIn("onGeographicVibeChange", html)
 
+    def test_web_studio_clean_slate_purge_on_apply_rig(self) -> None:
+        """Verify Web Studio init starts clean and applyRigRecommendation performs complete clean-slate purge."""
+        status, _, body = self._execute_request("GET", "/")
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+
+        # 1. Verify init starts clean (does not force Leica and Paris presets)
+        self.assertIn("cameraPresetSelect').value = 'none'", html)
+        self.assertIn("ambientPresetSelect').value = 'none'", html)
+        self.assertNotIn("cameraPresetSelect').value = 'cam_leica_m11_reportage'", html)
+        self.assertNotIn("ambientPresetSelect').value = 'amb_paris_haussmann'", html)
+
+        # 2. Verify applyRigRecommendation purges all residual fields
+        self.assertIn("function applyRigRecommendation(index, compileNow)", html)
+        self.assertIn("document.getElementById('environmentInput').value = ''", html)
+        self.assertIn("document.getElementById('wardrobeInput').value = ''", html)
+        self.assertIn("document.getElementById('moodInput').value = ''", html)
+        self.assertIn("document.getElementById('bodyVolumeInput').value = ''", html)
+        self.assertIn("document.getElementById('cctInput').value = ''", html)
+        self.assertIn("document.getElementById('luxInput').value = ''", html)
+        self.assertIn("document.getElementById('criInput').value = ''", html)
+        self.assertIn("document.getElementById('wallSurroundInput').value = ''", html)
+
+    def test_compile_with_user_prompt_no_paris_or_coat_leakage(self) -> None:
+        """Verify POST /api/compile with user prompt and empty environment produces zero residual Paris/coat tokens."""
+        user_scene = (
+            "An extra-obese, overweight 74-year-old senior white male with piercing blue eyes, "
+            "a large, hairy grizzly chest and gut, wearing beach-style speedos, bathing in a naturally heated lake. "
+            "Hyper-realistic portrait, no CGI, no fake AI content."
+        )
+        payload = {
+            "scene": user_scene,
+            "target": "gpt_images",
+            "profile": "nikon_z9",
+            "lens": "NIKKOR Z 135mm f/1.8 S Plena",
+            "aperture": "f/1.8",
+            "framing": "three-quarter environmental portrait",
+            "environment": "",
+            "wardrobe": "",
+            "mood": "",
+            "lighting": "Sculptural Key Light with 4:1 Dramatic Contrast Ratio",
+            "aspect_ratio": "4:5",
+        }
+        body_bytes = json.dumps(payload).encode("utf-8")
+        status, _, resp_bytes = self._execute_request("POST", "/api/compile", body_bytes)
+        self.assertEqual(status, 200)
+
+        data = json.loads(resp_bytes.decode("utf-8"))
+        compiled_positive = data["positive_prompt"]
+
+        # Positive output must NOT contain residual preset texts
+        self.assertNotIn("Paris", compiled_positive)
+        self.assertNotIn("Haussmann", compiled_positive)
+        self.assertNotIn("trench coat", compiled_positive)
+        self.assertNotIn("cashmere scarf", compiled_positive)
+        self.assertNotIn("Saint-Germain", compiled_positive)
+        self.assertNotIn("Exhibition Lighting Calibration", compiled_positive)
+        self.assertNotIn("Series Cohesion Protocol", compiled_positive)
+
+        # Positive output must retain the user's scene accurately
+        self.assertIn("74-year-old senior white male", compiled_positive)
+        self.assertIn("speedos", compiled_positive)
+        self.assertIn("naturally heated lake", compiled_positive)
+        self.assertIn("Nikon Z 9", compiled_positive)
+
 
 if __name__ == "__main__":
     unittest.main()
+

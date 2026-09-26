@@ -3831,14 +3831,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     async function init() {
       setupDragAndDrop();
       await loadProfiles();
-      // Apply default Leica M11 + Paris scenario to start
+      // Initialize in clean Build Your Own state so user prompts are never contaminated with residual presets
       if (document.getElementById('cameraPresetSelect')) {
-        document.getElementById('cameraPresetSelect').value = 'cam_leica_m11_reportage';
-        onCameraPresetSelectChange();
+        document.getElementById('cameraPresetSelect').value = 'none';
       }
       if (document.getElementById('ambientPresetSelect')) {
-        document.getElementById('ambientPresetSelect').value = 'amb_paris_haussmann';
-        onAmbientPresetSelectChange();
+        document.getElementById('ambientPresetSelect').value = 'none';
       }
     }
 
@@ -4209,6 +4207,69 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const rec = currentRigRecommendations[index];
       if (!rec) return;
 
+      // 0. Clean-slate purge of all lingering/stale scene inputs and preset overrides
+      if (document.getElementById('cameraPresetSelect')) document.getElementById('cameraPresetSelect').value = 'none';
+      if (document.getElementById('ambientPresetSelect')) document.getElementById('ambientPresetSelect').value = 'none';
+      if (document.getElementById('scenarioSelect')) document.getElementById('scenarioSelect').value = 'none';
+
+      if (document.getElementById('environmentInput')) document.getElementById('environmentInput').value = '';
+      if (document.getElementById('wardrobeInput')) document.getElementById('wardrobeInput').value = '';
+      if (document.getElementById('moodInput')) document.getElementById('moodInput').value = '';
+      if (document.getElementById('timeWeatherSelect')) document.getElementById('timeWeatherSelect').value = 'auto';
+      if (document.getElementById('countryCitySelect')) document.getElementById('countryCitySelect').value = 'none';
+      if (document.getElementById('geographicVibeSelect')) document.getElementById('geographicVibeSelect').value = 'none';
+      if (document.getElementById('cityVibeSelect')) document.getElementById('cityVibeSelect').value = 'none';
+      lastInjectedCity = null;
+      lastInjectedVibe = null;
+
+      if (document.getElementById('productCropInput')) document.getElementById('productCropInput').value = '';
+      if (document.getElementById('skuColorInput')) document.getElementById('skuColorInput').value = '';
+      if (document.getElementById('capGeometryInput')) document.getElementById('capGeometryInput').value = '';
+      if (document.getElementById('labelKerningInput')) document.getElementById('labelKerningInput').value = '';
+      if (document.getElementById('materialFinishInput')) document.getElementById('materialFinishInput').value = '';
+      if (document.getElementById('seamsInput')) document.getElementById('seamsInput').value = '';
+
+      if (document.getElementById('chkHandLock')) document.getElementById('chkHandLock').checked = false;
+      if (document.getElementById('gripTypeSelect')) document.getElementById('gripTypeSelect').value = 'default';
+      if (document.getElementById('handDetailsInput')) document.getElementById('handDetailsInput').value = '';
+
+      if (document.getElementById('chkAnamorphic')) document.getElementById('chkAnamorphic').checked = false;
+      if (document.getElementById('squeezeSelect')) document.getElementById('squeezeSelect').value = 'default';
+      if (document.getElementById('streakFlareSelect')) document.getElementById('streakFlareSelect').value = 'none';
+      if (document.getElementById('irisBladesSelect')) document.getElementById('irisBladesSelect').value = 'default';
+
+      if (document.getElementById('goboSelect')) document.getElementById('goboSelect').value = 'none';
+      if (document.getElementById('gripModifierSelect')) document.getElementById('gripModifierSelect').value = 'none';
+      if (document.getElementById('lightingRatioSelect')) document.getElementById('lightingRatioSelect').value = 'default';
+      if (document.getElementById('copySpaceSelect')) document.getElementById('copySpaceSelect').value = 'none';
+      if (document.getElementById('adSafeZoneSelect')) document.getElementById('adSafeZoneSelect').value = 'none';
+
+      if (document.getElementById('bodyVolumeInput')) document.getElementById('bodyVolumeInput').value = '';
+      if (document.getElementById('weightLbInput')) document.getElementById('weightLbInput').value = '';
+
+      if (document.getElementById('materialStyleSelect')) document.getElementById('materialStyleSelect').value = 'none';
+      if (document.getElementById('bgStyleSelect')) document.getElementById('bgStyleSelect').value = 'default';
+      if (document.getElementById('chkVolumetric4D')) document.getElementById('chkVolumetric4D').checked = false;
+      if (document.getElementById('chkRemoveText')) document.getElementById('chkRemoveText').checked = false;
+      if (document.getElementById('paperProfileSelect')) document.getElementById('paperProfileSelect').value = 'none';
+      if (document.getElementById('printSizeSelect')) document.getElementById('printSizeSelect').value = 'default';
+      if (document.getElementById('chkPolicySafe')) document.getElementById('chkPolicySafe').checked = false;
+      if (document.getElementById('probeSelect')) document.getElementById('probeSelect').value = 'none';
+      if (document.getElementById('minMbInput')) document.getElementById('minMbInput').value = '';
+      if (document.getElementById('skinLightingSelect')) document.getElementById('skinLightingSelect').value = 'none';
+
+      if (document.getElementById('cctInput')) document.getElementById('cctInput').value = '';
+      if (document.getElementById('luxInput')) document.getElementById('luxInput').value = '';
+      if (document.getElementById('criInput')) document.getElementById('criInput').value = '';
+      if (document.getElementById('wallSurroundInput')) document.getElementById('wallSurroundInput').value = '';
+      if (document.getElementById('galleryZoneInput')) document.getElementById('galleryZoneInput').value = '';
+      if (document.getElementById('anchorIdInput')) document.getElementById('anchorIdInput').value = '';
+
+      if (document.getElementById('filterSelect')) document.getElementById('filterSelect').value = 'none';
+      if (document.getElementById('shutterSelect')) document.getElementById('shutterSelect').value = 'auto';
+
+      document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+
       // 1. Set Hardware Profile
       const profSelect = document.getElementById('profileSelect');
       if (profSelect && rec.profile_id) {
@@ -4287,12 +4348,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
       }
 
-      // 8. If compileNow is true, execute compilation and scroll to output
+      // 8. Set Skin Lighting if present
+      if (rec.skin_lighting && document.getElementById('skinLightingSelect')) {
+        document.getElementById('skinLightingSelect').value = rec.skin_lighting;
+      }
+
+      // 9. If compileNow is true, execute compilation and scroll to output
       if (compileNow && typeof compile === 'function') {
         compile();
         const outPane = document.querySelector('.output-pane') || document.getElementById('positiveOutput');
         if (outPane) {
           outPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        showToast("⚡ Applied & Compiled " + (rec.tier_name || "Rig") + "!");
+      } else {
+        showToast("📋 Applied " + (rec.tier_name || "Rig") + " to form controls.");
+        const formEl = document.getElementById('subjectInput');
+        if (formEl) {
+          formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }
     }
@@ -4486,6 +4559,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (document.getElementById('paperProfileSelect')) document.getElementById('paperProfileSelect').value = 'none';
       if (document.getElementById('printSizeSelect')) document.getElementById('printSizeSelect').value = 'default';
       if (document.getElementById('chkPolicySafe')) document.getElementById('chkPolicySafe').checked = false;
+      if (document.getElementById('probeSelect')) document.getElementById('probeSelect').value = 'none';
+      if (document.getElementById('minMbInput')) document.getElementById('minMbInput').value = '';
+      if (document.getElementById('skinLightingSelect')) document.getElementById('skinLightingSelect').value = 'none';
+
+      if (document.getElementById('cctInput')) document.getElementById('cctInput').value = '';
+      if (document.getElementById('luxInput')) document.getElementById('luxInput').value = '';
+      if (document.getElementById('criInput')) document.getElementById('criInput').value = '';
+      if (document.getElementById('wallSurroundInput')) document.getElementById('wallSurroundInput').value = '';
+      if (document.getElementById('galleryZoneInput')) document.getElementById('galleryZoneInput').value = '';
+      if (document.getElementById('anchorIdInput')) document.getElementById('anchorIdInput').value = '';
+
+      if (document.getElementById('filterSelect')) document.getElementById('filterSelect').value = 'none';
+      if (document.getElementById('shutterSelect')) document.getElementById('shutterSelect').value = 'auto';
 
       document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
       

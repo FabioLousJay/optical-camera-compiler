@@ -685,7 +685,10 @@ class PromptIntelligenceEngine:
         # Flags
         is_monochrome = any(w in text for w in ["black and white", "b&w", "monochrome", "monochromatic", "tri-x", "silver halide", "grayscale"])
         is_cinematic = any(w in text for w in ["cinematic", "movie", "film still", "anamorphic", "cinema", "widescreen", "2.39:1"])
-        is_macro = genre == "macro_detail" or any(w in text for w in ["macro", "1:1", "close up", "close-up", "extreme detail", "microscopic", "pores", "lashes"])
+        is_macro = genre == "macro_detail" or (
+            any(w in text for w in ["macro lens", "1:1 macro", "extreme macro", "macro close-up", "microscopic", "dewdrop macro", "insect macro"])
+            and not any(w in text for w in ["portrait", "editorial portrait", "headshot", "senior", "man", "woman", "person"])
+        )
         is_action = genre == "sports_action" or any(w in text for w in ["running", "sprinting", "jumping", "flying", "leaping", "speed", "fast"])
         is_aerial = any(w in text for w in ["aerial", "drone", "nadir", "top down", "top-down", "bird's eye", "birds eye", "high altitude"])
         is_product = genre == "still_life" or any(w in text for w in ["bottle", "sku", "perfume", "cosmetic", "product shot", "ecommerce"])
@@ -851,7 +854,48 @@ class PromptIntelligenceEngine:
             if profile_id in ("sony_a1_ii", "canon_eos_r1", "nikon_z9"):
                 score += 30.0
 
+        # Specific hardware brand or model boost if explicitly requested in prompt
+        camera_display = PROFILE_DISPLAY_NAMES.get(profile_id, "").lower()
+        if profile_id.replace("_", " ") in prompt_lower or (camera_display and camera_display in prompt_lower):
+            score += 50.0
+        elif "nikon z9" in prompt_lower or "nikon z 9" in prompt_lower:
+            if profile_id == "nikon_z9":
+                score += 50.0
+        elif "plena" in prompt_lower and profile_id == "nikon_z9":
+            score += 50.0
+
         return score
+
+    @classmethod
+    def strip_compiler_boilerplate(cls, text: str) -> str:
+        """Strip previous compiler boilerplate, section prefixes, and hardware capture directives."""
+        if not text:
+            return ""
+        cleaned = text.strip()
+        # Strip leading Subject: or Scene:
+        if re.match(r"^(?:subject|scene):\s*", cleaned, flags=re.IGNORECASE):
+            cleaned = re.sub(r"^(?:subject|scene):\s*", "", cleaned, flags=re.IGNORECASE).strip()
+
+        # Remove sections starting with Environment:, Wardrobe:, Framing:, etc.
+        section_split = re.split(
+            r"\s+(?:Environment|Wardrobe|Framing|Lighting geometry|Focus discipline|Surface rendering|Output specification|Hard negative constraints|Series Cohesion Protocol|Exhibition Lighting Calibration|Body Morphology & Proportional Volume Calibration):",
+            cleaned,
+            maxsplit=1,
+            flags=re.IGNORECASE,
+        )
+        if len(section_split) > 1:
+            cleaned = section_split[0].strip()
+
+        # Remove hardware capture boilerplate clauses and camera signatures
+        patterns = [
+            r"\s*(?:Masterwork photographic capture|Photographic study captured|Atmospheric character capture|Photographic capture|Captured)\s+on\s+.*",
+            r"\s*Tack-sharp focus on primary focal plane with natural micro-contrast.*",
+            r"\s*[A-Za-z0-9\s]+optical signature:.*",
+        ]
+        for pat in patterns:
+            cleaned = re.sub(pat, "", cleaned, flags=re.IGNORECASE | re.DOTALL).strip()
+
+        return cleaned
 
     @classmethod
     def enhance_scene_prompt(cls, raw_prompt: str, intent: SceneIntent, profile_id: str, tier: int) -> str:
@@ -862,14 +906,18 @@ class PromptIntelligenceEngine:
         dof = spec.get("dof", "authentic depth of field")
         lighting = spec.get("lighting", "natural lighting")
         
-        # Clean user prompt without breaking grammar
-        clean_user_scene = raw_prompt.strip()
+        # Clean user prompt without breaking grammar and strip prior compiler boilerplate
+        clean_user_scene = cls.strip_compiler_boilerplate(raw_prompt)
+        if not clean_user_scene:
+            clean_user_scene = raw_prompt.strip()
         if clean_user_scene.endswith("."):
             clean_user_scene = clean_user_scene[:-1]
 
-        # Enforce Gaze Anchor for portraits if people are present
+        # Enforce Gaze Anchor for portraits if people are present and gaze not already described
         gaze_anchor = ""
-        if intent.primary_genre in ("portrait", "fashion", "documentary") and any(w in clean_user_scene.lower() for w in ["man", "woman", "person", "watchmaker", "tailor", "model", "face", "girl", "boy", "artisan", "elderly", "client", "worker"]):
+        scene_lower = clean_user_scene.lower()
+        has_gaze_cue = any(g in scene_lower for g in ["eye contact", "facing camera", "looking at camera", "gaze anchor", "direct gaze"])
+        if not has_gaze_cue and intent.primary_genre in ("portrait", "fashion", "documentary") and any(w in scene_lower for w in ["man", "woman", "person", "watchmaker", "tailor", "model", "face", "girl", "boy", "artisan", "elderly", "client", "worker"]):
             gaze_anchor = ", facing camera with direct eye contact, natural dignified posture and expression"
 
         if tier == 1:
@@ -914,13 +962,14 @@ class PromptIntelligenceEngine:
     ) -> QualityGateResult:
         """Automated Quality Gate enforcing Anti-Drift and Anti-Hallucination."""
         # 1. Anti-Drift Entity Recall Verification
-        # Extract user nouns & key tokens (min length 3, excluding stopwords)
+        # Extract user nouns & key tokens (min length 3, excluding stopwords) from core user prompt
+        core_user_prompt = cls.strip_compiler_boilerplate(user_prompt) or user_prompt
         stop_words = {
             "the", "and", "with", "for", "from", "that", "this", "shot", "photo", "photograph",
             "camera", "lens", "looking", "standing", "under", "over", "into", "onto", "about",
             "your", "his", "her", "their", "best", "some", "like", "very", "just"
         }
-        user_tokens = set(re.findall(r"[a-zA-Z0-9]+", user_prompt.lower()))
+        user_tokens = set(re.findall(r"[a-zA-Z0-9]+", core_user_prompt.lower()))
         filtered_user_tokens = [t for t in user_tokens if t not in stop_words and len(t) > 2]
         
         enhanced_lower = enhanced_scene.lower()

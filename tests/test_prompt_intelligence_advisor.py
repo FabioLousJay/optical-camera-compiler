@@ -258,6 +258,65 @@ class TestPromptIntelligenceAdvisor(unittest.TestCase):
         finally:
             sys.stdout = saved_stdout
 
+    def test_strip_compiler_boilerplate(self):
+        """Verify strip_compiler_boilerplate purges hardware capture clauses, signatures, and section headers."""
+        prompt = (
+            "Subject: An extra-obese, overweight 74-year-old senior white male in beach-style speedos bathing in a naturally heated lake. "
+            "Masterwork photographic capture on Nikon Z 9 with NIKKOR Z 135mm f/1.8 S Plena. "
+            "Tack-sharp focus on primary focal plane with natural micro-contrast and visible epidermal pores and fine textile weave. "
+            "Sculptural Key Light with 4:1 Dramatic Contrast Ratio. "
+            "Plena optical signature: absolute zero vignetting, perfectly circular edge-to-edge bokeh discs. "
+            "Environment: wet cobblestone Paris street in Saint-Germain. "
+            "Wardrobe: tailored navy wool trench coat."
+        )
+        cleaned = PromptIntelligenceEngine.strip_compiler_boilerplate(prompt)
+        self.assertNotIn("Masterwork photographic capture", cleaned)
+        self.assertNotIn("Nikon Z 9", cleaned)
+        self.assertNotIn("Plena", cleaned)
+        self.assertNotIn("Environment:", cleaned)
+        self.assertNotIn("Paris street", cleaned)
+        self.assertNotIn("Wardrobe:", cleaned)
+        self.assertNotIn("trench coat", cleaned)
+        self.assertIn("An extra-obese, overweight 74-year-old senior white male", cleaned)
+        self.assertIn("bathing in a naturally heated lake", cleaned)
+
+    def test_recommend_rigs_on_already_compiled_prompt_no_duplication(self):
+        """Verify that passing an already compiled prompt to recommend_rigs does not duplicate hardware sentences."""
+        user_prompt = (
+            "An extra-obese, overweight 74-year-old senior white male with piercing blue eyes, "
+            "a large, hairy grizzly chest and gut, wearing beach-style speedos, bathing in a naturally heated lake. "
+            "Hyper-realistic portrait, no CGI, no fake AI content. "
+            "Masterwork photographic capture on Nikon Z 9 with NIKKOR Z 135mm f/1.8 S Plena. "
+            "Tack-sharp focus on primary focal plane with natural micro-contrast and visible epidermal pores and fine textile weave. "
+            "Sculptural Key Light with 4:1 Dramatic Contrast Ratio. "
+            "Plena optical signature: absolute zero vignetting, perfectly circular edge-to-edge bokeh discs, "
+            "and tack-sharp subject acutance, preserving organic tonal gradation and unretouched authentic physical materiality."
+        )
+
+        recs = PromptIntelligenceEngine.recommend_rigs(user_prompt)
+        self.assertEqual(len(recs), 3)
+
+        # Rank 1 must boost Nikon Z 9 due to explicit hardware match
+        self.assertEqual(recs[0].profile_id, "nikon_z9")
+        # In Rank 1, "Masterwork photographic capture on Nikon Z 9" must appear EXACTLY ONCE
+        count_capture = recs[0].enhanced_scene.count("Masterwork photographic capture on Nikon Z 9")
+        self.assertEqual(count_capture, 1, "Hardware capture sentence must not be duplicated in Rank 1")
+
+        # In Rank 2 and Rank 3, prior Nikon Z 9 / Plena tokens must NOT leak into the new cameras
+        for r in recs[1:]:
+            self.assertNotIn("Nikon Z 9", r.enhanced_scene, f"Prior Nikon Z 9 text leaked into {r.camera_name}")
+            self.assertNotIn("Plena", r.enhanced_scene, f"Prior Plena text leaked into {r.camera_name}")
+
+        # All 3 recommendations must pass the quality gate with full intent preservation
+        for r in recs:
+            self.assertTrue(r.quality_gate.passed)
+            self.assertGreaterEqual(r.quality_gate.anti_drift_score, 90.0)
+            self.assertIn("extra", r.quality_gate.preserved_entities)
+            self.assertIn("obese", r.quality_gate.preserved_entities)
+            self.assertIn("speedos", r.quality_gate.preserved_entities)
+            self.assertIn("lake", r.quality_gate.preserved_entities)
+
 
 if __name__ == "__main__":
     unittest.main()
+
