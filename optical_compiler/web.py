@@ -1178,7 +1178,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <option value="cam_contax_t2_candid">Contax T2 // Zeiss Sonnar 38mm f/2.8 T* (Direct-Flash Night Candid)</option>
             <option value="cam_ricoh_gr_iv_street">Ricoh GR IV // GR 18.3mm f/2.8 (28mm Snap Street)</option>
             <option value="cam_canon_g7x_iii_flash">Canon G7 X Mark III // 24-100mm f/1.8-2.8 @ 24mm f/4.0 (Direct Flash Tokyo Izakaya Snapshot)</option>
-            <option value="cam_fujifilm_xe5_reala_street">Fujifilm X-E5 40.2MP // XF 27mm f/2.8 R WR @ f/5.6 (Reala Ace Kyoto Gion Rangefinder Street)</option>
+            <option value="cam_fujifilm_xe5_reala_street">Fujifilm X-E5 40.2MP // XF 27mm f/2.8 R WR @ f/5.6 (Best Travel Camera Overall // Reala Ace Kyoto Street)</option>
             <option value="cam_sony_a7c_ii_cinetone">Sony Alpha 7C II 33MP // FE 40mm F2.5 G @ f/2.8 (S-Cinetone Milan Street Style)</option>
             <option value="cam_nikon_z50_ii_street">Nikon Z50 II 20.9MP // NIKKOR Z DX 24mm f/1.7 @ f/2.8 (Picture Control Ceramicist Workshop)</option>
           </optgroup>

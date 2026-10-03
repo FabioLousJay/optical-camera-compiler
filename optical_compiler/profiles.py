@@ -638,6 +638,9 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "x-trans 5 hr",
             "xf 27mm",
             "xf 27mm f2.8",
+            "best travel camera",
+            "travel camera",
+            "travel photography",
         ],
     ),
     (

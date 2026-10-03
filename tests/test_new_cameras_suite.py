@@ -188,6 +188,7 @@ class TestNewCamerasSuite(unittest.TestCase):
         advisor_queries = [
             ("casual friends laughing over yakitori direct flash snapshot in shinjuku", "canon_powershot_g7x_iii"),
             ("gion kyoto reala ace film simulation street walk", "fujifilm_x_e5"),
+            ("Best travel camera overall with pancake lens for street documentary", "fujifilm_x_e5"),
             ("hiking through misty alpine rainforest waterfall moss", "om_system_om5_ii"),
             ("milan street fashion stylist tailored blazer s-cinetone", "sony_a7c_ii"),
         ]

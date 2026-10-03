@@ -830,7 +830,7 @@ class PromptIntelligenceEngine:
             if profile_id in ("panasonic_lumix_g97", "nikon_z50_ii"):
                 score += 35.0
 
-        if any(w in prompt_lower for w in ["reala", "film simulation", "classic chrome", "fuji", "gion", "kyoto", "machiya"]):
+        if any(w in prompt_lower for w in ["travel", "travel camera", "travel photography", "traveler", "wanderlust", "pancake lens", "reala", "film simulation", "classic chrome", "fuji", "gion", "kyoto", "machiya"]):
             if profile_id == "fujifilm_x_e5":
                 score += 45.0
 
@@ -858,6 +858,9 @@ class PromptIntelligenceEngine:
         camera_display = PROFILE_DISPLAY_NAMES.get(profile_id, "").lower()
         if profile_id.replace("_", " ") in prompt_lower or (camera_display and camera_display in prompt_lower):
             score += 50.0
+        elif any(k in prompt_lower for k in ["x-e5", "xe5", "fujifilm x-e5", "fuji x-e5", "xf 27mm"]):
+            if profile_id == "fujifilm_x_e5":
+                score += 50.0
         elif "nikon z9" in prompt_lower or "nikon z 9" in prompt_lower:
             if profile_id == "nikon_z9":
                 score += 50.0
