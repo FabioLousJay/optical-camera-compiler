@@ -41,6 +41,7 @@ class FluxAdapter(BaseAdapter):
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
         is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
         is_png_lock = bool((ref and ref.mode == ReferenceMode.UNIVERSAL_PNG_LOCK) or scene.has_png_lock)
+        is_seq_recon = bool((ref and ref.mode == ReferenceMode.SEQUENTIAL_RECON_4X) or scene.has_sequential_recon_orchestrator)
 
         # 1. Subject & Scene
         if scene.is_policy_safe:
@@ -128,6 +129,17 @@ class FluxAdapter(BaseAdapter):
                 sections.append(
                     "Flat reproduction capture: Suppress optical depth-of-field falloff, vignetting, and grain."
                 )
+        elif is_seq_recon:
+            orchestrator = scene.sequential_recon_orchestrator
+            active_path = (scene.processing_path.value if scene.processing_path else (orchestrator.processing_path.value if orchestrator else "path_b_generative"))
+            cam_target = orchestrator.camera_quality_target if orchestrator else "Fujifilm GFX 100 II 102MP Medium Format"
+            sections.append(
+                f"Sequential Reconstruction-to-4x Export Orchestrator: Two-stage sequential execution lock enforced. "
+                f"Stage 1 generative reconstruction [{active_path}] with optical benchmark {cam_target}. "
+                f"Photo of {subject_desc} with strict 8-point Quality Gate verification (zero false enlargement). "
+                f"Stage 2 4x RGB PNG export lock delivering exact 4x linear expansion ($W_{{out}}=4W_0, H_{{out}}=4H_0$) "
+                f"in uncompressed full-color RGB PNG (compress_level=0, staged sharpening without edge halos)."
+            )
         elif is_recon_4x:
             recon = scene.reconstruction_lock
             b_val = recon.backend.value if recon else "realesrnet_x4plus"
@@ -413,6 +425,7 @@ class FluxAdapter(BaseAdapter):
             include_reconstruction_drift=is_recon_4x,
             include_png_lock=is_png_lock,
             include_depixelate_v2=is_depixelate_v2,
+            include_sequential_orchestrator=is_seq_recon,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
@@ -432,7 +445,19 @@ class FluxAdapter(BaseAdapter):
                 "compress_level": 0,
                 "linear_scale": 4,
             })
-        if is_depixelate_v2:
+        if is_seq_recon:
+            orchestrator = scene.sequential_recon_orchestrator
+            active_path = (scene.processing_path.value if scene.processing_path else (orchestrator.processing_path.value if orchestrator else "path_b_generative"))
+            parameters.update({
+                "reference_mode": "sequential_recon_4x",
+                "linear_scale": 4,
+                "format": "PNG",
+                "color_mode": "RGB",
+                "processing_path": active_path,
+                "stage_1": "True Generative Reconstruction First Pass",
+                "stage_2": "4x RGB PNG Export Lock",
+            })
+        elif is_depixelate_v2:
             spec = scene.depixelate_v2
             parameters.update({
                 "reference_mode": "depixelate_v2",

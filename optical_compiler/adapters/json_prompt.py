@@ -15,6 +15,7 @@ from ..models import (
     CompiledPayload,
     ReferenceMode,
     SceneInput,
+    SequentialReconstructionOrchestratorSpec,
     TargetEngine,
 )
 from .base import BaseAdapter
@@ -68,6 +69,7 @@ class JSONAllInOneAdapter(BaseAdapter):
             include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X),
             include_png_lock=bool(scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK),
             include_depixelate_v2=bool(scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2),
+            include_sequential_orchestrator=bool(scene.has_sequential_recon_orchestrator or ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X),
         )
         if scene.custom_negatives:
             all_neg_tokens.extend(scene.custom_negatives)
@@ -80,13 +82,17 @@ class JSONAllInOneAdapter(BaseAdapter):
             resolution_str = scene.output_resolution or "102MP Medium Format (11648 x 8736 native GFX100RF resolution)"
         elif ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X or scene.has_reconstruction_lock_4x:
             resolution_str = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area)"
+        elif ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X or scene.has_sequential_recon_orchestrator:
+            resolution_str = scene.output_resolution or "Exact 4X Linear Source-Locked Master ($W_{out}=4W_0, H_{out}=4H_0$, 16X Area RGB PNG)"
         elif ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK or scene.has_png_lock:
             resolution_str = scene.output_resolution or "Highest Practical Resolution (11648 x 6552, 7680 x 4320, or equivalent full-color PNG)"
         else:
             resolution_str = scene.output_resolution or f"12MP PNG, {scene.aspect_ratio}"
 
         # 4. Build master All-in-One JSON dictionary
-        if scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2:
+        if scene.has_sequential_recon_orchestrator or ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X:
+            protocol_name = "Sequential Reconstruction-to-4x Export Orchestrator v1.0 & Professional Master Protocol"
+        elif scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2:
             protocol_name = "Universal De-Pixelate + Upscale Restoration Prompt v2.0"
         elif scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK:
             protocol_name = "Universal High-Resolution PNG Output Lock v1.0 & Mandatory 4X Upscale Protocol"
@@ -120,6 +126,10 @@ class JSONAllInOneAdapter(BaseAdapter):
         else:
             protocol_name = "Brutally Sharp Portrait Kit & All-in-One Prompt Engine"
 
+        is_schema_3_9 = bool(
+            scene.has_sequential_recon_orchestrator
+            or ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X
+        )
         is_schema_3_8 = bool(
             scene.has_depixelate_v2
             or ref_mode == ReferenceMode.DEPIXELATE_V2
@@ -151,7 +161,7 @@ class JSONAllInOneAdapter(BaseAdapter):
             or scene.has_copy_space
             or scene.has_gobo
         )
-        schema_ver = "3.8" if is_schema_3_8 else ("3.7" if is_schema_3_7 else ("3.6" if is_schema_3_6 else ("3.5" if is_schema_3_5 else ("3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2")))))
+        schema_ver = "3.9" if is_schema_3_9 else ("3.8" if is_schema_3_8 else ("3.7" if is_schema_3_7 else ("3.6" if is_schema_3_6 else ("3.5" if is_schema_3_5 else ("3.4" if is_schema_3_4 else ("3.3" if is_schema_3_3 else "3.2"))))))
 
         all_in_one_data: dict[str, Any] = {
             "$schema": "https://raw.githubusercontent.com/FabioLousJay/optical-camera-compiler/main/schemas/all_in_one_prompt.json",
@@ -393,6 +403,43 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "ocr_safety_mode": scene.depixelate_v2.ocr_safety_mode if scene.depixelate_v2 else "strict_preserve",
                 "confidence_mode": scene.depixelate_v2.confidence_mode if scene.depixelate_v2 else "evidence_anchored",
             },
+            "sequential_reconstruction_orchestrator": {
+                "active": bool(scene.has_sequential_recon_orchestrator or ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X),
+                "title": "Sequential Reconstruction-to-4x Export Orchestrator v1.0",
+                "stage_1_name": "True Generative Reconstruction First Pass",
+                "stage_2_name": "4x RGB PNG Export Lock",
+                "active_router_path": (
+                    scene.processing_path.value
+                    if scene.processing_path
+                    else (scene.sequential_recon_orchestrator.processing_path.value if scene.sequential_recon_orchestrator else "path_b_generative")
+                ),
+                "camera_quality_target": (
+                    scene.sequential_recon_orchestrator.camera_quality_target
+                    if scene.sequential_recon_orchestrator
+                    else "Fujifilm GFX 100 II (102MP Medium Format perceived clarity, large-format tonal depth)"
+                ),
+                "linear_scale": 4,
+                "format": "PNG",
+                "color_mode": "RGB",
+                "compress_level": 0,
+                "staged_sharpening": True,
+                "enforce_stage_order": True,
+                "truth_labeling": True,
+                "stage_order": [
+                    "1. Audit the source image",
+                    "2. Run Stage 1 generative reconstruction",
+                    "3. Evaluate Stage 1 against 8-point quality gate",
+                    "4. Approve or reject Stage 1",
+                    "5. Only if approved, hand off Stage 1 result to Stage 2",
+                    "6. Run Stage 2 dimension and export lock",
+                    "7. Verify final delivery requirements",
+                ],
+                "specification": (
+                    scene.sequential_recon_orchestrator.to_dict()
+                    if scene.sequential_recon_orchestrator
+                    else SequentialReconstructionOrchestratorSpec().to_dict()
+                ),
+            },
             "content_classification": {
                 "type": scene.content_type.value if scene.content_type else "photograph",
                 "is_flat_reproduction": bool(scene.content_type and scene.content_type.is_flat_reproduction),
@@ -482,6 +529,7 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "reconstruction_drift": shield.reconstruction_drift if (scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) else [],
                 "png_degradation": shield.png_degradation if (scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK) else [],
                 "v2_restoration": shield.v2_restoration if (scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2) else [],
+                "sequential_orchestrator_drift": shield.sequential_orchestrator_drift if (scene.has_sequential_recon_orchestrator or ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X) else [],
                 "all_negative_tokens": all_neg_tokens,
             },
             "compiled_prompts": {

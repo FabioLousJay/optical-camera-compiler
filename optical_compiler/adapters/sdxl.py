@@ -36,6 +36,7 @@ class SDXLAdapter(BaseAdapter):
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
         is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
         is_png_lock = bool((ref and ref.mode == ReferenceMode.UNIVERSAL_PNG_LOCK) or scene.has_png_lock)
+        is_seq_recon = bool((ref and ref.mode == ReferenceMode.SEQUENTIAL_RECON_4X) or scene.has_sequential_recon_orchestrator)
 
         # 1. Positive Prompt (Weighted camera and texture tokens)
         pos_chunks = []
@@ -80,6 +81,14 @@ class SDXLAdapter(BaseAdapter):
                 "universal de-pixelate and 102MP upscale restoration of reference photo, "
                 "fixed Fujifilm GFX100RF 102MP rendering, Fujinon 35mm f/4 leaf shutter, Reala Ace color response, "
                 "organic human skin realism overriding artificial clarity, strict text preservation"
+            )
+        elif is_seq_recon:
+            orchestrator = scene.sequential_recon_orchestrator
+            active_path = (scene.processing_path.value if scene.processing_path else (orchestrator.processing_path.value if orchestrator else "path_b_generative"))
+            pos_chunks.append(
+                f"Sequential Reconstruction-to-4x Export Orchestrator, Stage 1 generative reconstruction [{active_path}], "
+                "Fujifilm GFX 100 II 102MP medium-format tonal depth and micro-detail, Stage 2 4x RGB PNG export lock, "
+                "staged sharpening, zero fake enlargement"
             )
         elif is_recon_4x:
             recon = scene.reconstruction_lock
@@ -273,6 +282,8 @@ class SDXLAdapter(BaseAdapter):
             res_tag = scene.output_resolution or "102MP Medium Format (11648 x 8736)"
         elif is_recon_4x:
             res_tag = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area)"
+        elif is_seq_recon:
+            res_tag = scene.output_resolution or "Exact 4X Linear Source-Locked Master ($W_{out}=4W_0, H_{out}=4H_0$, 16X Area RGB PNG)"
         else:
             res_tag = scene.output_resolution or f"12MP PNG, vertical {scene.aspect_ratio}"
         texture_tokens.append(f"{res_tag}, uncompressed raw quality")
@@ -294,7 +305,7 @@ class SDXLAdapter(BaseAdapter):
 
 
         # 2. Negative Prompt (Comprehensive artifact suppression)
-        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_depixelate_v2 or is_identity_lock or is_product_lock or is_recon_4x or is_png_lock)
+        include_anti_drift = bool(is_restore or is_transform or is_outpaint or is_depixelate or is_depixelate_v2 or is_identity_lock or is_product_lock or is_recon_4x or is_png_lock or is_seq_recon)
         all_negatives = shield.all_tokens(
             include_anti_drift=include_anti_drift,
             include_branding=scene.suppress_text_branding and not is_product_lock,
@@ -307,6 +318,7 @@ class SDXLAdapter(BaseAdapter):
             include_reconstruction_drift=is_recon_4x,
             include_png_lock=is_png_lock,
             include_depixelate_v2=is_depixelate_v2,
+            include_sequential_orchestrator=is_seq_recon,
         )
         if scene.custom_negatives:
             all_negatives.extend(scene.custom_negatives)
@@ -412,7 +424,19 @@ class SDXLAdapter(BaseAdapter):
                 "compress_level": 0,
                 "linear_scale": 4,
             })
-        if is_depixelate_v2:
+        if is_seq_recon:
+            orchestrator = scene.sequential_recon_orchestrator
+            active_path = (scene.processing_path.value if scene.processing_path else (orchestrator.processing_path.value if orchestrator else "path_b_generative"))
+            parameters.update({
+                "reference_mode": "sequential_recon_4x",
+                "linear_scale": 4,
+                "format": "PNG",
+                "color_mode": "RGB",
+                "processing_path": active_path,
+                "stage_1": "True Generative Reconstruction First Pass",
+                "stage_2": "4x RGB PNG Export Lock",
+            })
+        elif is_depixelate_v2:
             spec = scene.depixelate_v2
             parameters.update({
                 "reference_mode": "depixelate_v2",

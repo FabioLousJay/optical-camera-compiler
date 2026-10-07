@@ -1656,6 +1656,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                   1:1 Identity & 150MP
                 </div>
               </button>
+              <button type="button" class="mode-card" id="btnModeSequentialRecon" onclick="setRefMode('sequential_recon')">
+                <div style="font-size: 0.72rem; font-weight: 700; color: #fff;">⚡ Recon 4x</div>
+                <div style="font-size: 0.60rem; color: var(--accent-cyan); margin-top: 0.15rem; line-height: 1.2;">
+                  2-Stage GFX 100 II
+                </div>
+              </button>
               <button type="button" class="mode-card" id="btnModeDepixelate" onclick="setRefMode('depixelate')">
                 <div style="font-size: 0.72rem; font-weight: 700; color: #fff;">✨ De-Pixelate</div>
                 <div style="font-size: 0.60rem; color: var(--accent-rose); margin-top: 0.15rem; line-height: 1.2;">
@@ -1680,6 +1686,35 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                   Head-to-toe shoes
                 </div>
               </button>
+            </div>
+          </div>
+
+          <!-- Sequential Reconstruction 4x Panel -->
+          <div id="seqReconPanel" style="display: none; background: rgba(6, 182, 212, 0.05); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 8px; padding: 0.75rem; margin-top: 0.15rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+              <span style="font-size: 0.76rem; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.05em;">
+                ⚡ Sequential Reconstruction-to-4x Orchestrator v1.0
+              </span>
+              <span style="font-size: 0.65rem; color: var(--accent-cyan); font-family: var(--font-mono);">
+                8-Point Quality Gate Active
+              </span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+              <div class="field-group">
+                <label for="processingPathSelect" style="font-size: 0.68rem;">Processing Router Path</label>
+                <select id="processingPathSelect" onchange="debounceCompile()" style="font-size: 0.74rem;">
+                  <option value="path_b" selected>Path B: Low Detail / Generative Micro-Detail (Default)</option>
+                  <option value="path_a">Path A: Clean High-Quality Source (Conservative 4x)</option>
+                  <option value="path_c">Path C: Text, Logo &amp; Diagram Sensitive</option>
+                  <option value="path_d">Path D: Faces, Identity &amp; Skin Sensitive</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label style="font-size: 0.68rem;">Hardware Target &amp; Benchmark</label>
+                <div style="font-size: 0.74rem; padding: 0.45rem 0.6rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--accent-cyan); font-family: var(--font-mono);">
+                  Fujifilm GFX 100 II (102MP Medium Format)
+                </div>
+              </div>
             </div>
           </div>
 
@@ -3935,6 +3970,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     function setRefMode(mode) {
       activeRefMode = mode;
       document.getElementById('btnModeRestore').classList.toggle('active', mode === 'restore');
+      const btnSeq = document.getElementById('btnModeSequentialRecon');
+      if (btnSeq) btnSeq.classList.toggle('active', mode === 'sequential_recon');
       document.getElementById('btnModeTransform').classList.toggle('active', mode === 'transform');
       const btnOut = document.getElementById('btnModeOutpaint');
       if (btnOut) btnOut.classList.toggle('active', mode === 'outpaint');
@@ -3944,9 +3981,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (btnProd) btnProd.classList.toggle('active', mode === 'product');
       const prodPanel = document.getElementById('productFidelityPanel');
       if (prodPanel) prodPanel.style.display = (mode === 'product') ? 'block' : 'none';
+      const seqPanel = document.getElementById('seqReconPanel');
+      if (seqPanel) seqPanel.style.display = (mode === 'sequential_recon') ? 'block' : 'none';
 
       const slider = document.getElementById('fidelitySlider');
-      if ((mode === 'restore' || mode === 'depixelate' || mode === 'product') && parseInt(slider.value, 10) < 90) {
+      if ((mode === 'restore' || mode === 'depixelate' || mode === 'product' || mode === 'sequential_recon') && parseInt(slider.value, 10) < 90) {
         slider.value = 95;
       } else if (mode === 'outpaint') {
         slider.value = 95;
@@ -3954,7 +3993,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         slider.value = 85;
       }
 
-      if (mode === 'depixelate') {
+      if (mode === 'sequential_recon') {
+        const profSel = document.getElementById('profileSelect');
+        if (profSel) {
+          for (let opt of profSel.options) {
+            if (opt.value === 'fujifilm_gfx100ii') {
+              profSel.value = 'fujifilm_gfx100ii';
+              if (typeof onProfileChange === 'function') onProfileChange();
+              break;
+            }
+          }
+        }
+      } else if (mode === 'depixelate') {
         const profSel = document.getElementById('profileSelect');
         if (profSel) {
           for (let opt of profSel.options) {
@@ -4008,10 +4058,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         if (activeRefMode === 'product') {
           badge.textContent = "ACTIVE // 100% COMMERCIAL SKU GATE";
           badge.style.color = "var(--accent-amber)";
+        } else if (activeRefMode === 'sequential_recon') {
+          badge.textContent = "ACTIVE // SEQUENTIAL RECON-TO-4X ORCHESTRATOR";
+          badge.style.color = "var(--accent-cyan)";
         } else {
           badge.textContent = "NO IMAGE ATTACHED";
           badge.style.color = "var(--text-muted)";
         }
+      } else if (activeRefMode === 'sequential_recon') {
+        badge.textContent = "ACTIVE // SEQUENTIAL RECON-TO-4X ORCHESTRATOR";
+        badge.style.color = "var(--accent-cyan)";
       } else if (activeRefMode === 'depixelate') {
         badge.textContent = "ACTIVE // GFX100RF 102MP DE-PIXELATE";
         badge.style.color = "var(--accent-rose)";
@@ -5014,6 +5070,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         const denoiseVal = (activeRefMode === 'restore' || activeRefMode === 'depixelate') ? 0.25 : (activeRefMode === 'outpaint' ? 0.40 : 0.65);
 
         let refModeStr = "restore_upscale";
+        if (activeRefMode === 'sequential_recon') refModeStr = "sequential_recon_4x";
         if (activeRefMode === 'depixelate') refModeStr = "depixelate_gfx100rf";
         if (activeRefMode === 'transform') refModeStr = "transform_adapt";
         if (activeRefMode === 'outpaint') refModeStr = "outpaint_full_body";
@@ -5106,6 +5163,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         gallery_zone: document.getElementById('galleryZoneInput') ? document.getElementById('galleryZoneInput').value.trim() : null,
         anchor_id: document.getElementById('anchorIdInput') ? document.getElementById('anchorIdInput').value.trim() : null,
         skin_lighting: (document.getElementById('skinLightingSelect') && document.getElementById('skinLightingSelect').value !== 'none') ? document.getElementById('skinLightingSelect').value : null,
+        sequential_recon_orchestrator: (activeRefMode === 'sequential_recon'),
+        processing_path: (document.getElementById('processingPathSelect') ? document.getElementById('processingPathSelect').value : 'path_b'),
       };
 
       try {
@@ -5625,7 +5684,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
         """Handle compilation requests via REST API."""
         parsed_path = self.path.split("?")[0]
 
-        if parsed_path not in ("/api/compile", "/api/upscale-102mp", "/api/export-closed-loop", "/api/recon-4x", "/api/png-lock-upscale", "/api/recommend-rigs"):
+        if parsed_path not in ("/api/compile", "/api/upscale-102mp", "/api/export-closed-loop", "/api/recon-4x", "/api/png-lock-upscale", "/api/recommend-rigs", "/api/sequential-recon-4x"):
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
             return
 
@@ -5635,6 +5694,37 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             body = json.loads(body_bytes.decode("utf-8"))
         except Exception as err:
             self._send_json({"error": f"Invalid JSON payload: {err}"}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/sequential-recon-4x":
+            input_path = body.get("input_path") or body.get("image_path")
+            if not input_path:
+                self._send_json({"error": "Missing required field 'input_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+
+            try:
+                from .restoration import PILLOW_AVAILABLE, execute_sequential_reconstruction_workflow
+            except ImportError:
+                self._send_json({"error": "Restoration module could not be imported."}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+                return
+
+            if not PILLOW_AVAILABLE:
+                self._send_json({"error": "Pillow is not installed."}, status=HTTPStatus.BAD_REQUEST)
+                return
+
+            try:
+                output_path = body.get("output_path") or None
+                processing_path = body.get("processing_path", "path_b_generative")
+
+                rep, rep_dict = execute_sequential_reconstruction_workflow(
+                    input_path=input_path,
+                    output_path=output_path,
+                    processing_path=processing_path,
+                    generate_report=True,
+                )
+                self._send_json(rep_dict)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
             return
 
         if parsed_path == "/api/png-lock-upscale":
@@ -5890,6 +5980,8 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 depix_camera=body.get("depix_camera"),
                 depix_lens=body.get("depix_lens"),
                 skin_lighting=body.get("skin_lighting") or body.get("skin_lighting_modifier"),
+                sequential_recon_orchestrator=body.get("sequential_recon_orchestrator") or body.get("sequential_recon_4x", False),
+                processing_path=body.get("processing_path"),
             )
             self._send_json(payload.to_dict())
         except Exception as err:

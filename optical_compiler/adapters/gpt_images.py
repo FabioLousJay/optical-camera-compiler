@@ -153,6 +153,23 @@ class GPTImagesAdapter(BaseAdapter):
             if scene.environment:
                 base_instr += f" Environment: {scene.environment}."
             sections.append(base_instr)
+        elif ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X or scene.has_sequential_recon_orchestrator:
+            orchestrator = scene.sequential_recon_orchestrator
+            active_path = (scene.processing_path.value if scene.processing_path else (orchestrator.processing_path.value if orchestrator else "path_b_generative"))
+            target_cam = orchestrator.camera_quality_target if orchestrator else "Fujifilm GFX 100 II 102MP Medium Format"
+            base_instr = (
+                "Base instruction (Sequential Reconstruction-to-4x Export Orchestrator v1.0 & Professional Master Protocol): "
+                "Two-stage sequential execution lock enforced in strict linear order: "
+                "Stage 1 (True Generative Reconstruction First Pass): perform source audit and semantic detail reconstruction "
+                f"via active router [{active_path}]. Target camera quality benchmark: {target_cam}. "
+                "Evaluate Stage 1 against 8-point Quality Gate. Do not advance if result is merely enlarged without visible detail improvement. "
+                "Stage 2 (4x RGB PNG Export Lock): hand off approved Stage 1 master to deliver exact 4x linear expansion ($W_{out}=4W_0, H_{out}=4H_0$) "
+                "as uncompressed full-color RGB PNG (no palette reduction, zero lossy compression). "
+                f"Subject: {scene.subject}."
+            )
+            if scene.environment:
+                base_instr += f" Environment: {scene.environment}."
+            sections.append(base_instr)
         elif ref_mode == ReferenceMode.TRANSFORM_ADAPT:
             base_instr = (
                 f"Base instruction: Photographic adaptation with biometric character lock. "
@@ -503,6 +520,8 @@ class GPTImagesAdapter(BaseAdapter):
             res = scene.output_resolution or "Highest Plausible Native-Looking Resolution (Full-Color Uncompressed Raster, Verbatim Scene & Text Integrity)"
         elif ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X or scene.has_reconstruction_lock_4x:
             res = scene.output_resolution or "Exact 4X Linear Source-Locked Reconstruction (16X pixel area, uncompressed master raster)"
+        elif ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X or scene.has_sequential_recon_orchestrator:
+            res = scene.output_resolution or "Exact 4X Linear Source-Locked Master ($W_{out}=4W_0, H_{out}=4H_0$, 16X Area RGB PNG)"
         else:
             res = scene.output_resolution or self._resolve_default_resolution(scene.aspect_ratio)
         res_block = (
@@ -526,6 +545,28 @@ class GPTImagesAdapter(BaseAdapter):
                 f"- Sky and Atmospheric Haze Protection: {sky_txt}.\n"
                 "- Anti-Model Stacking: Prohibit sequential model cascades.\n"
                 "- Strict Source Geometry Lock: Prohibit generative hallucination, geological mutation, or terrain drift."
+            )
+
+        # Sequential Reconstruction-to-4x Orchestrator Protocol Directives
+        if scene.has_sequential_recon_orchestrator or ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X:
+            orchestrator = scene.sequential_recon_orchestrator
+            active_path = (scene.processing_path.value if scene.processing_path else (orchestrator.processing_path.value if orchestrator else "path_b_generative"))
+            cam_target = orchestrator.camera_quality_target if orchestrator else "Fujifilm GFX 100 II (102MP Medium Format perceived clarity, large-format tonal depth)"
+            sections.append(
+                "Sequential Reconstruction-to-4x Orchestrator & Processing Router Directives:\n"
+                "- Workflow Architecture: Strict two-stage sequential execution (Stage 1 -> 8-Point Quality Gate -> Stage 2).\n"
+                "- Master Execution Rule: Stage 1 must be approved before Stage 2 begins. Stage 2 is forbidden from compensating for a failed Stage 1.\n"
+                "- False Enlargement Prohibition: Bigger dimensions or larger file sizes alone do not count as reconstruction. Genuine visual improvement is mandatory.\n"
+                f"- Processing Router Active Path: {active_path}.\n"
+                "  * Path A (Clean Source): Conservative 4x super-resolution, mild artifact cleanup, restrained sharpening.\n"
+                "  * Path B (Low Detail / Pixelated): Generative super-resolution; rebuild micro-detail semantically and locally (materials, architecture, skin, fabric).\n"
+                "  * Path C (Text / Logo / Diagram): Strict glyph and layout preservation; zero hallucinated text or altered typography.\n"
+                "  * Path D (Faces / Identity): Strict anatomical lock, natural epidermal pores, zero beautification or identity drift.\n"
+                f"- Optical Benchmark Target: {cam_target}.\n"
+                "- Staged Sharpening Policy: Generative reconstruction first, artifact cleanup second, optical sharpening last. Single-pass aggressive sharpening forbidden.\n"
+                "- Stage 1 Quality Gate (8 Checks): Normal viewing check, close-up inspection, real detail vs enlargement, clean edges without halos, smooth gradients, material fidelity, strict composition lock, and text/identity preservation.\n"
+                "- Stage 2 Export Lock: Deliver at exact 4x linear pixel expansion ($W_{out}=4W_0, H_{out}=4H_0$, 16X pixel area) as full-color RGB PNG (no palette reduction, compress_level=0).\n"
+                "- Truth Labeling & QC Report: Explicitly state Stage 1 reconstruction path, whether generative reconstruction or mathematical scaling was used, source and final dimensions, color mode, format, and file size."
             )
 
         # Universal High-Resolution PNG Output Lock Directives
@@ -587,6 +628,7 @@ class GPTImagesAdapter(BaseAdapter):
             include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or ref_mode == ReferenceMode.RECONSTRUCTION_LOCK_4X),
             include_png_lock=bool(scene.has_png_lock or ref_mode == ReferenceMode.UNIVERSAL_PNG_LOCK),
             include_depixelate_v2=bool(scene.has_depixelate_v2 or ref_mode == ReferenceMode.DEPIXELATE_V2),
+            include_sequential_orchestrator=bool(scene.has_sequential_recon_orchestrator or ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X),
         )
         if scene.custom_negatives:
             neg_tokens.extend(scene.custom_negatives)
@@ -625,6 +667,19 @@ class GPTImagesAdapter(BaseAdapter):
                 "content_type": scene.content_type.value if scene.content_type else "photograph",
                 "ocr_safety": True,
                 "confidence_mode": "evidence_proportional",
+            })
+        if scene.has_sequential_recon_orchestrator or ref_mode == ReferenceMode.SEQUENTIAL_RECON_4X:
+            orchestrator = scene.sequential_recon_orchestrator
+            active_path = (scene.processing_path.value if scene.processing_path else (orchestrator.processing_path.value if orchestrator else "path_b_generative"))
+            payload_params.update({
+                "sequential_recon_orchestrator": True,
+                "stage_1": "True Generative Reconstruction First Pass",
+                "stage_2": "4x RGB PNG Export Lock",
+                "processing_path": active_path,
+                "linear_scale": 4,
+                "format": "PNG",
+                "color_mode": "RGB",
+                "compress_level": 0,
             })
 
         return CompiledPayload(

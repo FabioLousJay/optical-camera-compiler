@@ -231,6 +231,24 @@ class RawSpecAdapter(BaseAdapter):
                 "Failure Prevention: Zero restyling, zero rewriting, zero AI gloss, zero text invention",
             ])
 
+        if scene.has_sequential_recon_orchestrator or (scene.reference and scene.reference.mode == ReferenceMode.SEQUENTIAL_RECON_4X):
+            orchestrator = scene.sequential_recon_orchestrator
+            active_path = (scene.processing_path.value if scene.processing_path else (orchestrator.processing_path.value if orchestrator else "path_b_generative"))
+            cam_target = orchestrator.camera_quality_target if orchestrator else "Fujifilm GFX 100 II (102MP Medium Format perceived clarity, large-format tonal depth)"
+            lines.extend([
+                "",
+                "--- Sequential Reconstruction-to-4x Export Orchestrator v1.0 ---",
+                "Workflow Identity: Stage 1 (True Generative Reconstruction First Pass) -> Stage 2 (4x RGB PNG Export Lock)",
+                "Master Execution Rule: Stage 1 must pass the 8-point Quality Gate before Stage 2 can begin",
+                "False Enlargement Prohibition: Bigger dimensions/files alone do not qualify as successful reconstruction",
+                f"Processing Router Active Path: {active_path}",
+                f"Optical Quality Benchmark: {cam_target}",
+                "Sharpness Policy: Staged sharpening (reconstruction first, artifact cleanup second, optical sharpening last)",
+                "Stage 1 Quality Gate: 8 mandatory verification checks; reject and retry on cosmetic-only improvement",
+                "Stage 2 Export Contract: 4x linear scaling ($W_{out}=4W_0, H_{out}=4H_0$, 16X area), RGB full-color, PNG compress_level=0",
+                "Truth Labeling Policy: Explicit disclosure of Stage 1 path, reconstruction vs scaling status, and final QC metrics",
+            ])
+
         positive_prompt = "\n".join(lines)
 
         negative_prompt = ", ".join(
@@ -241,6 +259,7 @@ class RawSpecAdapter(BaseAdapter):
                 include_reconstruction_drift=bool(scene.has_reconstruction_lock_4x or (scene.reference and scene.reference.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X)),
                 include_png_lock=bool(scene.has_png_lock or (scene.reference and scene.reference.mode == ReferenceMode.UNIVERSAL_PNG_LOCK)),
                 include_depixelate_v2=bool(scene.has_depixelate_v2 or (scene.reference and scene.reference.mode == ReferenceMode.DEPIXELATE_V2)),
+                include_sequential_orchestrator=bool(scene.has_sequential_recon_orchestrator or (scene.reference and scene.reference.mode == ReferenceMode.SEQUENTIAL_RECON_4X)),
             )
         )
 

@@ -39,6 +39,7 @@ class MidjourneyAdapter(BaseAdapter):
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
         is_recon_4x = bool((ref and ref.mode == ReferenceMode.RECONSTRUCTION_LOCK_4X) or scene.has_reconstruction_lock_4x)
         is_png_lock = bool((ref and ref.mode == ReferenceMode.UNIVERSAL_PNG_LOCK) or scene.has_png_lock)
+        is_seq_recon = bool((ref and ref.mode == ReferenceMode.SEQUENTIAL_RECON_4X) or scene.has_sequential_recon_orchestrator)
 
         # 1. Subject description and mandatory gaze anchor
         core_elements = []
@@ -71,6 +72,12 @@ class MidjourneyAdapter(BaseAdapter):
         elif is_depixelate:
             core_elements.append(
                 "Universal De-Pixelate and 102MP upscale restoration of reference photo, Fujinon 35mm f/4 leaf shutter, Reala Ace color response"
+            )
+        elif is_seq_recon:
+            orchestrator = scene.sequential_recon_orchestrator
+            active_path = (scene.processing_path.value if scene.processing_path else (orchestrator.processing_path.value if orchestrator else "path_b_generative"))
+            core_elements.append(
+                f"Sequential Reconstruction-to-4x Export Orchestrator, Stage 1 generative reconstruction [{active_path}] with GFX 100 II 102MP medium-format clarity and tonal depth, Stage 2 4x RGB PNG export lock, staged sharpening without edge halos, zero false enlargement"
             )
         elif is_recon_4x:
             recon = scene.reconstruction_lock
@@ -462,6 +469,16 @@ class MidjourneyAdapter(BaseAdapter):
                 "lossy PNG compression",
                 "flattened textures",
                 "compression damage",
+            ])
+
+        if is_seq_recon:
+            banned_mj.extend([
+                "bicubic blur",
+                "false enlargement",
+                "edge halos",
+                "plastic smoothing",
+                "hallucinated buildings",
+                "indexed color",
             ])
 
         if scene.custom_negatives:

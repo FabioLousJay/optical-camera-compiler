@@ -714,6 +714,7 @@ class ReferenceMode(str, Enum):
     RECONSTRUCTION_LOCK_4X = "reconstruction_lock_4x"  # Professional 4X Reconstruction Lock (source-locked deep SR, anti-hallucination)
     UNIVERSAL_PNG_LOCK = "universal_png_lock"  # Universal High-Resolution PNG Output Lock v1.0 (true full-color RGB PNG, 4X upscale)
     DEPIXELATE_V2 = "depixelate_v2"  # Universal De-Pixelate + Upscale Restoration v2.0 (Sony A7R V / Leica Q3 Monochrom / Multi-Class)
+    SEQUENTIAL_RECON_4X = "sequential_recon_4x"  # Sequential Reconstruction-to-4x Export Orchestrator v1.0 (Prompt 1 + 2 Master Protocol)
 
     @classmethod
     def from_str(cls, value: Optional[str]) -> ReferenceMode:
@@ -764,6 +765,23 @@ class ReferenceMode(str, Enum):
             "full_color_png": cls.UNIVERSAL_PNG_LOCK,
             "universal_png_output_lock": cls.UNIVERSAL_PNG_LOCK,
             "png_output_lock": cls.UNIVERSAL_PNG_LOCK,
+            "sequential_recon_4x": cls.SEQUENTIAL_RECON_4X,
+            "sequential_recon": cls.SEQUENTIAL_RECON_4X,
+            "sequential_orchestrator": cls.SEQUENTIAL_RECON_4X,
+            "sequential_reconstruction": cls.SEQUENTIAL_RECON_4X,
+            "sequential_reconstruction_to_4x": cls.SEQUENTIAL_RECON_4X,
+            "recon_to_4x": cls.SEQUENTIAL_RECON_4X,
+            "sequential_workflow": cls.SEQUENTIAL_RECON_4X,
+            "apply_the_sequential_reconstruction_to_4x_workflow": cls.SEQUENTIAL_RECON_4X,
+            "apply_the_sequential_reconstruction_to_4x_workflow.": cls.SEQUENTIAL_RECON_4X,
+            "apply the sequential reconstruction-to-4x workflow": cls.SEQUENTIAL_RECON_4X,
+            "apply the sequential reconstruction-to-4x workflow.": cls.SEQUENTIAL_RECON_4X,
+            "professional_image_reconstruction": cls.SEQUENTIAL_RECON_4X,
+            "apply_professional_4x_reconstruction_lock": cls.SEQUENTIAL_RECON_4X,
+            "apply_professional_4x_reconstruction_lock.": cls.SEQUENTIAL_RECON_4X,
+            "apply professional 4x reconstruction lock": cls.SEQUENTIAL_RECON_4X,
+            "apply professional 4x reconstruction lock.": cls.SEQUENTIAL_RECON_4X,
+            "professional_4x_reconstruction_lock": cls.SEQUENTIAL_RECON_4X,
         }
         if normalized in alias_map:
             return alias_map[normalized]
@@ -979,6 +997,215 @@ class HighResPNGOutputLockSpec:
                 "standard_delivery_pattern": "Done ✅ 4× full-color PNG upscale: [width] × [height] px, RGB PNG, [file size] MB.",
                 "correction_verbiage": self.correction_verbiage,
             },
+        }
+
+
+# ==============================================================================
+# Sequential Reconstruction-to-4x Export Orchestrator v1.0 & Professional 4X Protocol
+# ==============================================================================
+
+
+class ProcessingPath(str, Enum):
+    """Router paths for Prompt 1 & Prompt 2 source audit and reconstruction."""
+
+    PATH_A_CLEAN = "path_a_clean"  # Clean high-quality source: conservative 4x upscale, mild cleanup, restrained sharpening
+    PATH_B_GENERATIVE = "path_b_generative"  # Low-detail or pixelated source: generative detail reconstruction before final upscale
+    PATH_C_TEXT = "path_c_text"  # Text/logo/diagram-sensitive source: strict typography/layout preservation
+    PATH_D_IDENTITY = "path_d_identity"  # Faces or identity-sensitive source: strict biometric/anatomy lock
+
+    @classmethod
+    def from_str(cls, value: Optional[str]) -> Optional[ProcessingPath]:
+        if not value:
+            return None
+        norm = value.strip().lower().replace("-", "_").replace(" ", "_").rstrip(".")
+        aliases = {
+            "path_a": cls.PATH_A_CLEAN,
+            "path_a_clean": cls.PATH_A_CLEAN,
+            "path_a_clean_high_quality": cls.PATH_A_CLEAN,
+            "clean": cls.PATH_A_CLEAN,
+            "clean_source": cls.PATH_A_CLEAN,
+            "path_b": cls.PATH_B_GENERATIVE,
+            "path_b_generative": cls.PATH_B_GENERATIVE,
+            "path_b_low_detail": cls.PATH_B_GENERATIVE,
+            "path_b_pixelated": cls.PATH_B_GENERATIVE,
+            "generative": cls.PATH_B_GENERATIVE,
+            "low_detail": cls.PATH_B_GENERATIVE,
+            "pixelated": cls.PATH_B_GENERATIVE,
+            "generative_super_resolution": cls.PATH_B_GENERATIVE,
+            "path_c": cls.PATH_C_TEXT,
+            "path_c_text": cls.PATH_C_TEXT,
+            "path_c_logo": cls.PATH_C_TEXT,
+            "path_c_diagram": cls.PATH_C_TEXT,
+            "text": cls.PATH_C_TEXT,
+            "logo": cls.PATH_C_TEXT,
+            "diagram": cls.PATH_C_TEXT,
+            "typography": cls.PATH_C_TEXT,
+            "path_d": cls.PATH_D_IDENTITY,
+            "path_d_identity": cls.PATH_D_IDENTITY,
+            "path_d_faces": cls.PATH_D_IDENTITY,
+            "faces": cls.PATH_D_IDENTITY,
+            "face": cls.PATH_D_IDENTITY,
+            "identity": cls.PATH_D_IDENTITY,
+            "portrait": cls.PATH_D_IDENTITY,
+        }
+        if norm in aliases:
+            return aliases[norm]
+        for m in cls:
+            if m.value == norm or m.name.lower() == norm:
+                return m
+        return None
+
+    from_string = from_str
+
+
+@dataclass
+class SequentialReconstructionOrchestratorSpec:
+    """Specification for Sequential Reconstruction-to-4x Export Orchestrator v1.0.
+
+    Coordinates:
+      Stage 1: True Generative Reconstruction First Pass (incorporating Prompt 1's 4-Path Router,
+               staged sharpening, GFX 100 II medium format optical target, and strict quality gate).
+      Stage 2: 4x RGB PNG Export Lock (uncompressed 4x raster expansion, RGB color mode, compress_level=0).
+    """
+
+    title: str = "Sequential Reconstruction-to-4x Export Orchestrator v1.0"
+    orchestrator_type: str = "multi-stage image enhancement workflow controller"
+    stage_1_name: str = "True Generative Reconstruction First Pass"
+    stage_2_name: str = "4x RGB PNG Export Lock"
+    processing_path: ProcessingPath = ProcessingPath.PATH_B_GENERATIVE
+    camera_quality_target: str = "Fujifilm GFX 100 II (102MP Medium Format perceived clarity, large-format tonal depth)"
+    linear_scale: int = 4
+    format: str = "PNG"
+    color_mode: str = "RGB"
+    compress_level: int = 0
+    staged_sharpening: bool = True
+    enforce_stage_order: bool = True
+    max_stage_1_retries: int = 3
+    truth_labeling: bool = True
+    short_command_alias: str = "Apply the Sequential Reconstruction-to-4x Workflow."
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "title": self.title,
+            "type": self.orchestrator_type,
+            "mode": (
+                "Append this JSON after the user's creative prompt, before the first-pass reconstruction lock "
+                "and before the second-pass 4x RGB PNG export lock. This JSON controls the sequence, gating, "
+                "success criteria, and handoff rules between the two locks."
+            ),
+            "core_objective": (
+                "Force a two-stage enhancement workflow in the correct order: first, perform true generative "
+                "or semantic reconstruction to improve visible image quality; second, only after reconstruction "
+                "succeeds, perform dimension scaling and final 4x RGB PNG export. Prevent false success cases where "
+                "the image is merely enlarged, oversharpened, or exported at a larger size without meaningful visual improvement."
+            ),
+            "workflow_identity": {
+                "stage_1_name": self.stage_1_name,
+                "stage_2_name": self.stage_2_name,
+                "instruction": "These stages are separate and must not be merged, skipped, reversed, or collapsed into one generic enhancement step.",
+            },
+            "master_non_negotiable_rules": {
+                "rule_1": "Stage 1 must be completed before Stage 2 begins.",
+                "rule_2": "Stage 2 is forbidden from compensating for a failed Stage 1.",
+                "rule_3": "Larger dimensions, larger file size, or sharper edges alone do not count as successful reconstruction.",
+                "rule_4": "If Stage 1 does not produce a visibly better base image, the workflow must stop, reject the result, and re-run Stage 1 with a better reconstruction path.",
+                "rule_5": "Stage 2 may enlarge dimensions, but it must never be falsely described as the source of reconstructed detail.",
+                "rule_6": "The attached image remains the single source of truth throughout all stages unless the user explicitly requests a change.",
+                "rule_7": "Preserve the same image identity, composition, framing, subject geometry, layout, lighting logic, and intended style across both stages.",
+            },
+            "stage_order_lock": {
+                "required_sequence": [
+                    "1. Audit the source image",
+                    "2. Run Stage 1 generative reconstruction",
+                    "3. Evaluate Stage 1 against quality gate",
+                    "4. Approve or reject Stage 1",
+                    "5. Only if approved, hand off the Stage 1 result to Stage 2",
+                    "6. Run Stage 2 dimension and export lock",
+                    "7. Verify final delivery requirements",
+                ],
+                "forbidden_sequence": [
+                    "Running Stage 2 first",
+                    "Upscaling the raw source before reconstruction",
+                    "Claiming Stage 2 output as if it were fully reconstructed",
+                    "Accepting a larger image that is not visibly better",
+                    "Using export format compliance as proof of image quality",
+                ],
+            },
+            "mandatory_processing_router": {
+                "active_path": self.processing_path.value,
+                "step_1_source_audit": {
+                    "inspect_for": [
+                        "low resolution",
+                        "pixelation",
+                        "compression blocks",
+                        "JPEG ringing",
+                        "blur",
+                        "motion softness",
+                        "noise",
+                        "over-smoothing",
+                        "aliasing",
+                        "loss of micro-texture",
+                        "text or logo fragility",
+                        "faces or identity-sensitive regions",
+                        "architectural geometry",
+                        "fine natural textures such as hair, fabric, clouds, foliage, water, skin, glass, metal, roads, windows",
+                    ],
+                    "decision_rule": "Choose the restoration path based on visible defects, not on file size goals alone.",
+                },
+                "step_2_path_selection": {
+                    "path_A_clean_high_quality_source": {
+                        "use_when": "The source already contains usable real detail.",
+                        "method": "Apply conservative 4x super-resolution or high-quality upscale, mild artifact cleanup, local contrast, and restrained sharpening.",
+                        "avoid": "Over-processing, hallucinated detail, waxy texture, edge halos.",
+                    },
+                    "path_B_low_detail_or_pixelated_source": {
+                        "use_when": "The source lacks enough real detail for mathematical upscale to look professional.",
+                        "method": "Use generative super-resolution / detail reconstruction before final upscale. Rebuild plausible micro-detail while preserving scene geometry and identity.",
+                        "required": "Reconstruct detail semantically and locally: windows remain windows, roads remain roads, skin remains natural skin, fabric remains fabric, water remains water, clouds remain clouds.",
+                        "avoid": "Inventing new buildings, changing faces, changing composition, fake painterly texture, AI mush, plastic surfaces.",
+                    },
+                    "path_C_text_logo_diagram_sensitive_source": {
+                        "use_when": "The image contains readable text, logos, charts, diagrams, UI, signs, license plates, or typography.",
+                        "method": "Prioritize text/layout preservation. Do not rewrite or hallucinate letters. If text cannot be reliably preserved, keep it visually consistent rather than inventing new wording.",
+                        "avoid": "Fake letters, scrambled typography, altered brand marks.",
+                    },
+                    "path_D_faces_or_identity_sensitive_source": {
+                        "use_when": "The image contains real people, portraits, bodies, hands, pets, or identity-sensitive subjects.",
+                        "method": "Preserve identity, anatomy, expression, pose, age cues, skin texture, hair pattern, and clothing. Improve clarity without beautification or identity drift.",
+                        "avoid": "Face replacement, body reshaping, age change, skin plasticity, anatomy drift, extra fingers, altered gaze.",
+                    },
+                },
+            },
+            "stage_1_contract": {
+                "primary_goal": "Create the best native reconstructed base image available before any exact dimension lock is applied.",
+                "camera_quality_target": self.camera_quality_target,
+                "staged_sharpening": "Reconstruction first, artifact cleanup second, optical sharpening last.",
+                "quality_gate_checks": [
+                    "Is the result visibly better than the source at normal viewing distance?",
+                    "Is the result visibly better than the source at closer inspection?",
+                    "Did actual detail recovery occur, rather than mere enlargement?",
+                    "Are edges cleaner without haloing or double-edge artifacts?",
+                    "Are gradients smoother without banding, crushed blacks, or blotchy noise?",
+                    "Are textures more credible and material-consistent?",
+                    "Was composition preserved exactly enough to qualify as the same image?",
+                    "Were any text, logos, faces, anatomy, or sensitive elements preserved correctly if present?",
+                ],
+                "retry_policy": f"If Stage 1 fails quality gate, refine reconstruction prompt or switch path (max {self.max_stage_1_retries} retries). Do not advance to Stage 2.",
+            },
+            "stage_2_contract": {
+                "primary_goal": "Take the approved Stage 1 reconstructed master and deliver the final 4x RGB PNG output according to the user's export lock.",
+                "linear_scale": self.linear_scale,
+                "format": self.format,
+                "color_mode": self.color_mode,
+                "compress_level": self.compress_level,
+                "prohibited": ["palette PNG", "indexed color", "lossy JPEG final", "downscaled final output"],
+            },
+            "truth_labeling_policy": {
+                "stage_1": "State whether generative or semantic reconstruction was used, or whether the pass was mostly conservative cleanup.",
+                "stage_2": "State clearly that this stage handled final dimensional scaling and export formatting.",
+                "honesty_rule": "Do not imply that exact 4x native detail was produced if the platform required a later upscale step.",
+            },
+            "short_command_alias": self.short_command_alias,
         }
 
 
@@ -2329,6 +2556,34 @@ class NegativeShield:
             "unwanted vignette",
         ]
     )
+    sequential_orchestrator_drift: list[str] = field(
+        default_factory=lambda: [
+            "bicubic enlargement blur",
+            "mathematical upscale masquerading as reconstruction",
+            "skipping stage 1 generative reconstruction",
+            "false detail claims",
+            "premature 4x scaling",
+            "hallucinated architectural elements",
+            "invented buildings",
+            "altered facial identity",
+            "body morphology drift",
+            "waxy texture",
+            "plastic surfaces",
+            "AI mush",
+            "fake painterly texture",
+            "oversharpened roads and windows",
+            "edge halos",
+            "single-pass aggressive sharpening",
+            "scrambled typography",
+            "fake letters",
+            "altered brand marks",
+            "palette PNG reduction",
+            "indexed color export",
+            "lossy JPEG final",
+            "collapsed stage sequence",
+            "unverified upscale export",
+        ]
+    )
 
     def all_tokens(
         self,
@@ -2343,6 +2598,7 @@ class NegativeShield:
         include_reconstruction_drift: bool = False,
         include_png_lock: bool = False,
         include_depixelate_v2: bool = False,
+        include_sequential_orchestrator: bool = False,
     ) -> list[str]:
         """Return a flat list of all negative tokens across selected categories."""
         tokens = list(self.render_defects + self.skin_and_lighting_drift + self.anatomical_drift)
@@ -2419,6 +2675,11 @@ class NegativeShield:
                     seen.add(t)
         if include_depixelate_v2:
             for t in self.v2_restoration:
+                if t not in seen:
+                    tokens.append(t)
+                    seen.add(t)
+        if include_sequential_orchestrator:
+            for t in self.sequential_orchestrator_drift:
                 if t not in seen:
                     tokens.append(t)
                     seen.add(t)
@@ -2635,6 +2896,8 @@ class SceneInput:
     png_lock: Optional[HighResPNGOutputLockSpec] = None
     depixelate_v2: Optional[UniversalDepixelateV2Spec] = None
     skin_lighting: Optional[SkinLightingModifier] = None
+    sequential_recon_orchestrator: Optional[SequentialReconstructionOrchestratorSpec] = None
+    processing_path: Optional[ProcessingPath] = None
     universal_medium_format_override: bool = False
 
     @property
@@ -2835,6 +3098,13 @@ class SceneInput:
         if self.reference and self.reference.mode == ReferenceMode.DEPIXELATE_V2:
             return True
         return self.depixelate_v2 is not None
+
+    @property
+    def has_sequential_recon_orchestrator(self) -> bool:
+        """Return True if Sequential Reconstruction-to-4x Export Orchestrator is active."""
+        if self.reference and self.reference.mode == ReferenceMode.SEQUENTIAL_RECON_4X:
+            return True
+        return self.sequential_recon_orchestrator is not None
 
 
 

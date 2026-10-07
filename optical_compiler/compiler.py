@@ -24,10 +24,12 @@ from .models import (
     MaterialStyle,
     PaperProfile,
     PrintSpec,
+    ProcessingPath,
     ReconstructionLock4XSpec,
     ReferenceImageInput,
     ReferenceMode,
     SceneInput,
+    SequentialReconstructionOrchestratorSpec,
     SeriesCohesionSpec,
     SkinLightingModifier,
     StreakFlare,
@@ -139,6 +141,8 @@ class OpticalCompiler:
         depixelate_v2: Optional[Union[bool, dict, UniversalDepixelateV2Spec]] = None,
         depix_camera: Optional[str] = None,
         depix_lens: Optional[str] = None,
+        sequential_recon_orchestrator: Optional[Union[bool, dict, SequentialReconstructionOrchestratorSpec]] = None,
+        processing_path: Optional[Union[str, ProcessingPath]] = None,
         universal_medium_format_override: bool = False,
     ) -> CompiledPayload:
         """Compile a scene description into a model-specific, zero-artifact prompt payload.
@@ -209,6 +213,17 @@ class OpticalCompiler:
                     ],
                 ),
             )
+
+        if isinstance(scene, str):
+            s_low = scene.lower().strip()
+            if any(k in s_low for k in (
+                "apply the sequential reconstruction-to-4x workflow",
+                "apply professional 4x reconstruction lock",
+            )):
+                if ref_obj is None:
+                    ref_obj = ReferenceImageInput(mode=ReferenceMode.SEQUENTIAL_RECON_4X)
+                elif ref_obj.mode == ReferenceMode.NONE:
+                    ref_obj.mode = ReferenceMode.SEQUENTIAL_RECON_4X
 
         # Parse content_type
         c_type: Optional[ContentType] = None
@@ -353,6 +368,45 @@ class OpticalCompiler:
                 lens=depix_lens,
             )
 
+        # Sequential Reconstruction-to-4x Orchestrator normalization
+        seq_orchestrator_obj: Optional[SequentialReconstructionOrchestratorSpec] = None
+        is_seq_recon_ref = bool(ref_obj and ref_obj.mode == ReferenceMode.SEQUENTIAL_RECON_4X)
+        p_path: Optional[ProcessingPath] = None
+        if processing_path is not None:
+            p_path = ProcessingPath.from_str(processing_path) if isinstance(processing_path, str) else processing_path
+
+        if isinstance(sequential_recon_orchestrator, SequentialReconstructionOrchestratorSpec):
+            seq_orchestrator_obj = sequential_recon_orchestrator
+            if p_path:
+                seq_orchestrator_obj.processing_path = p_path
+        elif isinstance(sequential_recon_orchestrator, dict):
+            path_val = sequential_recon_orchestrator.get("processing_path", p_path or ProcessingPath.PATH_B_GENERATIVE)
+            if isinstance(path_val, str):
+                path_val = ProcessingPath.from_str(path_val) or ProcessingPath.PATH_B_GENERATIVE
+            seq_orchestrator_obj = SequentialReconstructionOrchestratorSpec(
+                processing_path=path_val,
+                camera_quality_target=sequential_recon_orchestrator.get(
+                    "camera_quality_target",
+                    "Fujifilm GFX 100 II (102MP Medium Format perceived clarity, large-format tonal depth)",
+                ),
+                linear_scale=int(sequential_recon_orchestrator.get("linear_scale", 4)),
+                format=sequential_recon_orchestrator.get("format", "PNG"),
+                color_mode=sequential_recon_orchestrator.get("color_mode", "RGB"),
+                compress_level=int(sequential_recon_orchestrator.get("compress_level", 0)),
+                staged_sharpening=bool(sequential_recon_orchestrator.get("staged_sharpening", True)),
+                enforce_stage_order=bool(sequential_recon_orchestrator.get("enforce_stage_order", True)),
+                max_stage_1_retries=int(sequential_recon_orchestrator.get("max_stage_1_retries", 3)),
+                truth_labeling=bool(sequential_recon_orchestrator.get("truth_labeling", True)),
+            )
+        elif sequential_recon_orchestrator is True or is_seq_recon_ref:
+            seq_orchestrator_obj = SequentialReconstructionOrchestratorSpec(
+                processing_path=p_path or ProcessingPath.PATH_B_GENERATIVE,
+            )
+        elif p_path is not None:
+            seq_orchestrator_obj = SequentialReconstructionOrchestratorSpec(
+                processing_path=p_path,
+            )
+
         # 2. Build SceneInput
         if isinstance(scene, str):
             scene_input = SceneInput(
@@ -419,6 +473,8 @@ class OpticalCompiler:
                 png_lock=png_lock_obj,
                 depixelate_v2=depix_v2_obj,
                 skin_lighting=sl,
+                sequential_recon_orchestrator=seq_orchestrator_obj,
+                processing_path=p_path or (seq_orchestrator_obj.processing_path if seq_orchestrator_obj else None),
                 universal_medium_format_override=universal_medium_format_override,
             )
 
@@ -544,6 +600,10 @@ class OpticalCompiler:
                 scene_input.depixelate_v2 = depix_v2_obj
             if sl is not None:
                 scene_input.skin_lighting = sl
+            if seq_orchestrator_obj is not None:
+                scene_input.sequential_recon_orchestrator = seq_orchestrator_obj
+            if p_path is not None:
+                scene_input.processing_path = p_path
             if universal_medium_format_override:
                 scene_input.universal_medium_format_override = universal_medium_format_override
 
@@ -567,6 +627,11 @@ class OpticalCompiler:
             elif self.is_auto:
                 target_profile_id = auto_select_profile(scene_input)
                 base = load_profile(target_profile_id)
+            else:
+                base = self.base_profile
+        elif scene_input.has_sequential_recon_orchestrator or (scene_input.reference and scene_input.reference.mode == ReferenceMode.SEQUENTIAL_RECON_4X):
+            if self.is_auto:
+                base = load_profile("fujifilm_gfx100ii")
             else:
                 base = self.base_profile
         elif self.is_auto:
