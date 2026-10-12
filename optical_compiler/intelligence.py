@@ -28,6 +28,8 @@ class SceneIntent:
     subject_entities: list[str] = field(default_factory=list)
     environment_cues: list[str] = field(default_factory=list)
     lighting_cues: list[str] = field(default_factory=list)
+    extracted_environment: Optional[str] = None
+    is_outdoor_intent: bool = False
     motion_cadence: str = "still"  # still, high_speed, motion_blur, slow_flow
     depth_scale: str = "medium"  # extreme_macro, tight_headshot, medium_three_quarter, full_length, wide_environmental, panoramic, aerial
     mood_tags: list[str] = field(default_factory=list)
@@ -75,6 +77,8 @@ class RigRecommendation:
     camera_angle: str
     film_stock: str  # "digital_raw", "portra_400", "tri_x_400", etc.
     skin_lighting: Optional[str] = None
+    clean_scene: str = ""
+    extracted_environment: str = ""
     enhanced_scene: str = ""
     rationale: str = ""
     quality_gate: Optional[QualityGateResult] = None
@@ -655,6 +659,60 @@ class PromptIntelligenceEngine:
     """Intelligent coordinator for scene intent parsing, camera recommendation, and quality checks."""
 
     @classmethod
+    def extract_environment_phrase(cls, text: str) -> Optional[str]:
+        """Extract a concise, descriptive environment phrase from the prompt."""
+        if not text:
+            return None
+        cleaned = cls.strip_compiler_boilerplate(text).strip()
+        lower = cleaned.lower()
+
+        # 1. Prepositional phrases: e.g. "bathing in a naturally heated lake", "on an outside-the-house garden maintenance checkup", "in a Zurich workshop"
+        prep_patterns = [
+            r"(?:in|on|at|around|near|beside|along|by|outside)\s+(?:an?|the)?\s*([a-zA-Z0-9\s-]{3,45}?(?:garden|lake|backyard|yard|patio|lawn|park|street|boulevard|alley|beach|ocean|sea|river|pool|forest|woods|courtyard|terrace|balcony|porch|veranda|greenhouse|rooftop|workshop|atelier|studio|kitchen|room|cathedral|rotunda|library|facade))\b",
+            r"(?:in|on|at|around|near|beside|along|by)\s+(?:an?|the)?\s*([a-zA-Z0-9\s-]{3,40}?(?:paris|tokyo|new york|london|zurich|milan|kyoto|gion))\b",
+        ]
+        for pat in prep_patterns:
+            m = re.search(pat, cleaned, flags=re.IGNORECASE)
+            if m:
+                phrase = m.group(1).strip()
+                phrase = re.sub(r"^(?:an?|the|some|this|that|ordinary)\s+", "", phrase, flags=re.IGNORECASE).strip()
+                if phrase and len(phrase) >= 3:
+                    return phrase
+
+        # 2. Specific keyword mappings if prepositional regex did not capture
+        env_map = [
+            ("garden", "residential garden exterior"),
+            ("backyard", "residential backyard"),
+            ("lake", "natural lake outdoors"),
+            ("beach", "coastal beach shoreline"),
+            ("forest", "dense natural forest"),
+            ("woods", "woodland natural outdoor environment"),
+            ("street", "urban street setting"),
+            ("park", "open park outdoors"),
+            ("patio", "outdoor residential patio"),
+            ("courtyard", "architectural courtyard"),
+            ("terrace", "open outdoor terrace"),
+            ("balcony", "residential balcony overlooking outdoors"),
+            ("pool", "outdoor swimming pool"),
+            ("river", "natural riverbank outdoors"),
+            ("ocean", "open ocean exterior"),
+            ("sea", "coastal seascape"),
+            ("desert", "open desert landscape"),
+            ("mountain", "mountain wilderness"),
+            ("workshop", "artisan workshop"),
+            ("atelier", "fine-art atelier"),
+            ("studio", "studio / controlled setting"),
+            ("kitchen", "residential kitchen"),
+            ("cathedral", "cathedral interior architecture"),
+            ("rotunda", "museum rotunda architecture"),
+        ]
+        for kw, desc in env_map:
+            if re.search(r"\b" + re.escape(kw) + r"\b", lower):
+                return desc
+
+        return None
+
+    @classmethod
     def extract_intent(cls, prompt: str) -> SceneIntent:
         """Parse natural user prompt into semantic photographic intent."""
         text = prompt.strip().lower()
@@ -695,7 +753,6 @@ class PromptIntelligenceEngine:
 
         # Extract Subject Entities (nouns and noun phrases)
         subject_entities: list[str] = []
-        # Extract meaningful subject keywords from prompt (filtering common stop words)
         stop_words = {
             "a", "an", "the", "in", "on", "at", "with", "and", "or", "of", "to", "for", "by",
             "is", "are", "was", "were", "be", "being", "been", "shot", "photo", "photograph",
@@ -708,10 +765,26 @@ class PromptIntelligenceEngine:
 
         # Extract Environment cues
         env_cues = []
-        env_keywords = ["street", "workshop", "atelier", "studio", "room", "cathedral", "forest", "desert", "beach", "city", "paris", "tokyo", "new york", "london", "rotunda", "library", "mountain", "plains", "savanna", "field", "mews"]
+        env_keywords = [
+            "street", "workshop", "atelier", "studio", "room", "cathedral", "forest", "woods",
+            "desert", "beach", "city", "paris", "tokyo", "new york", "london", "rotunda", "library",
+            "mountain", "plains", "savanna", "field", "mews", "garden", "backyard", "yard", "patio",
+            "lawn", "lake", "park", "pool", "terrace", "courtyard", "balcony", "porch", "veranda",
+            "outside", "outdoors", "exterior", "greenhouse", "orchard", "vineyard", "ocean", "sea", "river"
+        ]
         for ek in env_keywords:
             if ek in text:
                 env_cues.append(ek)
+
+        outdoor_cues = [
+            "garden", "backyard", "yard", "patio", "lawn", "lake", "park", "forest", "woods",
+            "beach", "ocean", "sea", "river", "pool", "terrace", "courtyard", "balcony", "porch",
+            "veranda", "outside", "outdoors", "exterior", "street", "sidewalk", "alley", "boulevard",
+            "plaza", "square", "rooftop", "desert", "mountain", "plains", "savanna", "field",
+            "nature", "wilderness", "open-air", "open air"
+        ]
+        is_outdoor = any(w in text for w in outdoor_cues)
+        extracted_env = cls.extract_environment_phrase(prompt)
 
         # Extract Lighting cues
         lighting_cues = []
@@ -748,6 +821,8 @@ class PromptIntelligenceEngine:
             subject_entities=subject_entities,
             environment_cues=env_cues,
             lighting_cues=lighting_cues,
+            extracted_environment=extracted_env,
+            is_outdoor_intent=is_outdoor,
             motion_cadence=motion_cadence,
             depth_scale=depth_scale,
             is_monochrome_intent=is_monochrome,
@@ -901,13 +976,22 @@ class PromptIntelligenceEngine:
         return cleaned
 
     @classmethod
-    def enhance_scene_prompt(cls, raw_prompt: str, intent: SceneIntent, profile_id: str, tier: int) -> str:
+    def enhance_scene_prompt(
+        cls,
+        raw_prompt: str,
+        intent: SceneIntent,
+        profile_id: str,
+        tier: int,
+        custom_lighting: Optional[str] = None,
+    ) -> str:
         """Transform raw prompt into a rich photographic scene description while preserving 100% of user intent."""
         spec = DEFAULT_HARDWARE_SPECS.get(profile_id, {})
         camera_title = PROFILE_DISPLAY_NAMES.get(profile_id, profile_id)
         lens = spec.get("lens", "Prime Lens")
         dof = spec.get("dof", "authentic depth of field")
-        lighting = spec.get("lighting", "natural lighting")
+        lighting = custom_lighting or spec.get("lighting", "natural lighting")
+        if not custom_lighting and intent.is_outdoor_intent and ("strobe" in lighting.lower() or "studio strobe" in lighting.lower()):
+            lighting = "Directional Natural Daylight with Soft Open-Air Fill, Balanced Outdoor Ambience and Organic Shadow Falloff"
         
         # Clean user prompt without breaking grammar and strip prior compiler boilerplate
         clean_user_scene = cls.strip_compiler_boilerplate(raw_prompt)
@@ -1128,14 +1212,39 @@ class PromptIntelligenceEngine:
             film_stock = spec["film_stock"]
             skin_lighting = spec.get("skin_lighting")
 
+            # Outdoor / on-location lighting harmonization
+            if intent.is_outdoor_intent and (lighting_key in ("strobe_para", "beauty_dish", "rembrandt_key") or "strobe" in lighting.lower()):
+                if any(w in prompt.lower() for w in ["golden hour", "sunset", "dusk", "dawn", "low-angle sun"]):
+                    lighting_key = "golden_hour"
+                    lighting = "Low-Angle Golden Hour Sunlight with Warm Ambient Fill and Organic Open-Air Shadow Dynamics"
+                elif any(w in prompt.lower() for w in ["overcast", "cloud", "rain", "fog", "mist"]):
+                    lighting_key = "window_daylight"
+                    lighting = "Soft Overcast Natural Daylight with Gentle Open-Air Diffusion and Natural Tonal Gradation"
+                else:
+                    lighting_key = "window_daylight"
+                    lighting = "Directional Natural Daylight with Soft Open-Air Fill, Balanced Outdoor Ambience and Organic Shadow Falloff"
+
             # Match aspect ratio to intent if explicitly cinematic or square
             if intent.is_cinematic_intent and aspect_ratio not in ("16:9", "2.7:1"):
                 aspect_ratio = "16:9"
             elif intent.is_monochrome_intent and pid == "hasselblad_500cm":
                 aspect_ratio = "1:1"
 
-            # Create enhanced prompt
-            enhanced = cls.enhance_scene_prompt(prompt, intent, pid, rank_idx)
+            # Create clean scene (user scene + natural gaze anchor if portrait, decoupled from camera hardware)
+            clean_user_scene = cls.strip_compiler_boilerplate(prompt)
+            if not clean_user_scene:
+                clean_user_scene = prompt.strip()
+            if clean_user_scene.endswith("."):
+                clean_user_scene = clean_user_scene[:-1]
+            gaze_anchor = ""
+            scene_lower = clean_user_scene.lower()
+            has_gaze_cue = any(g in scene_lower for g in ["eye contact", "facing camera", "looking at camera", "gaze anchor", "direct gaze"])
+            if not has_gaze_cue and intent.primary_genre in ("portrait", "fashion", "documentary") and any(w in scene_lower for w in ["man", "woman", "person", "watchmaker", "tailor", "model", "face", "girl", "boy", "artisan", "elderly", "client", "worker"]):
+                gaze_anchor = ", facing camera with direct eye contact, natural dignified posture and expression"
+            pure_scene = f"{clean_user_scene}{gaze_anchor}."
+
+            # Create enhanced prompt with harmonized lighting
+            enhanced = cls.enhance_scene_prompt(prompt, intent, pid, rank_idx, custom_lighting=lighting)
 
             # Build detailed rationale
             rationale = (
@@ -1173,6 +1282,8 @@ class PromptIntelligenceEngine:
                     camera_angle=angle,
                     film_stock=film_stock,
                     skin_lighting=skin_lighting,
+                    clean_scene=pure_scene,
+                    extracted_environment=intent.extracted_environment or "",
                     enhanced_scene=enhanced,
                     rationale=rationale,
                     quality_gate=qgate,

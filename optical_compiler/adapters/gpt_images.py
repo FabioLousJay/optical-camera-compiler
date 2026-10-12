@@ -194,6 +194,8 @@ class GPTImagesAdapter(BaseAdapter):
             has_explicit_rear = any(k in (scene.camera_angle or "").lower() for k in ("behind", "rear", "from back", "back view"))
             if is_portrait and not has_explicit_rear:
                 base_instr += " Gaze and posture: Facing camera with direct eye contact, natural dignified expression and posture."
+                if scene.has_body_morphology or any(k in scene.subject.lower() for k in ("obese", "overweight", "plus-size", "plus size", "heavyweight", "belly", "gut")):
+                    base_instr += " Perspective & distance discipline: Natural perspective captured from sufficient camera distance to prevent optical barrel distortion or foreshortening. Keep full head and garments fully visible within the frame. Anatomically correct visible hands with five articulated digits."
             sections.append(base_instr)
 
         # Camera angle & framing block
@@ -418,7 +420,14 @@ class GPTImagesAdapter(BaseAdapter):
                 )
         sections.append(focus_block)
 
-        surface_directives = ". ".join(profile.micro_detail_and_physics.surface_rendering)
+        # Filter out multi-line sections that are already rendered as standalone sections
+        filtered_surface = [
+            d for d in profile.micro_detail_and_physics.surface_rendering
+            if not d.startswith("Body Morphology")
+            and not d.startswith("4D Volumetric")
+            and not d.startswith("Biomechanical Hand")
+        ]
+        surface_directives = ". ".join(filtered_surface)
         if scene.has_product_lock:
             surface_block = (
                 "Surface rendering: Authentic commercial product material physics. "
@@ -427,13 +436,16 @@ class GPTImagesAdapter(BaseAdapter):
             )
         else:
             surface_block = (
-                "Surface rendering: Natural human skin with visible pores and micro texture. "
+                "Surface rendering: Natural human skin with visible pores and authentic micro texture. "
+                "Optical acutance hierarchy: Level 1 (Tack-Sharp): Iris, eyelashes, pupil wetline, and textile weave (denim weave, stitches, fabrics, metal hardware) resolve with maximum edge acutance. "
+                "Level 2 (Naturally Softer): Human skin remains softer than hard edges, eyes, hair, and textiles; authentic uneven epidermal pores, natural vellus hair, age-appropriate wrinkles, folds, and smooth photographic tonal transitions without waxy smoothing. "
+                "Level 3 (Hard Prohibitions): Absolute prohibition of algorithmic pore stamping, carved/engraved skin, metallic sheen, plastic skin, or HDR crunch. "
                 + (
                     "Human skin realism prioritized over artificial clarity. Natural organic skin softer than hard edges, eyes, hair, and textiles. "
                     if (scene.human_skin_realism and ref_mode == ReferenceMode.DEPIXELATE_GFX100RF)
                     else ""
                 )
-                + f"{surface_directives}. "
+                + (f"{surface_directives}. " if surface_directives else "")
                 + "Accurate dermal subsurface scattering without waxy specularities or artificial blur. "
                 + "High micro-contrast on hair, fabric, eyes, and environment. Crisp edges. No haze. No diffusion."
             )
@@ -453,12 +465,25 @@ class GPTImagesAdapter(BaseAdapter):
         if scene.grip_modifier:
             grip_desc = scene.grip_modifier.value.replace("_", " ")
             lighting_parts.append(f"Studio grip modifier: {grip_desc}.")
-        lighting_parts.append(
-            "Directional key light positioned 35–45° off-axis, slightly above eye line for micro-contrast. "
-            "Minimal fill. Strong black flag negative fill on the shadow side for deep tonal separation. "
-            "Optional very low-power rim light only for edge separation (no glow, no second key). "
-            "Background kept controlled to prevent spill. Contrast is editorial, not cinematic."
-        )
+
+        combined_text = f"{scene.environment or ''} {scene.subject or ''}".lower()
+        outdoor_cues = [
+            "garden", "backyard", "yard", "patio", "lawn", "lake", "park", "forest", "woods",
+            "beach", "ocean", "sea", "river", "pool", "courtyard", "terrace", "balcony", "nature",
+            "wilderness", "open-air", "open air", "outside", "outdoors"
+        ]
+        is_outdoor = any(w in combined_text for w in outdoor_cues)
+        if is_outdoor:
+            lighting_parts.append(
+                "Directional natural daylight with subtle fill, preserving readable outdoor depth, open-air context, and realistic soft shadow transitions without synthetic studio isolation."
+            )
+        else:
+            lighting_parts.append(
+                "Directional key light positioned 35–45° off-axis, slightly above eye line for micro-contrast. "
+                "Minimal fill. Strong black flag negative fill on the shadow side for deep tonal separation. "
+                "Optional very low-power rim light only for edge separation (no glow, no second key). "
+                "Background kept controlled to prevent spill. Contrast is editorial, not cinematic."
+            )
         lighting_block = " ".join(lighting_parts)
         sections.append(lighting_block)
 

@@ -316,6 +316,75 @@ class TestPromptIntelligenceAdvisor(unittest.TestCase):
             self.assertIn("speedos", r.quality_gate.preserved_entities)
             self.assertIn("lake", r.quality_gate.preserved_entities)
 
+    def test_outdoor_environment_extraction_and_lighting_harmonization(self):
+        """Verify prompt with outdoor garden cues extracts environment and harmonizes lighting."""
+        user_prompt = (
+            "An extra-obese, overweight 65-year-old white man, blue eyes, subtly laughing flirtatiously, "
+            "shirtless, wearing tight blue jean shorts, on an ordinary outside-the-house garden maintenance checkup. "
+            "4D, Hyper-realistic skin and full aesthetics, no CGI, no fake AI content."
+        )
+        intent = PromptIntelligenceEngine.extract_intent(user_prompt)
+        self.assertTrue(intent.is_outdoor_intent)
+        self.assertIn("garden", (intent.extracted_environment or "").lower())
+
+        recs = PromptIntelligenceEngine.recommend_rigs(user_prompt)
+        self.assertEqual(len(recs), 3)
+
+        # In all recommendations, lighting must be harmonized to daylight/sunlight, NOT indoor studio strobe or 18% gray wall
+        for r in recs:
+            self.assertTrue("Daylight" in r.lighting or "Sunlight" in r.lighting, f"Expected Daylight or Sunlight in {r.lighting}")
+            self.assertNotIn("Studio Strobe", r.lighting)
+            self.assertNotIn("Black Foam-Core Negative Fill", r.lighting)
+            self.assertTrue(r.clean_scene, "clean_scene must be present")
+            # clean_scene must not contain hardware capture sentences
+            self.assertNotIn("Masterwork photographic capture", r.clean_scene)
+            self.assertNotIn("Photographic study captured", r.clean_scene)
+            self.assertIn("outside-the-house garden", r.clean_scene)
+
+    def test_gpt_images_acutance_hierarchy_and_perspective_discipline(self):
+        """Verify gpt_images adapter generates 3-level acutance hierarchy and perspective distance rule."""
+        compiler = OpticalCompiler(profile="phase_one_iq4")
+        payload = compiler.compile(
+            "An extra-obese, overweight 65-year-old white man, blue eyes, shirtless, wearing tight blue jean shorts, on an ordinary outside-the-house garden maintenance checkup.",
+            target="gpt_images",
+            body_volume="gut, chest, waist",
+            weight_lb=310,
+        )
+        prompt = payload.positive_prompt
+
+        # Perspective distance discipline rule for heavy subjects
+        self.assertIn("Perspective & distance discipline:", prompt)
+        self.assertIn("Natural perspective captured from sufficient camera distance", prompt)
+        self.assertIn("Keep full head and garments fully visible", prompt)
+
+        # 3-Level Optical Acutance Hierarchy
+        self.assertIn("Optical acutance hierarchy: Level 1 (Tack-Sharp):", prompt)
+        self.assertIn("Level 2 (Naturally Softer):", prompt)
+        self.assertIn("Level 3 (Hard Prohibitions):", prompt)
+        self.assertIn("denim weave", prompt)
+        self.assertIn("authentic uneven epidermal pores", prompt)
+
+        # Deduplication check: Body Morphology should appear as standalone section and NOT be duplicated in Surface rendering
+        count_morphology = prompt.count("Body Morphology & Proportional Volume Calibration")
+        self.assertEqual(count_morphology, 1, "Body Morphology should not be duplicated in Surface rendering")
+
+        # Lighting geometry should be natural daylight for garden, not indoor studio strobe
+        self.assertIn("Directional natural daylight with subtle fill", prompt)
+        self.assertNotIn("Strong black flag negative fill", prompt)
+
+    def test_json_prompt_outdoor_environment_fallback(self):
+        """Verify json_prompt outputs extracted environment instead of 'Studio / Controlled' for outdoor prompts."""
+        compiler = OpticalCompiler(profile="phase_one_iq4")
+        payload = compiler.compile(
+            "An extra-obese, overweight 65-year-old white man, shirtless, wearing tight blue jean shorts, on an ordinary outside-the-house garden maintenance checkup.",
+            target="json",
+        )
+        import json
+        data = json.loads(payload.positive_prompt)
+        env = data.get("scene", {}).get("environment", "")
+        self.assertNotEqual(env, "Studio / Controlled")
+        self.assertIn("garden", env.lower())
+
 
 if __name__ == "__main__":
     unittest.main()

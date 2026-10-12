@@ -607,6 +607,26 @@ class OpticalCompiler:
             if universal_medium_format_override:
                 scene_input.universal_medium_format_override = universal_medium_format_override
 
+        # Auto-extract environment from subject if none was explicitly provided
+        if not scene_input.environment:
+            from .intelligence import PromptIntelligenceEngine
+            extracted_env = PromptIntelligenceEngine.extract_environment_phrase(scene_input.subject)
+            if extracted_env:
+                scene_input.environment = extracted_env
+
+        # Outdoor lighting harmonization if lighting was not explicitly specified
+        if not scene_input.lighting:
+            from .intelligence import PromptIntelligenceEngine
+            combined_txt = f"{scene_input.environment or ''} {scene_input.subject or ''}"
+            intent = PromptIntelligenceEngine.extract_intent(combined_txt)
+            if intent.is_outdoor_intent:
+                if any(w in combined_txt.lower() for w in ["golden hour", "sunset", "dusk", "dawn", "low-angle sun"]):
+                    scene_input.lighting = "Low-Angle Golden Hour Sunlight with Warm Ambient Fill and Organic Open-Air Shadow Dynamics"
+                elif any(w in combined_txt.lower() for w in ["overcast", "cloud", "rain", "fog", "mist"]):
+                    scene_input.lighting = "Soft Overcast Natural Daylight with Gentle Open-Air Diffusion and Natural Tonal Gradation"
+                else:
+                    scene_input.lighting = "Directional Natural Daylight with Soft Open-Air Fill, Balanced Outdoor Ambience and Organic Shadow Falloff"
+
         # 3. Parse target engine
         engine = (
             target

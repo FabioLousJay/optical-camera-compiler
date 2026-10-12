@@ -175,7 +175,9 @@ class JSONAllInOneAdapter(BaseAdapter):
                 "camera_angle": scene.camera_angle or "Not specified",
                 "color_mode": "monochrome" if scene.is_monochrome else "color",
                 "crowd_action": scene.crowd_action,
-                "environment": scene.environment or "Studio / Controlled",
+                "environment": scene.environment or (
+                    __import__("optical_compiler.intelligence", fromlist=["PromptIntelligenceEngine"]).PromptIntelligenceEngine.extract_environment_phrase(scene.subject) or "Studio / Controlled"
+                ),
                 "wardrobe": scene.wardrobe or "Not specified",
                 "mood": scene.mood or "Editorial / Photorealistic",
                 "aspect_ratio": scene.aspect_ratio,

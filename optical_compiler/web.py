@@ -4361,14 +4361,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         setAperture(rec.aperture);
       }
 
-      // 4. Set Subject & Framing
+      // 4. Set Subject, Framing & Environment
       const subjectInput = document.getElementById('subjectInput');
-      if (subjectInput && rec.enhanced_scene) {
-        subjectInput.value = rec.enhanced_scene;
+      if (subjectInput) {
+        subjectInput.value = rec.clean_scene || rec.enhanced_scene;
       }
       const framingInput = document.getElementById('framingInput');
       if (framingInput && rec.framing) {
         framingInput.value = rec.framing;
+      }
+      const environmentInput = document.getElementById('environmentInput');
+      if (environmentInput && rec.extracted_environment) {
+        environmentInput.value = rec.extracted_environment;
       }
 
       // 5. Set Lighting
