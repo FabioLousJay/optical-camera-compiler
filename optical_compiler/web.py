@@ -5803,6 +5803,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     protect_sky_haze=protect_sky_haze,
                     output_format=output_format,
                     generate_report=True,
+                    use_neural_sr=bool(body.get("use_neural_sr", True)),
                 )
                 self._send_json({
                     "success": rep.validation_passed,

@@ -1050,11 +1050,14 @@ def execute_4x_reconstruction_lock(
     output_format: Optional[str] = None,
     generate_report: bool = True,
     spec: Optional[Any] = None,
+    use_neural_sr: bool = False,
 ) -> tuple[ReconstructionReport, dict[str, Any]]:
     """Execute the Professional 4X Reconstruction Lock pipeline.
 
-    Note: Without configured external neural weights, this CPU execution path performs
-    staged Lanczos resampling + frequency-separated sky-protected acuity refinement and
+    When `use_neural_sr=True` and verified `RealESRGAN_x4plus.pth` weights exist in
+    `external/Real-ESRGAN/weights/`, delegates 4x reconstruction to PhotonQC's
+    Frequency-Decomposed Source-Locked Neural Hybrid (`realesrgan_antidrift` on Apple Silicon MPS).
+    Otherwise performs staged Lanczos resampling + sky-protected acuity refinement and
     explicitly records actual_execution_backend='lanczos_reference_not_ai' in provenance.
     """
     if spec is not None:
@@ -1108,48 +1111,74 @@ def execute_4x_reconstruction_lock(
 
     final_out.parent.mkdir(parents=True, exist_ok=True)
 
-    # 1. Staged Lanczos Upscale: w0 -> 2*w0 -> 4*w0
-    mid_img = working_img.resize((w0 * 2, h0 * 2), Image.Resampling.LANCZOS)
-    upscaled = mid_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
-    mid_img.close()
-    working_img.close()
+    actual_exec_backend = "lanczos_reference_not_ai"
+    default_weights = (
+        Path(__file__).resolve().parent.parent
+        / "external"
+        / "Real-ESRGAN"
+        / "weights"
+        / "RealESRGAN_x4plus.pth"
+    )
+    neural_executed = False
+    if use_neural_sr and not has_alpha and w0 >= 64 and h0 >= 64 and default_weights.is_file():
+        try:
+            from photonqc.backends import render_with_provenance
 
-    # 2. Frequency Separation & Regional Masking
-    if protect_sky_haze:
-        if upscaled.mode == "RGBA":
-            base_rgb = upscaled.convert("RGB")
-            alpha_ch = upscaled.split()[-1]
+            final_img, prov = render_with_provenance(
+                in_p,
+                (target_w, target_h),
+                backend="realesrgan_antidrift",
+                weights=default_weights,
+            )
+            actual_exec_backend = prov.backend_label
+            working_img.close()
+            neural_executed = True
+        except Exception:
+            neural_executed = False
+
+    if not neural_executed:
+        # 1. Staged Lanczos Upscale: w0 -> 2*w0 -> 4*w0
+        mid_img = working_img.resize((w0 * 2, h0 * 2), Image.Resampling.LANCZOS)
+        upscaled = mid_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
+        mid_img.close()
+        working_img.close()
+
+        # 2. Frequency Separation & Regional Masking
+        if protect_sky_haze:
+            if upscaled.mode == "RGBA":
+                base_rgb = upscaled.convert("RGB")
+                alpha_ch = upscaled.split()[-1]
+            else:
+                base_rgb = upscaled
+                alpha_ch = None
+
+            # Build high-frequency acutance layer
+            sharper = base_rgb.filter(
+                ImageFilter.UnsharpMask(radius=1.2, percent=int(round(40 + blend_ratio * 40)), threshold=2)
+            )
+
+            # Detect texture-bearing vs smooth gradient regions
+            gray = base_rgb.convert("L")
+            blurred_gray = gray.filter(ImageFilter.GaussianBlur(radius=6))
+            diff = ImageChops.difference(gray, blurred_gray)
+            texture_mask = diff.point(lambda p: min(255, int(p * 2.8)) if p > 8 else 0)
+
+            # Composite sharper detail strictly into texture areas
+            textured_rgb = Image.composite(sharper, base_rgb, texture_mask)
+            sharper.close()
+            gray.close()
+            blurred_gray.close()
+            diff.close()
+            texture_mask.close()
+
+            if alpha_ch is not None:
+                final_img = textured_rgb.convert("RGBA")
+                final_img.putalpha(alpha_ch)
+                textured_rgb.close()
+            else:
+                final_img = textured_rgb
         else:
-            base_rgb = upscaled
-            alpha_ch = None
-
-        # Build high-frequency acutance layer
-        sharper = base_rgb.filter(
-            ImageFilter.UnsharpMask(radius=1.2, percent=int(round(40 + blend_ratio * 40)), threshold=2)
-        )
-
-        # Detect texture-bearing vs smooth gradient regions
-        gray = base_rgb.convert("L")
-        blurred_gray = gray.filter(ImageFilter.GaussianBlur(radius=6))
-        diff = ImageChops.difference(gray, blurred_gray)
-        texture_mask = diff.point(lambda p: min(255, int(p * 2.8)) if p > 8 else 0)
-
-        # Composite sharper detail strictly into texture areas
-        textured_rgb = Image.composite(sharper, base_rgb, texture_mask)
-        sharper.close()
-        gray.close()
-        blurred_gray.close()
-        diff.close()
-        texture_mask.close()
-
-        if alpha_ch is not None:
-            final_img = textured_rgb.convert("RGBA")
-            final_img.putalpha(alpha_ch)
-            textured_rgb.close()
-        else:
-            final_img = textured_rgb
-    else:
-        final_img = upscaled
+            final_img = upscaled
 
     # 3. Save with optimal archival parameters
     save_kwargs: dict[str, Any] = {"dpi": (300, 300)}
@@ -1158,7 +1187,7 @@ def execute_4x_reconstruction_lock(
         pnginfo.add_text("Software", "Optical Camera Compiler 4X Reconstruction Engine")
         pnginfo.add_text("Reconstruction_Lock", "4X_SOURCE_LOCKED")
         pnginfo.add_text("Backend", backend_str)
-        pnginfo.add_text("Actual_Execution_Backend", "lanczos_reference_not_ai")
+        pnginfo.add_text("Actual_Execution_Backend", actual_exec_backend)
         save_kwargs.update({"compress_level": 6, "optimize": True, "pnginfo": pnginfo})
         final_img.save(final_out, format="PNG", **save_kwargs)
     elif fmt in ("TIFF", "TIF"):
@@ -1223,7 +1252,7 @@ def execute_4x_reconstruction_lock(
         metadata={
             "input_file": in_p.name,
             "source_sha256": source_sha,
-            "actual_execution_backend": "lanczos_reference_not_ai",
+            "actual_execution_backend": actual_exec_backend,
             "anti_model_stacking": True,
             "crop_inspection_zones": [
                 "foreground_rock_strata",
