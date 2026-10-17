@@ -11,3 +11,7 @@ build/
 .venv/
 *.venv
 venv/
+outputs/
+external/
+*.pth
+smoke_input.png

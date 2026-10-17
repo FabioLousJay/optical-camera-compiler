@@ -1,26 +1,51 @@
-name: CI
-
+name: PhotoPipe & PhotonQC CI
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, "feature/**" ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  cpu-validation:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-
+        python-version: ["3.11", "3.12"]
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Run Test Suite
-      run: |
-        python -m unittest discover -s tests -v
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install package and dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+      - name: Unit and regression tests (pytest + unittest)
+        run: |
+          python -m pytest -q
+          python -m unittest discover -s tests -q
+      - name: CPU smoke export (reference interpolation, not AI)
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from photonqc.assets import generate_rights_cleared_heart_example
+          generate_rights_cleared_heart_example(Path("smoke_input.png"), width=400, height=600)
+          PY
+          photopipe export \
+            --input smoke_input.png \
+            --output outputs/smoke.png \
+            --width-in 4 --height-in 6 --ppi 100 \
+            --min-mib 0.01 \
+            --backend lanczos \
+            --report-dir outputs/report
+          photopipe inspect --input outputs/smoke.png --json
+      - uses: actions/upload-artifact@v4
+        if: matrix.python-version == '3.11'
+        with:
+          name: photopipe-ci-smoke
+          path: outputs/
+          if-no-files-found: error

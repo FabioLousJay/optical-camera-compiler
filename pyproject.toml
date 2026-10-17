@@ -22,14 +22,23 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0",
+    "Pillow>=10.3,<14",
+    "numpy>=1.26,<3",
+    "pytest>=7.0,<10",
 ]
 upscale = [
-    "Pillow>=9.0",
+    "Pillow>=10.3,<14",
+    "numpy>=1.26,<3",
+]
+sr = [
+    "Pillow>=10.3,<14",
+    "numpy>=1.26,<3",
+    "torch>=2.0",
 ]
 all = [
-    "Pillow>=9.0",
-    "pytest>=7.0",
+    "Pillow>=10.3,<14",
+    "numpy>=1.26,<3",
+    "pytest>=7.0,<10",
 ]
 
 [project.scripts]
@@ -38,10 +47,15 @@ optical-studio = "optical_compiler.web:main"
 optical-upscaler = "optical_compiler.cli:upscaler_main"
 optical-recon-4x = "optical_compiler.cli:recon_4x_main"
 optical-png-lock = "optical_compiler.cli:png_lock_main"
+photonqc = "photonqc.cli:main"
+photopipe = "photopipe.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["optical_compiler*"]
+include = ["optical_compiler*", "photonqc*", "photopipe*"]
 
 [tool.setuptools.package-data]
 optical_compiler = ["profiles_data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

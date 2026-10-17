@@ -5804,7 +5804,11 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     output_format=output_format,
                     generate_report=True,
                 )
-                self._send_json(rep_dict)
+                self._send_json({
+                    "success": rep.validation_passed,
+                    "report": rep_dict,
+                    **rep_dict,
+                })
             except Exception as err:
                 self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
             return

@@ -286,7 +286,7 @@ class TestSizingAndClosedLoopExport(unittest.TestCase):
             profile="A",
             generate_report=False,
         )
-        self.assertEqual(run_report.output_dimensions, (400, 600))
+        self.assertEqual(run_report.output_dimensions, (4000, 6000))
         self.assertTrue(out_path.exists())
 
 

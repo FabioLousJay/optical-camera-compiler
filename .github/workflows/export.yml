@@ -1,43 +1,48 @@
-name: Closed-Loop Resolution & Export Pipeline
+name: PhotonQC Print-Calibrated Export Pipeline
 
 on:
+  push:
+    branches: [ main, master, "feature/**" ]
   workflow_dispatch:
     inputs:
       input_path:
-        description: "Path to source input image"
+        description: "Relative path to RGB source image in repository"
         required: true
-        default: "sample.png"
-      print_width:
-        description: "Target physical print width (inches)"
-        required: false
-        default: "16.0"
-      print_height:
-        description: "Target physical print height (inches)"
-        required: false
-        default: "24.0"
+        default: "examples/rights-cleared-example.png"
+      width_in:
+        description: "Target physical print width in inches"
+        required: true
+        default: "16"
+      height_in:
+        description: "Target physical print height in inches"
+        required: true
+        default: "24"
       ppi:
-        description: "Target raster resolution (PPI)"
-        required: false
+        description: "Target raster density (PPI)"
+        required: true
         default: "300"
-      min_mb:
-        description: "Non-negotiable minimum file size (MB)"
+      min_mib:
+        description: "Minimum lossless PNG size in MiB"
+        required: true
+        default: "8"
+      profile:
+        description: "Print calibration profile (matte_300ppi, glossy_300ppi, canvas_240ppi, baryta_300ppi)"
         required: false
-        default: "30.0"
-      format:
-        description: "Export format (png, tiff, jpeg)"
-        required: false
-        default: "png"
+        default: "matte_300ppi"
+
+permissions:
+  contents: read
 
 jobs:
   export:
-    name: Execute Closed-Loop Export & Provenance
+    name: Execute Verified Print Export & Provenance
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     steps:
       - name: Checkout Codebase
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -45,22 +50,48 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install Pillow
+          python -m pip install -e '.[dev]'
 
-      - name: Execute Closed-Loop Super-Resolution Export
+      - name: Validate Path & Execute Constraint-Verified Export
+        env:
+          INPUT_PATH: ${{ inputs.input_path || 'examples/rights-cleared-example.png' }}
+          WIDTH_IN: ${{ inputs.width_in || '16' }}
+          HEIGHT_IN: ${{ inputs.height_in || '24' }}
+          PPI: ${{ inputs.ppi || '300' }}
+          MIN_MIB: ${{ inputs.min_mib || '8' }}
+          PRINT_PROFILE: ${{ inputs.profile || 'matte_300ppi' }}
         run: |
-          python -m optical_compiler.cli \
-            --export-closed-loop "${{ github.event.inputs.input_path }}" \
-            --export-out "dist/export.${{ github.event.inputs.format }}" \
-            --export-format "${{ github.event.inputs.format }}" \
-            --print-width "${{ github.event.inputs.print_width }}" \
-            --print-height "${{ github.event.inputs.print_height }}" \
-            --ppi "${{ github.event.inputs.ppi }}" \
-            --min-mb "${{ github.event.inputs.min_mb }}" \
-            --report-md "dist/EXPORT_REPORT.md"
+          python - <<'PY'
+          import os
+          from pathlib import Path
 
-      - name: Publish Export Artifacts & Provenance
+          workspace = Path.cwd().resolve()
+          candidate = (workspace / os.environ["INPUT_PATH"]).resolve()
+          if not str(candidate).startswith(str(workspace)):
+              raise ValueError(f"Path traversal blocked: {candidate}")
+          if not candidate.is_file():
+              raise FileNotFoundError(f"Input image not found: {candidate}")
+          PY
+          photonqc export \
+            --input "$INPUT_PATH" \
+            --output "outputs/export/verified_export.png" \
+            --width-in "$WIDTH_IN" \
+            --height-in "$HEIGHT_IN" \
+            --ppi "$PPI" \
+            --min-mib "$MIN_MIB" \
+            --backend lanczos \
+            --profile "$PRINT_PROFILE" \
+            --output-sharpen \
+            --report-dir "outputs/export/report"
+          photonqc evaluate \
+            --candidate "outputs/export/verified_export.png" \
+            --check-heart \
+            --check-flat-black \
+            --report-dir "outputs/export/evaluation"
+
+      - name: Upload Export Package & Cryptographic Provenance
         uses: actions/upload-artifact@v4
         with:
-          name: exhibition-export-package
-          path: dist/
+          name: photonqc-verified-export
+          path: outputs/export/
+          if-no-files-found: error

@@ -1,0 +1,93 @@
+name: PhotonQC Super-Resolution & Perceptual Evaluation Benchmark
+
+on:
+  push:
+    branches: [ main, master, "feature/**" ]
+  workflow_dispatch:
+    inputs:
+      ground_truth_path:
+        description: "Path to rights-cleared high-resolution ground truth image H"
+        required: true
+        default: "examples/rights-cleared-example.png"
+      scale_factor:
+        description: "Synthetic degradation downsampling factor"
+        required: true
+        default: "4"
+      weights_path:
+        description: "Optional path to cached verified RealESRGAN_x4plus.pth weights"
+        required: false
+        default: ""
+      expected_weights_sha256:
+        description: "Expected SHA-256 hex digest of the checkpoint when weights_path is provided"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  sr-benchmark:
+    name: Controlled Degradation Benchmark & Registered Crop Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PhotonQC Evaluation Suite
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Verify Model Checkpoint Provenance & Execute Benchmark
+        env:
+          GT_PATH: ${{ inputs.ground_truth_path || 'examples/rights-cleared-example.png' }}
+          SCALE_FACTOR: ${{ inputs.scale_factor || '4' }}
+          WEIGHTS_PATH: ${{ inputs.weights_path || '' }}
+          EXPECTED_SHA256: ${{ inputs.expected_weights_sha256 || '' }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          from photonqc.report import sha256
+
+          workspace = Path.cwd().resolve()
+          gt = (workspace / os.environ["GT_PATH"]).resolve()
+          if not str(gt).startswith(str(workspace)) or not gt.is_file():
+              raise FileNotFoundError(f"Invalid ground truth path: {gt}")
+
+          w_str = os.environ.get("WEIGHTS_PATH", "").strip()
+          exp_sha = os.environ.get("EXPECTED_SHA256", "").strip().lower()
+          if w_str:
+              wp = Path(w_str).resolve()
+              if not wp.is_file():
+                  raise FileNotFoundError(f"Configured weights file does not exist: {wp}")
+              actual_sha = sha256(wp)
+              print(f"Verified checkpoint SHA-256: {actual_sha}")
+              if exp_sha and actual_sha.lower() != exp_sha:
+                  raise RuntimeError(f"Checkpoint SHA-256 mismatch: expected {exp_sha}, got {actual_sha}")
+          PY
+          if [ -n "$WEIGHTS_PATH" ]; then
+            photonqc benchmark \
+              --ground-truth "$GT_PATH" \
+              --scale "$SCALE_FACTOR" \
+              --weights "$WEIGHTS_PATH" \
+              --output-dir "outputs/benchmark"
+          else
+            photonqc benchmark \
+              --ground-truth "$GT_PATH" \
+              --scale "$SCALE_FACTOR" \
+              --output-dir "outputs/benchmark"
+          fi
+
+      - name: Upload Benchmark Reports & Registered Crop Panels
+        uses: actions/upload-artifact@v4
+        with:
+          name: photonqc-sr-benchmark-artifacts
+          path: outputs/benchmark/
+          if-no-files-found: error

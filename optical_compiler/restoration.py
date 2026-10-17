@@ -29,7 +29,7 @@ from typing import Any, Optional, Union
 
 # Handle Pillow import gracefully
 try:
-    from PIL import Image, ImageCms, ImageEnhance, ImageFilter, ImageOps, PngImagePlugin
+    from PIL import Image, ImageChops, ImageCms, ImageEnhance, ImageFilter, ImageOps, PngImagePlugin
     PILLOW_AVAILABLE = True
 except ImportError:
     PILLOW_AVAILABLE = False
@@ -967,14 +967,37 @@ class ReconstructionReport:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert reconstruction report to dictionary."""
-        return asdict(self)
+        """Convert reconstruction report to dictionary with full provenance."""
+        d = asdict(self)
+        d["pipeline"] = "Professional 4X Reconstruction Lock Protocol"
+        d["original_dimensions"] = list(self.source_dimensions)
+        d["source_dimensions"] = list(self.source_dimensions)
+        d["output_dimensions"] = list(self.output_dimensions)
+        d["linear_scale"] = self.linear_multiplier
+        d["pixel_area_expansion"] = self.area_multiplier
+        d["output_pixels"] = self.output_pixels
+        d["source_sha256"] = self.metadata.get("source_sha256", "")
+        d["output_sha256"] = self.sha256
+        d["actual_execution_backend"] = self.metadata.get(
+            "actual_execution_backend", "lanczos_reference_not_ai"
+        )
+        d["spec"] = {
+            "backend": self.backend,
+            "actual_execution_backend": d["actual_execution_backend"],
+            "linear_scale": self.linear_multiplier,
+            "denoise_strength": self.denoise_strength,
+            "blend_ratio": self.blend_ratio,
+            "protect_sky_haze": self.sky_haze_protected,
+            "anti_model_stacking": True,
+        }
+        return d
 
     def to_markdown(self) -> str:
         """Render report as GitHub-flavored Markdown."""
         status_badge = "**PASSED (SOURCE-LOCKED)**" if self.validation_passed else "**FAILED**"
         src_w, src_h = self.source_dimensions
         out_w, out_h = self.output_dimensions
+        actual_exec = self.metadata.get("actual_execution_backend", "lanczos_reference_not_ai")
         failure_section = ""
         if self.validation_failures:
             fails = "\n".join(f"- {f}" for f in self.validation_failures)
@@ -983,7 +1006,8 @@ class ReconstructionReport:
         return f"""# Professional 4X Reconstruction Lock Report
 
 - **Status**: {status_badge}
-- **Engine / Backend**: `{self.backend}`
+- **Configured Profile / Backend**: `{self.backend}`
+- **Actual Executed Backend**: `{actual_exec}`
 - **Execution Time**: {self.execution_seconds:.3f}s
 - **Output File**: `{Path(self.output_path).name}`
 - **SHA-256 Provenance**: `{self.sha256}`
@@ -993,8 +1017,8 @@ class ReconstructionReport:
 | :--- | :--- |
 | Source Dimensions | {src_w} x {src_h} px ({self.source_megapixels:.2f} MP) |
 | Output Dimensions | {out_w} x {out_h} px ({self.output_megapixels:.2f} MP) |
-| Linear Scale Factor | {self.linear_multiplier}X (Exact) |
-| Area Pixel Growth | {self.area_multiplier}X (Mathematical Truth) |
+| Linear Scale Factor | {self.linear_multiplier}x (Exact) |
+| Area Pixel Growth | {self.area_multiplier}x (Mathematical Truth) |
 | Output File Size | {self.file_size_mb:.2f} MB ({self.file_size_bytes:,} bytes) |
 | Format | {self.output_format} |
 | Denoise Strength | {self.denoise_strength} (Preserves micro-strata) |
@@ -1029,15 +1053,9 @@ def execute_4x_reconstruction_lock(
 ) -> tuple[ReconstructionReport, dict[str, Any]]:
     """Execute the Professional 4X Reconstruction Lock pipeline.
 
-    Workflow:
-      1. Assert exact 4X linear raster expansion (output_w = 4*w0, output_h = 4*h0, 16X pixels).
-      2. Perform staged Lanczos enlargement to 2X and 4X.
-      3. Frequency separation: compute high-frequency edge texture via gradient filtering.
-      4. Sky & atmospheric haze protection: masks out low-frequency/low-variance zones
-         (sky, clouds, fog, distant haze) from sharpening to prevent noise grain or edge halos.
-      5. Selective high-frequency detail blend on structured surfaces (rock strata, tree foliage, fabric).
-      6. Format-appropriate lossless or maximum-fidelity export (PNG, TIFF, JPEG).
-      7. Cryptographic SHA-256 provenance calculation and RECONSTRUCTION_REPORT.md generation.
+    Note: Without configured external neural weights, this CPU execution path performs
+    staged Lanczos resampling + frequency-separated sky-protected acuity refinement and
+    explicitly records actual_execution_backend='lanczos_reference_not_ai' in provenance.
     """
     if spec is not None:
         backend = getattr(spec, "backend", backend)
@@ -1053,6 +1071,7 @@ def execute_4x_reconstruction_lock(
     if not in_p.exists():
         raise FileNotFoundError(f"Source image not found: {in_p}")
 
+    source_sha = sha256_file(in_p)
     backend_str = str(backend.value if hasattr(backend, "value") else backend).lower()
 
     with Image.open(in_p) as src:
@@ -1112,7 +1131,7 @@ def execute_4x_reconstruction_lock(
         # Detect texture-bearing vs smooth gradient regions
         gray = base_rgb.convert("L")
         blurred_gray = gray.filter(ImageFilter.GaussianBlur(radius=6))
-        diff = ImageOps.difference(gray, blurred_gray)
+        diff = ImageChops.difference(gray, blurred_gray)
         texture_mask = diff.point(lambda p: min(255, int(p * 2.8)) if p > 8 else 0)
 
         # Composite sharper detail strictly into texture areas
@@ -1139,6 +1158,7 @@ def execute_4x_reconstruction_lock(
         pnginfo.add_text("Software", "Optical Camera Compiler 4X Reconstruction Engine")
         pnginfo.add_text("Reconstruction_Lock", "4X_SOURCE_LOCKED")
         pnginfo.add_text("Backend", backend_str)
+        pnginfo.add_text("Actual_Execution_Backend", "lanczos_reference_not_ai")
         save_kwargs.update({"compress_level": 6, "optimize": True, "pnginfo": pnginfo})
         final_img.save(final_out, format="PNG", **save_kwargs)
     elif fmt in ("TIFF", "TIF"):
@@ -1150,6 +1170,16 @@ def execute_4x_reconstruction_lock(
         save_rgb.save(final_out, format="JPEG", **save_kwargs)
     else:
         final_img.save(final_out, format=fmt, **save_kwargs)
+
+    # Also save companion archival TIFF and JPEG when generating reports
+    if generate_report:
+        tiff_companion = final_out.with_suffix(".tiff")
+        jpg_companion = final_out.with_suffix(".jpg")
+        if tiff_companion != final_out:
+            final_img.save(tiff_companion, format="TIFF", dpi=(300, 300), compression="tiff_lzw")
+        if jpg_companion != final_out:
+            rgb_comp = final_img.convert("RGB") if final_img.mode in ("RGBA", "P") else final_img
+            rgb_comp.save(jpg_companion, format="JPEG", dpi=(300, 300), quality=96, subsampling=0)
 
     final_img.close()
     gc.collect()
@@ -1192,6 +1222,8 @@ def execute_4x_reconstruction_lock(
         validation_failures=failures,
         metadata={
             "input_file": in_p.name,
+            "source_sha256": source_sha,
+            "actual_execution_backend": "lanczos_reference_not_ai",
             "anti_model_stacking": True,
             "crop_inspection_zones": [
                 "foreground_rock_strata",

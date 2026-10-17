@@ -1,13 +1,117 @@
-# Optical Camera Compiler 📷⚡
+# PhotonQC (`photo-pipeline-lab`) & Optical Camera Compiler 🔬📷⚡
+
+> **A constraint-tested AI photography pipeline. Every image is reproducible, measured, and honestly labeled.**
 
 [![CI](https://github.com/FabioLousJay/optical-camera-compiler/actions/workflows/ci.yml/badge.svg)](https://github.com/FabioLousJay/optical-camera-compiler/actions)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Version: 3.9.4](https://img.shields.io/badge/version-3.9.4-blue.svg)](pyproject.toml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Version: 3.9.4 / PhotonQC 1.0.0](https://img.shields.io/badge/PhotonQC-1.0.0-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 265 Passing](https://img.shields.io/badge/tests-265%20passing-brightgreen.svg)](tests/)
+[![Tests: 304 Passing](https://img.shields.io/badge/tests-304%20passing-brightgreen.svg)](tests/)
 [![ComfyUI: Supported](https://img.shields.io/badge/ComfyUI-Custom%20Node-blueviolet.svg)](#comfyui-custom-node-integration)
-[![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20runtime-success.svg)](pyproject.toml)
-[![Targets](https://img.shields.io/badge/engines-GPT%20Images%20%7C%20Gemini%20%7C%20Midjourney%20%7C%20Flux%20%7C%20SDXL%20%7C%20JSON-orange.svg)](#supported-target-adapters)
+
+**PhotonQC** (`photonqc` / `photopipe`) is an evidence-based computational photography, super-resolution orchestration, perceptual evaluation, and prepress print-calibration engineering platform integrated with the **Optical Camera Compiler**.
+
+Generative imaging systems frequently optimize visual plausibility while silently failing downstream engineering constraints: exact pixel dimensions, aspect-ratio preservation, ICC profile integrity, genuine neural super-resolution vs. conventional interpolation, lossless byte budgets, and anti-hallucination fidelity. **PhotonQC** enforces and verifies every constraint programmatically.
+
+---
+
+## 🏗️ PhotonQC Architecture & Engineering Differentiators
+
+1. **Exact Print & Pixel Geometry (`photonqc/sizing.py`)**:
+   - Converts physical print dimensions (`--width-in`, `--height-in`, `--ppi`) using exact `Decimal` arithmetic (`16 × 24 @ 300 PPI = 4800 × 7200 px`, `24 × 36 @ 240 PPI = 5760 × 8640 px`) or accepts mutually exclusive exact pixel dimensions (`--width-px`, `--height-px`).
+   - Enforces a strict aspect-ratio guard (`check_aspect_ratio`) that rejects mismatched ratios rather than stretching or silently cropping.
+2. **Honest AI Super-Resolution vs. Baseline Labeling (`photonqc/backends.py`, `photonqc/neural_sr.py`)**:
+   - Reference CPU exports are explicitly labeled `"sr_backend": "lanczos_reference_not_ai"`.
+   - Real-ESRGAN (`--backend realesrgan` subprocess adapter, `--backend realesrgan_native` PyTorch `RRDBNet` adapter, and `--backend realesrgan_antidrift` Frequency-Decomposed Source-Locked Neural Hybrid) requires a verified `.pth` checkpoint on disk, logs the checkpoint SHA-256 and device (`mps`/`cuda`/`cpu`), and records the native $4\times$ neural output size separately from any post-model Lanczos resize (`real_esrgan_antidrift_fp32_native_{W}x{H}_final_lanczos_{bool}`).
+   - Missing model weights fail immediately (`ValueError` / `FileNotFoundError`)—never falling back silently to interpolation.
+3. **Lossless PNG Byte-Budget Search Without Fake Noise (`photonqc/export.py`)**:
+   - Searches lossless PNG deflate levels `(6, 1, 0)` to satisfy `--min-mib` / `--max-mib` ($1\text{ MiB} = 1,048,576\text{ bytes}$).
+   - Never injects random RGB noise, metadata padding, or unrequested dimension inflation to fake higher byte counts. Impossible byte budgets at fixed pixels fail cleanly with a quantified `RuntimeError`.
+4. **Perceptual & Anti-Hallucination Evaluation (`photonqc/evaluation.py`, `photonqc/benchmark.py`)**:
+   - Controlled synthetic degradation benchmark ($H \rightarrow L \rightarrow \hat{H}$) computing aligned `PSNR (dB)`, `SSIM`, `LPIPS` (when installed; never fabricated when absent), Sobel `Edge RMSE`, and `Halo Overshoot Ratio`, plus automated **Registered High-Gradient Crop Panels**.
+   - Programmatic gold-case verifiers for the **Frontal Red Cubic Heart** (`evaluate_heart_gold_case`: bilateral symmetry $\text{IoU} = 1.0$, zero yaw/roll, full-frame containment) and **Opaque Flat-Black Background Lock** (`evaluate_flat_black_background`: `border_max_rgb == 0`, `exact_zero_fraction == 1.0`).
+5. **Color-Managed ICC Soft-Proofing & Exhibition Series Cohesion (`photonqc/calibration.py`)**:
+   - Uses LittleCMS2 (`PIL.ImageCms`) to distinguish ICC profile preservation from CMM color conversion, comparing `RELATIVE_COLORIMETRIC` (+BPC / -BPC) and `PERCEPTUAL` intents when a measured destination ICC profile is supplied, and explicitly labeling preset-only runs as `planning_only_no_measured_icc`.
+
+---
+
+## ⚡ Quickstart & Reproducible CLI Commands
+
+```bash
+# 1. Activate environment and run the full 304-test suite
+source .venv/bin/activate
+PYTHONPATH=src python -m pytest -q
+python -m unittest discover -s tests -q
+
+# 2. Inspect rights-cleared reference image (1024x1536 RGB PNG, sRGB ICC, 300 PPI)
+photopipe inspect --input examples/rights-cleared-example.png --json
+
+# 3. Export 16x24 inch print @ 300 PPI (4800x7200 px, >= 8 MiB lossless RGB PNG)
+#    Explicitly labeled as non-AI reference interpolation (`lanczos_reference_not_ai`)
+photopipe export \
+  --input examples/rights-cleared-example.png \
+  --output outputs/reference.png \
+  --width-in 16 --height-in 24 --ppi 300 \
+  --min-mib 8 \
+  --backend lanczos \
+  --report-dir outputs/report
+
+# 4. Run Pretrained Neural Anti-Drift Export (4000x6000 exact pixels, 10-15 MiB, Glossy 300 PPI)
+photonqc export \
+  --input examples/rights-cleared-example.png \
+  --output outputs/heart_4000x6000_neural_antidrift.png \
+  --width-px 4000 --height-px 6000 --ppi 300 \
+  --min-mib 10.0 --max-mib 15.0 \
+  --backend realesrgan_antidrift \
+  --weights external/Real-ESRGAN/weights/RealESRGAN_x4plus.pth \
+  --profile glossy_300ppi \
+  --output-sharpen \
+  --report-dir outputs/report-4000x6000-neural
+
+# 5. Evaluate Frontal Red Cubic Heart symmetry and flat-black border integrity
+photonqc evaluate \
+  --candidate outputs/heart_4000x6000_neural_antidrift.png \
+  --check-heart --check-flat-black \
+  --report-dir outputs/eval-4000x6000-neural
+
+# 6. Run Degradation-Controlled Pretrained Neural Benchmark & Generate Registered Crop Panel
+photonqc benchmark \
+  --ground-truth examples/rights-cleared-example.png \
+  --scale 4 \
+  --weights external/Real-ESRGAN/weights/RealESRGAN_x4plus.pth \
+  --output-dir outputs/sr-benchmark
+```
+
+---
+
+## 📊 Verified Execution & Benchmark Summary
+
+### 1. Verified Export Provenance (`outputs/report-4000x6000-neural/report.json`)
+- **Input**: `examples/rights-cleared-example.png` (`1024 × 1536`, RGB, `1.044533 MiB`, SHA-256: `f957ee12f66741270ed7af40d9d6f0b30f002ad25f2deddca0893d3cc54a7efa`)
+- **Neural Anti-Drift Export (`4000 × 6000 px`, `realesrgan_antidrift` on Apple Silicon `mps`)**: `4000 × 6000` px (`24.0 MP`), `RGB`, `299.9994 PPI` readback, `10.253654 MiB` (`10,751,736` bytes, `compress_level=1`), embedded sRGB ICC preserved, `bilateral_symmetry_iou = 1.0`, `flat_black_background.border_max_rgb = 0` (`exact_zero_fraction = 1.0`), SHA-256: `72c7a66bc953ffe8834109df9aeadb341baadd8a50d80ac3d94dd0e9ef2bfa7e`
+- **Print Export (`16 × 24 in @ 300 PPI`, `lanczos_reference_not_ai`)**: `4800 × 7200` px (`34.56 MP`), `RGB`, `299.9994 PPI` readback, `15.150677 MiB`, embedded sRGB ICC preserved.
+
+### 2. Controlled $4\times$ Degradation Benchmark (`1024 × 1536` GT $\rightarrow$ `256 × 384` LR $\rightarrow$ `1024 × 1536` on Apple Silicon `mps`)
+
+| Method | Neural AI? | Status | PSNR (dB) | SSIM | Edge RMSE | Halo Ratio | Runtime (s) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `lanczos_reference_not_ai` | No | PASS | 36.66 | 0.9365 | 10.46 | 0.0107 | 0.008 |
+| `source_locked_acuity_restoration_not_ai` | No | PASS | 36.69 | 0.9367 | 10.40 | 0.0112 | 0.069 |
+| `RealESRGAN_x4plus` (`mps`, raw GAN) | **Yes** | EXECUTED | 27.48 | 0.8236 | 36.77 | 1.3163 | 1.551 |
+| `RealESRNet_x4plus` (`mps`, L1 master) | **Yes** | EXECUTED | 31.84 | 0.9224 | 17.85 | 0.5644 | 1.558 |
+| `realesrgan_antidrift` (`mps`, Recommended) | **Yes** | **EXECUTED** | **36.69** | **0.9384** | **10.40** | **0.0111** | 3.476 |
+
+### 3. Documentation Index
+- [Authoritative Master Handoff Specification](docs/ANTIGRAVITY_PHOTOGRAPHY_AI_PIPELINE_MASTER_HANDOFF.md)
+- [Perceptual Quality & Anti-Hallucination Evaluation](docs/evaluation.md)
+- [Print Geometry, LittleCMS2 Soft-Proofing & Exhibition Calibration](docs/print-color-management.md)
+- [Cryptographic Provenance & Byte-Budget Integrity](docs/provenance.md)
+- [Model Card: Real-ESRGAN (`RealESRGAN_x4plus`)](docs/model-cards/realesrgan_x4plus.md)
+- [Implementation Review, Defect Remediation & Phased Backlog](docs/BACKLOG_AND_REVIEW.md)
+
+---
+
+# Optical Camera Compiler 📷⚡
 
 > **Deterministic Hardware-Level Optical Simulation for Zero-Artifact Photorealism**
 

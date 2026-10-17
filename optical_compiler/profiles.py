@@ -1272,6 +1272,8 @@ def list_available_profiles() -> list[dict[str, str]]:
                     try:
                         with open(json_file, "r", encoding="utf-8") as f:
                             data = json.load(f)
+                        if "sensor_and_optics" not in data:
+                            continue
                         profiles.append({
                             "id": data.get("profile_id", profile_id),
                             "title": data.get("title", profile_id.replace("_", " ").title()),

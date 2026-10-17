@@ -1,0 +1,18 @@
+{
+  "profile_id": "canvas_240ppi",
+  "name": "Large-Format Archival Exhibition Canvas (240 PPI)",
+  "paper": "Breathing Color Lyve Canvas 450gsm (Textured Cotton-Poly Weave)",
+  "medium": "canvas",
+  "ppi": 240,
+  "default_width_in": 24.0,
+  "default_height_in": 36.0,
+  "dmax_expected_range": "1.80 - 1.95",
+  "surface_reflectance": "Textured weave scatters micro-detail; requires stronger structural edge reinforcement",
+  "recommended_rendering_intent": "perceptual_with_bpc",
+  "output_sharpening": {
+    "unsharp_radius": 1.1,
+    "unsharp_percent": 65,
+    "unsharp_threshold": 4
+  },
+  "calibration_contract": "Requires measured printer/ink/paper ICC profile for actual CMM soft-proofing; without ICC file, operates in planning_only_no_measured_icc mode."
+}

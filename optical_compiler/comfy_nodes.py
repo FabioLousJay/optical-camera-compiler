@@ -709,6 +709,27 @@ class Optical4XReconstructionLockNode:
             report.validation_passed,
         )
 
+    def execute_reconstruction(
+        self,
+        image_path: str,
+        backend: str = "realesrnet_x4plus",
+        denoise_strength: float = 0.15,
+        blend_ratio: float = 0.20,
+        protect_sky_haze: str = "enabled",
+        output_format: str = "png",
+        output_path: str = "",
+    ) -> tuple[str, str]:
+        out_path, _sha, report_md, _mb, _passed = self.reconstruct_4x(
+            image_path=image_path,
+            backend=backend,
+            denoise_strength=denoise_strength,
+            blend_ratio=blend_ratio,
+            protect_sky_haze=protect_sky_haze,
+            output_format=output_format.upper(),
+            output_path=output_path,
+        )
+        return out_path, report_md
+
 
 class Optical4XFullColorPNGUpscaleNode:
     """ComfyUI node executing Universal High-Resolution PNG Output Lock v1.0 & 4X Upscale Workflow."""
