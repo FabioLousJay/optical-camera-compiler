@@ -4,6 +4,21 @@ perceptual evaluation, and print-aware export engineering platform.
 
 from __future__ import annotations
 
+from pathlib import Path as _Path
+import site as _site
+import sys as _sys
+
+if _sys.prefix == _sys.base_prefix:
+    _venv_sp = (
+        _Path(__file__).resolve().parent.parent
+        / ".venv"
+        / "lib"
+        / f"python{_sys.version_info.major}.{_sys.version_info.minor}"
+        / "site-packages"
+    )
+    if _venv_sp.is_dir() and str(_venv_sp) not in _sys.path:
+        _site.addsitedir(str(_venv_sp))
+
 __version__ = "1.0.0"
 
 from .backends import BackendProvenance, render, render_with_provenance

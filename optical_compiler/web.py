@@ -6024,7 +6024,18 @@ def run_server(host: str = "127.0.0.1", port: int = 8765, open_browser: bool = F
 
 
 def main() -> None:
-    """CLI runner for web studio."""
+    """CLI runner for web studio. Automatically uses local .venv/bin/python if invoked via system python3."""
+    from pathlib import Path
+
+    repo_venv_py = Path(__file__).resolve().parent.parent / ".venv" / "bin" / "python"
+    if (
+        sys.prefix == sys.base_prefix
+        and repo_venv_py.is_file()
+        and os.environ.get("OPTICAL_STUDIO_VENV_BOOTSTRAPPED") != "1"
+    ):
+        env = {**os.environ, "OPTICAL_STUDIO_VENV_BOOTSTRAPPED": "1"}
+        os.execve(str(repo_venv_py), [str(repo_venv_py), "-m", "optical_compiler.web", *sys.argv[1:]], env)
+
     parser = argparse.ArgumentParser(description="Run Optical Camera Compiler Studio Web UI")
     parser.add_argument("--host", default="127.0.0.1", help="Host interface (default: 127.0.0.1)")
     parser.add_argument("--port", "-p", type=int, default=8765, help="Port number (default: 8765)")
