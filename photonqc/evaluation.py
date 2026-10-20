@@ -230,7 +230,7 @@ def evaluate_flat_black_background(image: Image.Image, border_px: int = 16) -> d
         raise ValueError("Flat-black evaluation requires RGB image.")
     arr = np.asarray(image, dtype=np.uint8)
     h, w, _ = arr.shape
-    b = max(1, min(border_px, h // 4, w // 4))
+    b = max(1, min(border_px, max(8, min(w, h) // 48), h // 4, w // 4))
     border_mask = np.zeros((h, w), dtype=bool)
     border_mask[:b, :] = True
     border_mask[-b:, :] = True

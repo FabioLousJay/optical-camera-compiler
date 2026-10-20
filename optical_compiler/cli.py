@@ -713,6 +713,20 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Optional[list[str]] = None) -> int:
     """CLI entrypoint."""
     raw_args = list(argv) if argv is not None else sys.argv[1:]
+    if raw_args and raw_args[0] in ("photonqc", "photopipe"):
+        from photonqc.cli import main as photonqc_cli_main
+
+        photonqc_cli_main(raw_args[1:])
+        return 0
+    if (
+        raw_args
+        and raw_args[0] in ("export", "inspect", "restore", "evaluate", "benchmark", "calibrate")
+        and any(a in ("--input", "--candidate", "--ground-truth") for a in raw_args[1:])
+    ):
+        from photonqc.cli import main as photonqc_cli_main
+
+        photonqc_cli_main(raw_args)
+        return 0
     if raw_args and raw_args[0] == "recommend":
         rec_prompt = ""
         is_json = False
@@ -1219,13 +1233,23 @@ def recon_4x_main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("-o", "--output", help="Optional destination output path.")
     parser.add_argument(
         "--backend",
-        choices=["realesrnet_x4plus", "swinir_m_x4", "realesrgan_x4v3", "realesrgan_x4plus", "hat_s_x4", "pil_conservative"],
+        choices=[
+            "realesrgan_antidrift",
+            "realesrgan_native",
+            "realesrnet_x4plus",
+            "swinir_m_x4",
+            "realesrgan_x4v3",
+            "realesrgan_x4plus",
+            "hat_s_x4",
+            "pil_conservative",
+        ],
         default="realesrnet_x4plus",
         help="Super-resolution backend (default: realesrnet_x4plus).",
     )
     parser.add_argument("--denoise", type=float, default=0.15, help="Denoising strength (default: 0.15).")
     parser.add_argument("--blend", type=float, default=0.20, help="Detail blend ratio (default: 0.20).")
     parser.add_argument("--no-protect-sky", dest="protect_sky", action="store_false", default=True, help="Disable sky protection mask.")
+    parser.add_argument("--no-neural-sr", dest="use_neural_sr", action="store_false", default=True, help="Disable PhotonQC neural SR execution.")
     parser.add_argument("-f", "--format", choices=["png", "tiff", "tif", "jpeg", "jpg"], help="Output format.")
     parser.add_argument("--json", action="store_true", help="Output raw JSON execution report.")
     args = parser.parse_args(argv)
@@ -1241,6 +1265,7 @@ def recon_4x_main(argv: Optional[list[str]] = None) -> int:
             protect_sky_haze=args.protect_sky,
             output_format=args.format,
             generate_report=True,
+            use_neural_sr=(args.use_neural_sr and args.backend != "pil_conservative"),
         )
         if args.json:
             print(json.dumps(rep_d, indent=2))

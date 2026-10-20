@@ -406,6 +406,156 @@ class TestWebStudioHandler(unittest.TestCase):
         data = json.loads(resp_bytes.decode("utf-8"))
         self.assertIn("Cybernetic horologist in Tokyo workshop", data["positive_prompt"])
 
+    def test_photonqc_web_ui_and_status_endpoint(self):
+        """Verify Web Studio integrates PhotonQC modal, 5 tabs, and /api/photonqc/status."""
+        status, _, body = self._execute_request("GET", "/")
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+        self.assertIn('id="btnPhotonQCLab"', html)
+        self.assertIn('id="photonqcModal"', html)
+        for tab in ("export", "restore", "evaluate", "calibrate", "benchmark"):
+            self.assertIn(f'id="pqcTabBtn_{tab}"', html)
+            self.assertIn(f'id="pqcPanel_{tab}"', html)
+
+        status_code, _, status_bytes = self._execute_request("GET", "/api/photonqc/status")
+        self.assertEqual(status_code, 200)
+        st = json.loads(status_bytes.decode("utf-8"))
+        self.assertEqual(st["status"], "ok")
+        self.assertIn("compute_device", st)
+        self.assertIn("registered_models", st)
+        self.assertIn("baryta_300ppi", st["print_profiles"])
+
+    def test_photonqc_rest_endpoints_and_comfy_nodes(self):
+        """Verify all PhotonQC REST API endpoints and ComfyUI nodes execute end-to-end."""
+        import tempfile
+        from pathlib import Path
+        from photonqc.assets import generate_rights_cleared_heart_example
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            src_img = generate_rights_cleared_heart_example(tmp / "heart.png", width=128, height=192)
+            exp_out = tmp / "exported.png"
+            rest_out = tmp / "restored.png"
+
+            # 1. /api/photonqc/inspect
+            st, _, b = self._execute_request(
+                "POST", "/api/photonqc/inspect", json.dumps({"input_path": str(src_img)}).encode("utf-8")
+            )
+            self.assertEqual(st, 200)
+            insp = json.loads(b.decode("utf-8"))
+            self.assertEqual(insp["width"], 128)
+            self.assertEqual(insp["height"], 192)
+            self.assertTrue(insp["icc"]["present"])
+
+            # 2. /api/photonqc/export
+            st, _, b = self._execute_request(
+                "POST",
+                "/api/photonqc/export",
+                json.dumps(
+                    {
+                        "input_path": str(src_img),
+                        "output_path": str(exp_out),
+                        "width_px": 256,
+                        "height_px": 384,
+                        "ppi": 300,
+                        "backend": "lanczos",
+                        "profile": "baryta_300ppi",
+                        "output_sharpen": True,
+                    }
+                ).encode("utf-8"),
+            )
+            self.assertEqual(st, 200)
+            exp_rep = json.loads(b.decode("utf-8"))
+            self.assertEqual(exp_rep["validation"], "passed")
+            self.assertEqual(exp_rep["pixels"], [256, 384])
+
+            # 3. /api/photonqc/restore
+            st, _, b = self._execute_request(
+                "POST",
+                "/api/photonqc/restore",
+                json.dumps(
+                    {
+                        "input_path": str(src_img),
+                        "output_path": str(rest_out),
+                        "width_px": 256,
+                        "height_px": 384,
+                        "backend": "lanczos",
+                    }
+                ).encode("utf-8"),
+            )
+            self.assertEqual(st, 200)
+            rest_rep = json.loads(b.decode("utf-8"))
+            self.assertEqual(rest_rep["validation"], "passed")
+
+            # 4. /api/photonqc/evaluate
+            st, _, b = self._execute_request(
+                "POST",
+                "/api/photonqc/evaluate",
+                json.dumps(
+                    {
+                        "candidate_path": str(src_img),
+                        "reference_path": str(src_img),
+                        "check_heart": True,
+                        "check_flat_black": True,
+                    }
+                ).encode("utf-8"),
+            )
+            self.assertEqual(st, 200)
+            ev_rep = json.loads(b.decode("utf-8"))
+            self.assertEqual(ev_rep["psnr_db"], 100.0)
+            self.assertTrue(ev_rep["heart_gold_case"]["passed"])
+            self.assertTrue(ev_rep["flat_black_background"]["passed"])
+
+            # 5. /api/photonqc/calibrate
+            st, _, b = self._execute_request(
+                "POST",
+                "/api/photonqc/calibrate",
+                json.dumps(
+                    {
+                        "input_path": str(src_img),
+                        "profile": "baryta_300ppi",
+                        "width_in": 16,
+                        "height_in": 24,
+                        "series_paths": [str(src_img)],
+                    }
+                ).encode("utf-8"),
+            )
+            self.assertEqual(st, 200)
+            cal_rep = json.loads(b.decode("utf-8"))
+            self.assertTrue(cal_rep["series_cohesion"]["cohesion_passed"])
+
+            # 6. /api/photonqc/benchmark
+            st, _, b = self._execute_request(
+                "POST",
+                "/api/photonqc/benchmark",
+                json.dumps(
+                    {
+                        "ground_truth_path": str(src_img),
+                        "output_dir": str(tmp / "bench"),
+                        "scale_factor": 4,
+                    }
+                ).encode("utf-8"),
+            )
+            self.assertEqual(st, 200)
+            bm_rep = json.loads(b.decode("utf-8"))
+            self.assertIn("lanczos_baseline", bm_rep["methods"])
+
+            # 7. ComfyUI PhotonQC Nodes
+            from optical_compiler.comfy_nodes import NODE_CLASS_MAPPINGS
+
+            self.assertIn("PhotonQCNeuralSRExport", NODE_CLASS_MAPPINGS)
+            self.assertIn("PhotonQCEvaluation", NODE_CLASS_MAPPINGS)
+            eval_node = NODE_CLASS_MAPPINGS["PhotonQCEvaluation"]()
+            _, psnr_v, ssim_v, passed_v = eval_node.evaluate_photonqc(
+                candidate_path=str(src_img),
+                check_heart="enabled",
+                check_flat_black="enabled",
+                reference_path=str(src_img),
+            )
+            self.assertEqual(psnr_v, 100.0)
+            self.assertEqual(ssim_v, 1.0)
+            self.assertTrue(passed_v)
+
 
 if __name__ == "__main__":
     unittest.main()

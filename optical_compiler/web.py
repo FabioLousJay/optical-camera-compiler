@@ -1046,6 +1046,57 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       color: #000;
       box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
     }
+    .btn-photonqc-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(6, 182, 212, 0.25));
+      border: 1px solid rgba(139, 92, 246, 0.65);
+      color: #e0e7ff;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 0.34rem 0.95rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.28);
+    }
+    .btn-photonqc-trigger:hover {
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      color: #ffffff;
+      box-shadow: 0 0 18px rgba(6, 182, 212, 0.55);
+      transform: translateY(-1px);
+    }
+    .pqc-tabs {
+      display: flex;
+      gap: 0.4rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .pqc-tab {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 0.42rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .pqc-tab:hover {
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+    .pqc-tab.active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(6, 182, 212, 0.22));
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+    }
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -1097,12 +1148,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <div>
         <div class="brand-title">
           <span>Optical Camera Compiler</span>
-          <span class="brand-tag">v2.1 MASTER STUDIO</span>
+          <span class="brand-tag">v3.9.4 // PHOTONQC AI ENGINEERING PLATFORM</span>
         </div>
-        <div class="brand-subtitle">Hardware-Level Optics, Sensor Physics & Zero-Artifact Simulation</div>
+        <div class="brand-subtitle">Hardware-Level Optics, Sensor Physics, Anti-Drift Neural SR &amp; Print Calibration</div>
       </div>
     </div>
     <div class="header-actions">
+      <button class="btn-photonqc-trigger" id="btnPhotonQCLab" onclick="openPhotonQCModal()" title="Open PhotonQC AI Photography Engineering Platform (Neural SR, Print ICC, Perceptual Evaluation &amp; Benchmark)">
+        <span>⚡ PhotonQC Engineering Lab</span>
+      </button>
       <button class="btn-upscaler-trigger" onclick="openUpscalerModal()" title="Open PIL Conservative 102MP Restoration and Upscale Lock">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
         <span>102MP Upscaler Lock</span>
@@ -1654,9 +1708,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div style="font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 0.15rem;">
               Supports JPG, PNG, WEBP // 100% Local Hardware Processing
             </div>
-            <div style="margin-top: 0.45rem;">
+            <div style="margin-top: 0.45rem; display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap;">
               <button type="button" class="pill-btn" style="font-size: 0.65rem; padding: 2px 9px; border-color: rgba(245, 158, 11, 0.4); color: var(--accent-amber);" onclick="event.stopPropagation(); enableProductLockDirect();">
                 📦 Or Configure 100% Commercial SKU Approval Gate Directly
+              </button>
+              <button type="button" class="pill-btn" style="font-size: 0.65rem; padding: 2px 9px; border-color: rgba(6, 182, 212, 0.55); color: var(--accent-cyan);" onclick="event.stopPropagation(); openPhotonQCModal('export');">
+                ⚡ Open PhotonQC Neural SR, Restoration &amp; QC Lab
               </button>
             </div>
           </div>
@@ -2181,6 +2238,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             </select>
           </div>
         </div>
+        <div style="margin-top: 0.6rem;">
+          <button type="button" class="pill-btn" style="width: 100%; justify-content: center; font-size: 0.7rem; padding: 0.38rem 0.75rem; border-color: rgba(244, 63, 94, 0.45); color: var(--accent-rose);" onclick="openPhotonQCFromPrepress()">
+            🎨 Launch PhotonQC LittleCMS2 ICC Soft-Proof, Viewing Distance &amp; Series Cohesion Lab
+          </button>
+        </div>
       </div>
 
       <!-- 09. BRUTAL SHARPNESS & QUALITY ENFORCEMENT -->
@@ -2270,6 +2332,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div style="margin-top: 0.5rem;">
           <label class="field-label" for="anchorIdInput">Series Anchor Image ID</label>
           <input type="text" class="custom-input" id="anchorIdInput" placeholder="anchor_portrait_001" oninput="debounceCompile()">
+        </div>
+        <div style="margin-top: 0.65rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem;">
+          <button type="button" class="pill-btn" style="justify-content: center; font-size: 0.68rem; padding: 0.38rem 0.5rem; border-color: rgba(6, 182, 212, 0.5); color: var(--accent-cyan);" onclick="openPhotonQCModal('evaluate')">
+            📊 PhotonQC Perceptual &amp; Gold-Case QC
+          </button>
+          <button type="button" class="pill-btn" style="justify-content: center; font-size: 0.68rem; padding: 0.38rem 0.5rem; border-color: rgba(139, 92, 246, 0.5); color: #c4b5fd;" onclick="openPhotonQCModal('benchmark')">
+            🔬 SR Degradation Benchmark
+          </button>
         </div>
       </div>
 
@@ -5613,6 +5683,418 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
     }
 
+    // =========================================================================
+    // PHOTONQC AI PHOTOGRAPHY ENGINEERING PLATFORM INTEGRATION
+    // =========================================================================
+    let lastPhotonQCReport = null;
+    let activePhotonQCTab = 'export';
+
+    function openPhotonQCModal(tabName) {
+      document.getElementById('photonqcModal').classList.add('active');
+      if (tabName) {
+        switchPhotonQCTab(tabName);
+      }
+      loadPhotonQCStatus();
+    }
+
+    function closePhotonQCModal() {
+      document.getElementById('photonqcModal').classList.remove('active');
+    }
+
+    function openPhotonQCFromPrepress() {
+      const paperVal = document.getElementById('paperProfileSelect') ? document.getElementById('paperProfileSelect').value : 'none';
+      const printSizeVal = document.getElementById('printSizeSelect') ? document.getElementById('printSizeSelect').value : 'default';
+      const mapPaper = {
+        baryta: 'baryta_300ppi',
+        matte_cotton: 'matte_300ppi',
+        luster: 'baryta_300ppi',
+        glossy: 'glossy_300ppi',
+        canvas: 'canvas_240ppi'
+      };
+      const mappedProfile = mapPaper[paperVal] || 'baryta_300ppi';
+      if (document.getElementById('pqcCalProfile')) {
+        document.getElementById('pqcCalProfile').value = mappedProfile;
+      }
+      if (document.getElementById('pqcExportPaperProfile')) {
+        document.getElementById('pqcExportPaperProfile').value = mapPaper[paperVal] || 'none';
+      }
+      if (printSizeVal && printSizeVal !== 'default' && printSizeVal.includes('x') && printSizeVal.includes('@')) {
+        const [dims, ppiStr] = printSizeVal.split('@');
+        const [wIn, hIn] = dims.split('x');
+        if (document.getElementById('pqcCalWidthIn')) document.getElementById('pqcCalWidthIn').value = wIn;
+        if (document.getElementById('pqcCalHeightIn')) document.getElementById('pqcCalHeightIn').value = hIn;
+        if (document.getElementById('pqcExportSizeMode')) {
+          document.getElementById('pqcExportSizeMode').value = 'inches';
+          onPqcExportSizeModeChange();
+        }
+        if (document.getElementById('pqcExportWidthIn')) document.getElementById('pqcExportWidthIn').value = wIn;
+        if (document.getElementById('pqcExportHeightIn')) document.getElementById('pqcExportHeightIn').value = hIn;
+        if (document.getElementById('pqcExportPpi')) document.getElementById('pqcExportPpi').value = ppiStr;
+      }
+      openPhotonQCModal('calibrate');
+    }
+
+    function switchPhotonQCTab(tabName) {
+      activePhotonQCTab = tabName;
+      const tabs = ['export', 'restore', 'evaluate', 'calibrate', 'benchmark'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('pqcTabBtn_' + t);
+        const panel = document.getElementById('pqcPanel_' + t);
+        if (btn) btn.classList.toggle('active', t === tabName);
+        if (panel) panel.style.display = (t === tabName) ? 'flex' : 'none';
+      });
+    }
+
+    function onPqcExportSizeModeChange() {
+      const mode = document.getElementById('pqcExportSizeMode').value;
+      document.getElementById('pqcExportPixelsGroup').style.display = (mode === 'pixels') ? 'grid' : 'none';
+      document.getElementById('pqcExportInchesGroup').style.display = (mode === 'inches') ? 'grid' : 'none';
+    }
+
+    function fillPhotonQCCanonicalAsset() {
+      const examplePath = 'examples/rights-cleared-example.png';
+      ['pqcExportInput', 'pqcRestoreInput', 'pqcEvalCandidate', 'pqcCalInput', 'pqcBenchGt'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = examplePath;
+      });
+      showToast('Loaded canonical Gold-Case asset: examples/rights-cleared-example.png');
+    }
+
+    async function loadPhotonQCStatus() {
+      const banner = document.getElementById('pqcStatusBanner');
+      if (!banner) return;
+      try {
+        const res = await fetch('/api/photonqc/status');
+        if (!res.ok) return;
+        const data = await res.json();
+        const dev = data.compute_device || {};
+        const devLabel = dev.torch_available
+          ? `${(dev.device || 'cpu').toUpperCase()} (PyTorch ${dev.torch_version || ''})`
+          : 'CPU Reference (PIL)';
+        const wCount = (data.weights || []).filter(w => w.available).length;
+        banner.innerHTML = `
+          <span>⚡ <strong>Compute:</strong> <span style="color: var(--accent-cyan);">${devLabel}</span></span>
+          <span>🧬 <strong>Checkpoints:</strong> <span style="color: ${wCount > 0 ? 'var(--accent-green)' : 'var(--accent-amber)'};">${wCount}/2 Verified (.pth)</span></span>
+          <span>🛡️ <strong>Governance:</strong> <span style="color: var(--accent-green);">${(data.registered_models || []).length} Models (SUPIR Blocked)</span></span>
+          <span>🖨️ <strong>Profiles:</strong> ${(data.print_profiles || []).join(', ')}</span>
+        `;
+      } catch (e) {
+        console.error('PhotonQC status error:', e);
+      }
+    }
+
+    function renderPhotonQCResult(title, passed, summaryHtml, rawObj) {
+      lastPhotonQCReport = rawObj;
+      const copyBtn = document.getElementById('btnCopyPhotonQCReport');
+      if (copyBtn) copyBtn.style.display = 'inline-block';
+      const box = document.getElementById('photonqcStatusBox');
+      box.innerHTML = `
+        <div style="width: 100%; text-align: left; display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+            <span style="font-weight: bold; color: ${passed ? 'var(--accent-green)' : 'var(--accent-rose)'};">
+              ${passed ? '✅ ' : '⚠️ '}${title}
+            </span>
+            <span class="brand-tag">PHOTONQC v1.0</span>
+          </div>
+          ${summaryHtml}
+          <div style="font-size: 0.68rem; color: var(--text-muted); max-height: 170px; overflow-y: auto; background: #000; padding: 0.55rem; border-radius: 4px; border: 1px solid var(--border-subtle);">
+            <pre style="margin: 0; white-space: pre-wrap;">${JSON.stringify(rawObj, null, 2)}</pre>
+          </div>
+        </div>
+      `;
+    }
+
+    function copyPhotonQCReport() {
+      if (lastPhotonQCReport) {
+        navigator.clipboard.writeText(JSON.stringify(lastPhotonQCReport, null, 2));
+        showToast('Copied PhotonQC Telemetry JSON!');
+      }
+    }
+
+    async function runPhotonQCExport() {
+      const inputPath = document.getElementById('pqcExportInput').value.trim();
+      const outputPath = document.getElementById('pqcExportOutput').value.trim();
+      if (!inputPath || !outputPath) {
+        alert('Please provide both Source Image Path and Output Path.');
+        return;
+      }
+      const sizeMode = document.getElementById('pqcExportSizeMode').value;
+      const payload = {
+        input_path: inputPath,
+        output_path: outputPath,
+        ppi: parseInt(document.getElementById('pqcExportPpi').value || '300', 10),
+        backend: document.getElementById('pqcExportBackend').value,
+        crop_policy: document.getElementById('pqcExportCropPolicy').value,
+        profile: document.getElementById('pqcExportPaperProfile').value === 'none' ? null : document.getElementById('pqcExportPaperProfile').value,
+        output_sharpen: document.getElementById('pqcExportSharpen').checked,
+        min_mib: parseFloat(document.getElementById('pqcExportMinMib').value || '0')
+      };
+      const maxMibStr = document.getElementById('pqcExportMaxMib').value.trim();
+      if (maxMibStr) payload.max_mib = parseFloat(maxMibStr);
+
+      if (sizeMode === 'pixels') {
+        payload.width_px = parseInt(document.getElementById('pqcExportWidthPx').value || '4000', 10);
+        payload.height_px = parseInt(document.getElementById('pqcExportHeightPx').value || '6000', 10);
+      } else {
+        payload.width_in = parseFloat(document.getElementById('pqcExportWidthIn').value || '16');
+        payload.height_in = parseFloat(document.getElementById('pqcExportHeightIn').value || '24');
+      }
+
+      const box = document.getElementById('photonqcStatusBox');
+      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Executing PhotonQC Export &amp; Cryptographic Verification...</div>';
+      try {
+        const res = await fetch('/api/photonqc/export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'PhotonQC Export failed');
+        const summary = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; font-size: 0.74rem;">
+            <div><strong>Dimensions:</strong> ${(data.pixels || []).join('x')} (${data.megapixels} MP)</div>
+            <div><strong>Backend:</strong> <span style="color: var(--accent-cyan);">${data.sr_backend}</span></div>
+            <div><strong>Neural AI:</strong> ${data.model && data.model.is_neural_ai ? 'Yes (' + (data.model.device || 'mps') + ')' : 'No (Reference Lanczos)'}</div>
+            <div><strong>Size:</strong> ${data.size_mib} MiB (${data.size_mb_decimal} MB) [Deflate L${data.png_compression_level}]</div>
+            <div><strong>PPI Readback:</strong> ${(data.readback_ppi || []).join('x')}</div>
+            <div><strong>Source Unmodified:</strong> <span style="color: var(--accent-green);">✓ Verified</span></div>
+          </div>
+          <div style="background: var(--bg-surface); padding: 0.45rem; border-radius: 4px; border: 1px solid var(--border-subtle); font-size: 0.7rem; word-break: break-all;">
+            <div><strong>Output:</strong> <code>${data.output}</code></div>
+            <div><strong>SHA-256:</strong> <code>${data.output_sha256}</code></div>
+          </div>
+        `;
+        renderPhotonQCResult('PHOTONQC EXPORT & SHA-256 VERIFICATION PASSED', data.validation === 'passed', summary, data);
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      }
+    }
+
+    async function runPhotonQCRestore() {
+      const inputPath = document.getElementById('pqcRestoreInput').value.trim();
+      const outputPath = document.getElementById('pqcRestoreOutput').value.trim();
+      if (!inputPath || !outputPath) {
+        alert('Please provide Source Image Path and Output Path.');
+        return;
+      }
+      const payload = {
+        input_path: inputPath,
+        output_path: outputPath,
+        width_px: parseInt(document.getElementById('pqcRestoreWidthPx').value || '4000', 10),
+        height_px: parseInt(document.getElementById('pqcRestoreHeightPx').value || '6000', 10),
+        ppi: parseInt(document.getElementById('pqcRestorePpi').value || '300', 10),
+        backend: document.getElementById('pqcRestoreBackend').value,
+        deblock_strength: parseFloat(document.getElementById('pqcRestoreDeblock').value || '0.28'),
+        unsharp_radius: parseFloat(document.getElementById('pqcRestoreRadius').value || '1.6'),
+        unsharp_percent: parseInt(document.getElementById('pqcRestorePercent').value || '75', 10),
+        unsharp_threshold: parseInt(document.getElementById('pqcRestoreThreshold').value || '2', 10),
+        protect_smooth_gradients: document.getElementById('pqcRestoreProtectGradients').checked,
+        protect_flat_black: document.getElementById('pqcRestoreProtectBlack').checked
+      };
+      const box = document.getElementById('photonqcStatusBox');
+      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Running Source-Locked Restoration &amp; Flat-Black Lock...</div>';
+      try {
+        const res = await fetch('/api/photonqc/restore', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Restoration failed');
+        const summary = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; font-size: 0.74rem;">
+            <div><strong>Dimensions:</strong> ${(data.pixels || []).join('x')} (${data.megapixels} MP)</div>
+            <div><strong>Backend:</strong> <span style="color: var(--accent-cyan);">${data.sr_backend}</span></div>
+            <div><strong>Size:</strong> ${data.size_mib} MiB</div>
+            <div><strong>Transforms:</strong> ${(data.transforms || []).length} ops</div>
+          </div>
+          <div style="background: var(--bg-surface); padding: 0.45rem; border-radius: 4px; border: 1px solid var(--border-subtle); font-size: 0.7rem; word-break: break-all;">
+            <div><strong>Output:</strong> <code>${data.output}</code></div>
+            <div><strong>SHA-256:</strong> <code>${data.output_sha256}</code></div>
+          </div>
+        `;
+        renderPhotonQCResult('SOURCE-LOCKED RESTORATION PASSED', data.validation === 'passed', summary, data);
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      }
+    }
+
+    async function runPhotonQCEvaluate() {
+      const candidatePath = document.getElementById('pqcEvalCandidate').value.trim();
+      if (!candidatePath) {
+        alert('Please provide a Candidate Image Path.');
+        return;
+      }
+      const refPath = document.getElementById('pqcEvalReference').value.trim() || null;
+      const checkHeart = document.getElementById('pqcEvalHeart').checked;
+      const checkFlatBlack = document.getElementById('pqcEvalFlatBlack').checked;
+      const box = document.getElementById('photonqcStatusBox');
+      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Computing Perceptual &amp; Gold-Case Invariant Metrics...</div>';
+      try {
+        const res = await fetch('/api/photonqc/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            candidate_path: candidatePath,
+            reference_path: refPath,
+            check_heart: checkHeart,
+            check_flat_black: checkFlatBlack
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Evaluation failed');
+        const heart = data.heart_gold_case;
+        const fb = data.flat_black_background;
+        const summary = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; font-size: 0.74rem;">
+            <div><strong>PSNR (dB):</strong> ${data.psnr_db !== null && data.psnr_db !== undefined ? data.psnr_db + ' dB' : 'Requires aligned GT'}</div>
+            <div><strong>SSIM:</strong> ${data.ssim !== null && data.ssim !== undefined ? data.ssim : 'Requires aligned GT'}</div>
+            <div><strong>Edge RMSE:</strong> ${data.edge_gradient_rmse !== undefined ? data.edge_gradient_rmse : 'N/A'}</div>
+            <div><strong>Halo Overshoot:</strong> ${data.halo_overshoot_ratio !== undefined ? data.halo_overshoot_ratio : 'N/A'}</div>
+            ${heart ? `<div><strong>Heart Symmetry IoU:</strong> <span style="color:${heart.passed ? 'var(--accent-green)' : 'var(--accent-rose)'};">${heart.bilateral_symmetry_iou} (${heart.passed ? 'PASS' : 'FAIL'})</span></div>` : ''}
+            ${fb ? `<div><strong>Flat-Black Border:</strong> <span style="color:${fb.passed ? 'var(--accent-green)' : 'var(--accent-rose)'};">Max RGB=${fb.border_max_rgb} (${fb.passed ? 'PASS' : 'FAIL'})</span></div>` : ''}
+          </div>
+        `;
+        const allOk = (!heart || heart.passed) && (!fb || fb.passed);
+        renderPhotonQCResult('PERCEPTUAL & GOLD-CASE EVALUATION COMPLETE', allOk, summary, data);
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      }
+    }
+
+    async function runPhotonQCInspect() {
+      const candidatePath = document.getElementById('pqcEvalCandidate').value.trim();
+      if (!candidatePath) {
+        alert('Please provide an Image Path to inspect.');
+        return;
+      }
+      const box = document.getElementById('photonqcStatusBox');
+      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Inspecting Image Geometry, Cryptographic Hash &amp; LittleCMS2 ICC Profile...</div>';
+      try {
+        const res = await fetch('/api/photonqc/inspect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ input_path: candidatePath })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Inspection failed');
+        const icc = data.icc || {};
+        const summary = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; font-size: 0.74rem;">
+            <div><strong>Dimensions:</strong> ${data.width}x${data.height} (${data.mode} ${data.format})</div>
+            <div><strong>DPI / PPI:</strong> ${data.dpi ? data.dpi.join('x') : 'None'}</div>
+            <div><strong>Size:</strong> ${data.size_mib} MiB (${data.size_bytes} bytes)</div>
+            <div><strong>ICC Profile:</strong> ${icc.present ? (icc.description || 'Embedded') : 'None'}</div>
+          </div>
+          <div style="background: var(--bg-surface); padding: 0.45rem; border-radius: 4px; border: 1px solid var(--border-subtle); font-size: 0.7rem; word-break: break-all;">
+            <div><strong>SHA-256:</strong> <code>${data.sha256}</code></div>
+          </div>
+        `;
+        renderPhotonQCResult('FORENSIC IMAGE & ICC INSPECTION', true, summary, data);
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      }
+    }
+
+    async function runPhotonQCCalibrate() {
+      const inputPath = document.getElementById('pqcCalInput').value.trim();
+      if (!inputPath) {
+        alert('Please provide an Input / Anchor Image Path.');
+        return;
+      }
+      const seriesRaw = document.getElementById('pqcCalSeries').value.trim();
+      const seriesPaths = seriesRaw ? seriesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+      const payload = {
+        input_path: inputPath,
+        profile: document.getElementById('pqcCalProfile').value,
+        width_in: parseFloat(document.getElementById('pqcCalWidthIn').value || '16'),
+        height_in: parseFloat(document.getElementById('pqcCalHeightIn').value || '24'),
+        destination_icc: document.getElementById('pqcCalDestIcc').value.trim() || null,
+        series_paths: seriesPaths
+      };
+      const box = document.getElementById('photonqcStatusBox');
+      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Running LittleCMS2 ICC Soft-Proofing &amp; Series Cohesion Analysis...</div>';
+      try {
+        const res = await fetch('/api/photonqc/calibrate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Calibration failed');
+        const sp = data.soft_proof || {};
+        const sh = data.output_sharpening || {};
+        const coh = data.series_cohesion;
+        const summary = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; font-size: 0.74rem;">
+            <div><strong>Paper Profile:</strong> ${(data.profile && data.profile.name) || payload.profile}</div>
+            <div><strong>Viewing Distance:</strong> ${data.viewing_distance_in} inches</div>
+            <div><strong>Calibration Mode:</strong> <span style="color: var(--accent-cyan);">${sp.calibration_mode}</span></div>
+            <div><strong>Output Sharpening:</strong> r=${sh.unsharp_radius}, p=${sh.unsharp_percent}%, th=${sh.unsharp_threshold}</div>
+            ${sp.out_of_gamut_fraction !== null && sp.out_of_gamut_fraction !== undefined ? `<div><strong>Out-of-Gamut Fraction:</strong> ${(sp.out_of_gamut_fraction * 100).toFixed(2)}%</div>` : ''}
+            ${coh ? `<div><strong>Series Cohesion:</strong> <span style="color:${coh.cohesion_passed ? 'var(--accent-green)' : 'var(--accent-rose)'};">${coh.cohesion_passed ? 'PASSED' : 'DRIFT DETECTED'} (${(coh.series_comparisons || []).length} frames)</span></div>` : ''}
+          </div>
+        `;
+        renderPhotonQCResult('ICC PRINT CALIBRATION & SERIES COHESION COMPLETE', !coh || coh.cohesion_passed, summary, data);
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      }
+    }
+
+    async function runPhotonQCBenchmark() {
+      const gtPath = document.getElementById('pqcBenchGt').value.trim();
+      if (!gtPath) {
+        alert('Please provide a Ground-Truth Image Path.');
+        return;
+      }
+      const payload = {
+        ground_truth_path: gtPath,
+        output_dir: document.getElementById('pqcBenchOutDir').value.trim() || 'outputs/benchmark',
+        scale_factor: parseInt(document.getElementById('pqcBenchScale').value || '4', 10),
+        gaussian_blur_sigma: parseFloat(document.getElementById('pqcBenchBlur').value || '1.0'),
+        noise_sigma: parseFloat(document.getElementById('pqcBenchNoise').value || '1.5')
+      };
+      const box = document.getElementById('photonqcStatusBox');
+      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Running Controlled Degradation SR Benchmark &amp; Rendering 4-Column Crop Panel...</div>';
+      try {
+        const res = await fetch('/api/photonqc/benchmark', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Benchmark failed');
+        const methods = data.methods || {};
+        const rows = Object.entries(methods).map(([k, v]) => `
+          <tr>
+            <td style="padding: 4px 6px; border-bottom: 1px solid var(--border-subtle);">${k}</td>
+            <td style="padding: 4px 6px; border-bottom: 1px solid var(--border-subtle); color: var(--accent-cyan);">${v.psnr_db !== undefined && v.psnr_db !== null ? v.psnr_db + ' dB' : v.status}</td>
+            <td style="padding: 4px 6px; border-bottom: 1px solid var(--border-subtle);">${v.ssim !== undefined && v.ssim !== null ? v.ssim : '-'}</td>
+            <td style="padding: 4px 6px; border-bottom: 1px solid var(--border-subtle);">${v.edge_gradient_rmse !== undefined ? v.edge_gradient_rmse : '-'}</td>
+          </tr>
+        `).join('');
+        const summary = `
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.72rem;">
+            <thead>
+              <tr style="color: var(--text-muted); text-align: left;">
+                <th style="padding: 4px 6px; border-bottom: 1px solid var(--border-subtle);">Method</th>
+                <th style="padding: 4px 6px; border-bottom: 1px solid var(--border-subtle);">PSNR</th>
+                <th style="padding: 4px 6px; border-bottom: 1px solid var(--border-subtle);">SSIM</th>
+                <th style="padding: 4px 6px; border-bottom: 1px solid var(--border-subtle);">Edge RMSE</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div style="background: var(--bg-surface); padding: 0.45rem; border-radius: 4px; border: 1px solid var(--border-subtle); font-size: 0.7rem; word-break: break-all;">
+            <div><strong>4-Column Crop Panel:</strong> <code>${data.comparison_panel || ''}</code></div>
+          </div>
+        `;
+        renderPhotonQCResult('CONTROLLED DEGRADATION SR BENCHMARK COMPLETE', true, summary, data);
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      }
+    }
+
     window.onload = init;
   </script>
 
@@ -5704,6 +6186,339 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       </div>
     </div>
   </div>
+
+  <!-- PHOTONQC AI PHOTOGRAPHY ENGINEERING PLATFORM MODAL -->
+  <div class="modal-overlay" id="photonqcModal" onclick="if(event.target===this) closePhotonQCModal()">
+    <div class="modal-content" style="max-width: 1060px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 0.9rem;">⚡</div>
+          <div>
+            <div style="font-size: 0.96rem; font-weight: 700; letter-spacing: 0.04em; display: flex; align-items: center; gap: 0.5rem;">
+              <span>PHOTONQC AI PHOTOGRAPHY ENGINEERING PLATFORM</span>
+              <span class="brand-tag">PHOTOPIPE LAB v1.0</span>
+            </div>
+            <div style="font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono);">
+              Anti-Drift Neural SR (MPS/RRDBNet) • Print Geometry &amp; LittleCMS2 ICC Soft-Proofing • Perceptual &amp; Gold-Case Evaluation • SR Benchmark
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <button type="button" class="pill-btn" style="font-size: 0.68rem; border-color: rgba(6, 182, 212, 0.5); color: var(--accent-cyan);" onclick="fillPhotonQCCanonicalAsset()">
+            🎯 Load Canonical Asset (examples/rights-cleared-example.png)
+          </button>
+          <button onclick="closePhotonQCModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; padding: 0.2rem 0.5rem;">&times;</button>
+        </div>
+      </div>
+
+      <div class="modal-body" style="gap: 1rem;">
+        <!-- Live Hardware & Governance Banner -->
+        <div id="pqcStatusBanner" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.65rem; background: #080b10; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.55rem 0.9rem; font-size: 0.7rem; font-family: var(--font-mono); color: var(--text-secondary);">
+          <span>⚡ Initializing PhotonQC Hardware &amp; Governance Telemetry...</span>
+        </div>
+
+        <!-- 5-Tab Bar -->
+        <div class="pqc-tabs">
+          <button type="button" class="pqc-tab active" id="pqcTabBtn_export" onclick="switchPhotonQCTab('export')">🚀 1. Neural SR &amp; Print Export</button>
+          <button type="button" class="pqc-tab" id="pqcTabBtn_restore" onclick="switchPhotonQCTab('restore')">🛡️ 2. Source-Locked Restoration</button>
+          <button type="button" class="pqc-tab" id="pqcTabBtn_evaluate" onclick="switchPhotonQCTab('evaluate')">📊 3. Perceptual &amp; Gold-Case QC</button>
+          <button type="button" class="pqc-tab" id="pqcTabBtn_calibrate" onclick="switchPhotonQCTab('calibrate')">🎨 4. ICC Calibration &amp; Series Cohesion</button>
+          <button type="button" class="pqc-tab" id="pqcTabBtn_benchmark" onclick="switchPhotonQCTab('benchmark')">🔬 5. SR Degradation Benchmark</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 1.25rem;">
+          <!-- Left Column: Active Tab Controls -->
+          <div>
+            <!-- TAB 1: EXPORT -->
+            <div id="pqcPanel_export" style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Source Image Path *</label>
+                  <input type="text" id="pqcExportInput" value="examples/rights-cleared-example.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Validated Output PNG Path *</label>
+                  <input type="text" id="pqcExportOutput" value="outputs/photonqc_web_export.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Sizing Mode (Mutually Exclusive)</label>
+                  <select id="pqcExportSizeMode" onchange="onPqcExportSizeModeChange()" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                    <option value="pixels" selected>Exact Pixel Dimensions (width_px &times; height_px)</option>
+                    <option value="inches">Physical Print Geometry (inches &times; PPI)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Target Density (PPI)</label>
+                  <input type="number" id="pqcExportPpi" value="300" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div id="pqcExportPixelsGroup" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Target Width (px)</label>
+                  <input type="number" id="pqcExportWidthPx" value="4000" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Target Height (px)</label>
+                  <input type="number" id="pqcExportHeightPx" value="6000" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div id="pqcExportInchesGroup" style="display: none; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Physical Width (inches)</label>
+                  <input type="number" step="0.5" id="pqcExportWidthIn" value="16" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Physical Height (inches)</label>
+                  <input type="number" step="0.5" id="pqcExportHeightIn" value="24" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Super-Resolution Backend</label>
+                  <select id="pqcExportBackend" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:var(--accent-cyan); font-family:var(--font-mono); font-size:0.73rem;">
+                    <option value="realesrgan_antidrift" selected>realesrgan_antidrift (Anti-Drift Neural Fusion MPS)</option>
+                    <option value="realesrgan_native">realesrgan_native (PyTorch RRDBNet 4x)</option>
+                    <option value="lanczos">lanczos (Reference Non-AI Baseline)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Aspect-Ratio Policy</label>
+                  <select id="pqcExportCropPolicy" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                    <option value="reject" selected>reject (Strict Ratio Lock — Never Stretch)</option>
+                    <option value="center-crop">center-crop (Explicit Center Crop)</option>
+                    <option value="pad-black">pad-black (Explicit Flat-Black Padding)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Paper Profile</label>
+                  <select id="pqcExportPaperProfile" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                    <option value="baryta_300ppi" selected>baryta_300ppi</option>
+                    <option value="matte_300ppi">matte_300ppi</option>
+                    <option value="glossy_300ppi">glossy_300ppi</option>
+                    <option value="canvas_240ppi">canvas_240ppi</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Min MiB Floor</label>
+                  <input type="number" step="0.5" id="pqcExportMinMib" value="0.0" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Max MiB Ceiling</label>
+                  <input type="text" id="pqcExportMaxMib" placeholder="Optional" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <label class="check-item" style="font-size: 0.74rem;">
+                <input type="checkbox" id="pqcExportSharpen" checked>
+                <span>Apply viewing-distance &amp; paper-medium scaled output sharpening</span>
+              </label>
+
+              <button type="button" onclick="runPhotonQCExport()" style="width:100%; background:linear-gradient(135deg, #6366f1, #06b6d4); border:none; border-radius:6px; padding:0.72rem; color:#fff; font-weight:700; font-size:0.8rem; cursor:pointer; letter-spacing:0.04em;">
+                🚀 EXECUTE PHOTONQC VALIDATED EXPORT &amp; SHA-256 AUDIT
+              </button>
+            </div>
+
+            <!-- TAB 2: RESTORE -->
+            <div id="pqcPanel_restore" style="display: none; flex-direction: column; gap: 0.75rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Source Image Path *</label>
+                  <input type="text" id="pqcRestoreInput" value="examples/rights-cleared-example.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Restored Output Path *</label>
+                  <input type="text" id="pqcRestoreOutput" value="outputs/photonqc_restored.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Target Width (px)</label>
+                  <input type="number" id="pqcRestoreWidthPx" value="4000" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Target Height (px)</label>
+                  <input type="number" id="pqcRestoreHeightPx" value="6000" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">PPI</label>
+                  <input type="number" id="pqcRestorePpi" value="300" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Scaling Backend</label>
+                  <select id="pqcRestoreBackend" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:var(--accent-cyan); font-family:var(--font-mono); font-size:0.73rem;">
+                    <option value="realesrgan_antidrift" selected>realesrgan_antidrift (Anti-Drift Neural Fusion)</option>
+                    <option value="realesrgan_native">realesrgan_native (PyTorch RRDBNet 4x)</option>
+                    <option value="lanczos">lanczos (Reference Non-AI)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Smooth-Zone Deblock Strength</label>
+                  <input type="number" step="0.02" id="pqcRestoreDeblock" value="0.28" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Unsharp Radius</label>
+                  <input type="number" step="0.1" id="pqcRestoreRadius" value="1.6" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Unsharp Percent</label>
+                  <input type="number" id="pqcRestorePercent" value="75" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Threshold</label>
+                  <input type="number" id="pqcRestoreThreshold" value="2" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <label class="check-item" style="font-size:0.73rem;"><input type="checkbox" id="pqcRestoreProtectGradients" checked> Protect Smooth Gradients</label>
+                <label class="check-item" style="font-size:0.73rem;"><input type="checkbox" id="pqcRestoreProtectBlack" checked> Flat-Black #000000 Zero-Lock</label>
+              </div>
+
+              <button type="button" onclick="runPhotonQCRestore()" style="width:100%; background:linear-gradient(135deg, #059669, #10b981); border:none; border-radius:6px; padding:0.72rem; color:#fff; font-weight:700; font-size:0.8rem; cursor:pointer; letter-spacing:0.04em;">
+                🛡️ EXECUTE SOURCE-LOCKED RESTORATION
+              </button>
+            </div>
+
+            <!-- TAB 3: EVALUATE & INSPECT -->
+            <div id="pqcPanel_evaluate" style="display: none; flex-direction: column; gap: 0.75rem;">
+              <div>
+                <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Candidate Image Path *</label>
+                <input type="text" id="pqcEvalCandidate" value="examples/rights-cleared-example.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+              </div>
+              <div>
+                <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Aligned Ground-Truth Reference Path (Optional — Required for PSNR/SSIM/LPIPS/Edge RMSE)</label>
+                <input type="text" id="pqcEvalReference" placeholder="Leave blank for Gold-Case only, or enter aligned reference path" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+              </div>
+
+              <div style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.45rem;">
+                <div style="font-size:0.68rem; font-family:var(--font-mono); color:var(--accent-cyan); font-weight:700;">GOLD-CASE INVARIANT AUDITS</div>
+                <label class="check-item" style="font-size:0.73rem;">
+                  <input type="checkbox" id="pqcEvalHeart" checked>
+                  <span>Frontal Red Cubic Heart Gold-Case Check (Symmetry IoU &ge; 0.95, 4-Side Unclipped Margins, Center Offset &le; 0.02)</span>
+                </label>
+                <label class="check-item" style="font-size:0.73rem;">
+                  <input type="checkbox" id="pqcEvalFlatBlack" checked>
+                  <span>Flat-Black Perimeter Border Integrity Check (Max Border RGB == 0, Exact Zero Fraction == 1.0)</span>
+                </label>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <button type="button" onclick="runPhotonQCEvaluate()" style="background:linear-gradient(135deg, #2563eb, #06b6d4); border:none; border-radius:6px; padding:0.72rem; color:#fff; font-weight:700; font-size:0.76rem; cursor:pointer;">
+                  📊 RUN PERCEPTUAL &amp; GOLD-CASE QC
+                </button>
+                <button type="button" onclick="runPhotonQCInspect()" style="background:rgba(255,255,255,0.08); border:1px solid var(--border-subtle); border-radius:6px; padding:0.72rem; color:#fff; font-weight:700; font-size:0.76rem; cursor:pointer;">
+                  🔍 FORENSIC IMAGE &amp; ICC INSPECT
+                </button>
+              </div>
+            </div>
+
+            <!-- TAB 4: CALIBRATE -->
+            <div id="pqcPanel_calibrate" style="display: none; flex-direction: column; gap: 0.75rem;">
+              <div>
+                <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Input / Exhibition Anchor Image Path *</label>
+                <input type="text" id="pqcCalInput" value="examples/rights-cleared-example.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1.2fr 0.9fr 0.9fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Print Paper Profile</label>
+                  <select id="pqcCalProfile" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:var(--accent-rose); font-family:var(--font-mono); font-size:0.73rem;">
+                    <option value="baryta_300ppi" selected>baryta_300ppi (Baryta Satin 300 PPI)</option>
+                    <option value="matte_300ppi">matte_300ppi (Cotton Rag Matte 300 PPI)</option>
+                    <option value="glossy_300ppi">glossy_300ppi (Exhibition Glossy 300 PPI)</option>
+                    <option value="canvas_240ppi">canvas_240ppi (Archival Canvas 240 PPI)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Print Width (in)</label>
+                  <input type="number" step="0.5" id="pqcCalWidthIn" value="16" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Print Height (in)</label>
+                  <input type="number" step="0.5" id="pqcCalHeightIn" value="24" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div>
+                <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Measured Destination Printer/Paper ICC Profile Path (Optional — LittleCMS2 Soft-Proof)</label>
+                <input type="text" id="pqcCalDestIcc" placeholder="Leave blank for honest planning_only_no_measured_icc mode, or provide .icc/.icm path" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+              </div>
+
+              <div>
+                <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Exhibition Series Image Paths (Optional comma-separated paths to compare vs Anchor)</label>
+                <input type="text" id="pqcCalSeries" placeholder="e.g. examples/rights-cleared-example.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+              </div>
+
+              <button type="button" onclick="runPhotonQCCalibrate()" style="width:100%; background:linear-gradient(135deg, #e11d48, #f59e0b); border:none; border-radius:6px; padding:0.72rem; color:#fff; font-weight:700; font-size:0.8rem; cursor:pointer; letter-spacing:0.04em;">
+                🎨 EXECUTE ICC SOFT-PROOF &amp; SERIES COHESION CALIBRATION
+              </button>
+            </div>
+
+            <!-- TAB 5: BENCHMARK -->
+            <div id="pqcPanel_benchmark" style="display: none; flex-direction: column; gap: 0.75rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Ground-Truth H Image Path *</label>
+                  <input type="text" id="pqcBenchGt" value="examples/rights-cleared-example.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Benchmark Output Directory</label>
+                  <input type="text" id="pqcBenchOutDir" value="outputs/benchmark" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Scale Factor</label>
+                  <input type="number" id="pqcBenchScale" value="4" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Gaussian PSF Blur (&sigma;)</label>
+                  <input type="number" step="0.1" id="pqcBenchBlur" value="1.0" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Sensor Noise (&sigma;)</label>
+                  <input type="number" step="0.1" id="pqcBenchNoise" value="1.5" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <button type="button" onclick="runPhotonQCBenchmark()" style="width:100%; background:linear-gradient(135deg, #7c3aed, #2563eb); border:none; border-radius:6px; padding:0.72rem; color:#fff; font-weight:700; font-size:0.8rem; cursor:pointer; letter-spacing:0.04em;">
+                🔬 EXECUTE CONTROLLED DEGRADATION SR BENCHMARK &amp; CROP PANEL
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: PhotonQC Verification & Audit Telemetry -->
+          <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="spec-label">PhotonQC Cryptographic &amp; Perceptual Telemetry</span>
+              <button class="btn-action" onclick="copyPhotonQCReport()" id="btnCopyPhotonQCReport" style="display: none; padding: 0.22rem 0.6rem; font-size: 0.7rem;">Copy Telemetry JSON</button>
+            </div>
+            <div id="photonqcStatusBox" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem; min-height: 310px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.76rem; font-family: var(--font-mono);">
+              Select any PhotonQC engineering tab on the left and click Execute.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 """
@@ -5766,13 +6581,63 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             self._send_json({"status": "ok", "version": "2.1.0"})
             return
 
+        if parsed_path == "/api/photonqc/status":
+            try:
+                from pathlib import Path
+                from photonqc.licensing import MODEL_GOVERNANCE_REGISTRY
+                from photonqc.neural_sr import detect_compute_device, sha256_checkpoint
+
+                repo_root = Path(__file__).resolve().parent.parent
+                weights_dir = repo_root / "external" / "Real-ESRGAN" / "weights"
+                weights_info = []
+                for w_name in ("RealESRGAN_x4plus.pth", "RealESRNet_x4plus.pth"):
+                    wp = weights_dir / w_name
+                    exists = wp.is_file()
+                    weights_info.append(
+                        {
+                            "name": w_name,
+                            "path": str(wp),
+                            "available": exists,
+                            "sha256": sha256_checkpoint(wp) if exists else None,
+                        }
+                    )
+                self._send_json(
+                    {
+                        "status": "ok",
+                        "photonqc_version": "1.0.0",
+                        "compute_device": detect_compute_device(),
+                        "weights": weights_info,
+                        "registered_models": [spec.to_dict() for spec in MODEL_GOVERNANCE_REGISTRY.values()],
+                        "print_profiles": ["baryta_300ppi", "matte_300ppi", "glossy_300ppi", "canvas_240ppi"],
+                        "canonical_example": str(repo_root / "examples" / "rights-cleared-example.png"),
+                    }
+                )
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            return
+
         self.send_error(HTTPStatus.NOT_FOUND, "Not Found")
 
     def do_POST(self) -> None:
         """Handle compilation requests via REST API."""
         parsed_path = self.path.split("?")[0]
 
-        if parsed_path not in ("/api/compile", "/api/upscale-102mp", "/api/export-closed-loop", "/api/recon-4x", "/api/png-lock-upscale", "/api/recommend-rigs", "/api/sequential-recon-4x"):
+        allowed_post_paths = (
+            "/api/compile",
+            "/api/upscale-102mp",
+            "/api/export-closed-loop",
+            "/api/recon-4x",
+            "/api/png-lock-upscale",
+            "/api/recommend-rigs",
+            "/api/sequential-recon-4x",
+            "/api/photonqc/export",
+            "/api/photonqc/restore",
+            "/api/photonqc/evaluate",
+            "/api/photonqc/inspect",
+            "/api/photonqc/calibrate",
+            "/api/photonqc/benchmark",
+        )
+        if parsed_path not in allowed_post_paths:
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
             return
 
@@ -5782,6 +6647,334 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             body = json.loads(body_bytes.decode("utf-8"))
         except Exception as err:
             self._send_json({"error": f"Invalid JSON payload: {err}"}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/photonqc/export":
+            input_path_str = body.get("input_path") or body.get("input")
+            output_path_str = body.get("output_path") or body.get("output")
+            if not input_path_str or not output_path_str:
+                self._send_json({"error": "Missing required 'input_path' or 'output_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                from decimal import Decimal
+                from pathlib import Path
+                from PIL import Image
+                from photonqc.backends import render_with_provenance
+                from photonqc.calibration import (
+                    apply_output_sharpening,
+                    load_print_profile,
+                    soft_proof_icc,
+                    viewing_distance_for_print,
+                )
+                from photonqc.export import save_png_verified
+                from photonqc.report import verify_and_report
+                from photonqc.sizing import check_aspect_ratio, resolve_target_dimensions, validate_input_security
+
+                in_p = Path(input_path_str).expanduser().resolve()
+                out_p = Path(output_path_str).expanduser().resolve()
+                validate_input_security(in_p)
+
+                profile_name = body.get("profile")
+                prof_data = load_print_profile(profile_name) if profile_name and profile_name != "none" else None
+                raw_ppi = int(body.get("ppi", 300))
+                ppi = int(prof_data.get("ppi", raw_ppi)) if (prof_data and raw_ppi == 300) else raw_ppi
+
+                w_in = Decimal(str(body["width_in"])) if body.get("width_in") is not None else None
+                h_in = Decimal(str(body["height_in"])) if body.get("height_in") is not None else None
+                w_px = int(body["width_px"]) if body.get("width_px") is not None else None
+                h_px = int(body["height_px"]) if body.get("height_px") is not None else None
+
+                requested = resolve_target_dimensions(
+                    width_in=w_in,
+                    height_in=h_in,
+                    ppi=ppi,
+                    width_px=w_px,
+                    height_px=h_px,
+                )
+                crop_policy = str(body.get("crop_policy", "reject"))
+                with Image.open(in_p) as src:
+                    if crop_policy == "reject":
+                        check_aspect_ratio(src.size, requested)
+                    if src.mode != "RGB":
+                        raise ValueError("MVP expects RGB input")
+                    icc = src.info.get("icc_profile")
+
+                backend = str(body.get("backend", "lanczos"))
+                repo_root = Path(__file__).resolve().parent.parent
+                default_weights = repo_root / "external" / "Real-ESRGAN" / "weights" / "RealESRGAN_x4plus.pth"
+                weights_arg = Path(body["weights"]).expanduser().resolve() if body.get("weights") else (
+                    default_weights if (backend != "lanczos" and default_weights.is_file()) else None
+                )
+                repo_arg = Path(body["realesrgan_repo"]).expanduser().resolve() if body.get("realesrgan_repo") else None
+                effective_backend = backend
+                if backend in ("realesrgan_antidrift", "realesrgan_native") and weights_arg is None:
+                    effective_backend = "lanczos"
+
+                image, prov = render_with_provenance(
+                    in_p,
+                    requested,
+                    effective_backend,
+                    repo=repo_arg,
+                    weights=weights_arg,
+                    model_name=str(body.get("model_name", "RealESRGAN_x4plus")),
+                    crop_policy=crop_policy,
+                    tile_size=int(body.get("tile_size", 0)),
+                )
+
+                cal_info = None
+                output_sharpen = bool(body.get("output_sharpen", False))
+                dest_icc = Path(body["destination_icc"]).expanduser().resolve() if body.get("destination_icc") else None
+                if output_sharpen or prof_data or dest_icc:
+                    phys_w = float(w_in) if w_in is not None else requested[0] / float(ppi)
+                    phys_h = float(h_in) if h_in is not None else requested[1] / float(ppi)
+                    v_dist = viewing_distance_for_print(phys_w, phys_h)
+                    med = prof_data.get("medium", profile_name or "matte") if prof_data else (profile_name or "matte")
+                    if output_sharpen:
+                        image, sh_meta = apply_output_sharpening(image, medium=str(med), viewing_distance_in=v_dist)
+                    else:
+                        sh_meta = {"applied": False}
+                    proof_meta = soft_proof_icc(image, dest_icc, source_icc_bytes=icc)
+                    cal_info = {
+                        "profile": prof_data or profile_name,
+                        "viewing_distance_in": v_dist,
+                        "output_sharpening": sh_meta,
+                        "soft_proof": proof_meta,
+                    }
+
+                min_mib = float(body.get("min_mib", 0.0))
+                max_mib = float(body["max_mib"]) if body.get("max_mib") is not None else None
+                level, _ = save_png_verified(image, out_p, ppi, min_mib, max_mib, icc)
+                report_dir = Path(body.get("report_dir", out_p.parent / "photonqc_report")).expanduser().resolve()
+                report = verify_and_report(
+                    in_p,
+                    out_p,
+                    requested,
+                    ppi,
+                    min_mib,
+                    prov.backend_label,
+                    level,
+                    report_dir,
+                    maximum_mib=max_mib,
+                    provenance=prov.to_dict(),
+                    calibration_info=cal_info,
+                )
+                self._send_json(report)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/photonqc/restore":
+            input_path_str = body.get("input_path") or body.get("input")
+            output_path_str = body.get("output_path") or body.get("output")
+            if not input_path_str or not output_path_str:
+                self._send_json({"error": "Missing required 'input_path' or 'output_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                from decimal import Decimal
+                from pathlib import Path
+                from photonqc.restoration import SourcePreservingRestorer, restore_source_locked
+                from photonqc.sizing import resolve_target_dimensions
+
+                in_p = Path(input_path_str).expanduser().resolve()
+                out_p = Path(output_path_str).expanduser().resolve()
+                ppi = int(body.get("ppi", 300))
+                w_in = Decimal(str(body["width_in"])) if body.get("width_in") is not None else None
+                h_in = Decimal(str(body["height_in"])) if body.get("height_in") is not None else None
+                w_px = int(body["width_px"]) if body.get("width_px") is not None else None
+                h_px = int(body["height_px"]) if body.get("height_px") is not None else None
+                target_size = resolve_target_dimensions(
+                    width_in=w_in, height_in=h_in, ppi=ppi, width_px=w_px, height_px=h_px
+                )
+
+                backend = str(body.get("backend", "lanczos"))
+                repo_root = Path(__file__).resolve().parent.parent
+                default_weights = repo_root / "external" / "Real-ESRGAN" / "weights" / "RealESRGAN_x4plus.pth"
+                weights_arg = Path(body["weights"]).expanduser().resolve() if body.get("weights") else (
+                    default_weights if (backend != "lanczos" and default_weights.is_file()) else None
+                )
+                effective_backend = backend
+                if backend in ("realesrgan_antidrift", "realesrgan_native") and weights_arg is None:
+                    effective_backend = "lanczos"
+
+                restorer = SourcePreservingRestorer(
+                    deblock_strength=float(body.get("deblock_strength", 0.28)),
+                    protect_smooth_gradients=bool(body.get("protect_smooth_gradients", True)),
+                    protect_flat_black=bool(body.get("protect_flat_black", True)),
+                    unsharp_radius=float(body.get("unsharp_radius", 1.6)),
+                    unsharp_percent=int(body.get("unsharp_percent", 75)),
+                    unsharp_threshold=int(body.get("unsharp_threshold", 2)),
+                )
+                report_dir = Path(body.get("report_dir", out_p.parent / "photonqc_restore_report")).expanduser().resolve()
+                rep = restore_source_locked(
+                    input_path=in_p,
+                    output_path=out_p,
+                    target_size=target_size,
+                    ppi=ppi,
+                    minimum_mib=float(body.get("min_mib", 0.0)),
+                    maximum_mib=float(body["max_mib"]) if body.get("max_mib") is not None else None,
+                    backend=effective_backend,
+                    weights=weights_arg,
+                    restorer=restorer,
+                    report_dir=report_dir,
+                )
+                self._send_json(rep)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/photonqc/evaluate":
+            cand_str = body.get("candidate_path") or body.get("candidate")
+            if not cand_str:
+                self._send_json({"error": "Missing required 'candidate_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                from pathlib import Path
+                from PIL import Image
+                from photonqc.evaluation import (
+                    evaluate_flat_black_background,
+                    evaluate_heart_gold_case,
+                    evaluate_pair,
+                )
+
+                cand_p = Path(cand_str).expanduser().resolve()
+                ref_str = body.get("reference_path") or body.get("reference")
+                ref_p = Path(ref_str).expanduser().resolve() if ref_str else None
+                metrics = evaluate_pair(ref_p, cand_p)
+                with Image.open(cand_p) as cand_im:
+                    cand_im.load()
+                    if bool(body.get("check_heart", False)):
+                        metrics["heart_gold_case"] = evaluate_heart_gold_case(cand_im)
+                    if bool(body.get("check_flat_black", False)):
+                        metrics["flat_black_background"] = evaluate_flat_black_background(cand_im)
+                self._send_json(metrics)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/photonqc/inspect":
+            input_str = body.get("input_path") or body.get("input")
+            if not input_str:
+                self._send_json({"error": "Missing required 'input_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                from pathlib import Path
+                from PIL import Image
+                from photonqc.calibration import inspect_icc_profile
+                from photonqc.report import sha256
+                from photonqc.sizing import validate_input_security
+
+                in_p = Path(input_str).expanduser().resolve()
+                validate_input_security(in_p)
+                with Image.open(in_p) as im:
+                    im.load()
+                    w, h = im.size
+                    mode = im.mode
+                    fmt = im.format
+                    dpi = im.info.get("dpi")
+                    icc_info = inspect_icc_profile(im.info.get("icc_profile"))
+                mib = in_p.stat().st_size / (1024 * 1024)
+                self._send_json(
+                    {
+                        "path": str(in_p),
+                        "width": w,
+                        "height": h,
+                        "mode": mode,
+                        "format": fmt,
+                        "dpi": list(dpi) if dpi else None,
+                        "size_bytes": in_p.stat().st_size,
+                        "size_mib": round(mib, 6),
+                        "sha256": sha256(in_p),
+                        "icc": icc_info,
+                    }
+                )
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/photonqc/calibrate":
+            input_str = body.get("input_path") or body.get("input")
+            if not input_str:
+                self._send_json({"error": "Missing required 'input_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                from pathlib import Path
+                from PIL import Image
+                from photonqc.calibration import (
+                    apply_output_sharpening,
+                    evaluate_series_cohesion,
+                    load_print_profile,
+                    soft_proof_icc,
+                    viewing_distance_for_print,
+                )
+                from photonqc.sizing import validate_input_security
+
+                in_p = Path(input_str).expanduser().resolve()
+                validate_input_security(in_p)
+                prof_name = str(body.get("profile", "matte_300ppi"))
+                prof_data = load_print_profile(prof_name)
+                w_in = float(body.get("width_in", 16.0))
+                h_in = float(body.get("height_in", 24.0))
+                v_dist = viewing_distance_for_print(w_in, h_in)
+                dest_icc_str = body.get("destination_icc")
+                dest_icc = Path(dest_icc_str).expanduser().resolve() if dest_icc_str else None
+
+                with Image.open(in_p) as im:
+                    im.load()
+                    icc = im.info.get("icc_profile")
+                    proof = soft_proof_icc(im, dest_icc, source_icc_bytes=icc)
+                    _, sh_meta = apply_output_sharpening(
+                        im,
+                        medium=str(prof_data.get("medium", prof_name)),
+                        viewing_distance_in=v_dist,
+                    )
+
+                res_data: dict[str, Any] = {
+                    "input": str(in_p),
+                    "profile": prof_data,
+                    "viewing_distance_in": v_dist,
+                    "output_sharpening": sh_meta,
+                    "soft_proof": proof,
+                }
+                series_raw = body.get("series_paths") or body.get("series") or []
+                if series_raw:
+                    series_list = [Path(p).expanduser().resolve() for p in series_raw]
+                    cohesion = evaluate_series_cohesion(in_p, series_list)
+                    res_data["series_cohesion"] = cohesion.to_dict()
+                self._send_json(res_data)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/photonqc/benchmark":
+            gt_str = body.get("ground_truth_path") or body.get("ground_truth")
+            if not gt_str:
+                self._send_json({"error": "Missing required 'ground_truth_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                from pathlib import Path
+                from photonqc.benchmark import DegradationSpec, run_benchmark
+
+                gt_p = Path(gt_str).expanduser().resolve()
+                out_dir = Path(body.get("output_dir", "outputs/benchmark")).expanduser().resolve()
+                deg = DegradationSpec(
+                    scale_factor=int(body.get("scale_factor", 4)),
+                    gaussian_blur_sigma=float(body.get("gaussian_blur_sigma", 1.0)),
+                    noise_sigma=float(body.get("noise_sigma", 1.5)),
+                )
+                repo_root = Path(__file__).resolve().parent.parent
+                default_weights = repo_root / "external" / "Real-ESRGAN" / "weights" / "RealESRGAN_x4plus.pth"
+                weights_arg = Path(body["weights"]).expanduser().resolve() if body.get("weights") else (
+                    default_weights if default_weights.is_file() else None
+                )
+                summary = run_benchmark(
+                    ground_truth_path=gt_p,
+                    output_dir=out_dir,
+                    degradation=deg,
+                    weights_path=weights_arg,
+                )
+                self._send_json(summary)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
             return
 
         if parsed_path == "/api/sequential-recon-4x":
@@ -6090,9 +7283,9 @@ def run_server(host: str = "127.0.0.1", port: int = 8765, open_browser: bool = F
     sys.stdout.write("=" * 75 + "\n")
     sys.stdout.write("  OPTICAL CAMERA COMPILER // MASTER STUDIO CONSOLE v2.1\n")
     sys.stdout.write(f"  Live at: {url}\n")
-    sys.stdout.write("  Available Hardware Profiles: 10 Elite Camera Systems\n")
-    sys.stdout.write("  Scenario Bar: Grouped Natural Scenarios & Element of Surprise\n")
-    sys.stdout.write("  REST API available at /api/compile & /api/profiles\n")
+    sys.stdout.write("  Available Hardware Profiles: 44 Elite Camera Systems\n")
+    sys.stdout.write("  PhotonQC Engineering Lab: Neural SR (MPS/RRDBNet) • Print ICC • Gold-Case QC • Benchmark\n")
+    sys.stdout.write("  REST API: /api/compile, /api/profiles, /api/photonqc/[status|export|restore|evaluate|inspect|calibrate|benchmark]\n")
     sys.stdout.write("  Press Ctrl+C to stop.\n")
     sys.stdout.write("=" * 75 + "\n")
     sys.stdout.flush()

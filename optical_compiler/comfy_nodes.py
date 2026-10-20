@@ -650,6 +650,7 @@ class Optical4XReconstructionLockNode:
                 "image_path": ("STRING", {"default": "input_image.png"}),
                 "backend": (
                     [
+                        "realesrgan_antidrift (PhotonQC Anti-Drift Neural Fusion)",
                         "realesrnet_x4plus (Structural Fidelity Master)",
                         "swinir_m_x4 (Balanced Transformer)",
                         "realesrgan_x4v3 (Controlled Detail -dn 0.15)",
@@ -791,12 +792,200 @@ class Optical4XFullColorPNGUpscaleNode:
         )
 
 
+class PhotonQCNeuralSRExportNode:
+    """ComfyUI node executing PhotonQC Anti-Drift Neural SR, Print Calibration & Verified PNG Export."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "input_path": ("STRING", {"default": "examples/rights-cleared-example.png"}),
+                "output_path": ("STRING", {"default": "outputs/photonqc_export.png"}),
+                "width_px": ("INT", {"default": 4000, "min": 64, "max": 24000, "step": 16}),
+                "height_px": ("INT", {"default": 6000, "min": 64, "max": 24000, "step": 16}),
+                "ppi": ("INT", {"default": 300, "min": 72, "max": 1200, "step": 10}),
+                "backend": (
+                    [
+                        "realesrgan_antidrift",
+                        "realesrgan_native",
+                        "lanczos",
+                    ],
+                    {"default": "realesrgan_antidrift"},
+                ),
+                "crop_policy": (
+                    ["reject", "center-crop", "pad-black"],
+                    {"default": "reject"},
+                ),
+                "paper_profile": (
+                    ["none", "baryta_300ppi", "matte_300ppi", "glossy_300ppi", "canvas_240ppi"],
+                    {"default": "baryta_300ppi"},
+                ),
+                "output_sharpen": (["enabled", "disabled"], {"default": "enabled"}),
+                "min_mib": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 250.0, "step": 0.5}),
+            },
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "FLOAT", "BOOLEAN")
+    RETURN_NAMES = ("output_path", "output_sha256", "sr_backend", "size_mib", "validation_passed")
+    FUNCTION = "execute_photonqc_export"
+    CATEGORY = "image/photonqc"
+
+    def execute_photonqc_export(
+        self,
+        input_path: str,
+        output_path: str,
+        width_px: int = 4000,
+        height_px: int = 6000,
+        ppi: int = 300,
+        backend: str = "realesrgan_antidrift",
+        crop_policy: str = "reject",
+        paper_profile: str = "baryta_300ppi",
+        output_sharpen: str = "enabled",
+        min_mib: float = 0.0,
+    ) -> tuple[str, str, str, float, bool]:
+        from PIL import Image
+        from photonqc.backends import render_with_provenance
+        from photonqc.calibration import (
+            apply_output_sharpening,
+            load_print_profile,
+            soft_proof_icc,
+            viewing_distance_for_print,
+        )
+        from photonqc.export import save_png_verified
+        from photonqc.report import verify_and_report
+        from photonqc.sizing import validate_input_security
+
+        in_p = Path(input_path.strip()).resolve()
+        out_p = Path(output_path.strip()).resolve()
+        validate_input_security(in_p)
+
+        default_weights = (
+            Path(__file__).resolve().parent.parent
+            / "external"
+            / "Real-ESRGAN"
+            / "weights"
+            / "RealESRGAN_x4plus.pth"
+        )
+        effective_backend = backend
+        weights_arg = default_weights if (backend != "lanczos" and default_weights.is_file()) else None
+        if backend != "lanczos" and weights_arg is None:
+            effective_backend = "lanczos"
+
+        with Image.open(in_p) as src:
+            icc = src.info.get("icc_profile")
+
+        img, prov = render_with_provenance(
+            in_p,
+            (int(width_px), int(height_px)),
+            effective_backend,
+            weights=weights_arg,
+            crop_policy=crop_policy,
+        )
+
+        prof_data = load_print_profile(paper_profile) if paper_profile != "none" else None
+        cal_info = None
+        if output_sharpen == "enabled" or prof_data:
+            v_dist = viewing_distance_for_print(width_px / float(ppi), height_px / float(ppi))
+            medium = prof_data.get("medium", paper_profile) if prof_data else "matte"
+            if output_sharpen == "enabled":
+                img, sh_meta = apply_output_sharpening(img, medium=str(medium), viewing_distance_in=v_dist)
+            else:
+                sh_meta = {"applied": False}
+            proof_meta = soft_proof_icc(img, None, source_icc_bytes=icc)
+            cal_info = {
+                "profile": prof_data or paper_profile,
+                "viewing_distance_in": v_dist,
+                "output_sharpening": sh_meta,
+                "soft_proof": proof_meta,
+            }
+
+        level, _ = save_png_verified(img, out_p, ppi, min_mib, None, icc)
+        rep = verify_and_report(
+            in_p,
+            out_p,
+            (int(width_px), int(height_px)),
+            ppi,
+            min_mib,
+            prov.backend_label,
+            level,
+            out_p.parent / "photonqc_report",
+            provenance=prov.to_dict(),
+            calibration_info=cal_info,
+        )
+        return (
+            str(out_p),
+            str(rep["output_sha256"]),
+            str(rep["sr_backend"]),
+            float(rep["size_mib"]),
+            rep["validation"] == "passed",
+        )
+
+
+class PhotonQCEvaluationNode:
+    """ComfyUI node executing PhotonQC Perceptual (PSNR/SSIM/LPIPS/Edge) & Gold-Case Invariant Audits."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "candidate_path": ("STRING", {"default": "examples/rights-cleared-example.png"}),
+                "check_heart": (["enabled", "disabled"], {"default": "enabled"}),
+                "check_flat_black": (["enabled", "disabled"], {"default": "enabled"}),
+            },
+            "optional": {
+                "reference_path": ("STRING", {"default": ""}),
+            },
+        }
+
+    RETURN_TYPES = ("STRING", "FLOAT", "FLOAT", "BOOLEAN")
+    RETURN_NAMES = ("evaluation_json", "psnr_db", "ssim", "gold_case_passed")
+    FUNCTION = "evaluate_photonqc"
+    CATEGORY = "image/photonqc"
+
+    def evaluate_photonqc(
+        self,
+        candidate_path: str,
+        check_heart: str = "enabled",
+        check_flat_black: str = "enabled",
+        reference_path: str = "",
+    ) -> tuple[str, float, float, bool]:
+        import json
+        from PIL import Image
+        from photonqc.evaluation import (
+            evaluate_flat_black_background,
+            evaluate_heart_gold_case,
+            evaluate_pair,
+        )
+
+        cand_p = Path(candidate_path.strip()).resolve()
+        ref_p = Path(reference_path.strip()).resolve() if reference_path.strip() else None
+        metrics = evaluate_pair(ref_p, cand_p)
+
+        passed = True
+        with Image.open(cand_p) as cand_im:
+            cand_im.load()
+            if check_heart == "enabled":
+                heart = evaluate_heart_gold_case(cand_im)
+                metrics["heart_gold_case"] = heart
+                passed = passed and bool(heart.get("passed"))
+            if check_flat_black == "enabled":
+                fb = evaluate_flat_black_background(cand_im)
+                metrics["flat_black_background"] = fb
+                passed = passed and bool(fb.get("passed"))
+
+        psnr_val = float(metrics.get("psnr_db") or 0.0)
+        ssim_val = float(metrics.get("ssim") or 0.0)
+        return (json.dumps(metrics, indent=2), psnr_val, ssim_val, passed)
+
+
 NODE_CLASS_MAPPINGS = {
     "OpticalCameraCompiler": OpticalCameraCompilerNode,
     "OpticalConservative102MPUpscaler": OpticalConservative102MPUpscalerNode,
     "OpticalClosedLoopExporter": OpticalClosedLoopExporterNode,
     "Optical4XReconstructionLock": Optical4XReconstructionLockNode,
     "Optical4XFullColorPNGUpscale": Optical4XFullColorPNGUpscaleNode,
+    "PhotonQCNeuralSRExport": PhotonQCNeuralSRExportNode,
+    "PhotonQCEvaluation": PhotonQCEvaluationNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -805,4 +994,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "OpticalClosedLoopExporter": "🔒 Closed-Loop Resolution Engine & Provenance",
     "Optical4XReconstructionLock": "🚀 4X Reconstruction Lock Engine",
     "Optical4XFullColorPNGUpscale": "💎 4X Full-Color PNG Output Lock Upscaler",
+    "PhotonQCNeuralSRExport": "⚡ PhotonQC Neural SR & Print Export",
+    "PhotonQCEvaluation": "📊 PhotonQC Perceptual & Gold-Case Evaluator",
 }

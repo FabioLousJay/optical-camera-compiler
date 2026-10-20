@@ -76,6 +76,37 @@ from .restoration import (
     viewing_distance_inches,
 )
 
+# Unified PhotonQC AI Photography Engineering Platform re-exports
+from photonqc import (
+    MODEL_GOVERNANCE_REGISTRY,
+    BackendProvenance,
+    ModelLicenseSpec,
+    PixelSpec,
+    PrintCalibrationReport,
+    SeriesCohesionReport,
+    SourcePreservingRestorer,
+    apply_crop_or_pad,
+    apply_output_sharpening,
+    compute_edge_fidelity,
+    compute_lpips,
+    compute_psnr,
+    compute_ssim,
+    evaluate_flat_black_background,
+    evaluate_heart_gold_case,
+    evaluate_pair,
+    evaluate_series_cohesion,
+    load_print_profile,
+    render_with_provenance,
+    restore_source_locked,
+    save_png_verified,
+    soft_proof_icc,
+    validate_input_security,
+    verify_and_report,
+    verify_model_license,
+)
+from photonqc.benchmark import DegradationSpec, run_benchmark
+from photonqc.neural_sr import detect_compute_device
+
 __version__ = "3.9.4"
 
 __all__ = [
@@ -136,4 +167,33 @@ __all__ = [
     "init_pfep_project",
     "PROMPT_TEMPLATES",
     "RUN_LOG_TEMPLATE",
+    # PhotonQC Platform
+    "BackendProvenance",
+    "render_with_provenance",
+    "SourcePreservingRestorer",
+    "restore_source_locked",
+    "PrintCalibrationReport",
+    "SeriesCohesionReport",
+    "load_print_profile",
+    "soft_proof_icc",
+    "apply_output_sharpening",
+    "evaluate_series_cohesion",
+    "compute_psnr",
+    "compute_ssim",
+    "compute_lpips",
+    "compute_edge_fidelity",
+    "evaluate_pair",
+    "evaluate_heart_gold_case",
+    "evaluate_flat_black_background",
+    "MODEL_GOVERNANCE_REGISTRY",
+    "ModelLicenseSpec",
+    "verify_model_license",
+    "PixelSpec",
+    "apply_crop_or_pad",
+    "validate_input_security",
+    "save_png_verified",
+    "verify_and_report",
+    "DegradationSpec",
+    "run_benchmark",
+    "detect_compute_device",
 ]
