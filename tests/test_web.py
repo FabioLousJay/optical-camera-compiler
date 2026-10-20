@@ -379,6 +379,33 @@ class TestWebStudioHandler(unittest.TestCase):
         self.assertIn("naturally heated lake", compiled_positive)
         self.assertIn("Nikon Z 9", compiled_positive)
 
+    def test_web_studio_dual_sync_and_compile_buttons(self):
+        """Verify Web Studio contains dual-sync input handlers and compile buttons."""
+        status, _, body = self._execute_request("GET", "/")
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+
+        # Must have scenario prompt input handler and compile button
+        self.assertIn('oninput="onScenarioPromptInput(this.value)"', html)
+        self.assertIn('id="btnCompileFromAdvisor"', html)
+        self.assertIn('oninput="onSubjectInput(this.value)"', html)
+        self.assertIn('onProfileChange();', html)
+        self.assertIn('compile();', html)
+
+    def test_post_compile_supports_subject_or_scene_key(self):
+        """Verify POST /api/compile accepts either 'scene' or 'subject' key."""
+        payload_subject = {
+            "target": "flux",
+            "profile": "phase_one_iq4",
+            "subject": "Cybernetic horologist in Tokyo workshop",
+        }
+        status, _, resp_bytes = self._execute_request(
+            "POST", "/api/compile", json.dumps(payload_subject).encode("utf-8")
+        )
+        self.assertEqual(status, 200)
+        data = json.loads(resp_bytes.decode("utf-8"))
+        self.assertIn("Cybernetic horologist in Tokyo workshop", data["positive_prompt"])
+
 
 if __name__ == "__main__":
     unittest.main()

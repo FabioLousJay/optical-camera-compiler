@@ -299,6 +299,31 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     .btn-advisor-action:active {
       transform: translateY(0);
     }
+    .btn-advisor-compile {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: #ffffff;
+      padding: 0.48rem 0.95rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+    }
+    .btn-advisor-compile:hover {
+      background: linear-gradient(135deg, #047857 0%, #059669 100%);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.5);
+      transform: translateY(-1px);
+    }
+    .btn-advisor-compile:active {
+      transform: translateY(0);
+    }
     .rig-advisor-drawer {
       background: #080c14;
       border: 1px solid rgba(139, 92, 246, 0.35);
@@ -1102,9 +1127,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div class="advisor-input-wrap">
           <input type="text" id="scenarioPromptInput" class="scenario-prompt-input" 
                  placeholder="Type your scene (e.g. Master watchmaker in sunlit workshop)..." 
-                 onkeydown="if(event.key==='Enter') runRigAdvisor()">
+                 oninput="onScenarioPromptInput(this.value)"
+                 onkeydown="if(event.key==='Enter') onScenarioPromptEnter()">
+          <button type="button" class="btn-advisor-compile" id="btnCompileFromAdvisor" onclick="onScenarioPromptCompile()" title="Compile prompt immediately">
+            <span>⚡ Compile Prompt</span>
+          </button>
           <button type="button" class="btn-advisor-action" id="btnRunAdvisor" onclick="runRigAdvisor()" title="Analyze prompt & recommend top 3 optical packages">
-            <span id="btnAdvisorText">⚡ Recommend Rigs</span>
+            <span id="btnAdvisorText">✨ Recommend Rigs</span>
           </button>
         </div>
       </div>
@@ -1337,8 +1366,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </div>
 
         <div class="field-group">
-          <label for="subjectInput">Subject & Core Action <span class="hint">(Keep simple or detailed)</span></label>
-          <textarea id="subjectInput" placeholder="e.g. Woman in tailored trench coat standing under an umbrella..." oninput="debounceCompile()"></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label for="subjectInput" style="margin-bottom: 0;">Subject & Core Action <span class="hint">(Keep simple or detailed)</span></label>
+            <button type="button" class="btn-advisor-compile" style="padding: 0.22rem 0.65rem; font-size: 0.7rem;" onclick="compile()" title="Compile prompt immediately">
+              ⚡ Compile Prompt
+            </button>
+          </div>
+          <textarea id="subjectInput" placeholder="e.g. Woman in tailored trench coat standing under an umbrella..." oninput="onSubjectInput(this.value)"></textarea>
         </div>
 
         <div class="field-group">
@@ -3873,6 +3907,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (document.getElementById('ambientPresetSelect')) {
         document.getElementById('ambientPresetSelect').value = 'none';
       }
+      if (typeof onProfileChange === 'function') {
+        onProfileChange();
+      }
+      compile();
     }
 
     function setupDragAndDrop() {
@@ -4366,6 +4404,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (subjectInput) {
         subjectInput.value = rec.clean_scene || rec.enhanced_scene;
       }
+      const scenarioPromptInput = document.getElementById('scenarioPromptInput');
+      if (scenarioPromptInput) {
+        scenarioPromptInput.value = rec.clean_scene || rec.enhanced_scene;
+      }
       const framingInput = document.getElementById('framingInput');
       if (framingInput && rec.framing) {
         framingInput.value = rec.framing;
@@ -4468,7 +4510,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
 
       // 3. Populate camera-tailored subject & framing
-      if (c.subject) document.getElementById('subjectInput').value = c.subject;
+      if (c.subject) {
+        document.getElementById('subjectInput').value = c.subject;
+        if (document.getElementById('scenarioPromptInput')) {
+          document.getElementById('scenarioPromptInput').value = c.subject;
+        }
+      }
       if (c.framing) document.getElementById('framingInput').value = c.framing;
 
       // 4. If ambient style is not set, provide sensible default environment from camera preset
@@ -4558,7 +4605,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         document.getElementById('profileSelect').value = s.profile;
         onProfileChange();
       }
-      if (s.subject) document.getElementById('subjectInput').value = s.subject;
+      if (s.subject) {
+        document.getElementById('subjectInput').value = s.subject;
+        if (document.getElementById('scenarioPromptInput')) {
+          document.getElementById('scenarioPromptInput').value = s.subject;
+        }
+      }
       if (s.framing) document.getElementById('framingInput').value = s.framing;
       if (s.environment) document.getElementById('environmentInput').value = s.environment;
       if (s.wardrobe) document.getElementById('wardrobeInput').value = s.wardrobe;
@@ -4577,6 +4629,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (document.getElementById('cameraPresetSelect')) document.getElementById('cameraPresetSelect').value = 'none';
       if (document.getElementById('ambientPresetSelect')) document.getElementById('ambientPresetSelect').value = 'none';
       if (document.getElementById('scenarioSelect')) document.getElementById('scenarioSelect').value = 'none';
+      if (document.getElementById('scenarioPromptInput')) document.getElementById('scenarioPromptInput').value = '';
       document.getElementById('subjectInput').value = '';
       document.getElementById('environmentInput').value = '';
       document.getElementById('wardrobeInput').value = '';
@@ -5009,6 +5062,37 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         json: "JSON ALL-IN-ONE PROMPT // STRUCTURED PAYLOAD",
       };
       document.getElementById('targetBadge').textContent = badgeMap[engine] || engine.toUpperCase();
+      compile();
+    }
+
+    function onScenarioPromptInput(val) {
+      const subjectEl = document.getElementById('subjectInput');
+      if (subjectEl) subjectEl.value = val;
+      debounceCompile();
+    }
+
+    function onSubjectInput(val) {
+      const scenarioEl = document.getElementById('scenarioPromptInput');
+      if (scenarioEl) scenarioEl.value = val;
+      debounceCompile();
+    }
+
+    function onScenarioPromptEnter() {
+      const scenarioEl = document.getElementById('scenarioPromptInput');
+      const val = scenarioEl ? scenarioEl.value : '';
+      const subjectEl = document.getElementById('subjectInput');
+      if (subjectEl) subjectEl.value = val;
+      compile();
+      if (typeof runRigAdvisor === 'function') {
+        runRigAdvisor();
+      }
+    }
+
+    function onScenarioPromptCompile() {
+      const scenarioEl = document.getElementById('scenarioPromptInput');
+      const val = scenarioEl ? scenarioEl.value : '';
+      const subjectEl = document.getElementById('subjectInput');
+      if (subjectEl) subjectEl.value = val;
       compile();
     }
 
@@ -5908,7 +5992,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             return
 
         # /api/compile
-        scene_text = body.get("scene", "")
+        scene_text = body.get("scene") or body.get("subject") or ""
         target_engine = body.get("target", "flux")
         profile_name = body.get("profile", "phase_one_iq4")
 
