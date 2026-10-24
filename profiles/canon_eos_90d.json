@@ -1,0 +1,46 @@
+{
+  "profile_id": "canon_eos_90d",
+  "title": "Canon EOS 90D 32.5MP High-Resolution Enthusiast DSLR (Best DSLR for Enthusiasts)",
+  "schema_version": "2.0",
+  "purpose": "The pinnacle high-resolution enthusiast APS-C DSLR ('Best DSLR for Enthusiasts'): class-leading 32.5MP APS-C CMOS sensor, DIGIC 8 processor, 10 fps continuous burst, 45-point all cross-type optical AF + Dual Pixel CMOS AF, uncropped 4K video, and 1/8000s mechanical / 1/16000s electronic shutter speed.",
+  "sensor_and_optics": {
+    "camera_system": "Canon EOS 90D",
+    "sensor_type": "22.3 x 14.8mm High-Density APS-C CMOS sensor with Dual Pixel CMOS AF (32.5MP, 6960 x 4640)",
+    "sensor_dimensions": "22.3x14.8mm APS-C sensor (32.5MP, 3.2 µm pixel pitch)",
+    "full_frame_equivalent": "1.6x Canon APS-C crop factor for extended telephoto reach and high pixel density",
+    "lens": "Canon EF-S 17-55mm f/2.8 IS USM (27-88mm equivalent Constant-Aperture Professional Zoom)",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 100 base sensitivity (ISO 100–25,600, expandable to ISO 51,200)",
+    "dynamic_range": "13.5 EV dynamic range with ultra-dense 32.5MP resolving power for fine detail cropping and wildlife/action reach",
+    "shutter": "1/8000s mechanical focal-plane shutter (1/16000s electronic shutter), 10 fps continuous burst, 1/250s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Crisp natural outdoor daylight, golden hour backlight, or high-speed 1/8000s action freeze at ISO 100",
+    "light_transport": "DIGIC 8 color transport with Canon Auto Lighting Optimizer preserving bright sky gradations and rich shadow detail across high-density 32.5MP captures"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Ultra-dense 32.5MP APS-C sensor resolving intricate plumage, foliage, architectural brickwork, and fine epidermal skin texture with exceptional cropping latitude",
+      "True Canon color science with natural skin warmth, vibrant botanical greens, and clean specular highlights",
+      "High-acutance optical rendering free of artificial sharpening halos"
+    ],
+    "depth_and_optics": [
+      "45-point all cross-type optical AF paired with 220,000-pixel RGB+IR metering and EOS iTR face/eye tracking",
+      "10 fps high-speed burst capability freezing fast-moving wildlife, motorsports, and street action",
+      "1.6x APS-C telephoto reach advantage delivering tight subject framing and smooth optical background separation"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "soft focus", "motion blur", "diffraction blur", "CGI", "3D render",
+      "digital oversharpening halos", "chromatic aberration", "denoise smearing"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "airbrushed face", "oversmoothed texture", "blown highlights", "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "warped anatomy", "extra fingers", "extra limbs", "fused digits", "distorted proportions"
+    ]
+  },
+  "execution_directive": "Enforce Canon EOS 90D 32.5MP high-density APS-C DSLR resolving power with 45-point all cross-type AF, 10 fps action speed, and crisp Canon optical fidelity."
+}

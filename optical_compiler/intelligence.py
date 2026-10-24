@@ -176,6 +176,16 @@ PROFILE_DISPLAY_NAMES: dict[str, str] = {
     "om_system_om5_ii": "OM System OM-5 Mark II",
     "panasonic_lumix_g97": "Panasonic Lumix G97 Hybrid",
     "sony_a7c_ii": "Sony Alpha 7C II 33MP",
+    "nikon_d850": "Nikon D850 45.7MP FX DSLR",
+    "nikon_d500": "Nikon D500 20.9MP DX DSLR",
+    "nikon_d780": "Nikon D780 24.5MP FX DSLR",
+    "nikon_d3500": "Nikon D3500 24.2MP DX DSLR",
+    "canon_eos_5d_iv": "Canon EOS 5D Mark IV 30.4MP DSLR",
+    "canon_eos_5d_iii": "Canon EOS 5D Mark III 22.3MP DSLR",
+    "canon_eos_90d": "Canon EOS 90D 32.5MP DSLR",
+    "canon_eos_850d": "Canon EOS 850D (Rebel T8i) DSLR",
+    "canon_eos_250d": "Canon EOS 250D (Rebel SL3) DSLR",
+    "pentax_k1_ii": "Pentax K-1 Mark II 36.4MP DSLR",
 }
 
 # Default sweet spots for profiles
@@ -648,6 +658,126 @@ DEFAULT_HARDWARE_SPECS: dict[str, dict[str, Any]] = {
         "angle": "eye-level dynamic street perspective",
         "medium_type": "compact_full_frame",
     },
+    "nikon_d850": {
+        "lens": "AF-S NIKKOR 105mm f/1.4E ED",
+        "aperture": "f/2.8",
+        "dof": "Unfiltered 45.7MP OLPF-less FX BSI CMOS micro-acutance at Base ISO 64 (14.8 EV dynamic range) with D5-derived 153-point Multi-CAM 20K eye lock and 105mm f/1.4E 3D Hi-Fi bokeh",
+        "aspect_ratio": "4:5",
+        "film_stock": "digital_raw",
+        "lighting_key": "window_daylight",
+        "lighting": "Base ISO 64 High-Latitude Natural Directional Daylight with Deep 14.8-Stop Shadow Recovery and Smooth Highlight Roll-off",
+        "framing": "three-quarter editorial portrait",
+        "angle": "eye-level optical pentaprism perspective",
+        "medium_type": "35mm_dslr_flagship",
+    },
+    "nikon_d500": {
+        "lens": "AF-S NIKKOR 500mm f/5.6E PF ED VR",
+        "aperture": "f/5.6",
+        "dof": "750mm-equivalent DX super-telephoto compression with edge-to-edge 153-point Multi-CAM 20K 3D-tracking AF and 10 fps action freeze",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "window_daylight",
+        "lighting": "High-Speed 1/4000s Outdoor Action Daylight Freezing Airborne Detail and Feather Barbules",
+        "framing": "tight super-telephoto action and wildlife frame",
+        "angle": "eye-level telephoto tracking",
+        "medium_type": "aps_c_dslr_action",
+    },
+    "nikon_d780": {
+        "lens": "AF-S NIKKOR 24-120mm f/4G ED VR",
+        "aperture": "f/4.0",
+        "dof": "Clean 24.5MP FX BSI full-frame depth of field with EXPEED 6 color science and 273-point hybrid eye-detection precision",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "window_daylight",
+        "lighting": "Natural Available Ambient Daylight with Large-Pixel BSI Low-Light Latitude",
+        "framing": "medium environmental documentary portrait",
+        "angle": "eye-level honest documentary",
+        "medium_type": "35mm_dslr_enthusiast",
+    },
+    "nikon_d3500": {
+        "lens": "AF-S DX NIKKOR 35mm f/1.8G",
+        "aperture": "f/2.8",
+        "dof": "Crisp 24.2MP OLPF-less DX APS-C normal 52.5mm-equivalent perspective with natural optical background blur and honest Nikon color",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "window_daylight",
+        "lighting": "Natural Outdoor Daylight with Clean Unretouched Color Reproduction",
+        "framing": "three-quarter everyday outdoor portrait",
+        "angle": "eye-level natural perspective",
+        "medium_type": "aps_c_dslr_entry",
+    },
+    "canon_eos_5d_iv": {
+        "lens": "Canon EF 85mm f/1.4L IS USM",
+        "aperture": "f/2.0",
+        "dof": "30.4MP Full-Frame Dual Pixel RAW acuity with 61-point High-Density Reticular AF II and signature warm Canon L-series bokeh",
+        "aspect_ratio": "4:5",
+        "film_stock": "digital_raw",
+        "lighting_key": "golden_hour",
+        "lighting": "Warm Editorial Golden Hour Backlight with Luminous Canon Subsurface Skin Scattering",
+        "framing": "three-quarter professional editorial portrait",
+        "angle": "eye-level flattering editorial",
+        "medium_type": "35mm_dslr_pro",
+    },
+    "canon_eos_5d_iii": {
+        "lens": "Canon EF 50mm f/1.2L USM",
+        "aperture": "f/1.8",
+        "dof": "22.3MP Full-Frame large-pixel (6.25 µm) organic highlight roll-off with dreamy EF 50mm f/1.2L painterly background melt",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "golden_hour",
+        "lighting": "Warm Available Golden Hour and Open-Shade Light with Classic DIGIC 5+ Skin Warmth",
+        "framing": "medium classic documentary portrait",
+        "angle": "eye-level timeless editorial",
+        "medium_type": "35mm_dslr_classic",
+    },
+    "canon_eos_90d": {
+        "lens": "Canon EF-S 17-55mm f/2.8 IS USM",
+        "aperture": "f/4.0",
+        "dof": "Ultra-dense 32.5MP APS-C resolving power with 45-point all cross-type AF and 10 fps high-speed action clarity",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "window_daylight",
+        "lighting": "Crisp Outdoor Daylight with DIGIC 8 Highlight Tone Priority",
+        "framing": "three-quarter enthusiast action & documentary frame",
+        "angle": "eye-level dynamic",
+        "medium_type": "aps_c_dslr_enthusiast",
+    },
+    "canon_eos_850d": {
+        "lens": "Canon EF-S 18-135mm f/3.5-5.6 IS USM",
+        "aperture": "f/5.6",
+        "dof": "Balanced 24.1MP APS-C travel documentary depth of field keeping both subject and architectural surroundings crisp",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "golden_hour",
+        "lighting": "Sun-Drenched Travel Daylight with 220k-Pixel RGB+IR Balanced Exposure",
+        "framing": "three-quarter travel documentary portrait",
+        "angle": "eye-level walkaround perspective",
+        "medium_type": "aps_c_dslr_travel",
+    },
+    "canon_eos_250d": {
+        "lens": "Canon EF 50mm f/1.8 STM",
+        "aperture": "f/2.2",
+        "dof": "Flattering 80mm-equivalent portrait compression with smooth 7-blade circular STM bokeh and Dual Pixel Eye-AF lock",
+        "aspect_ratio": "4:5",
+        "film_stock": "digital_raw",
+        "lighting_key": "window_daylight",
+        "lighting": "Soft Open-Shade Natural Daylight with Flattering Warm Canon Skin Tones",
+        "framing": "tight head-and-shoulders everyday portrait",
+        "angle": "eye-level agile handheld",
+        "medium_type": "aps_c_dslr_lightweight",
+    },
+    "pentax_k1_ii": {
+        "lens": "HD PENTAX-D FA* 50mm F1.4 SDM AW",
+        "aperture": "f/5.6",
+        "dof": "36.4MP AA-filter-free Full-Frame acutance with Pixel Shift Resolution II per-pixel RGB color truth and 5-axis SR II stabilization",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "window_daylight",
+        "lighting": "Dramatic Wilderness & Mountain Daylight with Deep Pentax Emerald and Cobalt Color Fidelity",
+        "framing": "three-quarter environmental landscape portrait",
+        "angle": "eye-level rugged field perspective",
+        "medium_type": "35mm_dslr_rugged",
+    },
 }
 
 
@@ -844,35 +974,37 @@ class PromptIntelligenceEngine:
         if intent.primary_genre in ("portrait", "fashion", "documentary"):
             if profile_id in ("phase_one_iq4", "hasselblad_x2d_ii_100c", "fujifilm_gfx100ii"):
                 score += 35.0  # Flagship medium format resolves unmatched skin and fabric
-            elif profile_id in ("canon_eos_r5_ii", "nikon_z9", "leica_sl3_p", "leica_m11", "sony_a7c_ii"):
+            elif profile_id in ("nikon_d850", "canon_eos_5d_iv"):
+                score += 32.0  # Flagship Full-Frame DSLRs ("Best DSLR Overall" & "Best Professional DSLR")
+            elif profile_id in ("canon_eos_r5_ii", "nikon_z9", "leica_sl3_p", "leica_m11", "sony_a7c_ii", "canon_eos_5d_iii", "pentax_k1_ii", "nikon_d780"):
                 score += 25.0
             elif profile_id in ("pentax_67ii", "contax_645", "hasselblad_500cm", "mamiya_rz67"):
                 score += 30.0  # Analog character portraits
-            elif profile_id in ("panasonic_lumix_g97", "nikon_z50_ii", "fujifilm_x_e5"):
-                score += 25.0  # Tactile artisan/travel documentary
+            elif profile_id in ("panasonic_lumix_g97", "nikon_z50_ii", "fujifilm_x_e5", "canon_eos_250d", "nikon_d3500"):
+                score += 25.0  # Tactile artisan/travel/everyday documentary
 
         elif intent.primary_genre == "street":
             if profile_id in ("leica_m11", "leica_m6_analog", "ricoh_gr_iv", "fujifilm_gfx100rf", "fujifilm_x_e5"):
                 score += 40.0
-            elif profile_id in ("contax_t2", "nikon_fm2", "leica_q3_monochrom", "canon_powershot_g7x_iii", "sony_a7c_ii", "nikon_z50_ii"):
+            elif profile_id in ("contax_t2", "nikon_fm2", "leica_q3_monochrom", "canon_powershot_g7x_iii", "sony_a7c_ii", "nikon_z50_ii", "canon_eos_850d", "canon_eos_250d"):
                 score += 35.0
 
         elif intent.primary_genre == "architecture":
-            if profile_id in ("linhof_technika_4x5", "fujifilm_gfx100ii", "phase_one_iq4"):
+            if profile_id in ("linhof_technika_4x5", "fujifilm_gfx100ii", "phase_one_iq4", "nikon_d850"):
                 score += 40.0
-            elif profile_id in ("hasselblad_xpan", "sony_a7rv"):
+            elif profile_id in ("hasselblad_xpan", "sony_a7rv", "pentax_k1_ii"):
                 score += 25.0
 
         elif intent.primary_genre in ("wildlife", "sports_action"):
-            if profile_id in ("sony_a1_ii", "canon_eos_r1", "nikon_z9"):
+            if profile_id in ("sony_a1_ii", "canon_eos_r1", "nikon_z9", "nikon_d500", "nikon_d850"):
                 score += 45.0
-            elif profile_id in ("canon_eos_r5_ii", "canon_eos_r6_iii"):
+            elif profile_id in ("canon_eos_r5_ii", "canon_eos_r6_iii", "canon_eos_90d"):
                 score += 30.0
 
         elif intent.primary_genre == "macro_detail":
-            if profile_id in ("panasonic_lumix_s1rii", "sony_a7rv", "phase_one_iq4", "canon_eos_r5_ii"):
+            if profile_id in ("panasonic_lumix_s1rii", "sony_a7rv", "phase_one_iq4", "canon_eos_r5_ii", "nikon_d850"):
                 score += 45.0
-            elif profile_id in ("mamiya_rz67", "om_system_om5_ii"):
+            elif profile_id in ("mamiya_rz67", "om_system_om5_ii", "pentax_k1_ii"):
                 score += 35.0
 
         elif intent.primary_genre == "cinema":
@@ -882,13 +1014,13 @@ class PromptIntelligenceEngine:
                 score += 30.0
 
         elif intent.primary_genre == "landscape":
-            if profile_id in ("hasselblad_xpan", "deardorff_8x10", "linhof_technika_4x5", "phase_one_iq4"):
-                score += 35.0
-            elif profile_id in ("fujifilm_gfx100ii", "hasselblad_x2d_ii_100c", "om_system_om5_ii"):
+            if profile_id in ("hasselblad_xpan", "deardorff_8x10", "linhof_technika_4x5", "phase_one_iq4", "nikon_d850", "pentax_k1_ii"):
+                score += 38.0
+            elif profile_id in ("fujifilm_gfx100ii", "hasselblad_x2d_ii_100c", "om_system_om5_ii", "nikon_d780"):
                 score += 35.0
 
         elif intent.primary_genre == "still_life":
-            if profile_id in ("phase_one_iq4", "sony_a7rv", "hasselblad_x2d_ii_100c"):
+            if profile_id in ("phase_one_iq4", "sony_a7rv", "hasselblad_x2d_ii_100c", "nikon_d850"):
                 score += 40.0
 
         # Special flag and keyword affinities
@@ -941,6 +1073,41 @@ class PromptIntelligenceEngine:
                 score += 50.0
         elif "plena" in prompt_lower and profile_id == "nikon_z9":
             score += 50.0
+        elif any(k in prompt_lower for k in ["d850", "nikon d850", "best dslr", "iso 64", "105mm f/1.4e"]):
+            if profile_id == "nikon_d850":
+                score += 55.0
+        elif any(k in prompt_lower for k in ["d500", "nikon d500", "500mm pf"]):
+            if profile_id == "nikon_d500":
+                score += 55.0
+        elif any(k in prompt_lower for k in ["d780", "nikon d780"]):
+            if profile_id == "nikon_d780":
+                score += 55.0
+        elif any(k in prompt_lower for k in ["d3500", "nikon d3500", "beginner dslr"]):
+            if profile_id == "nikon_d3500":
+                score += 55.0
+        elif any(k in prompt_lower for k in ["5d mark iv", "5d iv", "5d4", "eos 5d mark iv", "professional dslr"]):
+            if profile_id == "canon_eos_5d_iv":
+                score += 55.0
+        elif any(k in prompt_lower for k in ["5d mark iii", "5d iii", "5d3", "eos 5d mark iii"]):
+            if profile_id == "canon_eos_5d_iii":
+                score += 55.0
+        elif any(k in prompt_lower for k in ["eos 90d", "canon 90d", "90d"]):
+            if profile_id == "canon_eos_90d":
+                score += 55.0
+        elif any(k in prompt_lower for k in ["eos 850d", "canon 850d", "850d", "rebel t8i", "t8i"]):
+            if profile_id == "canon_eos_850d":
+                score += 55.0
+        elif any(k in prompt_lower for k in ["eos 250d", "canon 250d", "250d", "rebel sl3", "lightweight dslr"]):
+            if profile_id == "canon_eos_250d":
+                score += 55.0
+        elif any(k in prompt_lower for k in ["pentax k-1", "pentax k1", "k-1 mark ii", "k1 mark ii", "pixel shift", "astrotracer"]):
+            if profile_id == "pentax_k1_ii":
+                score += 55.0
+        elif "dslr" in prompt_lower:
+            if profile_id == "nikon_d850":
+                score += 48.0
+            elif profile_id in ("canon_eos_5d_iv", "nikon_d500", "pentax_k1_ii", "nikon_d780", "canon_eos_90d"):
+                score += 35.0
 
         return score
 

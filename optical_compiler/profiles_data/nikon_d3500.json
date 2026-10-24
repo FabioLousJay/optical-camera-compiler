@@ -1,0 +1,46 @@
+{
+  "profile_id": "nikon_d3500",
+  "title": "Nikon D3500 24.2MP DX Compact Entry DSLR (Best Beginner DSLR)",
+  "schema_version": "2.0",
+  "purpose": "The benchmark entry-level APS-C DSLR ('Best Beginner DSLR'): 24.2MP OLPF-less DX-format CMOS sensor, EXPEED 4 image processor, crisp optical viewfinder framing, 5 fps continuous shooting, and honest, punchy Nikon color science in an ultra-compact monocoque body.",
+  "sensor_and_optics": {
+    "camera_system": "Nikon D3500",
+    "sensor_type": "23.5 x 15.6mm DX-format APS-C CMOS sensor without Optical Low-Pass Filter (OLPF-less, 24.2MP)",
+    "sensor_dimensions": "23.5x15.6mm DX APS-C sensor (24.2MP, 3.89 µm pixel pitch)",
+    "full_frame_equivalent": "1.5x DX crop factor (~52.5mm equivalent with 35mm prime)",
+    "lens": "AF-S DX NIKKOR 35mm f/1.8G (52.5mm equivalent Fast Normal Prime)",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "ISO 100 base sensor sensitivity (ISO 100–25,600)",
+    "dynamic_range": "13.9 EV dynamic range at ISO 100 with vibrant, true-to-life Nikon Picture Control color",
+    "shutter": "1/4000s to 30s mechanical focal-plane shutter, 5 fps continuous, 1/200s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Natural outdoor daylight, backyard golden hour, or window-lit indoor ambience at ISO 100",
+    "light_transport": "Clean, unpretentious natural light transport with truthful color reproduction, crisp daylight shadows, and organic highlight roll-off"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "OLPF-less 24.2MP DX CMOS sensor resolving crisp everyday textures, natural skin pores, foliage, and clothing weave without anti-aliasing softness",
+      "Honest EXPEED 4 color rendering with vibrant greens, warm natural skin tones, and clean mid-tone contrast",
+      "Authentic optical DSLR look free of smartphone computational multi-frame artifacts or synthetic HDR halos"
+    ],
+    "depth_and_optics": [
+      "11-point Multi-CAM 1000 phase-detection AF locked cleanly on the primary subject",
+      "Natural 52.5mm-equivalent normal perspective with AF-S DX 35mm f/1.8G providing pleasing optical background blur and crisp subject separation",
+      "Clean rectilinear framing with authentic APS-C depth of field progression"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "computational smartphone HDR", "fake portrait mode cutout", "CGI", "3D render",
+      "digital oversharpening halos", "blurry subject", "chromatic aberration"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "beauty filter", "airbrushed face", "blown highlights", "oversaturated neon"
+    ],
+    "anatomical_drift": [
+      "warped anatomy", "extra fingers", "extra limbs", "fused digits", "distorted proportions"
+    ]
+  },
+  "execution_directive": "Enforce Nikon D3500 24.2MP OLPF-less DX APS-C DSLR optical clarity with AF-S DX NIKKOR 35mm f/1.8G normal perspective and honest natural Nikon color science."
+}

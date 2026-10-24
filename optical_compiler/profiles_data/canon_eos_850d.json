@@ -1,0 +1,46 @@
+{
+  "profile_id": "canon_eos_850d",
+  "title": "Canon EOS 850D / Rebel T8i 24.1MP Travel DSLR (Best DSLR for Travel)",
+  "schema_version": "2.0",
+  "purpose": "The premier travel and walkaround APS-C DSLR ('Best DSLR for Travel'): 24.1MP APS-C CMOS sensor, DIGIC 8 processor, 45-point all cross-type optical AF + Dual Pixel CMOS AF with Eye Detection, 220k-pixel RGB+IR metering, 7 fps burst, and versatile Nano USM travel optics.",
+  "sensor_and_optics": {
+    "camera_system": "Canon EOS 850D (EOS Rebel T8i)",
+    "sensor_type": "22.3 x 14.9mm APS-C CMOS sensor with Dual Pixel CMOS AF (24.1MP, 6000 x 4000)",
+    "sensor_dimensions": "22.3x14.9mm APS-C sensor (24.1MP, 3.72 µm pixel pitch)",
+    "full_frame_equivalent": "1.6x Canon APS-C crop factor",
+    "lens": "Canon EF-S 18-135mm f/3.5-5.6 IS USM (29-216mm equivalent Nano USM Travel Zoom)",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 100 base sensitivity (ISO 100–25,600, expandable to ISO 51,200)",
+    "dynamic_range": "13.3 EV dynamic range with DIGIC 8 highlight tone priority and balanced travel daylight latitude",
+    "shutter": "1/4000s to 30s mechanical shutter, 7 fps continuous shooting, 1/200s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Sun-drenched travel daylight, golden-hour piazza light, or vibrant street market illumination at ISO 100",
+    "light_transport": "Natural outdoor light transport with warm Canon color rendering, balanced sky-to-shadow exposure via 220k-pixel RGB+IR metering, and crisp architectural micro-contrast"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "24.1MP APS-C CMOS sensor resolving weathered stone facades, market textiles, natural skin pores, and coastal water ripples with clean tonal gradation",
+      "DIGIC 8 color science delivering pleasing skin tones, rich azure skies, and authentic environmental textures",
+      "Optical image stabilization (4-stop IS) ensuring tack-sharp handheld travel documentary frames"
+    ],
+    "depth_and_optics": [
+      "45-point all cross-type optical viewfinder AF and Dual Pixel CMOS AF with Eye Detection locked on travel subjects",
+      "Versatile 29-216mm equivalent focal range framing both wide architectural plazas and compressed candid street portraits",
+      "Natural optical depth of field without synthetic smartphone background cutout artifacts"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "camera shake", "motion blur", "smartphone HDR halo", "CGI", "3D render",
+      "digital oversharpening", "chromatic aberration"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "airbrushed face", "blown sky highlights", "muddy shadows"
+    ],
+    "anatomical_drift": [
+      "warped anatomy", "extra fingers", "extra limbs", "fused digits", "distorted proportions"
+    ]
+  },
+  "execution_directive": "Enforce Canon EOS 850D (Rebel T8i) 24.1MP APS-C travel DSLR optical versatility with 45-point all cross-type AF, DIGIC 8 color science, and sharp handheld travel documentary realism."
+}

@@ -54,6 +54,16 @@ RIG_NAMES = [
     "Hasselblad 500 C/M Square Analog Medium Format",
     "Leica M6 35mm Rangefinder Analog Film",
     "Linhof Master Technika 4x5 Large Format Sheet Film",
+    "Nikon D850 45.7MP FX Full-Frame BSI DSLR (Best DSLR Overall)",
+    "Nikon D500 20.9MP DX Flagship Sports & Wildlife DSLR",
+    "Nikon D780 24.5MP FX Hybrid Full-Frame DSLR",
+    "Nikon D3500 24.2MP DX Compact Entry DSLR",
+    "Canon EOS 5D Mark IV 30.4MP Full-Frame Professional DSLR",
+    "Canon EOS 5D Mark III 22.3MP Full-Frame Classic DSLR",
+    "Canon EOS 90D 32.5MP High-Resolution Enthusiast DSLR",
+    "Canon EOS 850D / Rebel T8i 24.1MP Travel DSLR",
+    "Canon EOS 250D / Rebel SL3 24.1MP Ultra-Lightweight DSLR",
+    "Pentax K-1 Mark II 36.4MP Weather-Sealed Full-Frame DSLR",
 ]
 
 RIG_NAME_TO_ID = {
@@ -81,6 +91,16 @@ RIG_NAME_TO_ID = {
     "Hasselblad 500 C/M Square Analog Medium Format": "hasselblad_500cm",
     "Leica M6 35mm Rangefinder Analog Film": "leica_m6_analog",
     "Linhof Master Technika 4x5 Large Format Sheet Film": "linhof_technika_4x5",
+    "Nikon D850 45.7MP FX Full-Frame BSI DSLR (Best DSLR Overall)": "nikon_d850",
+    "Nikon D500 20.9MP DX Flagship Sports & Wildlife DSLR": "nikon_d500",
+    "Nikon D780 24.5MP FX Hybrid Full-Frame DSLR": "nikon_d780",
+    "Nikon D3500 24.2MP DX Compact Entry DSLR": "nikon_d3500",
+    "Canon EOS 5D Mark IV 30.4MP Full-Frame Professional DSLR": "canon_eos_5d_iv",
+    "Canon EOS 5D Mark III 22.3MP Full-Frame Classic DSLR": "canon_eos_5d_iii",
+    "Canon EOS 90D 32.5MP High-Resolution Enthusiast DSLR": "canon_eos_90d",
+    "Canon EOS 850D / Rebel T8i 24.1MP Travel DSLR": "canon_eos_850d",
+    "Canon EOS 250D / Rebel SL3 24.1MP Ultra-Lightweight DSLR": "canon_eos_250d",
+    "Pentax K-1 Mark II 36.4MP Weather-Sealed Full-Frame DSLR": "pentax_k1_ii",
 }
 
 

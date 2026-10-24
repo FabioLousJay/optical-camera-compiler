@@ -1,0 +1,46 @@
+{
+  "profile_id": "nikon_d500",
+  "title": "Nikon D500 20.9MP DX Flagship Sports & Wildlife DSLR (Best DSLR for Action)",
+  "schema_version": "2.0",
+  "purpose": "The undisputed APS-C sports and wildlife action DSLR king ('Best DSLR for Sports and Action'): 20.9MP OLPF-less DX CMOS sensor, EXPEED 5 processor, D5-derived 153-point Multi-CAM 20K autofocus spanning nearly frame-edge-to-edge, 10 fps sustained high-speed burst with 200-frame 14-bit RAW buffer, and 1.5x DX telephoto reach.",
+  "sensor_and_optics": {
+    "camera_system": "Nikon D500",
+    "sensor_type": "23.5 x 15.7mm DX-format APS-C CMOS sensor without Optical Low-Pass Filter (OLPF-less, 20.9MP)",
+    "sensor_dimensions": "23.5x15.7mm DX APS-C sensor (20.9MP, 4.22 µm pixel pitch)",
+    "full_frame_equivalent": "1.5x DX crop factor telephoto reach advantage",
+    "lens": "AF-S NIKKOR 500mm f/5.6E PF ED VR (750mm equivalent Phase Fresnel Super-Telephoto Prime)",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 100 base sensitivity (native ISO 100–51,200, expandable to Hi-5 ISO 1,640,000)",
+    "dynamic_range": "14.0 EV dynamic range with EXPEED 5 low-noise high-ISO signal integrity",
+    "shutter": "1/8000s high-speed mechanical shutter rated to 200,000 cycles, 10 fps continuous burst, 1/250s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "High-speed action shutter freeze (1/2000s to 1/8000s) under natural outdoor stadium, savanna, or wilderness daylight",
+    "light_transport": "Crisp directional outdoor sunlight catching airborne water droplets, turf spray, or individual raptor feathers with clean highlight retention and clean shadow separation"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "OLPF-less 20.9MP DX sensor resolving individual feather barbules, fur strands, sweat droplets, and high-velocity particulate spray without motion smear",
+      "Phase Fresnel (PF) and Fluorite (FL) NIKKOR super-telephoto optics eliminating chromatic aberration on high-contrast plumage and stadium highlights",
+      "Natural organic high-ISO luminance texture without waxy noise-reduction smearing"
+    ],
+    "depth_and_optics": [
+      "Edge-to-edge 153-point Multi-CAM 20K 3D-tracking autofocus (99 cross-type points) locked tenaciously on fast-moving eyes in flight or sprint",
+      "750mm-equivalent super-telephoto perspective compression isolating wildlife or athletes against creamy, smooth background dissolution",
+      "Instantaneous 10 fps mechanical shutter cadence freezing peak kinetic apex"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "motion blur on subject", "missed focus", "back-focused subject", "CGI", "3D render",
+      "chromatic fringing", "digital oversharpening halos", "denoise plastic smear"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "smoothed fur", "smeared feathers", "blown highlights", "artificial vignette"
+    ],
+    "anatomical_drift": [
+      "deformed wings", "extra limbs", "warped athletic anatomy", "extra fingers", "anatomical distortion"
+    ]
+  },
+  "execution_directive": "Enforce Nikon D500 flagship DX action DSLR physics with 153-point Multi-CAM 20K edge-to-edge AF lock, 10 fps high-speed shutter freeze, and 1.5x super-telephoto NIKKOR compression."
+}

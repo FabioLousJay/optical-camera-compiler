@@ -1,0 +1,18 @@
+{
+  "profile_id": "glossy_300ppi",
+  "name": "Exhibition Smooth Gloss (300 PPI)",
+  "paper": "Ilford Galerie Smooth Gloss 310gsm / Baryta High-Gloss",
+  "medium": "glossy",
+  "ppi": 300,
+  "default_width_in": 16.0,
+  "default_height_in": 24.0,
+  "dmax_expected_range": "2.40 - 2.65",
+  "surface_reflectance": "High-gloss specular reflection, deep blacks, wide chromatic gamut",
+  "recommended_rendering_intent": "relative_colorimetric_with_bpc",
+  "output_sharpening": {
+    "unsharp_radius": 0.65,
+    "unsharp_percent": 35,
+    "unsharp_threshold": 4
+  },
+  "calibration_contract": "Requires measured printer/ink/paper ICC profile for actual CMM soft-proofing; without ICC file, operates in planning_only_no_measured_icc mode."
+}

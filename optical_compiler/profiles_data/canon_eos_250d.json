@@ -1,0 +1,46 @@
+{
+  "profile_id": "canon_eos_250d",
+  "title": "Canon EOS 250D / Rebel SL3 24.1MP Ultra-Lightweight DSLR (Best Lightweight DSLR)",
+  "schema_version": "2.0",
+  "purpose": "The world's lightest movable-screen APS-C DSLR ('Best Lightweight DSLR'): 24.1MP APS-C CMOS sensor, DIGIC 8 processor, Dual Pixel CMOS AF with Eye Detection, 5 fps shooting, 449g featherweight body, and effortless everyday portrait and street versatility with fast Canon STM primes.",
+  "sensor_and_optics": {
+    "camera_system": "Canon EOS 250D (EOS Rebel SL3)",
+    "sensor_type": "22.3 x 14.9mm APS-C CMOS sensor with Dual Pixel CMOS AF (24.1MP, 6000 x 4000)",
+    "sensor_dimensions": "22.3x14.9mm APS-C sensor (24.1MP, 3.72 µm pixel pitch)",
+    "full_frame_equivalent": "1.6x Canon APS-C crop factor (~80mm portrait equivalent with 50mm f/1.8 STM)",
+    "lens": "Canon EF 50mm f/1.8 STM (80mm equivalent Fast Portrait & Everyday Prime, 7-blade circular aperture)",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "ISO 100 base sensitivity (ISO 100–25,600, expandable to ISO 51,200)",
+    "dynamic_range": "13.4 EV dynamic range with DIGIC 8 natural tonal mapping and warm Canon skin rendition",
+    "shutter": "1/4000s to 30s focal-plane shutter, 5 fps continuous, 1/200s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Soft natural window daylight, outdoor cafe open shade, or golden-hour park sunlight at ISO 100",
+    "light_transport": "Gentle, flattering natural light transport with signature warm Canon skin tones and clean specular catchlights in the eyes"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "24.1MP APS-C CMOS sensor paired with Canon EF 50mm f/1.8 STM resolving natural skin pores, eyelashes, hair strands, and knitwear textures",
+      "DIGIC 8 processor delivering vibrant, authentic color reproduction and smooth highlight roll-off without artificial beauty-filter smoothing",
+      "Pure optical lens rendering with Super Spectra coating minimizing ghosting and flare"
+    ],
+    "depth_and_optics": [
+      "Dual Pixel CMOS AF with Eye Detection locking focus accurately on the near eye",
+      "Flattering 80mm-equivalent portrait compression with EF 50mm f/1.8 STM creating smooth, circular 7-blade optical bokeh",
+      "Spontaneous, agile handheld framing from eye-level or vari-angle low perspectives"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "fake smartphone portrait blur", "computational cutout halo", "CGI", "3D render",
+      "digital oversharpening", "chromatic aberration", "motion blur"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "beauty filter", "airbrushed face", "blown highlights", "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "warped anatomy", "extra fingers", "extra limbs", "fused digits", "wide-angle selfie distortion"
+    ]
+  },
+  "execution_directive": "Enforce Canon EOS 250D (Rebel SL3) 24.1MP lightweight DSLR optical purity with Canon EF 50mm f/1.8 STM 80mm-equivalent portrait compression and warm DIGIC 8 skin color science."
+}

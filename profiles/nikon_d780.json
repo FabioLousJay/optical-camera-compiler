@@ -1,0 +1,46 @@
+{
+  "profile_id": "nikon_d780",
+  "title": "Nikon D780 24.5MP FX Hybrid Full-Frame DSLR (Best Full-Frame DSLR for Enthusiasts)",
+  "schema_version": "2.0",
+  "purpose": "The ultimate hybrid enthusiast full-frame DSLR ('Best Full-Frame DSLR for Enthusiasts'): 24.5MP FX BSI CMOS sensor, EXPEED 6 processor, dual AF systems (51-point optical OVF phase-detect + 273-point Z6-derived on-sensor Live View hybrid PDAF with Eye-Detection), and 1/8000s to 900s exposure versatility.",
+  "sensor_and_optics": {
+    "camera_system": "Nikon D780",
+    "sensor_type": "35.9 x 23.9mm FX-format Full-Frame Backside-Illuminated (BSI) CMOS sensor (24.5MP, 6048 x 4024)",
+    "sensor_dimensions": "35.9x23.9mm FX full-frame BSI sensor (24.5MP, 5.94 µm pixel pitch)",
+    "full_frame_equivalent": "35mm native full-frame field of view",
+    "lens": "AF-S NIKKOR 24-120mm f/4G ED VR (Versatile FX All-Rounder Constant-Aperture Zoom)",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 100 base sensor sensitivity (ISO 100–51,200, expandable to ISO 50–204,800)",
+    "dynamic_range": "14.4 EV dynamic range with large 5.94 µm BSI photoreceptors for exceptional low-light purity",
+    "shutter": "1/8000s to 900s (15-minute long exposure) mechanical shutter, 7 fps OVF / 12 fps silent Live View"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Available natural ambient light, twilight blue hour, or long-exposure night sky illumination with large-pixel BSI low-noise latitude",
+    "light_transport": "Rich full-frame tonal gradations with clean shadow recovery and natural color fidelity across golden hour, indoor ambient, and night scenes"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "24.5MP BSI full-frame pixel pitch (5.94 µm) delivering remarkably clean, organic skin tones, fabric textures, and architectural surfaces even in dim available light",
+      "EXPEED 6 color science with balanced mid-tone contrast and smooth specular highlight roll-off",
+      "Zero synthetic smoothing, preserving authentic environmental micro-detail and natural atmospheric depth"
+    ],
+    "depth_and_optics": [
+      "Dual autofocus precision: 51-point OVF phase-detection with D5 tracking algorithms and 273-point on-sensor Eye-Detection PDAF",
+      "Full-frame 35mm depth of field with smooth background separation and natural perspective",
+      "Extended shutter capability from 1/8000s action freeze to 900-second silky water and star-trail exposures"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "soft focus", "color noise blotches", "CGI", "3D render", "digital oversharpening halos",
+      "chromatic aberration", "banding", "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "airbrushed skin", "oversmoothed face", "blown highlights", "muddy shadows"
+    ],
+    "anatomical_drift": [
+      "warped anatomy", "extra fingers", "extra limbs", "distorted proportions", "asymmetrical eyes"
+    ]
+  },
+  "execution_directive": "Enforce Nikon D780 24.5MP FX BSI CMOS full-frame fidelity with EXPEED 6 color science, large-photodiode low-light purity, and versatile NIKKOR F-mount optical rendering."
+}

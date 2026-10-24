@@ -1,0 +1,47 @@
+{
+  "profile_id": "canon_eos_5d_iv",
+  "title": "Canon EOS 5D Mark IV 30.4MP Full-Frame Professional DSLR (Best Professional DSLR)",
+  "schema_version": "2.0",
+  "purpose": "The iconic industry-workhorse professional full-frame DSLR ('Best Professional DSLR'): 30.4MP Full-Frame CMOS sensor with Dual Pixel CMOS AF and Dual Pixel RAW, DIGIC 6+ processor, 61-point High-Density Reticular AF II (41 cross-type points), 7 fps continuous speed, and legendary Canon L-series skin tone color science.",
+  "sensor_and_optics": {
+    "camera_system": "Canon EOS 5D Mark IV",
+    "sensor_type": "36.0 x 24.0mm Full-Frame CMOS sensor with Dual Pixel CMOS AF & Dual Pixel RAW (30.4MP, 6720 x 4480)",
+    "sensor_dimensions": "36.0x24.0mm full-frame sensor (30.4MP, 5.36 µm pixel pitch)",
+    "full_frame_equivalent": "35mm native full-frame field of view",
+    "lens": "Canon EF 85mm f/1.4L IS USM (14 elements in 10 groups, Air Sphere Coating, 9-blade circular aperture, 4-stop optical IS)",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "ISO 100 native base sensitivity (ISO 100–32,000, expandable to L:50 and H2:102,400)",
+    "dynamic_range": "13.6 EV dynamic range with Canon Dual Pixel RAW micro-contrast and signature warm human skin color matrices",
+    "shutter": "1/8000s to 30s weather-sealed focal-plane shutter, 1/200s flash sync, 7 fps continuous burst"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Professional studio strobe, off-camera softbox, or golden-hour editorial backlight calibrated to ISO 100",
+    "light_transport": "Signature Canon full-frame color transport: warm, luminous subsurface skin scattering, smooth highlight roll-off on cheekbones and bridal silk, and clean shadow separation"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "30.4MP full-frame CMOS resolving authentic epidermal skin texture, fine vellus hair, eyelashes, and luxury textile weaves with Canon's renowned flattering skin warmth",
+      "Dual Pixel RAW micro-resolution acuity with natural local contrast and zero harsh digital edge ringing",
+      "Canon L-series fluorite and Air Sphere Coating (ASC) optical purity suppressing veiling flare and ghosting in backlit portraits"
+    ],
+    "depth_and_optics": [
+      "61-point High-Density Reticular AF II (41 cross-type points) with 150,000-pixel RGB+IR metering locked on the near eye",
+      "Classic full-frame L-series three-dimensional subject isolation with creamy, rounded 9-blade bokeh transitions",
+      "Natural rectilinear full-frame geometry with zero wide-angle facial distortion"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "soft focus", "motion blur", "CGI", "3D render", "digital sharpening halos",
+      "chromatic aberration", "banding", "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "greenish skin cast", "muddy grey skin", "airbrushed pores",
+      "oversmoothed face", "blown highlights", "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "warped anatomy", "extra fingers", "extra limbs", "fused digits", "distorted proportions"
+    ]
+  },
+  "execution_directive": "Enforce Canon EOS 5D Mark IV 30.4MP Full-Frame professional DSLR optical authority with Canon EF L-series glass, Dual Pixel RAW acuity, and signature warm Canon editorial skin color science."
+}

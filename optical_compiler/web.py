@@ -1293,6 +1293,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <option value="cam_nikon_z5_ii_allrounder">Nikon Z 5 II 24MP // NIKKOR Z 24-70mm f/4 S (All-Rounder Documentary Craft)</option>
             <option value="cam_panasonic_s1rii_micro">Panasonic LUMIX S1R II // Lumix S 100mm f/2.8 Macro (1:1 Orchid Micro-Science)</option>
           </optgroup>
+
+          <optgroup label="🔭 DSLR Hall of Fame (Best DSLRs Overall & Category Leaders)">
+            <option value="cam_nikon_d850_portrait_master">Nikon D850 45.7MP FX BSI // AF-S 105mm f/1.4E ED (Best DSLR Overall — 3D Hi-Fi Portrait)</option>
+            <option value="cam_nikon_d850_landscape_iso64">Nikon D850 45.7MP FX BSI // AF-S 14-24mm f/2.8G @ ISO 64 (14.8 EV Dynamic Range Landscape)</option>
+            <option value="cam_nikon_d500_action_wildlife">Nikon D500 20.9MP DX // AF-S 500mm f/5.6E PF VR (Best DSLR for Sports & Action)</option>
+            <option value="cam_pentax_k1_ii_pixel_shift">Pentax K-1 Mark II 36.4MP // HD D FA* 50mm f/1.4 AW (Best Value Full-Frame DSLR — Pixel Shift II)</option>
+            <option value="cam_nikon_d780_enthusiast">Nikon D780 24.5MP FX BSI // AF-S 24-120mm f/4G VR (Best Full-Frame DSLR for Enthusiasts)</option>
+            <option value="cam_canon_eos_5d_iv_pro">Canon EOS 5D Mark IV 30.4MP // EF 85mm f/1.4L IS USM (Best Professional DSLR)</option>
+            <option value="cam_canon_eos_5d_iii_classic">Canon EOS 5D Mark III 22.3MP // EF 50mm f/1.2L USM (Best Value Classic Full-Frame DSLR)</option>
+            <option value="cam_canon_eos_90d_enthusiast">Canon EOS 90D 32.5MP // EF-S 17-55mm f/2.8 IS USM (Best DSLR for Enthusiasts)</option>
+            <option value="cam_canon_eos_850d_travel">Canon EOS 850D / Rebel T8i 24.1MP // EF-S 18-135mm IS USM (Best DSLR for Travel)</option>
+            <option value="cam_canon_eos_250d_lightweight">Canon EOS 250D / Rebel SL3 24.1MP // EF 50mm f/1.8 STM (Best Lightweight DSLR)</option>
+            <option value="cam_nikon_d3500_beginner">Nikon D3500 24.2MP DX // AF-S DX 35mm f/1.8G (Best Beginner DSLR)</option>
+          </optgroup>
         </select>
       </div>
 
@@ -2701,6 +2715,68 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         "Canon RF 50mm F1.2L USM (Micro-Contrast & Natural DOF)",
         "Canon RF 85mm F1.2L USM (Reference Portrait Prime)",
         "Canon RF 24-105mm F4L IS USM (All-Rounder Event & Documentary)"
+      ],
+      nikon_d850: [
+        "AF-S NIKKOR 105mm f/1.4E ED (Reference 3D Hi-Fi Portrait & Editorial Prime)",
+        "AF-S NIKKOR 14-24mm f/2.8G ED (Legendary Ultra-Wide Landscape & Architecture Zoom)",
+        "AF-S NIKKOR 24-70mm f/2.8E ED VR (Flagship Wedding & Commercial Workhorse Zoom)",
+        "AF-S NIKKOR 70-200mm f/2.8E FL ED VR (Fluorite Sports, Action & Telephoto Portrait Zoom)",
+        "AF-S NIKKOR 85mm f/1.4G (Nano Crystal Coat Classic Portrait Prime)",
+        "AF-S NIKKOR 500mm f/5.6E PF ED VR (Phase Fresnel Wildlife & Birding Super-Telephoto)",
+        "PC NIKKOR 19mm f/4E ED Tilt-Shift (Zero-Keystone Architectural Perspective Control)"
+      ],
+      nikon_d500: [
+        "AF-S NIKKOR 500mm f/5.6E PF ED VR (750mm equivalent Phase Fresnel Action & Wildlife Prime)",
+        "AF-S DX NIKKOR 16-80mm f/2.8-4E ED VR (24-120mm equivalent Nano Crystal Coat Flagship DX Zoom)",
+        "AF-S NIKKOR 70-200mm f/2.8E FL ED VR (105-300mm equivalent High-Speed Sports Telephoto)",
+        "AF-S NIKKOR 300mm f/4E PF ED VR (450mm equivalent Handheld Birding & Action Prime)"
+      ],
+      nikon_d780: [
+        "AF-S NIKKOR 24-120mm f/4G ED VR (Versatile FX All-Rounder Constant-Aperture Zoom)",
+        "AF-S NIKKOR 50mm f/1.4G (Classic Full-Frame Standard Available-Light Prime)",
+        "AF-S NIKKOR 85mm f/1.8G (Lightweight Full-Frame Portrait Separation Prime)",
+        "AF-S NIKKOR 20mm f/1.8G ED (Wide Environmental & Astrophotography Long-Exposure Prime)"
+      ],
+      nikon_d3500: [
+        "AF-S DX NIKKOR 35mm f/1.8G (52.5mm equivalent Fast Normal Everyday Prime)",
+        "AF-P DX NIKKOR 18-55mm f/3.5-5.6G VR (27-82.5mm equivalent Compact Walkaround Zoom)",
+        "AF-P DX NIKKOR 70-300mm f/4.5-6.3G ED VR (105-450mm equivalent Compact Telephoto Zoom)"
+      ],
+      canon_eos_5d_iv: [
+        "Canon EF 85mm f/1.4L IS USM (Reference Professional Portrait & Editorial Prime)",
+        "Canon EF 24-70mm f/2.8L II USM (Industry-Standard Commercial & Wedding Zoom)",
+        "Canon EF 50mm f/1.2L USM (Signature Warm Character & Shallow DOF Standard Prime)",
+        "Canon EF 70-200mm f/2.8L IS III USM (Flagship Event & Telephoto Compression Zoom)",
+        "Canon EF 35mm f/1.4L II USM (Blue Spectrum Refractive Reportage Prime)"
+      ],
+      canon_eos_5d_iii: [
+        "Canon EF 50mm f/1.2L USM (Classic Editorial & Wedding Character Prime)",
+        "Canon EF 85mm f/1.2L II USM (Legendary Dreamy Bokeh Portrait King)",
+        "Canon EF 24-70mm f/2.8L II USM (Workhorse Reportage & Event Zoom)",
+        "Canon EF 135mm f/2L USM (Velvety Telephoto Portrait Compression Prime)"
+      ],
+      canon_eos_90d: [
+        "Canon EF-S 17-55mm f/2.8 IS USM (27-88mm equivalent Constant-Aperture Enthusiast Zoom)",
+        "Canon EF 100-400mm f/4.5-5.6L IS II USM (160-640mm equivalent High-Density Wildlife Telephoto)",
+        "Canon EF-S 24mm f/2.8 STM (38mm equivalent Compact Street Pancake Prime)",
+        "Canon EF 85mm f/1.8 USM (136mm equivalent Tight Portrait Telephoto)"
+      ],
+      canon_eos_850d: [
+        "Canon EF-S 18-135mm f/3.5-5.6 IS USM (29-216mm equivalent Nano USM All-in-One Travel Zoom)",
+        "Canon EF-S 10-18mm f/4.5-5.6 IS STM (16-29mm equivalent Ultra-Wide Architectural Travel Zoom)",
+        "Canon EF-S 24mm f/2.8 STM (38mm equivalent Featherweight Travel Walkaround Prime)"
+      ],
+      canon_eos_250d: [
+        "Canon EF 50mm f/1.8 STM (80mm equivalent Fast Portrait & Everyday Prime)",
+        "Canon EF-S 18-55mm f/4-5.6 IS STM (29-88mm equivalent Ultra-Compact Kit Zoom)",
+        "Canon EF-S 24mm f/2.8 STM (38mm equivalent Pocketable Street Pancake Prime)"
+      ],
+      pentax_k1_ii: [
+        "HD PENTAX-D FA* 50mm F1.4 SDM AW (Star-Series Weather-Sealed Reference Prime)",
+        "HD PENTAX-D FA* 85mm F1.4 ED SDM AW (Star-Series Portrait & Micro-Contrast Master)",
+        "HD PENTAX-FA 77mm f/1.8 Limited (Legendary Hand-Machined Aluminum Portrait Prime)",
+        "HD PENTAX-D FA 15-30mm F2.8 ED SDM WR (Weather-Sealed Landscape & AstroTracer Ultra-Wide)",
+        "HD PENTAX-D FA 24-70mm F2.8 ED SDM WR (Rugged Expedition Full-Frame Standard Zoom)"
       ]
     };
 
@@ -3607,6 +3683,160 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         mood: "Sony A7C II 33MP full-frame planar isolation, S-Cinetone cinematic skin modeling, BIONZ XR AI eye-tracking acutance, compact rangefinder street elegance",
         timeWeather: "golden_hour",
         lighting: "golden_hour",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_nikon_d850_portrait_master: {
+        profile: "nikon_d850",
+        lens: "AF-S NIKKOR 105mm f/1.4E ED (Reference 3D Hi-Fi Portrait & Editorial Prime)",
+        aperture: "f/2.0",
+        subject: "Editorial portrait subject with natural skin pores, fine vellus hair, expressive gaze, and three-dimensional subject separation",
+        framing: "three-quarter editorial portrait",
+        environment: "sunlit architectural garden courtyard with warm limestone arches and dappled foliage backlight",
+        wardrobe: "tailored linen jacket over fine cotton shirt",
+        mood: "Best DSLR Overall: Nikon D850 45.7MP OLPF-less FX BSI CMOS at Base ISO 64 (14.8 EV dynamic range), 153-point Multi-CAM 20K eye lock, and 105mm f/1.4E 3D Hi-Fi bokeh",
+        timeWeather: "golden_hour",
+        lighting: "golden_hour",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_nikon_d850_landscape_iso64: {
+        profile: "nikon_d850",
+        lens: "AF-S NIKKOR 14-24mm f/2.8G ED (Legendary Ultra-Wide Landscape & Architecture Zoom)",
+        aperture: "f/8.0",
+        subject: "Rugged alpine mountain tarn reflecting jagged granite peaks at dawn, crystalline foreground rocks and wet alpine moss",
+        framing: "wide environmental landscape vista",
+        environment: "high-altitude Dolomites mountain pass at first light with glowing golden peaks and deep cobalt valley shadows",
+        wardrobe: "none",
+        mood: "Nikon D850 Base ISO 64 (expandable to ISO 32 Lo-1) 14.8-stop dynamic range authority, OLPF-less 45.7MP corner-to-corner micro-acutance",
+        timeWeather: "golden_hour",
+        lighting: "golden_hour",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_nikon_d500_action_wildlife: {
+        profile: "nikon_d500",
+        lens: "AF-S NIKKOR 500mm f/5.6E PF ED VR (750mm equivalent Phase Fresnel Action & Wildlife Prime)",
+        aperture: "f/5.6",
+        subject: "Peregrine falcon banking sharply in mid-air flight, every feather barbule and golden talon frozen at 1/4000s",
+        framing: "tight super-telephoto wildlife action frame",
+        environment: "windswept coastal cliffside with muted ocean spray and soft overcast daylight",
+        wardrobe: "none",
+        mood: "Best DSLR for Sports & Action: Nikon D500 20.9MP OLPF-less DX sensor, edge-to-edge 153-point Multi-CAM 20K AF lock, 10 fps burst authority",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_pentax_k1_ii_pixel_shift: {
+        profile: "pentax_k1_ii",
+        lens: "HD PENTAX-D FA* 50mm F1.4 SDM AW (Star-Series Weather-Sealed Reference Prime)",
+        aperture: "f/5.6",
+        subject: "Highland geologist examining ancient basalt columns beside a misty waterfall, tactile wet stone and wool tweed weave",
+        framing: "three-quarter environmental portrait",
+        environment: "storm-swept Scottish Isle of Skye basalt cliffside with cascading waterfall and dramatic cloud breaks",
+        wardrobe: "weatherproof waxed oilskin coat and heritage wool sweater",
+        mood: "Best Value Full-Frame DSLR: Pentax K-1 Mark II 36.4MP AA-filter-free sensor, Pixel Shift Resolution II per-pixel RGB fidelity, 5-axis SR II stabilization",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_nikon_d780_enthusiast: {
+        profile: "nikon_d780",
+        lens: "AF-S NIKKOR 24-120mm f/4G ED VR (Versatile FX All-Rounder Constant-Aperture Zoom)",
+        aperture: "f/4.0",
+        subject: "Luthier hand-varnishing a spruce violin top under warm workshop window light, fine wood curls and amber resin sheen",
+        framing: "medium environmental craft portrait",
+        environment: "historic Cremona violin-making atelier with hanging maple backs, gouges, and late-afternoon golden light",
+        wardrobe: "linen craftsman shirt with rolled sleeves and leather apron",
+        mood: "Best Full-Frame DSLR for Enthusiasts: Nikon D780 24.5MP FX BSI CMOS low-light purity, EXPEED 6 color science, hybrid 273-point eye-AF",
+        timeWeather: "golden_hour",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_canon_eos_5d_iv_pro: {
+        profile: "canon_eos_5d_iv",
+        lens: "Canon EF 85mm f/1.4L IS USM (Reference Professional Portrait & Editorial Prime)",
+        aperture: "f/2.0",
+        subject: "Bride and groom sharing a quiet candid laugh under stone colonnade, luminous skin tones and intricate lace embroidery",
+        framing: "three-quarter editorial wedding portrait",
+        environment: "sunlit Italian villa courtyard with travertine columns, olive trees, and warm golden-hour rim light",
+        wardrobe: "bespoke ivory silk-lace gown and tailored black tuxedo",
+        mood: "Best Professional DSLR: Canon EOS 5D Mark IV 30.4MP Dual Pixel RAW acuity, 61-point Reticular AF II, signature warm Canon L-series skin tones",
+        timeWeather: "golden_hour",
+        lighting: "golden_hour",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_canon_eos_5d_iii_classic: {
+        profile: "canon_eos_5d_iii",
+        lens: "Canon EF 50mm f/1.2L USM (Classic Editorial & Wedding Character Prime)",
+        aperture: "f/1.8",
+        subject: "Musician tuning an acoustic guitar on a sunlit brownstone stoop, warm golden skin tones and soulful direct gaze",
+        framing: "medium environmental portrait",
+        environment: "tree-lined Brooklyn brownstone street in late afternoon sun with warm brick shadows",
+        wardrobe: "vintage faded denim jacket over cotton henley",
+        mood: "Best Value Classic Full-Frame DSLR: Canon EOS 5D Mark III 22.3MP large-pixel organic highlight roll-off and EF 50mm f/1.2L painterly bokeh",
+        timeWeather: "golden_hour",
+        lighting: "golden_hour",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_canon_eos_90d_enthusiast: {
+        profile: "canon_eos_90d",
+        lens: "Canon EF-S 17-55mm f/2.8 IS USM (27-88mm equivalent Constant-Aperture Enthusiast Zoom)",
+        aperture: "f/4.0",
+        subject: "Vintage motorsport mechanic adjusting dual carburetors on a classic silver roadster in paddock daylight",
+        framing: "three-quarter documentary action portrait",
+        environment: "classic racing circuit paddock with polished aluminum bodywork, leather straps, and crisp morning sun",
+        wardrobe: "oil-smudged racing coveralls and driving gloves",
+        mood: "Best DSLR for Enthusiasts: Canon EOS 90D 32.5MP high-density APS-C detail, 45-point cross-type AF, 10 fps speed",
+        timeWeather: "noon_sun",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_canon_eos_850d_travel: {
+        profile: "canon_eos_850d",
+        lens: "Canon EF-S 18-135mm f/3.5-5.6 IS USM (29-216mm equivalent Nano USM All-in-One Travel Zoom)",
+        aperture: "f/5.6",
+        subject: "Traveler browsing hand-painted ceramics at an open-air Mediterranean market stall, vibrant glazes and warm sunlight",
+        framing: "three-quarter travel documentary portrait",
+        environment: "sun-drenched Lisbon tiled alleyway with yellow tram in distance and terracotta rooftops",
+        wardrobe: "breathable olive linen shirt and woven leather crossbody bag",
+        mood: "Best DSLR for Travel: Canon EOS 850D (Rebel T8i) 24.1MP APS-C clarity, 45-point cross-type AF, vibrant DIGIC 8 travel color",
+        timeWeather: "golden_hour",
+        lighting: "golden_hour",
+        filmStock: "digital_raw",
+        aspectRatio: "3:2"
+      },
+      cam_canon_eos_250d_lightweight: {
+        profile: "canon_eos_250d",
+        lens: "Canon EF 50mm f/1.8 STM (80mm equivalent Fast Portrait & Everyday Prime)",
+        aperture: "f/2.2",
+        subject: "Young florist arranging fresh peonies and eucalyptus at a sunlit sidewalk flower stand, natural warm smile",
+        framing: "tight head-and-shoulders everyday portrait",
+        environment: "charming neighborhood flower shop storefront with wooden crates, kraft paper wraps, and soft morning shade",
+        wardrobe: "soft cream knit cardigan and canvas florist apron",
+        mood: "Best Lightweight DSLR: Canon EOS 250D (Rebel SL3) 24.1MP sensor with EF 50mm f/1.8 STM 80mm-equivalent creamy bokeh and warm skin tones",
+        timeWeather: "overcast",
+        lighting: "window_daylight",
+        filmStock: "digital_raw",
+        aspectRatio: "4:5"
+      },
+      cam_nikon_d3500_beginner: {
+        profile: "nikon_d3500",
+        lens: "AF-S DX NIKKOR 35mm f/1.8G (52.5mm equivalent Fast Normal Everyday Prime)",
+        aperture: "f/2.8",
+        subject: "Weekend gardener tending heirloom tomatoes and wooden raised beds in a sunny backyard garden, relaxed authentic smile",
+        framing: "three-quarter everyday outdoor portrait",
+        environment: "sunlit residential backyard garden with green foliage, terracotta pots, and natural afternoon daylight",
+        wardrobe: "casual cotton t-shirt and worn blue jeans",
+        mood: "Best Beginner DSLR: Nikon D3500 24.2MP OLPF-less DX CMOS crispness, 35mm f/1.8G natural normal perspective, honest Nikon color",
+        timeWeather: "golden_hour",
+        lighting: "window_daylight",
         filmStock: "digital_raw",
         aspectRatio: "3:2"
       }

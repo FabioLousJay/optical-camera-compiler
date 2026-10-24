@@ -1,0 +1,46 @@
+{
+  "profile_id": "pentax_k1_ii",
+  "title": "Pentax K-1 Mark II 36.4MP Weather-Sealed Full-Frame DSLR (Best Value Full-Frame DSLR)",
+  "schema_version": "2.0",
+  "purpose": "The rugged landscape and fine-art full-frame DSLR titan ('Best Value Full-Frame DSLR'): 36.4MP AA-filter-free Full-Frame CMOS sensor, PRIME IV engine with Pentax Accelerator Unit, 5-axis SR II in-body stabilization, Pixel Shift Resolution System II (Dynamic handheld full-RGB color synthesis), AstroTracer GPS star-tracking, and tank-like 87-seal weatherproof magnesium alloy build.",
+  "sensor_and_optics": {
+    "camera_system": "Pentax K-1 Mark II",
+    "sensor_type": "35.9 x 24.0mm Full-Frame CMOS sensor without Anti-Aliasing Filter (36.4MP, 7360 x 4912) with 5-Axis Shake Reduction II",
+    "sensor_dimensions": "35.9x24.0mm full-frame sensor (36.4MP, 4.88 µm pixel pitch)",
+    "full_frame_equivalent": "35mm native full-frame field of view (100% 0.70x optical pentaprism viewfinder)",
+    "lens": "HD PENTAX-D FA* 50mm F1.4 SDM AW (Star-Series Weather-Sealed Reference Prime, Aero Bright Coating II, 9 rounded blades)",
+    "aperture_sweet_spot": "f/5.6",
+    "iso_base": "ISO 100 base sensor sensitivity (ISO 100–819,200 ultra-high sensitivity range, 14-bit RAW)",
+    "dynamic_range": "14.6 EV dynamic range with Pixel Shift Resolution II capturing true R-G-B color at every single pixel without Bayer demosaicing moire",
+    "shutter": "1/8000s to 30 minutes weather-sealed shutter rated to 300,000 cycles, 5-axis 5-stop SR II IBIS, AstroTracer sensor-shift star tracking"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Dramatic wilderness golden hour, storm-clearing mountain light, or dark-sky astrophotography illumination at Base ISO 100",
+    "light_transport": "Rich Pentax Custom Image tonal transport (Natural / Landscape / Fine Sharpness) with deep emerald foliage, cobalt skies, and zero color moire via Pixel Shift full-color sampling"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "AA-filter-free 36.4MP Full-Frame sensor with Pixel Shift Resolution II resolving micro-fine geological strata, alpine lichens, bark, skin pores, and fine fabric threads with true per-pixel RGB color fidelity",
+      "HD Pentax Coating and Aero Bright Coating II delivering crystal-clear micro-contrast and suppressing flare against direct mountain sunlight",
+      "Authentic three-dimensional Pentax Limited & Star-series optical rendering with rich, painterly color depth"
+    ],
+    "depth_and_optics": [
+      "SAFOX 12 33-point phase-detection autofocus (25 cross-type points) with 86,000-pixel RGB exposure metering",
+      "5-axis Shake Reduction II (5 stops) enabling razor-sharp handheld high-resolution exposures in rugged outdoor environments",
+      "Full-frame 35mm optical depth of field with smooth, organic transition from tack-sharp foreground to atmospheric background"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "Bayer color moire", "false color artifacts", "soft focus", "camera shake",
+      "CGI", "3D render", "digital oversharpening halos", "chromatic aberration"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "airbrushed textures", "smeared foliage", "blown highlights", "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "warped anatomy", "extra fingers", "extra limbs", "fused digits", "distorted proportions"
+    ]
+  },
+  "execution_directive": "Enforce Pentax K-1 Mark II 36.4MP AA-filter-free Full-Frame DSLR optical physics with Pixel Shift Resolution II per-pixel RGB fidelity, 5-axis SR II stabilization, and HD PENTAX-D FA* Star-series weather-sealed glass."
+}

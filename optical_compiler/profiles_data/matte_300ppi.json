@@ -1,0 +1,18 @@
+{
+  "profile_id": "matte_300ppi",
+  "name": "Archival Cotton Rag Matte (300 PPI)",
+  "paper": "Hahnemühle Photo Rag 308gsm (100% Cotton, Smooth Matte)",
+  "medium": "matte",
+  "ppi": 300,
+  "default_width_in": 16.0,
+  "default_height_in": 24.0,
+  "dmax_expected_range": "1.65 - 1.75",
+  "surface_reflectance": "Diffuse matte, zero specular glare, high optical ink absorption",
+  "recommended_rendering_intent": "perceptual_or_relative_with_bpc",
+  "output_sharpening": {
+    "unsharp_radius": 0.85,
+    "unsharp_percent": 52,
+    "unsharp_threshold": 3
+  },
+  "calibration_contract": "Requires measured printer/ink/paper ICC profile for actual CMM soft-proofing; without ICC file, operates in planning_only_no_measured_icc mode."
+}

@@ -1,0 +1,51 @@
+{
+  "profile_id": "nikon_d850",
+  "title": "Nikon D850 45.7MP FX Full-Frame BSI DSLR (Best DSLR Overall)",
+  "schema_version": "2.0",
+  "purpose": "The pinnacle of optical pentaprism DSLR engineering ('Best DSLR Overall'): 45.7MP OLPF-less backside-illuminated FX full-frame CMOS sensor with native Base ISO 64 (expandable to ISO 32 Lo-1) delivering 14.8 EV dynamic range, EXPEED 5 processing, D5-derived 153-point Multi-CAM 20K phase-detection autofocus, 7-9 fps continuous speed, and unyielding edge-to-edge NIKKOR F-mount optical resolving authority for studio portrait, fashion, wedding, landscape, nature, and action photography.",
+  "sensor_and_optics": {
+    "camera_system": "Nikon D850",
+    "sensor_type": "35.9 x 23.9mm FX-format Full-Frame Backside-Illuminated (BSI) CMOS sensor without Optical Low-Pass Filter (OLPF-less, 45.7MP, 8256 x 5504)",
+    "sensor_dimensions": "35.9x23.9mm FX full-frame BSI sensor (45.7MP, 4.35 µm pixel pitch)",
+    "full_frame_equivalent": "35mm native full-frame field of view (0.75x optical pentaprism viewfinder)",
+    "lens": "AF-S NIKKOR 105mm f/1.4E ED (14 elements in 9 groups, 3 ED elements, Nano Crystal Coat, 9-blade rounded electromagnetic diaphragm)",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 64 native base sensor sensitivity (expandable to ISO 32 Lo-1 through ISO 102,400 Hi-2, 14-bit lossless compressed RAW)",
+    "dynamic_range": "14.8 EV benchmark dynamic range at Base ISO 64 with deep shadow recovery, smooth highlight roll-off, and 180k-pixel RGB matrix metering",
+    "shutter": "Mechanical focal-plane shutter (1/8000s to 30s, 1/250s flash sync) with electronic front-curtain mirror-up zero-vibration mode and 7-9 fps burst"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Base ISO 64 high-latitude exposure with directional key illumination and 1/250s high-precision flash sync or natural golden-hour open-air light",
+    "light_transport": "Three-dimensional sculptural light modeling leveraging Base ISO 64's 14.8-stop tonal latitude, preserving luminous highlight micro-gradients on skin and deep chromatically intact shadow detail without clipping"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Unfiltered 45.7MP OLPF-less BSI CMOS micro-acutance resolving natural epidermal pores, fine vellus hair, and authentic subsurface skin translucency without plastic smoothing",
+      "Three-dimensional Hi-Fi rendering characteristic of NIKKOR Nano Crystal Coat optics: crisp focal-plane micro-contrast with gradual, organic transition into creamy defocus",
+      "True physical materiality across fine textile weaves, embroidery, foliage, feathers, rock strata, and specular metallic highlights without digital oversharpening halos",
+      "Base ISO 64 pure signal-to-noise ratio delivering grain-free tonal continuity from deep obsidian shadows to delicate bridal whites"
+    ],
+    "depth_and_optics": [
+      "153-point Multi-CAM 20K phase-detection AF (99 cross-type points) locked precisely on the near eye iris and eyelashes",
+      "Optical pentaprism full-frame depth of field with natural 9-blade circular bokeh discs and zero axial chromatic fringing",
+      "Rectilinear full-frame geometry with authentic optical perspective compression and zero synthetic segmentation blur"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "soft focus", "motion blur", "digital oversharpening halos", "anti-aliasing blur",
+      "CGI", "3D render", "illustration", "chromatic aberration", "purple fringing",
+      "moire artifacts", "denoise smearing", "compression blocks", "synthetic HDR glow"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "waxy skin", "airbrushed pores", "oversmoothed face",
+      "beauty filter", "fake portrait mode blur", "blown highlights", "crushed muddy shadows",
+      "neon oversaturation"
+    ],
+    "anatomical_drift": [
+      "wide-angle facial distortion", "warped anatomy", "extra fingers", "extra limbs",
+      "fused digits", "mutated hands", "asymmetrical eyes", "cloned background elements"
+    ]
+  },
+  "execution_directive": "Enforce Nikon D850 45.7MP OLPF-less FX BSI CMOS optical authority at native Base ISO 64 (14.8 EV dynamic range) paired with flagship AF-S NIKKOR F-mount glass. Deliver tack-sharp center-to-corner micro-acutance, three-dimensional subject separation, and unretouched authentic dermal and material physics."
+}

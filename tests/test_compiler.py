@@ -209,6 +209,49 @@ class TestOpticalCompiler(unittest.TestCase):
         self.assertEqual(p_mj.unified_prompt, p_mj.positive_prompt)
         self.assertIn("--no", p_mj.unified_prompt)
 
+    def test_dslr_hall_of_fame_10_profiles_and_nikon_d850_optimization(self) -> None:
+        """Verify all 10 DSLRs from 'The best DSLRs' list and deep Nikon D850 specs are integrated."""
+        from optical_compiler.profiles import auto_select_profile, load_profile
+        from optical_compiler.presets import CAMERA_PRESETS, LENS_CATALOG
+        from optical_compiler.intelligence import PromptIntelligenceEngine
+
+        dslr_ids = [
+            "nikon_d850",
+            "nikon_d3500",
+            "canon_eos_250d",
+            "canon_eos_850d",
+            "canon_eos_90d",
+            "nikon_d500",
+            "pentax_k1_ii",
+            "nikon_d780",
+            "canon_eos_5d_iv",
+            "canon_eos_5d_iii",
+        ]
+        for pid in dslr_ids:
+            prof = load_profile(pid)
+            self.assertEqual(prof.profile_id, pid)
+            self.assertIn(pid, LENS_CATALOG)
+            self.assertGreaterEqual(len(LENS_CATALOG[pid]), 3)
+
+        # Verify Nikon D850 specific physics & specs
+        d850 = load_profile("d850")
+        self.assertEqual(d850.profile_id, "nikon_d850")
+        self.assertIn("45.7MP", d850.sensor_and_optics.sensor_type)
+        self.assertIn("ISO 64", d850.sensor_and_optics.iso_base)
+        self.assertIn("14.8 EV", d850.sensor_and_optics.dynamic_range)
+        self.assertIn("AF-S NIKKOR 105mm f/1.4E ED", d850.sensor_and_optics.lens)
+        self.assertEqual(auto_select_profile("Portrait shot on Nikon D850 at Base ISO 64"), "nikon_d850")
+        self.assertEqual(auto_select_profile("Travel street photo with Canon Rebel T8i"), "canon_eos_850d")
+        self.assertEqual(auto_select_profile("Lightweight everyday portrait on Rebel SL3"), "canon_eos_250d")
+        self.assertEqual(auto_select_profile("Landscape with Pentax K-1 Mark II Pixel Shift"), "pentax_k1_ii")
+
+        # Verify presets and AI Rig Advisor
+        self.assertIn("cam_nikon_d850_portrait_master", CAMERA_PRESETS)
+        self.assertIn("cam_nikon_d850_landscape_iso64", CAMERA_PRESETS)
+        recs = PromptIntelligenceEngine.recommend_rigs("Editorial portrait shot on Nikon D850 at ISO 64")
+        self.assertEqual(recs[0].profile_id, "nikon_d850")
+        self.assertTrue(recs[0].quality_gate.passed)
+
 
 if __name__ == "__main__":
     unittest.main()

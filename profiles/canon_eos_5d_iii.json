@@ -1,0 +1,46 @@
+{
+  "profile_id": "canon_eos_5d_iii",
+  "title": "Canon EOS 5D Mark III 22.3MP Full-Frame Classic DSLR (Best Value Classic Full-Frame DSLR)",
+  "schema_version": "2.0",
+  "purpose": "The legendary full-frame DSLR workhorse ('Best Cheap / Value Full-Frame DSLR'): 22.3MP Full-Frame CMOS sensor with gapless microlenses, DIGIC 5+ processor, 61-point High-Density Reticular AF, 6 fps continuous shooting, and timeless, organic Canon full-frame color rendering revered by wedding, portrait, and documentary photographers worldwide.",
+  "sensor_and_optics": {
+    "camera_system": "Canon EOS 5D Mark III",
+    "sensor_type": "36.0 x 24.0mm Full-Frame CMOS sensor with gapless microlenses (22.3MP, 5760 x 3840)",
+    "sensor_dimensions": "36.0x24.0mm full-frame sensor (22.3MP, 6.25 µm pixel pitch)",
+    "full_frame_equivalent": "35mm native full-frame field of view",
+    "lens": "Canon EF 50mm f/1.2L USM (Classic Editorial & Documentary Fast Standard Prime)",
+    "aperture_sweet_spot": "f/2.0",
+    "iso_base": "ISO 100 base sensitivity (ISO 100–25,600, expandable to L:50 and H2:102,400)",
+    "dynamic_range": "Large 6.25 µm full-frame pixel pitch delivering organic, film-like highlight roll-off and rich color depth",
+    "shutter": "1/8000s to 30s magnesium-alloy weather-sealed shutter rated to 150,000 cycles, 6 fps burst, 1/200s flash sync"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Available natural window light, golden hour sun flare, or warm tungsten reception ambient light",
+    "light_transport": "Organic, forgiving highlight roll-off characteristic of large 6.25 µm full-frame pixels paired with fast EF L-series primes, producing warm skin tones and gentle shadow transitions"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "22.3MP full-frame sensor with large 6.25 µm photoreceptors rendering smooth, organic skin texture with natural pores and zero clinical digital harshness",
+      "Classic Canon DIGIC 5+ color science prized for rich reds, warm golden skin hues, and film-like tonal transitions",
+      "Authentic optical character of Canon EF L-series glass with subtle spherical glow wide open and tack-sharp focal plane stopped down"
+    ],
+    "depth_and_optics": [
+      "61-point High-Density Reticular AF (41 cross-type points, 5 dual-diagonal cross-type at f/2.8) locked on the subject's eyes",
+      "Dreamy full-frame shallow depth of field with Canon EF 50mm f/1.2L USM or EF 85mm f/1.2L II USM painterly background melt",
+      "True 35mm full-frame perspective with natural optical vignetting and organic highlight bokeh discs"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "clinical digital oversharpening", "synthetic HDR halos", "CGI", "3D render",
+      "harsh edge ringing", "chromatic aberration", "compression artifacts"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic skin", "waxy skin", "cold clinical skin cast", "airbrushed face", "blown highlights"
+    ],
+    "anatomical_drift": [
+      "warped anatomy", "extra fingers", "extra limbs", "fused digits", "distorted proportions"
+    ]
+  },
+  "execution_directive": "Enforce Canon EOS 5D Mark III 22.3MP Full-Frame DSLR optical character with large 6.25 µm pixel tonal smoothness, fast Canon EF L-series primes, and timeless warm editorial skin rendering."
+}
