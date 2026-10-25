@@ -1,0 +1,50 @@
+{
+  "profile_id": "sony_a7r_vi",
+  "title": "Sony Alpha 7R VI 66.8MP Stacked Full-Frame (ILCE-7RM6)",
+  "schema_version": "2.0",
+  "purpose": "Benchmark 66.8MP full-frame ultra-high-resolution optical authority (ILCE-7RM6): brand-new 66.8MP (9984x6656) fully-stacked Exmor RS BSI CMOS sensor, BIONZ XR2 processor with integrated AI processing unit, up to 16 stops dynamic range, 8.5-stop 5-axis IBIS, 759-point Real-time Recognition AF+ covering 94% of the frame, 30 fps 14-bit RAW speed, and razor-sharp G-Master II resolving power.",
+  "sensor_and_optics": {
+    "camera_system": "Sony Alpha 7R VI (ILCE-7RM6, 66.8MP Full-Frame Stacked Exmor RS BSI CMOS)",
+    "sensor_type": "35.9 x 24.0mm Full-Frame Fully-Stacked Exmor RS Back-Illuminated CMOS sensor without Optical Low-Pass Filter (66.8MP effective / 72.6MP total, 9984 x 6656 pixels, BIONZ XR2 + Integrated AI Unit)",
+    "sensor_dimensions": "35.9x24.0mm full-frame stacked sensor (66.8MP, 9984x6656, 3.60 µm pixel pitch)",
+    "full_frame_equivalent": "35mm native full-frame field of view (0.90x 9.44M-dot DCI-P3 EVF)",
+    "lens": "Sony FE 85mm F1.4 GM II (SEL85F14GM2, 2 XA extreme aspherical elements, 2 ED elements, Nano AR Coating II, 11-blade circular aperture)",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "ISO 100 native base sensitivity (expandable ISO 50 to 102,400, 14-bit uncompressed RAW & 16-shot Pixel Shift Multi Shooting)",
+    "dynamic_range": "16 stops benchmark low-ISO dynamic range with BIONZ XR2 16-bit internal tonal processing, deep shadow recovery, and smooth highlight roll-off",
+    "shutter": "30 fps blackout-free electronic stacked shutter with Pre-Capture or 1/8000s low-vibration EFCS/mechanical shutter with 8.5-stop 5-axis IBIS"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "High-precision studio strobe, Broncolor parabolic modifier, or directional golden-hour daylight calibrated to ISO 100 (or ISO 50 extended) across 16 stops of dynamic latitude",
+    "light_transport": "Three-dimensional sculptural light transport with BIONZ XR2 AI-assisted white balance and skin-tone color science, preserving delicate specular highlight micro-gradients and deep, noise-free shadow detail"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Unprecedented 66.8MP (9984 x 6656) OLPF-less stacked Exmor RS resolving authority: microscopic iris crypts, individual eyelashes, fine vellus hair, and authentic epidermal pore relief without synthetic sharpening",
+      "Next-generation Sony G-Master II (XA extreme aspherical) optical purity eliminating onion-ring bokeh, sagittal coma flare, and longitudinal chromatic aberration",
+      "True 14-bit uncompressed RAW and 16-shot Pixel Shift Multi Shooting materiality across fine silk, tweed weave, brushed horology metals, botanical veins, and architectural stone",
+      "8.5-stop 5-axis In-Body Image Stabilization ensuring zero micro-shake blur at the 3.60 µm pixel level"
+    ],
+    "depth_and_optics": [
+      "759-point Fast Hybrid AF (94% frame coverage) with BIONZ XR2 Real-time Recognition AF+ human pose and near-eye iris lock at 60 calculations/sec",
+      "Signature G-Master II 11-blade circular aperture transition from razor-sharp focal plane to creamy, three-dimensional background dissolution",
+      "Corner-to-corner rectilinear full-frame geometry with zero digital segmentation-mask blur"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "soft focus", "motion blur", "micro-shake blur", "CGI", "3D render", "illustration",
+      "digital sharpening halos", "onion-ring bokeh", "chromatic aberration", "purple fringing",
+      "denoise smearing", "compression artifacts", "synthetic HDR glow"
+    ],
+    "skin_and_lighting_drift": [
+      "plastic poreless skin", "waxy skin", "airbrushed skin", "glamour retouching",
+      "computational portrait blur", "beauty filter glow", "blown highlights", "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "wide-angle facial distortion", "mutated hands", "extra digits", "extra limbs",
+      "fused fingers", "asymmetrical pupil dilation", "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Sony Alpha 7R VI (ILCE-7RM6) 66.8MP (9984x6656) full-frame stacked Exmor RS BSI CMOS resolving authority with BIONZ XR2 AI processing, 16-stop dynamic range, 8.5-stop IBIS, and Sony G-Master II optical acutance. Human skin realism overrides artificial sharpening: preserve organic pores, subsurface scattering, and tack-sharp near-eye iris lock."
+}

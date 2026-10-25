@@ -150,6 +150,7 @@ PROFILE_DISPLAY_NAMES: dict[str, str] = {
     "linhof_technika_4x5": "Linhof Master Technika 4x5",
     "polaroid_20x24": "Polaroid 20x24 Large Format",
     "sony_a1_ii": "Sony a1 II",
+    "sony_a7r_vi": "Sony Alpha 7R VI 66.8MP (ILCE-7RM6)",
     "sony_a7rv": "Sony Alpha 7R V",
     "canon_eos_r1": "Canon EOS R1",
     "canon_eos_r5_ii": "Canon EOS R5 Mark II",
@@ -357,6 +358,18 @@ DEFAULT_HARDWARE_SPECS: dict[str, dict[str, Any]] = {
         "framing": "three-quarter dynamic portrait",
         "angle": "eye-level dynamic",
         "medium_type": "35mm_flagship_digital",
+    },
+    "sony_a7r_vi": {
+        "lens": "Sony FE 85mm F1.4 GM II (SEL85F14GM2)",
+        "aperture": "f/2.0",
+        "dof": "Unprecedented 66.8MP (9984x6656) OLPF-less stacked Exmor RS micro-acutance with 16-stop dynamic range, 8.5-stop IBIS, BIONZ XR2 Real-time Recognition AF+ eye lock, and 11-blade G-Master II bokeh",
+        "aspect_ratio": "4:5",
+        "film_stock": "digital_raw",
+        "lighting_key": "strobe_para",
+        "lighting": "Precision Parabolic Key Strobe with 16-Stop Low-ISO Tonal Latitude and Black Flag Negative Fill",
+        "framing": "three-quarter editorial portrait",
+        "angle": "eye-level authoritative",
+        "medium_type": "35mm_ultra_high_res_stacked",
     },
     "sony_a7rv": {
         "lens": "Sony FE 90mm f/2.8 Macro G OSS",
@@ -974,8 +987,8 @@ class PromptIntelligenceEngine:
         if intent.primary_genre in ("portrait", "fashion", "documentary"):
             if profile_id in ("phase_one_iq4", "hasselblad_x2d_ii_100c", "fujifilm_gfx100ii"):
                 score += 35.0  # Flagship medium format resolves unmatched skin and fabric
-            elif profile_id in ("nikon_d850", "canon_eos_5d_iv"):
-                score += 32.0  # Flagship Full-Frame DSLRs ("Best DSLR Overall" & "Best Professional DSLR")
+            elif profile_id in ("sony_a7r_vi", "nikon_d850", "canon_eos_5d_iv"):
+                score += 33.0  # 66.8MP Stacked Full-Frame & Flagship Full-Frame DSLRs
             elif profile_id in ("canon_eos_r5_ii", "nikon_z9", "leica_sl3_p", "leica_m11", "sony_a7c_ii", "canon_eos_5d_iii", "pentax_k1_ii", "nikon_d780"):
                 score += 25.0
             elif profile_id in ("pentax_67ii", "contax_645", "hasselblad_500cm", "mamiya_rz67"):
@@ -990,19 +1003,19 @@ class PromptIntelligenceEngine:
                 score += 35.0
 
         elif intent.primary_genre == "architecture":
-            if profile_id in ("linhof_technika_4x5", "fujifilm_gfx100ii", "phase_one_iq4", "nikon_d850"):
+            if profile_id in ("linhof_technika_4x5", "fujifilm_gfx100ii", "phase_one_iq4", "sony_a7r_vi", "nikon_d850"):
                 score += 40.0
             elif profile_id in ("hasselblad_xpan", "sony_a7rv", "pentax_k1_ii"):
                 score += 25.0
 
         elif intent.primary_genre in ("wildlife", "sports_action"):
-            if profile_id in ("sony_a1_ii", "canon_eos_r1", "nikon_z9", "nikon_d500", "nikon_d850"):
+            if profile_id in ("sony_a1_ii", "canon_eos_r1", "nikon_z9", "nikon_d500", "nikon_d850", "sony_a7r_vi"):
                 score += 45.0
             elif profile_id in ("canon_eos_r5_ii", "canon_eos_r6_iii", "canon_eos_90d"):
                 score += 30.0
 
         elif intent.primary_genre == "macro_detail":
-            if profile_id in ("panasonic_lumix_s1rii", "sony_a7rv", "phase_one_iq4", "canon_eos_r5_ii", "nikon_d850"):
+            if profile_id in ("panasonic_lumix_s1rii", "sony_a7r_vi", "sony_a7rv", "phase_one_iq4", "canon_eos_r5_ii", "nikon_d850"):
                 score += 45.0
             elif profile_id in ("mamiya_rz67", "om_system_om5_ii", "pentax_k1_ii"):
                 score += 35.0
@@ -1014,13 +1027,13 @@ class PromptIntelligenceEngine:
                 score += 30.0
 
         elif intent.primary_genre == "landscape":
-            if profile_id in ("hasselblad_xpan", "deardorff_8x10", "linhof_technika_4x5", "phase_one_iq4", "nikon_d850", "pentax_k1_ii"):
+            if profile_id in ("hasselblad_xpan", "deardorff_8x10", "linhof_technika_4x5", "phase_one_iq4", "sony_a7r_vi", "nikon_d850", "pentax_k1_ii"):
                 score += 38.0
             elif profile_id in ("fujifilm_gfx100ii", "hasselblad_x2d_ii_100c", "om_system_om5_ii", "nikon_d780"):
                 score += 35.0
 
         elif intent.primary_genre == "still_life":
-            if profile_id in ("phase_one_iq4", "sony_a7rv", "hasselblad_x2d_ii_100c", "nikon_d850"):
+            if profile_id in ("phase_one_iq4", "sony_a7r_vi", "sony_a7rv", "hasselblad_x2d_ii_100c", "nikon_d850"):
                 score += 40.0
 
         # Special flag and keyword affinities
@@ -1073,6 +1086,9 @@ class PromptIntelligenceEngine:
                 score += 50.0
         elif "plena" in prompt_lower and profile_id == "nikon_z9":
             score += 50.0
+        elif any(k in prompt_lower for k in ["a7r vi", "a7rvi", "a7r6", "ilce-7rm6", "66.8mp", "66.8 megapixels", "bionz xr2"]):
+            if profile_id == "sony_a7r_vi":
+                score += 60.0
         elif any(k in prompt_lower for k in ["d850", "nikon d850", "best dslr", "iso 64", "105mm f/1.4e"]):
             if profile_id == "nikon_d850":
                 score += 55.0

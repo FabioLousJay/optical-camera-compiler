@@ -252,6 +252,32 @@ class TestOpticalCompiler(unittest.TestCase):
         self.assertEqual(recs[0].profile_id, "nikon_d850")
         self.assertTrue(recs[0].quality_gate.passed)
 
+    def test_sony_a7r_vi_66_8mp_stacked_profile_and_routing(self) -> None:
+        """Verify Sony Alpha 7R VI (ILCE-7RM6, 66.8MP stacked Exmor RS, BIONZ XR2) integration."""
+        from optical_compiler.profiles import auto_select_profile, load_profile
+        from optical_compiler.presets import CAMERA_PRESETS, LENS_CATALOG
+        from optical_compiler.intelligence import PromptIntelligenceEngine
+
+        for alias in ("sony_a7r_vi", "a7r_vi", "a7rvi", "a7r6", "ilce_7rm6"):
+            prof = load_profile(alias)
+            self.assertEqual(prof.profile_id, "sony_a7r_vi")
+            self.assertIn("66.8MP", prof.sensor_and_optics.sensor_type)
+            self.assertIn("9984", prof.sensor_and_optics.sensor_type)
+            self.assertIn("BIONZ XR2", prof.sensor_and_optics.sensor_type)
+            self.assertIn("16 stops", prof.sensor_and_optics.dynamic_range)
+
+        self.assertIn("sony_a7r_vi", LENS_CATALOG)
+        self.assertGreaterEqual(len(LENS_CATALOG["sony_a7r_vi"]), 7)
+        self.assertIn("cam_sony_a7r_vi_66mp_portrait", CAMERA_PRESETS)
+        self.assertIn("cam_sony_a7r_vi_pixel_shift_arch", CAMERA_PRESETS)
+
+        self.assertEqual(auto_select_profile("Studio portrait shot on Sony A7R VI 66.8MP"), "sony_a7r_vi")
+        self.assertEqual(auto_select_profile("Captured with ILCE-7RM6 and BIONZ XR2"), "sony_a7r_vi")
+
+        recs = PromptIntelligenceEngine.recommend_rigs("High-fashion portrait on Sony A7R VI 66.8MP")
+        self.assertEqual(recs[0].profile_id, "sony_a7r_vi")
+        self.assertTrue(recs[0].quality_gate.passed)
+
 
 if __name__ == "__main__":
     unittest.main()
