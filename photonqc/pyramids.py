@@ -42,12 +42,14 @@ class LaplacianPyramidConfig:
     """Configuration for Laplacian pyramid frequency separation and halo-free portrait refinement."""
 
     levels: int = 4
-    lighting_smooth_sigma: float = 1.8
-    lighting_smooth_blend: float = 0.28
-    pore_band_gain: float = 1.10
-    meso_band_gain: float = 1.04
-    halo_edge_threshold: float = 14.0
-    halo_soft_clamp_tau: float = 6.5
+    scale_factor: int = 1
+    use_neural_sr: bool = True
+    lighting_smooth_sigma: float = 1.2
+    lighting_smooth_blend: float = 0.15
+    pore_band_gain: float = 1.25
+    meso_band_gain: float = 1.15
+    halo_edge_threshold: float = 18.0
+    halo_soft_clamp_tau: float = 8.0
     protect_flat_black: bool = True
     flat_black_threshold: int = 2
 
@@ -389,15 +391,71 @@ def frequency_separate_portrait_lighting(
         raise ValueError("frequency_separate_portrait_lighting requires RGB mode image.")
 
     cfg = config or LaplacianPyramidConfig()
-    arr = np.asarray(image, dtype=np.float64)
+    working_img = image
+    ops: list[str] = []
+
+    # Optional Multi-Band Neural Super-Resolution Upscale (e.g. 4x or 2x) before/during pyramid separation
+    if cfg.scale_factor > 1:
+        from pathlib import Path
+        target_w = image.size[0] * cfg.scale_factor
+        target_h = image.size[1] * cfg.scale_factor
+        repo_root = Path(__file__).resolve().parent.parent
+        w_gan = repo_root / "external" / "Real-ESRGAN" / "weights" / "RealESRGAN_x4plus.pth"
+        w_net = repo_root / "external" / "Real-ESRGAN" / "weights" / "RealESRNet_x4plus.pth"
+        if cfg.use_neural_sr and w_gan.is_file():
+            try:
+                from .neural_sr import run_native_rrdbnet_inference
+                sr_gan, _ = run_native_rrdbnet_inference(image, w_gan, tile_size=256)
+                if w_net.is_file():
+                    sr_net, _ = run_native_rrdbnet_inference(image, w_net, tile_size=256)
+                    gan_arr = np.asarray(sr_gan, dtype=np.float64)
+                    net_arr = np.asarray(sr_net, dtype=np.float64)
+                    # Blend 55% high-acuity ESRGAN + 45% structural ESRNet for crisp dermal & hair texture
+                    sr_combined = Image.fromarray(
+                        np.clip(np.rint(0.55 * gan_arr + 0.45 * net_arr), 0, 255).astype(np.uint8),
+                        mode="RGB",
+                    )
+                    ops.append("neural_sr_4x_esrgan55_esrnet45_mps")
+                else:
+                    sr_combined = sr_gan
+                    ops.append("neural_sr_4x_esrgan_mps")
+
+                # Multi-band Laplacian fusion: lock G_N lighting/color to optical anchor while
+                # retaining 88% of genuine 4x neural high-frequency detail in L_0, L_1, L_2
+                anchor_4x = image.resize(sr_combined.size, Image.Resampling.LANCZOS)
+                pyr_a = build_laplacian_pyramid(anchor_4x, levels=cfg.levels, use_cv2=use_cv2)
+                pyr_s = build_laplacian_pyramid(sr_combined, levels=cfg.levels, use_cv2=use_cv2)
+                fused_sr_pyr: list[np.ndarray] = []
+                for b_idx in range(len(pyr_a) - 1):
+                    # Inject neural detail strongly across L_0, L_1, L_2 while damping step-edge halos
+                    w_b = 0.90 if b_idx <= 1 else 0.75
+                    fused_sr_pyr.append((1.0 - w_b) * pyr_a[b_idx] + w_b * pyr_s[b_idx])
+                # Lock coarsest illumination base G_N to true source color/tonality
+                fused_sr_pyr.append(0.85 * pyr_a[-1] + 0.15 * pyr_s[-1])
+                fused_sr_arr = reconstruct_from_laplacian_pyramid(fused_sr_pyr, use_cv2=use_cv2)
+                working_img = Image.fromarray(
+                    np.clip(np.rint(fused_sr_arr), 0, 255).astype(np.uint8), mode="RGB"
+                )
+                if working_img.size != (target_w, target_h):
+                    working_img = working_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
+                ops.append(f"laplacian_multiband_sr_upscale_{target_w}x{target_h}")
+            except Exception:
+                working_img = image.resize((target_w, target_h), Image.Resampling.LANCZOS)
+                ops.append(f"lanczos_upscale_{target_w}x{target_h}")
+        else:
+            working_img = image.resize((target_w, target_h), Image.Resampling.LANCZOS)
+            ops.append(f"lanczos_upscale_{target_w}x{target_h}")
+
+    arr = np.asarray(working_img, dtype=np.float64)
     gauss_pyr = build_gaussian_pyramid(arr, levels=cfg.levels, use_cv2=use_cv2)
     lap_pyr = build_laplacian_pyramid(arr, levels=cfg.levels, use_cv2=use_cv2)
     eff_levels = len(lap_pyr) - 1
 
     refined_pyr: list[np.ndarray] = [b.copy() for b in lap_pyr]
-    ops: list[str] = [f"laplacian_pyramid_decompose_levels_{eff_levels}"]
+    ops.append(f"laplacian_pyramid_decompose_levels_{eff_levels}")
 
-    # 1. Low-frequency lighting envelope harmonization on G_N and coarsest Laplacian band
+    # 1. Edge-preserving low-frequency lighting envelope harmonization on G_N ONLY
+    #    (Never attenuates L_{N-1} or blurs across structural edges, avoiding mid-frequency notches)
     if cfg.lighting_smooth_blend > 0.0 and cfg.lighting_smooth_sigma > 0.0:
         base_g = refined_pyr[-1]
         base_u8 = np.clip(np.rint(base_g), 0, 255).astype(np.uint8)
@@ -406,12 +464,10 @@ def frequency_separate_portrait_lighting(
             base_pil.filter(ImageFilter.GaussianBlur(radius=cfg.lighting_smooth_sigma)),
             dtype=np.float64,
         )
-        alpha = float(np.clip(cfg.lighting_smooth_blend, 0.0, 0.85))
-        refined_pyr[-1] = (1.0 - alpha) * base_g + alpha * base_smoothed
-        if eff_levels >= 3:
-            # Slightly attenuate low-frequency blotchiness in the coarsest shading band L_{N-1}
-            refined_pyr[-2] = refined_pyr[-2] * (1.0 - 0.20 * alpha)
-        ops.append(f"low_freq_lighting_envelope_harmonize_blend_{alpha:.2f}")
+        base_gate = _compute_edge_halo_damping_gate(base_g, edge_threshold=10.0)
+        alpha = float(np.clip(cfg.lighting_smooth_blend, 0.0, 0.65))
+        refined_pyr[-1] = base_g + alpha * base_gate * (base_smoothed - base_g)
+        ops.append(f"edge_preserving_low_freq_lighting_harmonize_{alpha:.2f}")
 
     # 2. High-frequency dermal pore (L_0) and meso-structure (L_1) refinement with Edge-Halo Suppression
     tau = max(1.0, float(cfg.halo_soft_clamp_tau))
@@ -428,16 +484,12 @@ def frequency_separate_portrait_lighting(
             ops.append(f"band_L{band_idx}_halo_gated_detail_gain_{gain:.2f}")
 
     reconstructed = reconstruct_from_laplacian_pyramid(refined_pyr, use_cv2=use_cv2)
+    reconstructed = np.clip(reconstructed, 0.0, 255.0)
+    ops.append("halo_gated_multiband_reconstruct")
 
-    # 3. Local optical envelope protection against step-edge ringing
-    min_env = np.asarray(image.filter(ImageFilter.MinFilter(size=3)), dtype=np.float64) - 2.5
-    max_env = np.asarray(image.filter(ImageFilter.MaxFilter(size=3)), dtype=np.float64) + 2.5
-    reconstructed = np.clip(reconstructed, np.maximum(0.0, min_env), np.minimum(255.0, max_env))
-    ops.append("optical_envelope_halo_clamp")
-
-    # 4. Strict flat-black studio backdrop lock
+    # 3. Strict flat-black studio backdrop lock
     if cfg.protect_flat_black:
-        src_u8 = np.asarray(image, dtype=np.uint8)
+        src_u8 = np.asarray(working_img, dtype=np.uint8)
         black_mask = np.max(src_u8, axis=2) <= cfg.flat_black_threshold
         if np.any(black_mask):
             reconstructed[black_mask] = 0.0
@@ -446,9 +498,12 @@ def frequency_separate_portrait_lighting(
     out_u8 = np.clip(np.rint(reconstructed), 0, 255).astype(np.uint8)
     out_img = Image.fromarray(out_u8, mode="RGB")
 
-    spec_metrics = evaluate_laplacian_frequency_spectrum(out_img, reference=image, levels=eff_levels)
+    spec_metrics = evaluate_laplacian_frequency_spectrum(out_img, reference=working_img, levels=eff_levels)
     meta = {
         "config": cfg.to_dict(),
+        "input_dimensions": list(image.size),
+        "output_dimensions": list(out_img.size),
+        "output_megapixels": round((out_img.size[0] * out_img.size[1]) / 1_000_000.0, 2),
         "operations": ops,
         "spectrum": spec_metrics,
     }

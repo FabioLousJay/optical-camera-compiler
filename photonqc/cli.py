@@ -153,10 +153,11 @@ def main(argv: list[str] | None = None) -> None:
     )
     fs.add_argument("--input", type=Path, required=True)
     fs.add_argument("--output", type=Path, required=True)
+    fs.add_argument("--scale", type=int, default=1, help="Optional super-resolution scale factor (e.g. 4 for 4x MPS Neural SR + Pyramid)")
     fs.add_argument("--levels", type=int, default=4)
-    fs.add_argument("--lighting-blend", type=float, default=0.28)
-    fs.add_argument("--pore-gain", type=float, default=1.10)
-    fs.add_argument("--meso-gain", type=float, default=1.04)
+    fs.add_argument("--lighting-blend", type=float, default=0.15)
+    fs.add_argument("--pore-gain", type=float, default=1.25)
+    fs.add_argument("--meso-gain", type=float, default=1.15)
 
     args = parser.parse_args(argv)
 
@@ -377,6 +378,7 @@ def main(argv: list[str] | None = None) -> None:
             rgb_in = src_im.convert("RGB")
         cfg = LaplacianPyramidConfig(
             levels=args.levels,
+            scale_factor=args.scale,
             lighting_smooth_blend=args.lighting_blend,
             pore_band_gain=args.pore_gain,
             meso_band_gain=args.meso_gain,
