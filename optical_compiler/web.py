@@ -6057,6 +6057,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const copyBtn = document.getElementById('btnCopyPhotonQCReport');
       if (copyBtn) copyBtn.style.display = 'inline-block';
       const box = document.getElementById('photonqcStatusBox');
+      const outFile = (rawObj && (rawObj.output_path || rawObj.output)) ? (rawObj.output_path || rawObj.output) : '';
+      const downloadBarHtml = outFile ? `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 6px; padding: 0.5rem 0.7rem;">
+          <span style="font-size: 0.71rem; color: var(--accent-green); font-weight: 700;">✨ Master Image Saved Ready!</span>
+          <div style="display: flex; gap: 0.45rem;">
+            <a href="/api/photonqc/file?path=${encodeURIComponent(outFile)}" target="_blank" style="background: rgba(6, 182, 212, 0.2); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); text-decoration: none; padding: 0.28rem 0.65rem; border-radius: 4px; font-size: 0.69rem; font-weight: 700;">👁️ View Image</a>
+            <a href="/api/photonqc/file?path=${encodeURIComponent(outFile)}&amp;download=1" download style="background: var(--accent-green); color: #000; text-decoration: none; padding: 0.28rem 0.65rem; border-radius: 4px; font-size: 0.69rem; font-weight: 700;">💾 Download PNG</a>
+          </div>
+        </div>
+      ` : '';
       box.innerHTML = `
         <div style="width: 100%; text-align: left; display: flex; flex-direction: column; gap: 0.75rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
@@ -6065,12 +6075,64 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             </span>
             <span class="brand-tag">PHOTONQC v1.0</span>
           </div>
+          ${downloadBarHtml}
           ${summaryHtml}
           <div style="font-size: 0.68rem; color: var(--text-muted); max-height: 170px; overflow-y: auto; background: #000; padding: 0.55rem; border-radius: 4px; border: 1px solid var(--border-subtle);">
             <pre style="margin: 0; white-space: pre-wrap;">${JSON.stringify(rawObj, null, 2)}</pre>
           </div>
         </div>
       `;
+    }
+
+    let activeBrowseTargetInputId = null;
+    function triggerStudioFileBrowse(inputId) {
+      activeBrowseTargetInputId = inputId;
+      const picker = document.getElementById('globalStudioFilePicker');
+      if (picker) {
+        picker.value = '';
+        picker.click();
+      }
+    }
+
+    async function handleStudioFilePicked(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file || !activeBrowseTargetInputId) return;
+      const targetEl = document.getElementById(activeBrowseTargetInputId);
+      if (!targetEl) return;
+      const prevVal = targetEl.value;
+      targetEl.value = '⏳ Uploading ' + file.name + '...';
+      try {
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        const res = await fetch('/api/photonqc/upload-local-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, data_url: dataUrl })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+        targetEl.value = data.saved_path;
+        // Also auto-suggest an output filename matching the uploaded stem
+        const stem = (data.stem || 'image');
+        const autoOutMap = {
+          pqcPyrInput: ['pqcPyrOutput', `outputs/${stem}_pyramid_refined.png`],
+          pqcExportInput: ['pqcExportOutput', `outputs/${stem}_photonqc_export.png`],
+          pqcRestoreInput: ['pqcRestoreOutput', `outputs/${stem}_photonqc_restored.png`]
+        };
+        if (autoOutMap[activeBrowseTargetInputId]) {
+          const [outId, suggested] = autoOutMap[activeBrowseTargetInputId];
+          const outEl = document.getElementById(outId);
+          if (outEl) outEl.value = suggested;
+        }
+        showToast('Loaded file: ' + file.name);
+      } catch (err) {
+        targetEl.value = prevVal;
+        alert('Could not load file: ' + err.message);
+      }
     }
 
     function copyPhotonQCReport() {
@@ -6600,7 +6662,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div id="pqcPanel_export" style="display: flex; flex-direction: column; gap: 0.75rem;">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
                 <div>
-                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Source Image Path *</label>
+                  <label class="spec-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                    <span>Source Image Path *</span>
+                    <button type="button" onclick="triggerStudioFileBrowse('pqcExportInput')" style="background:rgba(6,182,212,0.18); border:1px solid var(--accent-cyan); color:var(--accent-cyan); border-radius:4px; padding:1px 7px; font-size:0.65rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">📂 Browse Mac...</button>
+                  </label>
                   <input type="text" id="pqcExportInput" value="examples/rights-cleared-example.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
                 </div>
                 <div>
@@ -6699,7 +6764,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div id="pqcPanel_restore" style="display: none; flex-direction: column; gap: 0.75rem;">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
                 <div>
-                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Source Image Path *</label>
+                  <label class="spec-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                    <span>Source Image Path *</span>
+                    <button type="button" onclick="triggerStudioFileBrowse('pqcRestoreInput')" style="background:rgba(6,182,212,0.18); border:1px solid var(--accent-cyan); color:var(--accent-cyan); border-radius:4px; padding:1px 7px; font-size:0.65rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">📂 Browse Mac...</button>
+                  </label>
                   <input type="text" id="pqcRestoreInput" value="examples/rights-cleared-example.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
                 </div>
                 <div>
@@ -6885,7 +6953,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
                 <div>
-                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Primary Portrait / Source Image A *</label>
+                  <label class="spec-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                    <span>Primary Portrait / Source Image A *</span>
+                    <button type="button" onclick="triggerStudioFileBrowse('pqcPyrInput')" style="background:rgba(6,182,212,0.18); border:1px solid var(--accent-cyan); color:var(--accent-cyan); border-radius:4px; padding:1px 7px; font-size:0.65rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">📂 Browse Mac...</button>
+                  </label>
                   <input type="text" id="pqcPyrInput" value="examples/rights-cleared-example.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
                 </div>
                 <div>
@@ -6915,11 +6986,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
                 <div>
-                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Secondary Image B (Optional — For Seamless Multi-Band Blend)</label>
+                  <label class="spec-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                    <span>Secondary Image B (Optional)</span>
+                    <button type="button" onclick="triggerStudioFileBrowse('pqcPyrSecondInput')" style="background:rgba(139,92,246,0.18); border:1px solid #a78bfa; color:#c4b5fd; border-radius:4px; padding:1px 7px; font-size:0.65rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">📂 Browse Mac...</button>
+                  </label>
                   <input type="text" id="pqcPyrSecondInput" placeholder="Leave blank to test self-blend or provide 2nd image path" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
                 </div>
                 <div>
-                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Blend Mask Image (Optional — Defaults to 50/50 Split)</label>
+                  <label class="spec-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                    <span>Blend Mask Image (Optional)</span>
+                    <button type="button" onclick="triggerStudioFileBrowse('pqcPyrMaskInput')" style="background:rgba(139,92,246,0.18); border:1px solid #a78bfa; color:#c4b5fd; border-radius:4px; padding:1px 7px; font-size:0.65rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">📂 Browse Mac...</button>
+                  </label>
                   <input type="text" id="pqcPyrMaskInput" placeholder="Optional grayscale mask PNG path" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
                 </div>
               </div>
@@ -6949,6 +7026,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       </div>
     </div>
   </div>
+  <input type="file" id="globalStudioFilePicker" accept="image/*" style="display:none;" onchange="handleStudioFilePicked(event)">
 </body>
 </html>
 """
@@ -7046,6 +7124,40 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
             return
 
+        if parsed_path == "/api/photonqc/file":
+            try:
+                from pathlib import Path
+                from urllib.parse import parse_qs, urlparse
+
+                qs = parse_qs(urlparse(self.path).query)
+                raw_path = (qs.get("path") or [""])[0]
+                if not raw_path:
+                    self.send_error(HTTPStatus.BAD_REQUEST, "Missing path query parameter")
+                    return
+                fp = Path(raw_path).expanduser().resolve()
+                if not fp.is_file() or fp.suffix.lower() not in (".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp"):
+                    self.send_error(HTTPStatus.NOT_FOUND, "Image file not found")
+                    return
+                mime_map = {
+                    ".png": "image/png",
+                    ".jpg": "image/jpeg",
+                    ".jpeg": "image/jpeg",
+                    ".tif": "image/tiff",
+                    ".tiff": "image/tiff",
+                    ".webp": "image/webp",
+                }
+                data_bytes = fp.read_bytes()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", mime_map.get(fp.suffix.lower(), "application/octet-stream"))
+                self.send_header("Content-Length", str(len(data_bytes)))
+                if (qs.get("download") or ["0"])[0] == "1":
+                    self.send_header("Content-Disposition", f'attachment; filename="{fp.name}"')
+                self.end_headers()
+                self.wfile.write(data_bytes)
+            except Exception as err:
+                self.send_error(HTTPStatus.BAD_REQUEST, str(err))
+            return
+
         self.send_error(HTTPStatus.NOT_FOUND, "Not Found")
 
     def do_POST(self) -> None:
@@ -7068,6 +7180,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             "/api/photonqc/benchmark",
             "/api/photonqc/frequency-separate",
             "/api/photonqc/pyramid-blend",
+            "/api/photonqc/upload-local-image",
         )
         if parsed_path not in allowed_post_paths:
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
@@ -7079,6 +7192,39 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             body = json.loads(body_bytes.decode("utf-8"))
         except Exception as err:
             self._send_json({"error": f"Invalid JSON payload: {err}"}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/photonqc/upload-local-image":
+            try:
+                import base64
+                import re
+                from pathlib import Path
+
+                raw_name = str(body.get("filename") or "uploaded_image.png")
+                safe_name = re.sub(r"[^A-Za-z0-9._-]", "_", Path(raw_name).name)
+                if not safe_name:
+                    safe_name = "uploaded_image.png"
+                data_url = str(body.get("data_url") or "")
+                if "," in data_url:
+                    _, b64_payload = data_url.split(",", 1)
+                else:
+                    b64_payload = data_url
+                raw_bytes = base64.b64decode(b64_payload)
+                repo_root = Path(__file__).resolve().parent.parent
+                uploads_dir = repo_root / "uploads"
+                uploads_dir.mkdir(parents=True, exist_ok=True)
+                dest_p = uploads_dir / safe_name
+                dest_p.write_bytes(raw_bytes)
+                self._send_json(
+                    {
+                        "saved_path": f"uploads/{safe_name}",
+                        "absolute_path": str(dest_p),
+                        "stem": dest_p.stem,
+                        "size_bytes": len(raw_bytes),
+                    }
+                )
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
             return
 
         if parsed_path == "/api/photonqc/export":
