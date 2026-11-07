@@ -6443,13 +6443,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         input_path: inputPath,
         output_path: outputPath,
         scale_factor: parseInt(document.getElementById('pqcPyrScale') ? document.getElementById('pqcPyrScale').value : '4', 10),
-        levels: parseInt(document.getElementById('pqcPyrLevels').value || '4', 10),
-        lighting_smooth_blend: parseFloat(document.getElementById('pqcPyrLightingBlend').value || '0.15'),
-        pore_band_gain: parseFloat(document.getElementById('pqcPyrPoreGain').value || '1.25'),
-        meso_band_gain: parseFloat(document.getElementById('pqcPyrMesoGain').value || '1.15')
+        levels: parseInt(document.getElementById('pqcPyrLevels').value || '5', 10),
+        lighting_smooth_blend: parseFloat(document.getElementById('pqcPyrLightingBlend').value || '0.16'),
+        pore_band_gain: parseFloat(document.getElementById('pqcPyrPoreGain').value || '1.08'),
+        meso_band_gain: parseFloat(document.getElementById('pqcPyrMesoGain').value || '1.10')
       };
       const box = document.getElementById('photonqcStatusBox');
-      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Running Apple Silicon MPS 4X Neural SR + Multi-Band Laplacian Pyramid Frequency Separation...</div>';
+      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Running Lightroom-Grade YCbCr Optical 4X + Multi-Band Laplacian Pyramid Frequency Separation...</div>';
       try {
         const res = await fetch('/api/photonqc/frequency-separate', {
           method: 'POST',
@@ -6972,26 +6972,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 <div>
                   <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Super-Resolution Scale</label>
                   <select id="pqcPyrScale" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.55rem; color:var(--accent-green); font-family:var(--font-mono); font-size:0.71rem; font-weight:700;">
-                    <option value="4" selected>4x Neural SR + Pyramid (MPS 16x Pixels)</option>
-                    <option value="2">2x Neural SR + Pyramid (4x Pixels)</option>
+                    <option value="4" selected>4x Lightroom-Grade YCbCr Optical + Pyramid (16x Pixels)</option>
+                    <option value="2">2x Lightroom-Grade YCbCr Optical + Pyramid (4x Pixels)</option>
                     <option value="1">1x Native Resolution (No Upscale)</option>
                   </select>
                 </div>
                 <div>
                   <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Levels</label>
-                  <input type="number" min="1" max="8" id="pqcPyrLevels" value="4" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:var(--accent-cyan); font-family:var(--font-mono); font-size:0.73rem;">
+                  <input type="number" min="1" max="8" id="pqcPyrLevels" value="5" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:var(--accent-cyan); font-family:var(--font-mono); font-size:0.73rem;">
                 </div>
                 <div>
                   <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Light Smooth</label>
-                  <input type="number" step="0.02" id="pqcPyrLightingBlend" value="0.15" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                  <input type="number" step="0.02" id="pqcPyrLightingBlend" value="0.16" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
                 </div>
                 <div>
                   <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Pore (L0)</label>
-                  <input type="number" step="0.05" id="pqcPyrPoreGain" value="1.25" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                  <input type="number" step="0.02" id="pqcPyrPoreGain" value="1.08" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
                 </div>
                 <div>
                   <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Meso (L1)</label>
-                  <input type="number" step="0.05" id="pqcPyrMesoGain" value="1.15" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                  <input type="number" step="0.02" id="pqcPyrMesoGain" value="1.10" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
                 </div>
               </div>
 
@@ -7602,12 +7602,12 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     rgb_in = im.convert("RGB")
 
                 cfg = LaplacianPyramidConfig(
-                    levels=int(body.get("levels", 4)),
+                    levels=int(body.get("levels", 5)),
                     scale_factor=int(body.get("scale_factor", 1)),
-                    use_neural_sr=bool(body.get("use_neural_sr", True)),
-                    lighting_smooth_blend=float(body.get("lighting_smooth_blend", 0.15)),
-                    pore_band_gain=float(body.get("pore_band_gain", 1.25)),
-                    meso_band_gain=float(body.get("meso_band_gain", 1.15)),
+                    use_neural_sr=bool(body.get("use_neural_sr", False)),
+                    lighting_smooth_blend=float(body.get("lighting_smooth_blend", 0.16)),
+                    pore_band_gain=float(body.get("pore_band_gain", 1.08)),
+                    meso_band_gain=float(body.get("meso_band_gain", 1.10)),
                 )
                 out_img, meta = frequency_separate_portrait_lighting(rgb_in, config=cfg)
                 out_p.parent.mkdir(parents=True, exist_ok=True)
