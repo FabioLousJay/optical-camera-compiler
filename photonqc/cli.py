@@ -20,8 +20,18 @@ from .calibration import (
     soft_proof_icc,
     viewing_distance_for_print,
 )
-from .evaluation import evaluate_flat_black_background, evaluate_heart_gold_case, evaluate_pair
+from .evaluation import (
+    evaluate_flat_black_background,
+    evaluate_heart_gold_case,
+    evaluate_laplacian_frequency_spectrum,
+    evaluate_pair,
+)
 from .export import save_png_verified
+from .pyramids import (
+    LaplacianPyramidConfig,
+    frequency_separate_portrait_lighting,
+    laplacian_pyramid_blend,
+)
 from .report import sha256, verify_and_report
 from .restoration import SourcePreservingRestorer, restore_source_locked
 from .sizing import (
@@ -90,6 +100,12 @@ def main(argv: list[str] | None = None) -> None:
     )
     rest.add_argument("--realesrgan-repo", type=Path, default=None)
     rest.add_argument("--weights", type=Path, default=None)
+    rest.add_argument(
+        "--use-laplacian-pyramid",
+        action="store_true",
+        help="Enable multi-band Laplacian pyramid frequency separation for halo-free lighting & detail refinement",
+    )
+    rest.add_argument("--pyramid-levels", type=int, default=4)
     rest.add_argument("--report-dir", type=Path, default=Path("outputs/restore-report"))
 
     # 4. evaluate
@@ -98,6 +114,7 @@ def main(argv: list[str] | None = None) -> None:
     ev.add_argument("--reference", type=Path, default=None)
     ev.add_argument("--check-heart", action="store_true", help="Run Frontal Red Cubic Heart symmetry/containment check")
     ev.add_argument("--check-flat-black", action="store_true", help="Run flat-black border integrity check")
+    ev.add_argument("--check-pyramids", action="store_true", help="Run Laplacian pyramid multi-band spectrum & edge-halo audit")
     ev.add_argument("--report-dir", type=Path, default=Path("outputs/evaluation"))
 
     # 5. benchmark
@@ -117,6 +134,29 @@ def main(argv: list[str] | None = None) -> None:
     cal.add_argument("--destination-icc", type=Path, default=None)
     cal.add_argument("--series", type=Path, nargs="*", default=None, help="Optional series images to compare against --input as anchor")
     cal.add_argument("--report-dir", type=Path, default=Path("outputs/calibration"))
+
+    # 7. pyramid-blend
+    pb = sub.add_parser(
+        "pyramid-blend",
+        help="Seamless multi-band Laplacian pyramid blend of two images across a soft or binary mask",
+    )
+    pb.add_argument("--image-a", type=Path, required=True, help="Foreground / Region-A RGB image")
+    pb.add_argument("--image-b", type=Path, required=True, help="Background / Region-B RGB image")
+    pb.add_argument("--mask", type=Path, default=None, help="Optional grayscale mask image (defaults to horizontal 50/50 split)")
+    pb.add_argument("--output", type=Path, required=True, help="Output PNG path")
+    pb.add_argument("--levels", type=int, default=5, help="Number of Laplacian pyramid decomposition levels")
+
+    # 8. frequency-separate
+    fs = sub.add_parser(
+        "frequency-separate",
+        help="Separate low-frequency portrait lighting from high-frequency dermal detail without edge halos",
+    )
+    fs.add_argument("--input", type=Path, required=True)
+    fs.add_argument("--output", type=Path, required=True)
+    fs.add_argument("--levels", type=int, default=4)
+    fs.add_argument("--lighting-blend", type=float, default=0.28)
+    fs.add_argument("--pore-gain", type=float, default=1.10)
+    fs.add_argument("--meso-gain", type=float, default=1.04)
 
     args = parser.parse_args(argv)
 
@@ -257,6 +297,10 @@ def main(argv: list[str] | None = None) -> None:
             width_px=args.width_px,
             height_px=args.height_px,
         )
+        restorer = SourcePreservingRestorer(
+            use_laplacian_pyramid=bool(args.use_laplacian_pyramid),
+            pyramid_levels=int(args.pyramid_levels),
+        )
         report = restore_source_locked(
             input_path=args.input,
             output_path=args.output,
@@ -267,6 +311,7 @@ def main(argv: list[str] | None = None) -> None:
             backend=args.backend,
             repo=args.realesrgan_repo,
             weights=args.weights,
+            restorer=restorer,
             report_dir=args.report_dir,
         )
         print(f"PASS RESTORE {report['pixels']} {report['size_mib']:.3f} MiB {report['sr_backend']}")
@@ -280,9 +325,68 @@ def main(argv: list[str] | None = None) -> None:
                 metrics["heart_gold_case"] = evaluate_heart_gold_case(cand_im)
             if args.check_flat_black:
                 metrics["flat_black_background"] = evaluate_flat_black_background(cand_im)
+            if args.check_pyramids:
+                ref_im = None
+                if args.reference and args.reference.is_file():
+                    with Image.open(args.reference) as r_im:
+                        r_im.load()
+                        ref_im = r_im.copy()
+                metrics["laplacian_pyramid_spectrum"] = evaluate_laplacian_frequency_spectrum(
+                    cand_im, reference=ref_im
+                )
         args.report_dir.mkdir(parents=True, exist_ok=True)
         (args.report_dir / "evaluation.json").write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
         print(json.dumps(metrics, indent=2))
+        return
+
+    if args.operation == "pyramid-blend":
+        import numpy as np
+
+        validate_input_security(args.image_a)
+        validate_input_security(args.image_b)
+        with Image.open(args.image_a) as im_a, Image.open(args.image_b) as im_b:
+            im_a.load()
+            im_b.load()
+            rgb_a = im_a.convert("RGB")
+            rgb_b = im_b.convert("RGB")
+            if rgb_b.size != rgb_a.size:
+                rgb_b = rgb_b.resize(rgb_a.size, Image.Resampling.LANCZOS)
+            if args.mask is not None:
+                validate_input_security(args.mask)
+                with Image.open(args.mask) as m_im:
+                    m_im.load()
+                    mask_in: Image.Image | np.ndarray = m_im.copy()
+            else:
+                w, h = rgb_a.size
+                mask_arr = np.zeros((h, w), dtype=np.float64)
+                mask_arr[:, : w // 2] = 1.0
+                mask_in = mask_arr
+
+            blended, meta = laplacian_pyramid_blend(rgb_a, rgb_b, mask_in, levels=args.levels)
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            blended.save(args.output, format="PNG")
+            meta["output_path"] = str(args.output)
+            meta["output_sha256"] = sha256(args.output)
+            print(json.dumps(meta, indent=2))
+        return
+
+    if args.operation == "frequency-separate":
+        validate_input_security(args.input)
+        with Image.open(args.input) as src_im:
+            src_im.load()
+            rgb_in = src_im.convert("RGB")
+        cfg = LaplacianPyramidConfig(
+            levels=args.levels,
+            lighting_smooth_blend=args.lighting_blend,
+            pore_band_gain=args.pore_gain,
+            meso_band_gain=args.meso_gain,
+        )
+        refined, meta = frequency_separate_portrait_lighting(rgb_in, config=cfg)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        refined.save(args.output, format="PNG")
+        meta["output_path"] = str(args.output)
+        meta["output_sha256"] = sha256(args.output)
+        print(json.dumps(meta, indent=2))
         return
 
     if args.operation == "benchmark":

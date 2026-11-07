@@ -6005,7 +6005,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     function switchPhotonQCTab(tabName) {
       activePhotonQCTab = tabName;
-      const tabs = ['export', 'restore', 'evaluate', 'calibrate', 'benchmark'];
+      const tabs = ['export', 'restore', 'evaluate', 'calibrate', 'benchmark', 'pyramids'];
       tabs.forEach(t => {
         const btn = document.getElementById('pqcTabBtn_' + t);
         const panel = document.getElementById('pqcPanel_' + t);
@@ -6022,7 +6022,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     function fillPhotonQCCanonicalAsset() {
       const examplePath = 'examples/rights-cleared-example.png';
-      ['pqcExportInput', 'pqcRestoreInput', 'pqcEvalCandidate', 'pqcCalInput', 'pqcBenchGt'].forEach(id => {
+      ['pqcExportInput', 'pqcRestoreInput', 'pqcEvalCandidate', 'pqcCalInput', 'pqcBenchGt', 'pqcPyrInput'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = examplePath;
       });
@@ -6158,7 +6158,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         unsharp_percent: parseInt(document.getElementById('pqcRestorePercent').value || '75', 10),
         unsharp_threshold: parseInt(document.getElementById('pqcRestoreThreshold').value || '2', 10),
         protect_smooth_gradients: document.getElementById('pqcRestoreProtectGradients').checked,
-        protect_flat_black: document.getElementById('pqcRestoreProtectBlack').checked
+        protect_flat_black: document.getElementById('pqcRestoreProtectBlack').checked,
+        use_laplacian_pyramid: document.getElementById('pqcRestoreLaplacian') ? document.getElementById('pqcRestoreLaplacian').checked : false
       };
       const box = document.getElementById('photonqcStatusBox');
       box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Running Source-Locked Restoration &amp; Flat-Black Lock...</div>';
@@ -6197,6 +6198,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const refPath = document.getElementById('pqcEvalReference').value.trim() || null;
       const checkHeart = document.getElementById('pqcEvalHeart').checked;
       const checkFlatBlack = document.getElementById('pqcEvalFlatBlack').checked;
+      const checkPyramids = document.getElementById('pqcEvalPyramids') ? document.getElementById('pqcEvalPyramids').checked : true;
       const box = document.getElementById('photonqcStatusBox');
       box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Computing Perceptual &amp; Gold-Case Invariant Metrics...</div>';
       try {
@@ -6207,13 +6209,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             candidate_path: candidatePath,
             reference_path: refPath,
             check_heart: checkHeart,
-            check_flat_black: checkFlatBlack
+            check_flat_black: checkFlatBlack,
+            check_pyramids: checkPyramids
           })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Evaluation failed');
         const heart = data.heart_gold_case;
         const fb = data.flat_black_background;
+        const pyr = data.laplacian_pyramid_spectrum;
         const summary = `
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; font-size: 0.74rem;">
             <div><strong>PSNR (dB):</strong> ${data.psnr_db !== null && data.psnr_db !== undefined ? data.psnr_db + ' dB' : 'Requires aligned GT'}</div>
@@ -6222,9 +6226,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div><strong>Halo Overshoot:</strong> ${data.halo_overshoot_ratio !== undefined ? data.halo_overshoot_ratio : 'N/A'}</div>
             ${heart ? `<div><strong>Heart Symmetry IoU:</strong> <span style="color:${heart.passed ? 'var(--accent-green)' : 'var(--accent-rose)'};">${heart.bilateral_symmetry_iou} (${heart.passed ? 'PASS' : 'FAIL'})</span></div>` : ''}
             ${fb ? `<div><strong>Flat-Black Border:</strong> <span style="color:${fb.passed ? 'var(--accent-green)' : 'var(--accent-rose)'};">Max RGB=${fb.border_max_rgb} (${fb.passed ? 'PASS' : 'FAIL'})</span></div>` : ''}
+            ${pyr ? `<div><strong>Pyramid Invertibility:</strong> <span style="color:var(--accent-cyan);">MSE=${pyr.reconstruction_mse} (${pyr.reconstruction_psnr_db} dB)</span></div>` : ''}
+            ${pyr ? `<div><strong>Edge-Halo Audit:</strong> <span style="color:${pyr.halo_free_certified ? 'var(--accent-green)' : 'var(--accent-rose)'};">Idx=${pyr.edge_halo_overshoot_index} (${pyr.halo_free_certified ? 'HALO-FREE' : 'HALO DETECTED'})</span></div>` : ''}
           </div>
         `;
-        const allOk = (!heart || heart.passed) && (!fb || fb.passed);
+        const allOk = (!heart || heart.passed) && (!fb || fb.passed) && (!pyr || pyr.halo_free_certified);
         renderPhotonQCResult('PERCEPTUAL & GOLD-CASE EVALUATION COMPLETE', allOk, summary, data);
       } catch (err) {
         box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
@@ -6364,6 +6370,97 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
     }
 
+    async function runPhotonQCFrequencySeparate() {
+      const inputPath = document.getElementById('pqcPyrInput').value.trim();
+      const outputPath = document.getElementById('pqcPyrOutput').value.trim();
+      if (!inputPath || !outputPath) {
+        alert('Please provide Source Image Path and Output Path.');
+        return;
+      }
+      const payload = {
+        input_path: inputPath,
+        output_path: outputPath,
+        levels: parseInt(document.getElementById('pqcPyrLevels').value || '4', 10),
+        lighting_smooth_blend: parseFloat(document.getElementById('pqcPyrLightingBlend').value || '0.28'),
+        pore_band_gain: parseFloat(document.getElementById('pqcPyrPoreGain').value || '1.10'),
+        meso_band_gain: parseFloat(document.getElementById('pqcPyrMesoGain').value || '1.04')
+      };
+      const box = document.getElementById('photonqcStatusBox');
+      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Decomposing Multi-Band Laplacian Pyramid &amp; Applying Halo-Free Frequency Separation...</div>';
+      try {
+        const res = await fetch('/api/photonqc/frequency-separate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Frequency separation failed');
+        const spec = data.spectrum || {};
+        const bands = spec.band_rms_energy || {};
+        const bandStr = Object.entries(bands).map(([k, v]) => `<code>${k}=${v}</code>`).join(' • ');
+        const summary = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; font-size: 0.74rem;">
+            <div><strong>Pyramid Levels:</strong> ${spec.levels} Bands (Burt-Adelson 5&times;5)</div>
+            <div><strong>Invertibility PSNR:</strong> <span style="color: var(--accent-cyan);">${spec.reconstruction_psnr_db} dB (MSE=${spec.reconstruction_mse})</span></div>
+            <div><strong>Halo Overshoot Index:</strong> ${spec.edge_halo_overshoot_index}</div>
+            <div><strong>Halo-Free Certified:</strong> <span style="color: ${spec.halo_free_certified ? 'var(--accent-green)' : 'var(--accent-rose)'};">${spec.halo_free_certified ? '✓ YES (ZERO EDGE HALOS)' : '⚠️ NO'}</span></div>
+          </div>
+          <div style="background: var(--bg-surface); padding: 0.45rem; border-radius: 4px; border: 1px solid var(--border-subtle); font-size: 0.7rem; word-break: break-all;">
+            <div><strong>Band Energy:</strong> ${bandStr}</div>
+            <div style="margin-top:3px;"><strong>Output:</strong> <code>${data.output_path}</code></div>
+            <div><strong>SHA-256:</strong> <code>${data.output_sha256}</code></div>
+          </div>
+        `;
+        renderPhotonQCResult('LAPLACIAN PYRAMID FREQUENCY SEPARATION COMPLETE', Boolean(spec.halo_free_certified), summary, data);
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      }
+    }
+
+    async function runPhotonQCPyramidBlend() {
+      const imageA = document.getElementById('pqcPyrInput').value.trim();
+      const imageB = document.getElementById('pqcPyrSecondInput').value.trim() || imageA;
+      const maskPath = document.getElementById('pqcPyrMaskInput').value.trim() || null;
+      const outputPath = document.getElementById('pqcPyrOutput').value.trim();
+      if (!imageA || !outputPath) {
+        alert('Please provide Source Image A and Output Path.');
+        return;
+      }
+      const payload = {
+        image_a: imageA,
+        image_b: imageB,
+        mask_path: maskPath,
+        output_path: outputPath,
+        levels: parseInt(document.getElementById('pqcPyrLevels').value || '5', 10)
+      };
+      const box = document.getElementById('photonqcStatusBox');
+      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Executing Burt &amp; Adelson Multi-Band Laplacian Pyramid Seamless Blend...</div>';
+      try {
+        const res = await fetch('/api/photonqc/pyramid-blend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Pyramid blend failed');
+        const summary = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; font-size: 0.74rem;">
+            <div><strong>Dimensions:</strong> ${(data.dimensions || []).join('x')}</div>
+            <div><strong>Pyramid Levels:</strong> ${data.levels} Bands</div>
+            <div><strong>Naive Seam Gradient:</strong> ${data.seam_gradient_naive}</div>
+            <div><strong>Pyramid Seam Gradient:</strong> <span style="color: var(--accent-green);">${data.seam_gradient_pyramid} (-${data.seam_harshness_reduction_pct}% seam harshness)</span></div>
+          </div>
+          <div style="background: var(--bg-surface); padding: 0.45rem; border-radius: 4px; border: 1px solid var(--border-subtle); font-size: 0.7rem; word-break: break-all;">
+            <div><strong>Output:</strong> <code>${data.output_path}</code></div>
+            <div><strong>SHA-256:</strong> <code>${data.output_sha256}</code></div>
+          </div>
+        `;
+        renderPhotonQCResult('SEAMLESS MULTI-BAND LAPLACIAN PYRAMID BLEND COMPLETE', true, summary, data);
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      }
+    }
+
     window.onload = init;
   </script>
 
@@ -6486,13 +6583,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <span>⚡ Initializing PhotonQC Hardware &amp; Governance Telemetry...</span>
         </div>
 
-        <!-- 5-Tab Bar -->
+        <!-- 6-Tab Bar -->
         <div class="pqc-tabs">
           <button type="button" class="pqc-tab active" id="pqcTabBtn_export" onclick="switchPhotonQCTab('export')">🚀 1. Neural SR &amp; Print Export</button>
           <button type="button" class="pqc-tab" id="pqcTabBtn_restore" onclick="switchPhotonQCTab('restore')">🛡️ 2. Source-Locked Restoration</button>
           <button type="button" class="pqc-tab" id="pqcTabBtn_evaluate" onclick="switchPhotonQCTab('evaluate')">📊 3. Perceptual &amp; Gold-Case QC</button>
           <button type="button" class="pqc-tab" id="pqcTabBtn_calibrate" onclick="switchPhotonQCTab('calibrate')">🎨 4. ICC Calibration &amp; Series Cohesion</button>
           <button type="button" class="pqc-tab" id="pqcTabBtn_benchmark" onclick="switchPhotonQCTab('benchmark')">🔬 5. SR Degradation Benchmark</button>
+          <button type="button" class="pqc-tab" id="pqcTabBtn_pyramids" onclick="switchPhotonQCTab('pyramids')">🔺 6. Laplacian Pyramids &amp; Frequency Lab</button>
         </div>
 
         <div style="display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 1.25rem;">
@@ -6658,6 +6756,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <label class="check-item" style="font-size:0.73rem;"><input type="checkbox" id="pqcRestoreProtectGradients" checked> Protect Smooth Gradients</label>
                 <label class="check-item" style="font-size:0.73rem;"><input type="checkbox" id="pqcRestoreProtectBlack" checked> Flat-Black #000000 Zero-Lock</label>
+                <label class="check-item" style="font-size:0.73rem; color:var(--accent-cyan);"><input type="checkbox" id="pqcRestoreLaplacian" checked> Multi-Band Laplacian Pyramid Frequency Separation (Halo-Free)</label>
               </div>
 
               <button type="button" onclick="runPhotonQCRestore()" style="width:100%; background:linear-gradient(135deg, #059669, #10b981); border:none; border-radius:6px; padding:0.72rem; color:#fff; font-weight:700; font-size:0.8rem; cursor:pointer; letter-spacing:0.04em;">
@@ -6685,6 +6784,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 <label class="check-item" style="font-size:0.73rem;">
                   <input type="checkbox" id="pqcEvalFlatBlack" checked>
                   <span>Flat-Black Perimeter Border Integrity Check (Max Border RGB == 0, Exact Zero Fraction == 1.0)</span>
+                </label>
+                <label class="check-item" style="font-size:0.73rem; color:var(--accent-cyan);">
+                  <input type="checkbox" id="pqcEvalPyramids" checked>
+                  <span>Multi-Band Laplacian Pyramid Spectrum &amp; Step-Edge Halo Overshoot Audit (Certify Halo-Free &le; 0.15)</span>
                 </label>
               </div>
 
@@ -6771,6 +6874,64 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               <button type="button" onclick="runPhotonQCBenchmark()" style="width:100%; background:linear-gradient(135deg, #7c3aed, #2563eb); border:none; border-radius:6px; padding:0.72rem; color:#fff; font-weight:700; font-size:0.8rem; cursor:pointer; letter-spacing:0.04em;">
                 🔬 EXECUTE CONTROLLED DEGRADATION SR BENCHMARK &amp; CROP PANEL
               </button>
+            </div>
+
+            <!-- TAB 6: LAPLACIAN PYRAMIDS & FREQUENCY SEPARATION LAB -->
+            <div id="pqcPanel_pyramids" style="display: none; flex-direction: column; gap: 0.75rem;">
+              <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 6px; padding: 0.65rem 0.8rem; font-size: 0.71rem; color: var(--text-secondary);">
+                <strong style="color: var(--accent-cyan);">🔺 Burt &amp; Adelson (1983) / OpenCV 5&times;5 Multi-Band Laplacian Pyramid Engine:</strong>
+                Separates low-frequency illumination envelopes (<code>G_N</code>) from high-frequency epidermal pore &amp; hair bands (<code>L_0, L_1</code>) to harmonize synthetic portrait lighting and blend composites cleanly <strong>with zero step-edge halos</strong>.
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Primary Portrait / Source Image A *</label>
+                  <input type="text" id="pqcPyrInput" value="examples/rights-cleared-example.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Output PNG Path *</label>
+                  <input type="text" id="pqcPyrOutput" value="outputs/photonqc_pyramid_out.png" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.55rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Pyramid Levels</label>
+                  <input type="number" min="1" max="8" id="pqcPyrLevels" value="4" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.6rem; color:var(--accent-cyan); font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Lighting Smooth</label>
+                  <input type="number" step="0.02" id="pqcPyrLightingBlend" value="0.28" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.6rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Pore Gain (L0)</label>
+                  <input type="number" step="0.02" id="pqcPyrPoreGain" value="1.10" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.6rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Meso Gain (L1)</label>
+                  <input type="number" step="0.02" id="pqcPyrMesoGain" value="1.04" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.6rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Secondary Image B (Optional — For Seamless Multi-Band Blend)</label>
+                  <input type="text" id="pqcPyrSecondInput" placeholder="Leave blank to test self-blend or provide 2nd image path" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Blend Mask Image (Optional — Defaults to 50/50 Split)</label>
+                  <input type="text" id="pqcPyrMaskInput" placeholder="Optional grayscale mask PNG path" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.7rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <button type="button" onclick="runPhotonQCFrequencySeparate()" style="background:linear-gradient(135deg, #06b6d4, #3b82f6); border:none; border-radius:6px; padding:0.72rem; color:#000; font-weight:700; font-size:0.75rem; cursor:pointer;">
+                  🔺 RUN HALO-FREE FREQUENCY SEPARATION
+                </button>
+                <button type="button" onclick="runPhotonQCPyramidBlend()" style="background:linear-gradient(135deg, #8b5cf6, #ec4899); border:none; border-radius:6px; padding:0.72rem; color:#fff; font-weight:700; font-size:0.75rem; cursor:pointer;">
+                  🧬 RUN SEAMLESS MULTI-BAND PYRAMID BLEND
+                </button>
+              </div>
             </div>
           </div>
 
@@ -6905,6 +7066,8 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             "/api/photonqc/inspect",
             "/api/photonqc/calibrate",
             "/api/photonqc/benchmark",
+            "/api/photonqc/frequency-separate",
+            "/api/photonqc/pyramid-blend",
         )
         if parsed_path not in allowed_post_paths:
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
@@ -7072,6 +7235,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     unsharp_radius=float(body.get("unsharp_radius", 1.6)),
                     unsharp_percent=int(body.get("unsharp_percent", 75)),
                     unsharp_threshold=int(body.get("unsharp_threshold", 2)),
+                    use_laplacian_pyramid=bool(body.get("use_laplacian_pyramid", False)),
                 )
                 report_dir = Path(body.get("report_dir", out_p.parent / "photonqc_restore_report")).expanduser().resolve()
                 rep = restore_source_locked(
@@ -7102,6 +7266,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 from photonqc.evaluation import (
                     evaluate_flat_black_background,
                     evaluate_heart_gold_case,
+                    evaluate_laplacian_frequency_spectrum,
                     evaluate_pair,
                 )
 
@@ -7115,6 +7280,15 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                         metrics["heart_gold_case"] = evaluate_heart_gold_case(cand_im)
                     if bool(body.get("check_flat_black", False)):
                         metrics["flat_black_background"] = evaluate_flat_black_background(cand_im)
+                    if bool(body.get("check_pyramids", False)):
+                        ref_im = None
+                        if ref_p and ref_p.is_file():
+                            with Image.open(ref_p) as r_im:
+                                r_im.load()
+                                ref_im = r_im.copy()
+                        metrics["laplacian_pyramid_spectrum"] = evaluate_laplacian_frequency_spectrum(
+                            cand_im, reference=ref_im
+                        )
                 self._send_json(metrics)
             except Exception as err:
                 self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
@@ -7242,6 +7416,102 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     weights_path=weights_arg,
                 )
                 self._send_json(summary)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/photonqc/frequency-separate":
+            input_str = body.get("input_path") or body.get("input")
+            output_str = body.get("output_path") or body.get("output")
+            if not input_str or not output_str:
+                self._send_json(
+                    {"error": "Missing required 'input_path' or 'output_path'"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+                return
+            try:
+                from pathlib import Path
+                from PIL import Image
+                from photonqc.pyramids import LaplacianPyramidConfig, frequency_separate_portrait_lighting
+                from photonqc.report import sha256
+                from photonqc.sizing import validate_input_security
+
+                in_p = Path(input_str).expanduser().resolve()
+                out_p = Path(output_str).expanduser().resolve()
+                validate_input_security(in_p)
+
+                with Image.open(in_p) as im:
+                    im.load()
+                    rgb_in = im.convert("RGB")
+
+                cfg = LaplacianPyramidConfig(
+                    levels=int(body.get("levels", 4)),
+                    lighting_smooth_blend=float(body.get("lighting_smooth_blend", 0.28)),
+                    pore_band_gain=float(body.get("pore_band_gain", 1.10)),
+                    meso_band_gain=float(body.get("meso_band_gain", 1.04)),
+                )
+                out_img, meta = frequency_separate_portrait_lighting(rgb_in, config=cfg)
+                out_p.parent.mkdir(parents=True, exist_ok=True)
+                out_img.save(out_p, format="PNG")
+                meta["output_path"] = str(out_p)
+                meta["output_sha256"] = sha256(out_p)
+                self._send_json(meta)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/photonqc/pyramid-blend":
+            img_a_str = body.get("image_a") or body.get("input_path")
+            out_str = body.get("output_path") or body.get("output")
+            if not img_a_str or not out_str:
+                self._send_json(
+                    {"error": "Missing required 'image_a' or 'output_path'"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+                return
+            try:
+                import numpy as np
+                from pathlib import Path
+                from PIL import Image
+                from photonqc.pyramids import laplacian_pyramid_blend
+                from photonqc.report import sha256
+                from photonqc.sizing import validate_input_security
+
+                in_a = Path(img_a_str).expanduser().resolve()
+                img_b_str = body.get("image_b") or img_a_str
+                in_b = Path(img_b_str).expanduser().resolve()
+                out_p = Path(out_str).expanduser().resolve()
+                validate_input_security(in_a)
+                validate_input_security(in_b)
+
+                with Image.open(in_a) as im_a, Image.open(in_b) as im_b:
+                    im_a.load()
+                    im_b.load()
+                    rgb_a = im_a.convert("RGB")
+                    rgb_b = im_b.convert("RGB")
+                    if rgb_b.size != rgb_a.size:
+                        rgb_b = rgb_b.resize(rgb_a.size, Image.Resampling.LANCZOS)
+
+                mask_str = body.get("mask_path") or body.get("mask")
+                if mask_str:
+                    m_p = Path(mask_str).expanduser().resolve()
+                    validate_input_security(m_p)
+                    with Image.open(m_p) as m_im:
+                        m_im.load()
+                        mask_in: Any = m_im.copy()
+                else:
+                    w, h = rgb_a.size
+                    m_arr = np.zeros((h, w), dtype=np.float64)
+                    m_arr[:, : w // 2] = 1.0
+                    mask_in = m_arr
+
+                levels = int(body.get("levels", 5))
+                blended, meta = laplacian_pyramid_blend(rgb_a, rgb_b, mask_in, levels=levels)
+                out_p.parent.mkdir(parents=True, exist_ok=True)
+                blended.save(out_p, format="PNG")
+                meta["output_path"] = str(out_p)
+                meta["output_sha256"] = sha256(out_p)
+                self._send_json(meta)
             except Exception as err:
                 self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
             return

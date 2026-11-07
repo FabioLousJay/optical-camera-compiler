@@ -15,6 +15,7 @@ from PIL import Image, ImageChops, ImageFilter
 
 from .backends import render_with_provenance
 from .export import save_png_verified
+from .pyramids import LaplacianPyramidConfig, frequency_separate_portrait_lighting
 from .report import sha256, verify_and_report
 from .sizing import check_aspect_ratio, validate_input_security
 
@@ -31,12 +32,18 @@ class SourcePreservingRestorer:
     unsharp_radius: float = 1.6
     unsharp_percent: int = 75
     unsharp_threshold: int = 2
+    use_laplacian_pyramid: bool = False
+    pyramid_levels: int = 4
+    pore_band_gain: float = 1.08
 
     def restore_image(self, image: Image.Image) -> tuple[Image.Image, list[str]]:
         """Apply conservative source-locked cleanup with flat-black and smooth-gradient protection.
 
         Separates smooth low-variance regions (where sensor noise/JPEG blockiness is attenuated)
         from structural step edges (where PSF/resampling blur is selectively de-blurred).
+        When `use_laplacian_pyramid=True`, also runs Multi-Band Laplacian Pyramid Frequency
+        Separation to harmonize low-frequency lighting and refine dermal/textile detail without
+        step-edge overshoot halos.
         """
         if image.mode != "RGB":
             raise ValueError("SourcePreservingRestorer requires RGB mode image.")
@@ -74,6 +81,18 @@ class SourcePreservingRestorer:
             else:
                 working = sharpened
                 ops.append("global_unsharp_mask")
+
+        # 2b. Optional Multi-Band Laplacian Pyramid Frequency Separation (Halo-Free Lighting & Detail)
+        if self.use_laplacian_pyramid:
+            pyr_cfg = LaplacianPyramidConfig(
+                levels=self.pyramid_levels,
+                lighting_smooth_blend=min(0.45, max(0.10, self.deblock_strength * 0.85)),
+                pore_band_gain=self.pore_band_gain,
+                protect_flat_black=self.protect_flat_black,
+                flat_black_threshold=self.flat_black_threshold,
+            )
+            working, pyr_meta = frequency_separate_portrait_lighting(working, config=pyr_cfg)
+            ops.extend(pyr_meta.get("operations", []))
 
         # 3. Strict flat-black preservation (Section 8: preserve genuinely opaque flat black)
         if self.protect_flat_black:

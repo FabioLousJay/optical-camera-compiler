@@ -13,6 +13,8 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
+from .pyramids import evaluate_laplacian_frequency_spectrum
+
 
 def _ensure_compatible_rgb(ref_img: Image.Image, test_img: Image.Image) -> tuple[np.ndarray, np.ndarray]:
     if ref_img.mode != "RGB" or test_img.mode != "RGB":

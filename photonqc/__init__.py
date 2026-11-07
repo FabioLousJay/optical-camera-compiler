@@ -41,6 +41,18 @@ from .evaluation import (
 )
 from .export import MIB, save_png_verified
 from .licensing import MODEL_GOVERNANCE_REGISTRY, ModelLicenseSpec, verify_model_license
+from .pyramids import (
+    LaplacianPyramidConfig,
+    build_gaussian_pyramid,
+    build_laplacian_pyramid,
+    evaluate_laplacian_frequency_spectrum,
+    frequency_separate_portrait_lighting,
+    laplacian_pyramid_antidrift_fusion,
+    laplacian_pyramid_blend,
+    pyr_down,
+    pyr_up,
+    reconstruct_from_laplacian_pyramid,
+)
 from .report import sha256, verify_and_report
 from .restoration import SourcePreservingRestorer, restore_source_locked
 from .sizing import (
@@ -89,4 +101,14 @@ __all__ = [
     "soft_proof_icc",
     "apply_output_sharpening",
     "evaluate_series_cohesion",
+    "LaplacianPyramidConfig",
+    "pyr_down",
+    "pyr_up",
+    "build_gaussian_pyramid",
+    "build_laplacian_pyramid",
+    "reconstruct_from_laplacian_pyramid",
+    "laplacian_pyramid_blend",
+    "frequency_separate_portrait_lighting",
+    "laplacian_pyramid_antidrift_fusion",
+    "evaluate_laplacian_frequency_spectrum",
 ]

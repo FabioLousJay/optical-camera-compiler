@@ -20,7 +20,10 @@ from optical_compiler.adapters import (
     get_adapter,
 )
 from optical_compiler.web import StudioAPIHandler
-from tests.test_web import MockSocket
+try:
+    from tests.test_web import MockSocket
+except ImportError:
+    from test_web import MockSocket  # type: ignore[import-not-found]
 
 
 class TestNewPhotorealisticEngines(unittest.TestCase):

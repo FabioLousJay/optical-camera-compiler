@@ -1000,6 +1000,119 @@ class PhotonQCEvaluationNode:
         return (json.dumps(metrics, indent=2), psnr_val, ssim_val, passed)
 
 
+class PhotonQCLaplacianPyramidNode:
+    """ComfyUI node for Multi-Band Laplacian Pyramid Seamless Blending & Halo-Free Portrait Frequency Separation."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "input_path": ("STRING", {"default": "examples/rights-cleared-example.png"}),
+                "output_path": ("STRING", {"default": "outputs/photonqc_pyramid_out.png"}),
+                "operation_mode": (
+                    [
+                        "frequency_separate_portrait (Halo-Free Lighting & Pore Separation)",
+                        "laplacian_pyramid_blend (Seamless Multi-Band Portrait/Composite Blend)",
+                    ],
+                    {"default": "frequency_separate_portrait (Halo-Free Lighting & Pore Separation)"},
+                ),
+                "pyramid_levels": ("INT", {"default": 4, "min": 1, "max": 8, "step": 1}),
+                "lighting_smooth_blend": ("FLOAT", {"default": 0.28, "min": 0.0, "max": 0.85, "step": 0.02}),
+                "pore_band_gain": ("FLOAT", {"default": 1.10, "min": 0.50, "max": 2.00, "step": 0.02}),
+                "meso_band_gain": ("FLOAT", {"default": 1.04, "min": 0.50, "max": 2.00, "step": 0.02}),
+            },
+            "optional": {
+                "secondary_image_path": ("STRING", {"default": ""}),
+                "mask_image_path": ("STRING", {"default": ""}),
+            },
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "BOOLEAN")
+    RETURN_NAMES = ("output_path", "output_sha256", "telemetry_json", "halo_free_certified")
+    FUNCTION = "execute_pyramid"
+    CATEGORY = "image/photonqc"
+
+    def execute_pyramid(
+        self,
+        input_path: str,
+        output_path: str,
+        operation_mode: str = "frequency_separate_portrait (Halo-Free Lighting & Pore Separation)",
+        pyramid_levels: int = 4,
+        lighting_smooth_blend: float = 0.28,
+        pore_band_gain: float = 1.10,
+        meso_band_gain: float = 1.04,
+        secondary_image_path: str = "",
+        mask_image_path: str = "",
+    ) -> tuple[str, str, str, bool]:
+        import json
+        import numpy as np
+        from PIL import Image
+        from photonqc.pyramids import (
+            LaplacianPyramidConfig,
+            evaluate_laplacian_frequency_spectrum,
+            frequency_separate_portrait_lighting,
+            laplacian_pyramid_blend,
+        )
+        from photonqc.report import sha256
+        from photonqc.sizing import validate_input_security
+
+        in_p = Path(input_path.strip()).resolve()
+        out_p = Path(output_path.strip()).resolve()
+        validate_input_security(in_p)
+
+        mode_key = operation_mode.split(" ")[0].strip()
+        with Image.open(in_p) as src_im:
+            src_im.load()
+            rgb_a = src_im.convert("RGB")
+
+        if mode_key == "laplacian_pyramid_blend":
+            sec_str = secondary_image_path.strip()
+            if sec_str:
+                sec_p = Path(sec_str).resolve()
+                validate_input_security(sec_p)
+                with Image.open(sec_p) as sec_im:
+                    sec_im.load()
+                    rgb_b = sec_im.convert("RGB")
+                if rgb_b.size != rgb_a.size:
+                    rgb_b = rgb_b.resize(rgb_a.size, Image.Resampling.LANCZOS)
+            else:
+                rgb_b = rgb_a.copy()
+
+            mask_str = mask_image_path.strip()
+            if mask_str:
+                m_p = Path(mask_str).resolve()
+                validate_input_security(m_p)
+                with Image.open(m_p) as m_im:
+                    m_im.load()
+                    mask_in: Any = m_im.copy()
+            else:
+                w, h = rgb_a.size
+                m_arr = np.zeros((h, w), dtype=np.float64)
+                m_arr[:, : w // 2] = 1.0
+                mask_in = m_arr
+
+            out_img, meta = laplacian_pyramid_blend(rgb_a, rgb_b, mask_in, levels=int(pyramid_levels))
+            spec = evaluate_laplacian_frequency_spectrum(out_img, levels=int(pyramid_levels))
+            meta["spectrum"] = spec
+            halo_free = bool(spec.get("halo_free_certified", True))
+        else:
+            cfg = LaplacianPyramidConfig(
+                levels=int(pyramid_levels),
+                lighting_smooth_blend=float(lighting_smooth_blend),
+                pore_band_gain=float(pore_band_gain),
+                meso_band_gain=float(meso_band_gain),
+            )
+            out_img, meta = frequency_separate_portrait_lighting(rgb_a, config=cfg)
+            halo_free = bool(meta.get("spectrum", {}).get("halo_free_certified", True))
+
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_img.save(out_p, format="PNG")
+        digest = sha256(out_p)
+        meta["output_path"] = str(out_p)
+        meta["output_sha256"] = digest
+        return (str(out_p), digest, json.dumps(meta, indent=2), halo_free)
+
+
 NODE_CLASS_MAPPINGS = {
     "OpticalCameraCompiler": OpticalCameraCompilerNode,
     "OpticalConservative102MPUpscaler": OpticalConservative102MPUpscalerNode,
@@ -1008,6 +1121,7 @@ NODE_CLASS_MAPPINGS = {
     "Optical4XFullColorPNGUpscale": Optical4XFullColorPNGUpscaleNode,
     "PhotonQCNeuralSRExport": PhotonQCNeuralSRExportNode,
     "PhotonQCEvaluation": PhotonQCEvaluationNode,
+    "PhotonQCLaplacianPyramid": PhotonQCLaplacianPyramidNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -1018,4 +1132,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Optical4XFullColorPNGUpscale": "💎 4X Full-Color PNG Output Lock Upscaler",
     "PhotonQCNeuralSRExport": "⚡ PhotonQC Neural SR & Print Export",
     "PhotonQCEvaluation": "📊 PhotonQC Perceptual & Gold-Case Evaluator",
+    "PhotonQCLaplacianPyramid": "🔺 PhotonQC Laplacian Pyramid & Frequency Separation",
 }
