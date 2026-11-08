@@ -8,7 +8,7 @@ import os
 import sys
 import webbrowser
 from http import HTTPStatus
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
 from typing import Any, Optional
 
 from .compiler import OpticalCompiler
@@ -5864,25 +5864,54 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
+    let qwenRenderTimer = null;
+
     async function runLocalQwenGeneration() {
       const box = document.getElementById('localQwenResultBox');
       if (!box) return;
       box.style.display = 'block';
-      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Generating locally on Apple M5 Pro Metal GPU via Qwen-Image-2.1-Turbo (Unsloth Q8_0 GGUF + Qwen3-VL-8B)...</div>';
-      const promptText = lastPayload ? (lastPayload.positive_prompt || '') : (document.getElementById('positiveOutput').textContent || '');
-      const aspect = document.getElementById('aspectSelect') ? document.getElementById('aspectSelect').value : '1:1';
+      if (qwenRenderTimer) {
+        clearInterval(qwenRenderTimer);
+        qwenRenderTimer = null;
+      }
+      let elapsedSec = 0;
+      const updateWaitingBanner = () => {
+        box.innerHTML = `<div style="color: var(--accent-cyan); display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
+          <span>⏳ Generating locally on Apple M5 Pro Metal GPU via Qwen-Image-2.1-Turbo (Unsloth Q8_0 GGUF + Qwen3-VL-8B)...</span>
+          <strong style="color: var(--accent-green); font-family: var(--font-mono); white-space:nowrap;">${elapsedSec}s / ~45s</strong>
+        </div>`;
+      };
+      updateWaitingBanner();
+      qwenRenderTimer = setInterval(() => {
+        elapsedSec += 1;
+        updateWaitingBanner();
+      }, 1000);
+
       try {
+        const promptText = (typeof currentPayload !== 'undefined' && currentPayload && currentPayload.positive_prompt)
+          ? currentPayload.positive_prompt
+          : ((document.getElementById('positiveOutput') && document.getElementById('positiveOutput').textContent) || '');
+        const negText = (typeof currentPayload !== 'undefined' && currentPayload && currentPayload.negative_prompt)
+          ? currentPayload.negative_prompt
+          : '';
+        const aspect = document.getElementById('aspectSelect') ? document.getElementById('aspectSelect').value : '1:1';
         const res = await fetch('/api/qwen-image/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             prompt: promptText,
+            negative_prompt: negText,
             aspect_ratio: aspect,
+            seed: Math.floor(Math.random() * 1000000),
             apply_lightroom_pyramid: true,
             pyramid_scale: 1
           })
         });
         const data = await res.json();
+        if (qwenRenderTimer) {
+          clearInterval(qwenRenderTimer);
+          qwenRenderTimer = null;
+        }
         if (!res.ok) throw new Error(data.error || 'Local Qwen-Image-2.1 generation failed');
         const encPath = encodeURIComponent(data.output_path);
         const dims = (data.output_dimensions || []).join('x');
@@ -5894,12 +5923,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               <a href="/api/photonqc/file?path=${encPath}&download=1" download style="background:rgba(6,182,212,0.18); border:1px solid var(--accent-cyan); color:var(--accent-cyan); padding:2px 8px; border-radius:4px; font-size:0.68rem; text-decoration:none; font-weight:700;">💾 Download PNG</a>
             </div>
           </div>
-          <div style="font-size:0.68rem; color:var(--text-secondary);">Model: <code>${data.denoiser}</code> + <code>${data.llm_encoder}</code> • Output: <code>${data.output_path}</code></div>
+          <div style="font-size:0.68rem; color:var(--text-secondary);">Model: <code>${data.denoiser}</code> + <code>${data.llm_encoder}</code> • Saved on Mac: <code>${data.output_path}</code></div>
           <div style="margin-top:0.5rem; text-align:center;">
-            <img src="/api/photonqc/file?path=${encPath}&t=${Date.now()}" style="max-width:100%; max-height:360px; border-radius:6px; border:1px solid var(--border-subtle);" alt="Qwen-Image-2.1 Local Output">
+            <img src="/api/photonqc/file?path=${encPath}&t=${Date.now()}" style="max-width:100%; max-height:420px; border-radius:6px; border:1px solid var(--border-subtle);" alt="Qwen-Image-2.1 Local Output">
           </div>
         `;
       } catch (err) {
+        if (qwenRenderTimer) {
+          clearInterval(qwenRenderTimer);
+          qwenRenderTimer = null;
+        }
         box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
       }
     }
@@ -8064,7 +8097,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
 def run_server(host: str = "127.0.0.1", port: int = 8765, open_browser: bool = False) -> None:
     """Start local web studio server."""
     server_address = (host, port)
-    httpd = HTTPServer(server_address, StudioAPIHandler)
+    httpd = ThreadingHTTPServer(server_address, StudioAPIHandler)
     url = f"http://{host}:{port}"
 
     sys.stdout.write("=" * 75 + "\n")
