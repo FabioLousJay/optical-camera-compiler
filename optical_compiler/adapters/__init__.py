@@ -14,6 +14,7 @@ from .humain import HumainAdapter
 from .imagen import ImagenAdapter
 from .json_prompt import JSONAllInOneAdapter
 from .midjourney import MidjourneyAdapter
+from .qwen_image import QwenImageAdapter
 from .raw import RawSpecAdapter
 from .runway import RunwayAdapter
 from .sdxl import SDXLAdapter
@@ -24,6 +25,7 @@ ADAPTER_REGISTRY: dict[TargetEngine, Type[BaseAdapter]] = {
     TargetEngine.MIDJOURNEY: MidjourneyAdapter,
     TargetEngine.FLUX: FluxAdapter,
     TargetEngine.FLUX_RAW: FluxRawAdapter,
+    TargetEngine.QWEN_IMAGE: QwenImageAdapter,
     TargetEngine.FIREFLY: FireflyAdapter,
     TargetEngine.RUNWAY: RunwayAdapter,
     TargetEngine.HUMAIN: HumainAdapter,

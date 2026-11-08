@@ -2368,6 +2368,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div class="tabs">
           <button class="tab active" onclick="setTarget('gpt_images')">🤖 GPT Images (ChatGPT)</button>
           <button class="tab" onclick="setTarget('imagen')">♊ Gemini Images (Imagen 3)</button>
+          <button class="tab" onclick="setTarget('qwen_image')">🟣 Qwen-Image-2.1 (Local Metal)</button>
           <button class="tab" onclick="setTarget('firefly')">🔴 Adobe Firefly 5</button>
           <button class="tab" onclick="setTarget('flux_raw')">⚡ FLUX1.1 Ultra Raw</button>
           <button class="tab" onclick="setTarget('runway')">🎬 Runway Gen-4</button>
@@ -2410,7 +2411,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <button class="action-btn-shield" onclick="copyPrompt('negative')" title="Copy only the negative artifact suppression tokens">
             <span>Copy Shield Only</span>
           </button>
+          <button type="button" onclick="runLocalQwenGeneration()" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); border: 1px solid rgba(167, 139, 250, 0.6); color: #fff; padding: 0.42rem 0.95rem; border-radius: 6px; font-size: 0.74rem; font-family: var(--font-mono); font-weight: 700; cursor: pointer;" title="Generate this compiled optical prompt locally on your M5 Pro via Qwen-Image-2.1 Unsloth GGUF">
+            <span>🟣 Generate Locally (Qwen-Image-2.1 M5 Metal)</span>
+          </button>
         </div>
+        <div id="localQwenResultBox" style="display: none; margin-top: 0.65rem; padding: 0.7rem; border-radius: 6px; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.35); font-family: var(--font-mono); font-size: 0.73rem;"></div>
       </div>
 
       <!-- Anti-Artifact Shield / Negative Prompt Breakdown -->
@@ -5390,6 +5395,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const badgeMap = {
         gpt_images: "GPT IMAGES // MASTER EXECUTION PROMPT",
         imagen: "GEMINI IMAGES // IMAGEN 3 PROSE",
+        qwen_image: "QWEN-IMAGE-2.1 // 7B DIT + QWEN3-VL-8B LOCAL METAL GGUF",
         firefly: "ADOBE FIREFLY // IMAGE 5 / IMAGE 4 ULTRA PHOTOGRAPHY",
         flux_raw: "FLUX1.1 [PRO] ULTRA RAW // RAW=TRUE SENSOR FIDELITY",
         runway: "RUNWAY GEN-4 IMAGE // CINEMATIC PRODUCTION STILL",
@@ -5856,6 +5862,46 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       toast.textContent = msg;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    async function runLocalQwenGeneration() {
+      const box = document.getElementById('localQwenResultBox');
+      if (!box) return;
+      box.style.display = 'block';
+      box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Generating locally on Apple M5 Pro Metal GPU via Qwen-Image-2.1-Turbo (Unsloth Q8_0 GGUF + Qwen3-VL-8B)...</div>';
+      const promptText = lastPayload ? (lastPayload.positive_prompt || '') : (document.getElementById('positiveOutput').textContent || '');
+      const aspect = document.getElementById('aspectSelect') ? document.getElementById('aspectSelect').value : '1:1';
+      try {
+        const res = await fetch('/api/qwen-image/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: promptText,
+            aspect_ratio: aspect,
+            apply_lightroom_pyramid: true,
+            pyramid_scale: 1
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Local Qwen-Image-2.1 generation failed');
+        const encPath = encodeURIComponent(data.output_path);
+        const dims = (data.output_dimensions || []).join('x');
+        box.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.45rem;">
+            <strong style="color: var(--accent-green);">✅ QWEN-IMAGE-2.1 LOCAL METAL RENDER COMPLETE (${dims} px in ${data.elapsed_seconds}s)</strong>
+            <div style="display:flex; gap:0.4rem;">
+              <a href="/api/photonqc/file?path=${encPath}&t=${Date.now()}" target="_blank" style="background:rgba(16,185,129,0.18); border:1px solid var(--accent-green); color:var(--accent-green); padding:2px 8px; border-radius:4px; font-size:0.68rem; text-decoration:none; font-weight:700;">👁️ View Full PNG</a>
+              <a href="/api/photonqc/file?path=${encPath}&download=1" download style="background:rgba(6,182,212,0.18); border:1px solid var(--accent-cyan); color:var(--accent-cyan); padding:2px 8px; border-radius:4px; font-size:0.68rem; text-decoration:none; font-weight:700;">💾 Download PNG</a>
+            </div>
+          </div>
+          <div style="font-size:0.68rem; color:var(--text-secondary);">Model: <code>${data.denoiser}</code> + <code>${data.llm_encoder}</code> • Output: <code>${data.output_path}</code></div>
+          <div style="margin-top:0.5rem; text-align:center;">
+            <img src="/api/photonqc/file?path=${encPath}&t=${Date.now()}" style="max-width:100%; max-height:360px; border-radius:6px; border:1px solid var(--border-subtle);" alt="Qwen-Image-2.1 Local Output">
+          </div>
+        `;
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      }
     }
 
     let lastUpscaleReport = null;
@@ -7100,6 +7146,15 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             self._send_json({"status": "ok", "version": "2.1.0"})
             return
 
+        if parsed_path == "/api/qwen-image/status":
+            try:
+                from .qwen_engine import get_qwen_engine_status
+
+                self._send_json(get_qwen_engine_status())
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            return
+
         if parsed_path == "/api/photonqc/status":
             try:
                 from pathlib import Path
@@ -7192,6 +7247,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             "/api/photonqc/frequency-separate",
             "/api/photonqc/pyramid-blend",
             "/api/photonqc/upload-local-image",
+            "/api/qwen-image/generate",
         )
         if parsed_path not in allowed_post_paths:
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
@@ -7203,6 +7259,39 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             body = json.loads(body_bytes.decode("utf-8"))
         except Exception as err:
             self._send_json({"error": f"Invalid JSON payload: {err}"}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/qwen-image/generate":
+            prompt_str = str(body.get("prompt") or "").strip()
+            if not prompt_str:
+                self._send_json({"error": "Missing required 'prompt'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                from pathlib import Path
+                import time
+                from .qwen_engine import run_qwen_image_local
+
+                repo_root = Path(__file__).resolve().parent.parent
+                out_str = body.get("output_path") or str(
+                    repo_root / "outputs" / f"qwen_image_2_1_{int(time.time())}.png"
+                )
+                res = run_qwen_image_local(
+                    prompt=prompt_str,
+                    output_path=out_str,
+                    negative_prompt=str(body.get("negative_prompt") or ""),
+                    aspect_ratio=str(body.get("aspect_ratio") or "1:1"),
+                    width=int(body["width"]) if body.get("width") is not None else None,
+                    height=int(body["height"]) if body.get("height") is not None else None,
+                    steps=int(body["steps"]) if body.get("steps") is not None else None,
+                    cfg_scale=float(body["cfg_scale"]) if body.get("cfg_scale") is not None else None,
+                    seed=int(body.get("seed", 42)),
+                    ref_image_path=body.get("ref_image_path"),
+                    apply_lightroom_pyramid=bool(body.get("apply_lightroom_pyramid", True)),
+                    pyramid_scale=int(body.get("pyramid_scale", 1)),
+                )
+                self._send_json(res)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
             return
 
         if parsed_path == "/api/photonqc/upload-local-image":

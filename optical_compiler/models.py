@@ -16,6 +16,7 @@ class TargetEngine(str, Enum):
     MIDJOURNEY = "midjourney"
     FLUX = "flux"
     FLUX_RAW = "flux_raw"
+    QWEN_IMAGE = "qwen_image"
     FIREFLY = "firefly"
     RUNWAY = "runway"
     HUMAIN = "humain"
@@ -46,6 +47,13 @@ class TargetEngine(str, Enum):
             "flux1.1_raw": cls.FLUX_RAW,
             "flux1.1_pro_ultra_raw": cls.FLUX_RAW,
             "flux_ultra": cls.FLUX_RAW,
+            "qwen": cls.QWEN_IMAGE,
+            "qwen_image": cls.QWEN_IMAGE,
+            "qwen-image": cls.QWEN_IMAGE,
+            "qwen_image_2_1": cls.QWEN_IMAGE,
+            "qwen-image-2.1": cls.QWEN_IMAGE,
+            "qwen2.1": cls.QWEN_IMAGE,
+            "qwen_turbo": cls.QWEN_IMAGE,
             "firefly": cls.FIREFLY,
             "adobe_firefly": cls.FIREFLY,
             "firefly5": cls.FIREFLY,

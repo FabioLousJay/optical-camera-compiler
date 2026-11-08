@@ -698,6 +698,7 @@ class OpticalCompiler:
         for engine in [
             TargetEngine.GPT_IMAGES,
             TargetEngine.IMAGEN,
+            TargetEngine.QWEN_IMAGE,
             TargetEngine.MIDJOURNEY,
             TargetEngine.FLUX,
             TargetEngine.SDXL,
