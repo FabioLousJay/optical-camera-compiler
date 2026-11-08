@@ -1725,9 +1725,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               Supports JPG, PNG, WEBP, HEIC, TIFF // 100% Local Hardware Processing
             </div>
             <div style="margin-top: 0.45rem; display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap;">
-              <button type="button" class="pill-btn" style="font-size: 0.68rem; padding: 3px 10px; background: rgba(16, 185, 129, 0.16); border-color: var(--accent-green); color: var(--accent-green); font-weight: 700;" onclick="openRefFileBrowser(event)">
+              <label for="refFileInput" class="pill-btn" style="font-size: 0.68rem; padding: 3px 10px; background: rgba(16, 185, 129, 0.16); border: 1px solid var(--accent-green); color: var(--accent-green); font-weight: 700; cursor: pointer; display: inline-flex; align-items: center;" onclick="event.stopPropagation();">
                 📂 Browse Mac Reference Image...
-              </button>
+              </label>
               <button type="button" class="pill-btn" style="font-size: 0.65rem; padding: 2px 9px; border-color: rgba(245, 158, 11, 0.4); color: var(--accent-amber);" onclick="event.stopPropagation(); enableProductLockDirect();">
                 📦 Or Configure 100% Commercial SKU Approval Gate Directly
               </button>
@@ -4379,7 +4379,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         const matchedAr = computeMatchedAspectRatio(w, h);
         const savedPath = (uploadMeta && uploadMeta.saved_path) || file.name;
         const absPath = (uploadMeta && uploadMeta.absolute_path) || savedPath;
-        const stem = (uploadMeta && uploadMeta.stem) || (file.name || 'reference').replace(/\.[^.]+$/, '');
+        const rawParts = (file.name || 'reference').split('.');
+        const stem = (uploadMeta && uploadMeta.stem) || (rawParts.length > 1 ? rawParts.slice(0, -1).join('.') : rawParts[0]) || 'reference';
 
         refData = {
           active: true,
@@ -6012,14 +6013,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           qwenRenderTimer = null;
         }
         if (!res.ok) throw new Error(data.error || 'Local Qwen-Image-2.1 generation failed');
-        const encPath = encodeURIComponent(data.output_path);
-        const safeJsPath = (data.output_path || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const encPath = encodeURIComponent(data.output_path || '');
         const dims = (data.output_dimensions || []).join('x');
         box.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.45rem;">
             <strong style="color: var(--accent-green);">✅ QWEN-IMAGE-2.1 LOCAL METAL RENDER COMPLETE (${dims} px in ${data.elapsed_seconds}s)</strong>
             <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-              <button type="button" onclick="sendQwenRenderToLaplacianLab('${safeJsPath}')" style="background:rgba(139,92,246,0.22); border:1px solid #a78bfa; color:#c4b5fd; padding:2px 8px; border-radius:4px; font-size:0.68rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">🔺 Send to 4X Laplacian Lab</button>
+              <button type="button" onclick="sendQwenRenderToLaplacianLab(decodeURIComponent('${encPath}'))" style="background:rgba(139,92,246,0.22); border:1px solid #a78bfa; color:#c4b5fd; padding:2px 8px; border-radius:4px; font-size:0.68rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">🔺 Send to 4X Laplacian Lab</button>
               <a href="/api/photonqc/file?path=${encPath}&t=${Date.now()}" target="_blank" style="background:rgba(16,185,129,0.18); border:1px solid var(--accent-green); color:var(--accent-green); padding:2px 8px; border-radius:4px; font-size:0.68rem; text-decoration:none; font-weight:700;">👁️ View Full PNG</a>
               <a href="/api/photonqc/file?path=${encPath}&download=1" download style="background:rgba(6,182,212,0.18); border:1px solid var(--accent-cyan); color:var(--accent-cyan); padding:2px 8px; border-radius:4px; font-size:0.68rem; text-decoration:none; font-weight:700;">💾 Download PNG</a>
             </div>
@@ -6044,7 +6044,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const outEl = document.getElementById('pqcPyrOutput');
       if (inEl) inEl.value = imgPath;
       if (outEl) {
-        const stem = imgPath.split('/').pop().replace(/\.[^.]+$/, '');
+        const baseName = (imgPath || 'render.png').split('/').pop() || 'render.png';
+        const parts = baseName.split('.');
+        const stem = (parts.length > 1 ? parts.slice(0, -1).join('.') : parts[0]) || 'render';
         outEl.value = 'outputs/' + stem + '_pyramid_4x.png';
       }
     }

@@ -43,6 +43,41 @@ class TestQwenImage21Integration(unittest.TestCase):
         self.assertIn("ready", data)
         self.assertTrue(data["sd_cli"]["installed"])
 
+    def test_web_studio_javascript_and_event_handlers_syntax_via_node_check(self) -> None:
+        """Ensure HTML_TEMPLATE script blocks and all static HTML event handlers have 0 JS syntax errors."""
+        import html as html_mod
+        import os
+        import re
+        import shutil
+        import subprocess
+        import tempfile
+
+        from optical_compiler.web import HTML_TEMPLATE
+
+        # Verify refFileInput is placed outside refDropzone and paired with a native <label for="refFileInput">
+        self.assertIn('<label for="refFileInput"', HTML_TEMPLATE)
+        idx_input = HTML_TEMPLATE.index('id="refFileInput"')
+        idx_dropzone = HTML_TEMPLATE.index('id="refDropzone"')
+        self.assertLess(idx_input, idx_dropzone, "refFileInput must precede refDropzone to prevent click bubbling")
+
+        if shutil.which("node"):
+            static_html = HTML_TEMPLATE.split("<script>")[0] + HTML_TEMPLATE.split("</script>")[-1]
+            scripts = re.findall(r"<script>(.*?)</script>", HTML_TEMPLATE, re.S)
+            handlers = [
+                html_mod.unescape(h)
+                for h in re.findall(r'\bon(?:click|change|input|keydown)="([^"]+)"', static_html)
+            ]
+            combined = "\n".join(scripts) + "\n" + "\n".join(f"(function(event){{ {h} }});" for h in handlers)
+            with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as f:
+                f.write(combined)
+                js_path = f.name
+            try:
+                proc = subprocess.run(["node", "--check", js_path], capture_output=True, text=True, check=False)
+                self.assertEqual(proc.returncode, 0, f"JavaScript SyntaxError in HTML_TEMPLATE:\n{proc.stderr}")
+            finally:
+                if os.path.exists(js_path):
+                    os.unlink(js_path)
+
 
 if __name__ == "__main__":
     unittest.main()
