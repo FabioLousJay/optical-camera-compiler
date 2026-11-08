@@ -5914,11 +5914,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
         if (!res.ok) throw new Error(data.error || 'Local Qwen-Image-2.1 generation failed');
         const encPath = encodeURIComponent(data.output_path);
+        const safeJsPath = (data.output_path || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         const dims = (data.output_dimensions || []).join('x');
         box.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.45rem;">
             <strong style="color: var(--accent-green);">✅ QWEN-IMAGE-2.1 LOCAL METAL RENDER COMPLETE (${dims} px in ${data.elapsed_seconds}s)</strong>
-            <div style="display:flex; gap:0.4rem;">
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+              <button type="button" onclick="sendQwenRenderToLaplacianLab('${safeJsPath}')" style="background:rgba(139,92,246,0.22); border:1px solid #a78bfa; color:#c4b5fd; padding:2px 8px; border-radius:4px; font-size:0.68rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">🔺 Send to 4X Laplacian Lab</button>
               <a href="/api/photonqc/file?path=${encPath}&t=${Date.now()}" target="_blank" style="background:rgba(16,185,129,0.18); border:1px solid var(--accent-green); color:var(--accent-green); padding:2px 8px; border-radius:4px; font-size:0.68rem; text-decoration:none; font-weight:700;">👁️ View Full PNG</a>
               <a href="/api/photonqc/file?path=${encPath}&download=1" download style="background:rgba(6,182,212,0.18); border:1px solid var(--accent-cyan); color:var(--accent-cyan); padding:2px 8px; border-radius:4px; font-size:0.68rem; text-decoration:none; font-weight:700;">💾 Download PNG</a>
             </div>
@@ -5934,6 +5936,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           qwenRenderTimer = null;
         }
         box.innerHTML = `<div style="color: var(--accent-rose);">❌ Error: ${err.message}</div>`;
+      }
+    }
+
+    function sendQwenRenderToLaplacianLab(imgPath) {
+      openPhotonQCModal('pyramids');
+      const inEl = document.getElementById('pqcPyrInput');
+      const outEl = document.getElementById('pqcPyrOutput');
+      if (inEl) inEl.value = imgPath;
+      if (outEl) {
+        const stem = imgPath.split('/').pop().replace(/\.[^.]+$/, '');
+        outEl.value = 'outputs/' + stem + '_pyramid_4x.png';
       }
     }
 
@@ -7137,6 +7150,24 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
         """Custom clean logging to stderr."""
         sys.stderr.write(f"[Studio Web] {self.address_string()} - {format % args}\n")
 
+    def _resolve_studio_path(self, raw_path: str) -> Any:
+        """Resolve relative studio paths against repository root regardless of process cwd."""
+        from pathlib import Path
+
+        repo_root = Path(__file__).resolve().parent.parent
+        p = Path(str(raw_path).strip()).expanduser()
+        if not p.is_absolute():
+            p = (repo_root / p).resolve()
+        else:
+            p = p.resolve()
+            # If started with cwd=/ and an accidental /uploads/ or /outputs/ or /examples/ path was formed, remap to repo_root
+            for prefix in ("/uploads/", "/outputs/", "/examples/"):
+                if str(p).startswith(prefix) and not p.exists():
+                    remapped = (repo_root / str(p).lstrip("/")).resolve()
+                    if remapped.exists() or prefix == "/outputs/":
+                        return remapped
+        return p
+
     def _send_json(self, data: Any, status: int = HTTPStatus.OK) -> None:
         """Helper to send JSON response with appropriate headers."""
         response_body = json.dumps(data).encode("utf-8")
@@ -7233,7 +7264,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 if not raw_path:
                     self.send_error(HTTPStatus.BAD_REQUEST, "Missing path query parameter")
                     return
-                fp = Path(raw_path).expanduser().resolve()
+                fp = self._resolve_studio_path(raw_path)
                 if not fp.is_file() or fp.suffix.lower() not in (".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp"):
                     self.send_error(HTTPStatus.NOT_FOUND, "Image file not found")
                     return
@@ -7381,8 +7412,8 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 from photonqc.report import verify_and_report
                 from photonqc.sizing import check_aspect_ratio, resolve_target_dimensions, validate_input_security
 
-                in_p = Path(input_path_str).expanduser().resolve()
-                out_p = Path(output_path_str).expanduser().resolve()
+                in_p = self._resolve_studio_path(input_path_str)
+                out_p = self._resolve_studio_path(output_path_str)
                 validate_input_security(in_p)
 
                 profile_name = body.get("profile")
@@ -7486,8 +7517,8 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 from photonqc.restoration import SourcePreservingRestorer, restore_source_locked
                 from photonqc.sizing import resolve_target_dimensions
 
-                in_p = Path(input_path_str).expanduser().resolve()
-                out_p = Path(output_path_str).expanduser().resolve()
+                in_p = self._resolve_studio_path(input_path_str)
+                out_p = self._resolve_studio_path(output_path_str)
                 ppi = int(body.get("ppi", 300))
                 w_in = Decimal(str(body["width_in"])) if body.get("width_in") is not None else None
                 h_in = Decimal(str(body["height_in"])) if body.get("height_in") is not None else None
@@ -7549,9 +7580,9 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     evaluate_pair,
                 )
 
-                cand_p = Path(cand_str).expanduser().resolve()
+                cand_p = self._resolve_studio_path(cand_str)
                 ref_str = body.get("reference_path") or body.get("reference")
-                ref_p = Path(ref_str).expanduser().resolve() if ref_str else None
+                ref_p = self._resolve_studio_path(ref_str) if ref_str else None
                 metrics = evaluate_pair(ref_p, cand_p)
                 with Image.open(cand_p) as cand_im:
                     cand_im.load()
@@ -7585,7 +7616,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 from photonqc.report import sha256
                 from photonqc.sizing import validate_input_security
 
-                in_p = Path(input_str).expanduser().resolve()
+                in_p = self._resolve_studio_path(input_str)
                 validate_input_security(in_p)
                 with Image.open(in_p) as im:
                     im.load()
@@ -7630,7 +7661,7 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 )
                 from photonqc.sizing import validate_input_security
 
-                in_p = Path(input_str).expanduser().resolve()
+                in_p = self._resolve_studio_path(input_str)
                 validate_input_security(in_p)
                 prof_name = str(body.get("profile", "matte_300ppi"))
                 prof_data = load_print_profile(prof_name)
@@ -7676,8 +7707,8 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 from pathlib import Path
                 from photonqc.benchmark import DegradationSpec, run_benchmark
 
-                gt_p = Path(gt_str).expanduser().resolve()
-                out_dir = Path(body.get("output_dir", "outputs/benchmark")).expanduser().resolve()
+                gt_p = self._resolve_studio_path(gt_str)
+                out_dir = self._resolve_studio_path(body.get("output_dir", "outputs/benchmark"))
                 deg = DegradationSpec(
                     scale_factor=int(body.get("scale_factor", 4)),
                     gaussian_blur_sigma=float(body.get("gaussian_blur_sigma", 1.0)),
@@ -7715,8 +7746,8 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 from photonqc.report import sha256
                 from photonqc.sizing import validate_input_security
 
-                in_p = Path(input_str).expanduser().resolve()
-                out_p = Path(output_str).expanduser().resolve()
+                in_p = self._resolve_studio_path(input_str)
+                out_p = self._resolve_studio_path(output_str)
                 validate_input_security(in_p)
 
                 with Image.open(in_p) as im:
@@ -7758,10 +7789,10 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 from photonqc.report import sha256
                 from photonqc.sizing import validate_input_security
 
-                in_a = Path(img_a_str).expanduser().resolve()
+                in_a = self._resolve_studio_path(img_a_str)
                 img_b_str = body.get("image_b") or img_a_str
-                in_b = Path(img_b_str).expanduser().resolve()
-                out_p = Path(out_str).expanduser().resolve()
+                in_b = self._resolve_studio_path(img_b_str)
+                out_p = self._resolve_studio_path(out_str)
                 validate_input_security(in_a)
                 validate_input_security(in_b)
 
@@ -8096,6 +8127,10 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
 
 def run_server(host: str = "127.0.0.1", port: int = 8765, open_browser: bool = False) -> None:
     """Start local web studio server."""
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parent.parent
+    os.chdir(str(repo_root))
     server_address = (host, port)
     httpd = ThreadingHTTPServer(server_address, StudioAPIHandler)
     url = f"http://{host}:{port}"
