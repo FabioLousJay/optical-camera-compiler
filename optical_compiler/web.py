@@ -1712,19 +1712,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <div class="section-meta" id="refModeBadge" style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.68rem;">NO IMAGE ATTACHED</div>
         </div>
 
-        <!-- Local Image Drag & Drop / File Browser Area -->
-        <div class="ref-dropzone" id="refDropzone" onclick="document.getElementById('refFileInput').click()">
-          <input type="file" id="refFileInput" accept="image/png, image/jpeg, image/webp, image/heic" style="display: none;" onchange="handleFileSelect(event)">
+        <!-- Local Image Drag & Drop / File Browser Area (file input placed OUTSIDE dropzone to prevent click bubbling recursion) -->
+        <input type="file" id="refFileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+        <div class="ref-dropzone" id="refDropzone" onclick="openRefFileBrowser(event)">
           
           <div id="dropzoneEmpty" style="padding: 0.5rem 0;">
             <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="color: var(--accent-cyan); margin-bottom: 0.35rem;">
               <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
-            <div style="font-weight: 600; font-size: 0.8rem; color: #fff;">Click or Drag & Drop Local Reference Image</div>
+            <div style="font-weight: 600; font-size: 0.8rem; color: #fff;">Click, Drag &amp; Drop, or Paste (Cmd+V) Local Reference Image</div>
             <div style="font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 0.15rem;">
-              Supports JPG, PNG, WEBP // 100% Local Hardware Processing
+              Supports JPG, PNG, WEBP, HEIC, TIFF // 100% Local Hardware Processing
             </div>
             <div style="margin-top: 0.45rem; display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap;">
+              <button type="button" class="pill-btn" style="font-size: 0.68rem; padding: 3px 10px; background: rgba(16, 185, 129, 0.16); border-color: var(--accent-green); color: var(--accent-green); font-weight: 700;" onclick="openRefFileBrowser(event)">
+                📂 Browse Mac Reference Image...
+              </button>
               <button type="button" class="pill-btn" style="font-size: 0.65rem; padding: 2px 9px; border-color: rgba(245, 158, 11, 0.4); color: var(--accent-amber);" onclick="event.stopPropagation(); enableProductLockDirect();">
                 📦 Or Configure 100% Commercial SKU Approval Gate Directly
               </button>
@@ -1743,6 +1746,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               <div style="display: flex; gap: 0.4rem; margin-top: 0.45rem; flex-wrap: wrap;">
                 <button type="button" class="btn-ref-action" onclick="syncRefAspectRatio(event)">
                   <span>📐 Match Rig AR</span>
+                </button>
+                <button type="button" class="btn-ref-action" style="border-color: rgba(139,92,246,0.5); color: #c4b5fd;" onclick="event.stopPropagation(); if(refData && refData.saved_path) sendQwenRenderToLaplacianLab(refData.saved_path);">
+                  <span>🔺 4X Laplacian Lab</span>
                 </button>
                 <button type="button" class="btn-ref-action btn-ref-danger" onclick="clearRefImage(event)">
                   <span>✕ Remove</span>
@@ -4257,22 +4263,56 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       compile();
     }
 
+    function openRefFileBrowser(event) {
+      if (event) event.stopPropagation();
+      const inp = document.getElementById('refFileInput');
+      if (inp) {
+        inp.value = '';
+        inp.click();
+      }
+    }
+
     function setupDragAndDrop() {
       const dz = document.getElementById('refDropzone');
       if (!dz) return;
-      dz.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dz.classList.add('dragover');
+      ['dragenter', 'dragover'].forEach(evtName => {
+        dz.addEventListener(evtName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dz.classList.add('dragover');
+        });
       });
       dz.addEventListener('dragleave', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         dz.classList.remove('dragover');
       });
       dz.addEventListener('drop', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         dz.classList.remove('dragover');
         if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
           processSelectedImage(e.dataTransfer.files[0]);
+        }
+      });
+      // Prevent accidental window file navigation and allow Cmd+V image paste
+      window.addEventListener('dragover', (e) => e.preventDefault());
+      window.addEventListener('drop', (e) => {
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+          e.preventDefault();
+          processSelectedImage(e.dataTransfer.files[0]);
+        }
+      });
+      window.addEventListener('paste', (e) => {
+        const items = (e.clipboardData && e.clipboardData.items) || [];
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type && items[i].type.startsWith('image/')) {
+            const pastedFile = items[i].getAsFile();
+            if (pastedFile) {
+              processSelectedImage(pastedFile);
+              break;
+            }
+          }
         }
       });
     }
@@ -4283,50 +4323,105 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       processSelectedImage(file);
     }
 
-    function processSelectedImage(file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const dataUri = e.target.result;
-        const img = new Image();
-        img.onload = function() {
-          const w = img.naturalWidth;
-          const h = img.naturalHeight;
-          const ratio = w / h;
+    function computeMatchedAspectRatio(w, h) {
+      const ratio = w / Math.max(1, h);
+      if (ratio > 1.6) return "16:9";
+      if (ratio > 1.35) return "3:2";
+      if (ratio > 1.15) return "4:5";
+      if (ratio > 0.92 && ratio < 1.08) return "1:1";
+      if (ratio > 0.72) return "4:5";
+      if (ratio > 0.60) return "2:3";
+      return "9:16";
+    }
 
-          let matchedAr = "4:5";
-          if (ratio > 1.6) matchedAr = "16:9";
-          else if (ratio > 1.35) matchedAr = "3:2";
-          else if (ratio > 1.15) matchedAr = "4:5";
-          else if (ratio > 0.92 && ratio < 1.08) matchedAr = "1:1";
-          else if (ratio > 0.72) matchedAr = "4:5";
-          else if (ratio > 0.60) matchedAr = "2:3";
-          else matchedAr = "9:16";
+    async function processSelectedImage(file) {
+      const badge = document.getElementById('refModeBadge');
+      if (badge) {
+        badge.textContent = "⏳ ATTACHING IMAGE...";
+        badge.style.color = "var(--accent-cyan)";
+      }
+      try {
+        const dataUri = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
 
-          refData = {
-            active: true,
-            filename: file.name,
-            file_size: file.size,
-            width: w,
-            height: h,
-            aspect_ratio: matchedAr,
-            data_uri: dataUri
-          };
+        // Upload to local studio backend so Pillow inspects dimensions and saves to uploads/
+        let uploadMeta = null;
+        try {
+          const upRes = await fetch('/api/photonqc/upload-local-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name || 'reference.png', data_url: dataUri })
+          });
+          if (upRes.ok) {
+            uploadMeta = await upRes.json();
+          }
+        } catch (upErr) {
+          console.warn('Backend reference upload warning:', upErr);
+        }
 
-          document.getElementById('refThumb').src = dataUri;
-          document.getElementById('refFileName').textContent = file.name;
-          document.getElementById('refDimensions').textContent = `${w} × ${h} px (Est. AR: ${matchedAr})`;
+        // Measure image dimensions via browser Image or fallback to backend Pillow dimensions
+        const dims = await new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+          img.onerror = () => resolve({
+            w: (uploadMeta && uploadMeta.width) || 1024,
+            h: (uploadMeta && uploadMeta.height) || 1024
+          });
+          img.src = dataUri;
+        });
 
-          document.getElementById('dropzoneEmpty').style.display = 'none';
-          document.getElementById('dropzonePreview').style.display = 'flex';
-          document.getElementById('refControls').style.display = 'flex';
-          updateRefBadge();
+        const w = dims.w;
+        const h = dims.h;
+        const matchedAr = computeMatchedAspectRatio(w, h);
+        const savedPath = (uploadMeta && uploadMeta.saved_path) || file.name;
+        const absPath = (uploadMeta && uploadMeta.absolute_path) || savedPath;
+        const stem = (uploadMeta && uploadMeta.stem) || (file.name || 'reference').replace(/\.[^.]+$/, '');
 
-          showToast(`Loaded reference: ${file.name} (${w}x${h})`);
-          debounceCompile();
+        refData = {
+          active: true,
+          filename: file.name || 'reference.png',
+          saved_path: savedPath,
+          absolute_path: absPath,
+          file_size: file.size,
+          width: w,
+          height: h,
+          aspect_ratio: matchedAr,
+          data_uri: dataUri
         };
-        img.src = dataUri;
-      };
-      reader.readAsDataURL(file);
+
+        const thumbEl = document.getElementById('refThumb');
+        if (thumbEl) {
+          thumbEl.src = uploadMeta && uploadMeta.saved_path
+            ? `/api/photonqc/file?path=${encodeURIComponent(uploadMeta.saved_path)}&t=${Date.now()}`
+            : dataUri;
+        }
+        document.getElementById('refFileName').textContent = file.name || 'reference.png';
+        document.getElementById('refDimensions').textContent = `${w} × ${h} px (Est. AR: ${matchedAr})`;
+
+        document.getElementById('dropzoneEmpty').style.display = 'none';
+        document.getElementById('dropzonePreview').style.display = 'flex';
+        document.getElementById('refControls').style.display = 'flex';
+        updateRefBadge();
+
+        // Pre-fill PhotonQC & Upscaler inputs with the attached reference image
+        ['pqcPyrInput', 'pqcExportInput', 'pqcRestoreInput', 'pqcEvalCandidate', 'pqcCalInput', 'upscaleInputPath'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = savedPath;
+        });
+        if (document.getElementById('pqcPyrOutput')) {
+          document.getElementById('pqcPyrOutput').value = `outputs/${stem}_pyramid_4x.png`;
+        }
+
+        showToast(`Loaded reference: ${file.name} (${w}×${h})`);
+        debounceCompile();
+      } catch (err) {
+        console.error('Failed to attach reference image:', err);
+        alert('Could not attach reference image: ' + err.message);
+      }
     }
 
     function syncRefAspectRatio(event) {
@@ -5895,6 +5990,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           ? currentPayload.negative_prompt
           : '';
         const aspect = document.getElementById('aspectSelect') ? document.getElementById('aspectSelect').value : '1:1';
+        const refImgPath = (typeof refData !== 'undefined' && refData && refData.active && (refData.absolute_path || refData.saved_path))
+          ? (refData.absolute_path || refData.saved_path)
+          : null;
         const res = await fetch('/api/qwen-image/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -5903,6 +6001,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             negative_prompt: negText,
             aspect_ratio: aspect,
             seed: Math.floor(Math.random() * 1000000),
+            ref_image_path: refImgPath,
             apply_lightroom_pyramid: true,
             pyramid_scale: 1
           })
@@ -7379,12 +7478,22 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 uploads_dir.mkdir(parents=True, exist_ok=True)
                 dest_p = uploads_dir / safe_name
                 dest_p.write_bytes(raw_bytes)
+                img_w, img_h = None, None
+                try:
+                    from PIL import Image
+
+                    with Image.open(dest_p) as u_im:
+                        img_w, img_h = u_im.size
+                except Exception:
+                    pass
                 self._send_json(
                     {
                         "saved_path": f"uploads/{safe_name}",
                         "absolute_path": str(dest_p),
                         "stem": dest_p.stem,
                         "size_bytes": len(raw_bytes),
+                        "width": img_w,
+                        "height": img_h,
                     }
                 )
             except Exception as err:
