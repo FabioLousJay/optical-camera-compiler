@@ -22,8 +22,8 @@ class TestQwenImage21Integration(unittest.TestCase):
         self.assertEqual(payload.parameters["diffusion_model"], "qwen-image-2.1-turbo-Q8_0.gguf")
         self.assertEqual(payload.parameters["llm"], "Qwen3-VL-8B-Instruct-UD-Q4_K_XL.gguf")
         self.assertEqual(payload.parameters["steps"], 8)
-        self.assertEqual(payload.parameters["width"], 896)
-        self.assertEqual(payload.parameters["height"], 1120)
+        self.assertEqual(payload.parameters["width"], 1024)
+        self.assertEqual(payload.parameters["height"], 1280)
 
     def test_qwen_engine_status_and_web_endpoint(self) -> None:
         status = get_qwen_engine_status()

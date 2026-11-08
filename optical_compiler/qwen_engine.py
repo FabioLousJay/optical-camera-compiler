@@ -181,20 +181,25 @@ def run_qwen_image_local(
         stderr_tail = (proc.stderr or proc.stdout or "")[-1200:]
         raise RuntimeError(f"sd-cli failed (exit {proc.returncode}): {stderr_tail}")
 
+    # Automatically remove periodic wan_vae stride-2/4 transposed-conv carrier spikes in Luminance (Y)
+    from photonqc.pyramids import LaplacianPyramidConfig, degrid_vae_rgb_image, frequency_separate_portrait_lighting
+
+    with Image.open(out_p) as gen_im:
+        gen_im.load()
+        rgb_gen = gen_im.convert("RGB")
+    rgb_clean, vae_spikes_clamped = degrid_vae_rgb_image(rgb_gen)
+
     pyramid_meta: dict[str, Any] | None = None
     if apply_lightroom_pyramid:
-        from photonqc.pyramids import LaplacianPyramidConfig, frequency_separate_portrait_lighting
-
-        with Image.open(out_p) as gen_im:
-            gen_im.load()
-            rgb_gen = gen_im.convert("RGB")
         pyr_cfg = LaplacianPyramidConfig(
             levels=5,
             scale_factor=max(1, int(pyramid_scale)),
             use_neural_sr=False,
         )
-        refined_img, pyramid_meta = frequency_separate_portrait_lighting(rgb_gen, config=pyr_cfg)
+        refined_img, pyramid_meta = frequency_separate_portrait_lighting(rgb_clean, config=pyr_cfg)
         refined_img.save(out_p, format="PNG")
+    elif vae_spikes_clamped > 0:
+        rgb_clean.save(out_p, format="PNG")
 
     with Image.open(out_p) as final_im:
         final_dims = list(final_im.size)
@@ -211,6 +216,7 @@ def run_qwen_image_local(
         "native_dimensions": [w_px, h_px],
         "output_dimensions": final_dims,
         "elapsed_seconds": elapsed_s,
+        "vae_carrier_spikes_clamped": vae_spikes_clamped,
         "lightroom_pyramid_applied": bool(apply_lightroom_pyramid),
         "pyramid_telemetry": pyramid_meta,
         "output_path": str(out_p),

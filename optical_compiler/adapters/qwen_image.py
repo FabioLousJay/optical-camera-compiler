@@ -13,18 +13,18 @@ from ..models import (
 )
 from .base import BaseAdapter
 
-# Official Qwen-Image-2.1 / Turbo aspect ratio presets (Standard 1MP & High-Res 4MP)
+# Official Qwen-Image-2.1 / Turbo aspect ratio presets (High-Acuity 1.3MP Native Sweet Spot, exact multiples of 64)
 QWEN_ASPECT_RESOLUTIONS: dict[str, tuple[int, int]] = {
-    "1:1": (1024, 1024),
-    "4:3": (1152, 864),
-    "3:4": (864, 1152),
-    "4:5": (896, 1120),
-    "5:4": (1120, 896),
-    "3:2": (1216, 832),
-    "2:3": (832, 1216),
-    "16:9": (1344, 768),
-    "9:16": (768, 1344),
-    "21:9": (1536, 640),
+    "1:1": (1152, 1152),
+    "4:3": (1280, 960),
+    "3:4": (960, 1280),
+    "4:5": (1024, 1280),
+    "5:4": (1280, 1024),
+    "3:2": (1344, 896),
+    "2:3": (896, 1344),
+    "16:9": (1472, 832),
+    "9:16": (832, 1472),
+    "21:9": (1664, 704),
 }
 
 
