@@ -682,6 +682,13 @@ class OpticalCompiler:
         # 6. Compile via target adapter
         adapter = get_adapter(engine)
         payload = adapter.compile(scene_input, active_profile)
+        # 7. Universal Professional Acuity Shield (all camera profiles, lenses, and engines)
+        from .pro_acuity import apply_pro_acuity_shield
+
+        apply_pro_acuity_shield(
+            payload,
+            lens_text=str(scene_input.lens or getattr(active_profile.sensor_and_optics, "lens", "") or ""),
+        )
         payload.metadata.setdefault("hardware_profile", active_profile.profile_id)
         payload.metadata["policy_safe"] = scene_input.is_policy_safe
         if "aspect_ratio" not in payload.parameters:

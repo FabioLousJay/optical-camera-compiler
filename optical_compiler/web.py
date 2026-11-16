@@ -6639,7 +6639,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         levels: parseInt(document.getElementById('pqcPyrLevels').value || '5', 10),
         lighting_smooth_blend: parseFloat(document.getElementById('pqcPyrLightingBlend').value || '0.16'),
         pore_band_gain: parseFloat(document.getElementById('pqcPyrPoreGain').value || '1.08'),
-        meso_band_gain: parseFloat(document.getElementById('pqcPyrMesoGain').value || '1.10')
+        meso_band_gain: parseFloat(document.getElementById('pqcPyrMesoGain').value || '1.10'),
+        skin_retouch: parseFloat((document.getElementById('pqcPyrSkinRetouch') || {}).value || '0.45'),
+        capture_sharpen: parseFloat((document.getElementById('pqcPyrCaptureSharpen') || {}).value || '0.65')
       };
       const box = document.getElementById('photonqcStatusBox');
       box.innerHTML = '<div style="color: var(--accent-cyan);">⏳ Running Lightroom-Grade YCbCr Optical 4X + Multi-Band Laplacian Pyramid Frequency Separation...</div>';
@@ -7185,6 +7187,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 <div>
                   <label class="spec-label" style="display:block; margin-bottom:0.25rem;">Meso (L1)</label>
                   <input type="number" step="0.02" id="pqcPyrMesoGain" value="1.10" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+              </div>
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem; margin-top:0.6rem;">
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;" title="Frequency-separation skin retouch on blemish/mottling bands only. Pores and hair stay tack-sharp. 0 = off, 0.9 = strong.">Skin Retouch (0-0.9)</label>
+                  <input type="number" step="0.05" min="0" max="0.9" id="pqcPyrSkinRetouch" value="0.45" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
+                </div>
+                <div>
+                  <label class="spec-label" style="display:block; margin-bottom:0.25rem;" title="Output-resolution capture sharpening (halo-clamped).">Capture Sharpen</label>
+                  <input type="number" step="0.05" min="0" max="1.5" id="pqcPyrCaptureSharpen" value="0.65" style="width:100%; background:var(--bg-input); border:1px solid var(--border-subtle); border-radius:6px; padding:0.5rem 0.5rem; color:#fff; font-family:var(--font-mono); font-size:0.73rem;">
                 </div>
               </div>
 
@@ -7872,6 +7884,8 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     lighting_smooth_blend=float(body.get("lighting_smooth_blend", 0.16)),
                     pore_band_gain=float(body.get("pore_band_gain", 1.08)),
                     meso_band_gain=float(body.get("meso_band_gain", 1.10)),
+                    skin_retouch=float(body.get("skin_retouch", 0.45)),
+                    capture_sharpen=float(body.get("capture_sharpen", 0.65)),
                 )
                 out_img, meta = frequency_separate_portrait_lighting(rgb_in, config=cfg)
                 out_p.parent.mkdir(parents=True, exist_ok=True)

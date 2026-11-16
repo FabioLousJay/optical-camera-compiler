@@ -12,6 +12,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 from typing import Any
@@ -271,6 +272,29 @@ def run_native_rrdbnet_inference(
             state_dict = checkpoint
     else:
         raise ValueError("Unsupported checkpoint format: expected state_dict mapping.")
+
+    # Auto-detect and remap legacy ESRGAN key format (e.g., 4x-UltraSharp.pth, 4x_foolhardy_Remacri.pth)
+    if "conv_first.weight" not in state_dict and "model.0.weight" in state_dict:
+        remapped: dict[str, Any] = {}
+        for k, v in state_dict.items():
+            if k.startswith("model.0."):
+                remapped[k.replace("model.0.", "conv_first.")] = v
+            elif k.startswith("model.1.sub.23."):
+                remapped[k.replace("model.1.sub.23.", "conv_body.")] = v
+            elif k.startswith("model.1.sub."):
+                m = re.match(r"model\.1\.sub\.(\d+)\.RDB(\d+)\.conv(\d+)\.0\.(weight|bias)", k)
+                if m:
+                    b_idx, rdb_idx, c_idx, wb = m.groups()
+                    remapped[f"body.{b_idx}.rdb{rdb_idx}.conv{c_idx}.{wb}"] = v
+            elif k.startswith("model.3."):
+                remapped[k.replace("model.3.", "conv_up1.")] = v
+            elif k.startswith("model.6."):
+                remapped[k.replace("model.6.", "conv_up2.")] = v
+            elif k.startswith("model.8."):
+                remapped[k.replace("model.8.", "conv_hr.")] = v
+            elif k.startswith("model.10."):
+                remapped[k.replace("model.10.", "conv_last.")] = v
+        state_dict = remapped
 
     # Auto-detect num_feat, num_block, num_grow_ch from state_dict keys so both full 23-block
     # RealESRGAN_x4plus checkpoints and compact test checkpoints load strictly with strict=True.

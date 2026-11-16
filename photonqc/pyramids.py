@@ -55,6 +55,8 @@ class LaplacianPyramidConfig:
     shadow_lift: float = 2.5
     halo_edge_threshold: float = 15.0
     halo_soft_clamp_tau: float = 8.0
+    skin_retouch: float = 0.45
+    capture_sharpen: float = 0.65
     protect_flat_black: bool = True
     flat_black_threshold: int = 2
 
@@ -515,6 +517,97 @@ def degrid_vae_rgb_image(image: Image.Image) -> tuple[Image.Image, int]:
     return Image.fromarray(out_u8, mode="RGB"), n_spikes
 
 
+_WEIGHTS_DIR = Path(__file__).resolve().parent.parent / "external" / "Real-ESRGAN" / "weights"
+PRO_SR_DETAIL_WEIGHTS = "4x_foolhardy_Remacri.pth"
+PRO_SR_EDGE_WEIGHTS = "4x-UltraSharp.pth"
+
+
+def _pro_camera_sr_fusion(
+    clean_rgb_1x: np.ndarray,
+    target_size: tuple[int, int],
+    *,
+    skin_retouch: float = 0.45,
+    capture_sharpen: float = 0.65,
+    use_cv2: bool = True,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]] | None:
+    """Pro Camera 4x SR: Remacri (pore/hair detail) + UltraSharp (edge acuity) Laplacian fusion.
+
+    - `L_0, L_1` (pores, vellus hair, lashes): 70% Remacri + 30% UltraSharp.
+    - `L_2, L_3` (blemish / mottling scale): frequency-separation skin retouch, applied only inside a
+      YCbCr skin-locus mask so hair, eyes, fabric and background keep full detail.
+    - `L_4, G_N` (tonality, facial geometry): locked to the Lanczos optical anchor (zero drift).
+    - Output-resolution capture sharpening (`sigma=0.9`) with noise threshold and a 3x3 envelope clamp.
+    - Chroma: low frequencies from the optical anchor, high-frequency color texture from Remacri.
+    Returns `None` when weights or PyTorch are unavailable so callers can fall back.
+    """
+    detail_w = _WEIGHTS_DIR / PRO_SR_DETAIL_WEIGHTS
+    edge_w = _WEIGHTS_DIR / PRO_SR_EDGE_WEIGHTS
+    if not (detail_w.is_file() and edge_w.is_file()):
+        return None
+    tw, th = target_size
+    if tw != clean_rgb_1x.shape[1] * 4 or th != clean_rgb_1x.shape[0] * 4:
+        return None
+    try:
+        from .neural_sr import run_native_rrdbnet_inference
+
+        clean_im = Image.fromarray(clean_rgb_1x, mode="RGB")
+        rem = np.asarray(run_native_rrdbnet_inference(clean_im, detail_w, tile_size=512)[0], dtype=np.float64)
+        ult = np.asarray(run_native_rrdbnet_inference(clean_im, edge_w, tile_size=512)[0], dtype=np.float64)
+    except Exception:
+        return None
+    lan = np.asarray(clean_im.resize((tw, th), Image.Resampling.LANCZOS), dtype=np.float64)
+
+    def _ycc(rgb: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        y = 0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1] + 0.0722 * rgb[..., 2]
+        return y, (rgb[..., 2] - y) / 1.8556, (rgb[..., 0] - y) / 1.5748
+
+    y_rem, cb_rem, cr_rem = _ycc(rem)
+    y_ult, _, _ = _ycc(ult)
+    y_lan, cb_lan, cr_lan = _ycc(lan)
+    y1, cb1, cr1 = _ycc(clean_rgb_1x.astype(np.float64))
+
+    skin1 = (
+        np.clip((cr1 - 6.0) / 8.0, 0, 1)
+        * np.clip((40.0 - cr1) / 8.0, 0, 1)
+        * np.clip((-cb1 - 2.0) / 6.0, 0, 1)
+        * np.clip((y1 - 50.0) / 30.0, 0, 1)
+    )
+    skin1 = _gaussian_blur_float(skin1, 2.0)
+
+    p_rem = build_laplacian_pyramid(y_rem, levels=5, use_cv2=use_cv2)
+    p_ult = build_laplacian_pyramid(y_ult, levels=5, use_cv2=use_cv2)
+    p_lan = build_laplacian_pyramid(y_lan, levels=5, use_cv2=use_cv2)
+    skin_p = [np.clip(_resize_float_2d(skin1, (b.shape[1], b.shape[0])), 0, 1) for b in p_rem]
+
+    retouch = float(np.clip(skin_retouch, 0.0, 0.9))
+    fused = [0.70 * p_rem[0] + 0.30 * p_ult[0], 0.70 * p_rem[1] + 0.30 * p_ult[1]]
+    for k, w in ((2, 0.35), (3, 1.0)):
+        detail = 0.75 * p_rem[k] + 0.25 * p_ult[k]
+        smooth = 0.60 * p_ult[k]
+        s = skin_p[k] * retouch * w
+        fused.append((1.0 - s) * detail + s * smooth)
+    fused.extend(p_lan[4:])
+    y = reconstruct_from_laplacian_pyramid(fused, use_cv2=use_cv2)
+
+    hp = y - _gaussian_blur_float(y, 0.9)
+    y_sh = y + float(capture_sharpen) * hp * np.clip((np.abs(hp) - 1.2) / 1.2, 0.0, 1.0)
+    yf = Image.fromarray(y.astype(np.float32), mode="F")
+    lo = np.asarray(yf.filter(ImageFilter.MinFilter(size=3)), dtype=np.float64) - 1.0
+    hi = np.asarray(yf.filter(ImageFilter.MaxFilter(size=3)), dtype=np.float64) + 1.0
+    y_out = np.clip(y_sh, np.maximum(0.0, lo), np.minimum(255.0, hi))
+
+    cb = _gaussian_blur_float(cb_lan, 6.0) + _gaussian_blur_float(cb_rem - _gaussian_blur_float(cb_rem, 6.0), 0.7)
+    cr = _gaussian_blur_float(cr_lan, 6.0) + _gaussian_blur_float(cr_rem - _gaussian_blur_float(cr_rem, 6.0), 0.7)
+    meta = {
+        "detail_model": PRO_SR_DETAIL_WEIGHTS,
+        "edge_model": PRO_SR_EDGE_WEIGHTS,
+        "skin_retouch": retouch,
+        "skin_coverage": round(float(np.mean(skin1)), 4),
+        "capture_sharpen": float(capture_sharpen),
+    }
+    return y_out, cb, cr, meta
+
+
 def frequency_separate_portrait_lighting(
     image: Image.Image,
     config: LaplacianPyramidConfig | None = None,
@@ -592,7 +685,26 @@ def frequency_separate_portrait_lighting(
             / "RealESRNet_x4plus.pth"
         )
         used_anisotropic_esrnet = False
-        if esrnet_weights.is_file() and w_in >= 128 and h_in >= 128:
+        pro_meta: dict[str, Any] | None = None
+        if scale == 4 and w_in >= 128 and h_in >= 128:
+            r_p = y_1x + 1.5748 * cr_1x
+            b_p = y_1x + 1.8556 * cb_1x
+            g_p = (y_1x - 0.2126 * r_p - 0.0722 * b_p) / 0.7152
+            clean_rgb = np.clip(np.rint(np.stack([r_p, g_p, b_p], axis=-1)), 0, 255).astype(np.uint8)
+            pro = _pro_camera_sr_fusion(
+                clean_rgb,
+                (target_w, target_h),
+                skin_retouch=float(cfg.skin_retouch),
+                capture_sharpen=float(cfg.capture_sharpen),
+                use_cv2=use_cv2,
+            )
+            if pro is not None:
+                y_hr, cb_hr, cr_hr, pro_meta = pro
+                used_anisotropic_esrnet = True
+                ops.append(
+                    f"pro_camera_sr_remacri_ultrasharp_fusion_skin_{pro_meta['skin_retouch']:.2f}"
+                )
+        if not used_anisotropic_esrnet and esrnet_weights.is_file() and w_in >= 128 and h_in >= 128:
             try:
                 from .neural_sr import run_native_rrdbnet_inference
 
@@ -771,6 +883,7 @@ def frequency_separate_portrait_lighting(
         "output_megapixels": round((out_img.size[0] * out_img.size[1]) / 1_000_000.0, 2),
         "operations": ops,
         "spectrum": spec_metrics,
+        "pro_camera_sr": pro_meta if scale > 1 else None,
     }
     return out_img, meta
 
