@@ -41,7 +41,10 @@ class QwenImageAdapter(BaseAdapter):
 
         is_outpaint = ref and ref.mode == ReferenceMode.OUTPAINT_FULL_BODY
         is_product_lock = (ref and ref.mode == ReferenceMode.PRODUCT_LOCK) or scene.has_product_lock
-        is_identity_lock = ref and ref.mode == ReferenceMode.IDENTITY_LOCK
+        is_transform_adapt = ref and ref.mode == ReferenceMode.TRANSFORM_ADAPT
+        has_subject_ref = bool(
+            ref and ref.mode != ReferenceMode.NONE and not is_outpaint and not is_product_lock
+        )
 
         sentences: List[str] = []
 
@@ -50,15 +53,16 @@ class QwenImageAdapter(BaseAdapter):
                 "Policy-Safe Compliance: Dignified editorial photographic capture adhering to platform standards with fully clothed subject."
             )
 
-        # 1. Primary Visual Directive for Qwen3-VL-8B Text Encoder
+        # 1. Primary Visual Directive for Qwen3-VL-8B Text + Vision Encoder
+        subj_clean = scene.subject.strip().rstrip(".")
         if is_outpaint:
             sentences.append(
-                f"Create a photorealistic full-body photograph extending downward from the input reference image of {scene.subject}, "
+                f"Create a photorealistic full-body photograph extending downward from the input reference image of {subj_clean}, "
                 "showing the complete head-to-toe figure with natural ground contact while preserving exact facial geometry, hair, and wardrobe fabric."
             )
         elif is_product_lock:
             sentences.append(
-                f"Photorealistic commercial studio product photograph of {scene.subject}, preserving exact reference SKU proportions, "
+                f"Photorealistic commercial studio product photograph of {subj_clean}, preserving exact reference SKU proportions, "
                 "packaging geometry, seam lines, and authentic material specular response."
             )
             if scene.sku_color:
@@ -69,11 +73,31 @@ class QwenImageAdapter(BaseAdapter):
                 sentences.append(
                     f"Typography & Label Rule: Render exact crisp lettering reading \"{scene.label_kerning}\" with uniform kerning and zero character warping."
                 )
-        elif is_identity_lock:
+        elif is_transform_adapt:
+            frame_txt = f"{scene.framing.strip()} of " if scene.framing else ""
             sentences.append(
-                f"Photorealistic editorial portrait photograph of {scene.subject} from the reference image, locking exact facial bone structure, "
-                "eye geometry, skin tone, and authentic expression."
+                f"Reference Subject Identity Lock + Custom Scene Execution: Using the exact person/subject from the attached reference image "
+                f"(locking exact facial bone structure, eye geometry, hair, skin tone, and physical build), "
+                f"generate a hyper-realistic 4D photograph showing {frame_txt}{subj_clean}."
             )
+            if ref.preserved_elements:
+                sentences.append(
+                    f"Preserve from reference image ({int(round(ref.fidelity_lock * 100))}% fidelity): "
+                    + ", ".join(ref.preserved_elements)
+                    + "."
+                )
+        elif has_subject_ref:
+            frame_txt = f" ({scene.framing.strip()})" if scene.framing else ""
+            sentences.append(
+                f"Photorealistic high-acuity photograph{frame_txt} strictly locking the exact subject from the attached reference image "
+                f"(preserving facial bone structure, eye geometry, skin tone, expression, and physical proportions) while executing: {subj_clean}."
+            )
+            if ref.preserved_elements:
+                sentences.append(
+                    f"Reference Lock Elements ({int(round(ref.fidelity_lock * 100))}% fidelity): "
+                    + ", ".join(ref.preserved_elements)
+                    + "."
+                )
         else:
             is_portrait = any(
                 k in f"{scene.framing} {scene.subject}".lower()
@@ -105,7 +129,6 @@ class QwenImageAdapter(BaseAdapter):
                 if (is_portrait and not has_explicit_rear)
                 else ""
             )
-            subj_clean = scene.subject.strip().rstrip(".")
             if scene.framing:
                 lead = f"{scene.framing} of {subj_clean}"
             elif subj_clean.lower().startswith(

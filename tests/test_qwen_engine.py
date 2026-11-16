@@ -30,6 +30,8 @@ class TestQwenImage21Integration(unittest.TestCase):
         self.assertIn("ready", status)
         self.assertIn("sd_cli", status)
         self.assertIn("models", status)
+        self.assertTrue(status["models"]["vision_ready"])
+        self.assertIn("mmproj-F16.gguf", status["models"]["llm_vision"]["path"])
 
         try:
             from tests.test_web import TestWebStudioHandler
@@ -42,6 +44,30 @@ class TestQwenImage21Integration(unittest.TestCase):
         data = json.loads(body.decode("utf-8"))
         self.assertIn("ready", data)
         self.assertTrue(data["sd_cli"]["installed"])
+        self.assertTrue(data["models"]["vision_ready"])
+
+    def test_qwen_image_reference_subject_and_custom_prompt_modes(self) -> None:
+        from optical_compiler.models import ReferenceImageInput, ReferenceMode, SceneInput
+
+        for mode, expected_marker in (
+            (ReferenceMode.TRANSFORM_ADAPT, "Reference Subject Identity Lock"),
+            (ReferenceMode.RESTORE_UPSCALE, "strictly locking the exact subject from the attached reference image"),
+        ):
+            scene = SceneInput(
+                subject="standing in a sunlit architectural library wearing a navy cashmere turtleneck",
+                framing="medium portrait",
+                environment="warm cedar bookshelves and tall glass windows",
+                reference=ReferenceImageInput(
+                    filename="subject_ref.png",
+                    mode=mode,
+                    fidelity_lock=0.92,
+                ),
+            )
+            payload = compile_scene(scene, profile="phase_one_iq4", target="qwen_image", aspect_ratio="4:5")
+            self.assertIn(expected_marker, payload.positive_prompt)
+            self.assertIn("sunlit architectural library", payload.positive_prompt)
+            self.assertIn("Professional Acuity Lock", payload.positive_prompt)
+            self.assertIn("soft focus", payload.negative_prompt.lower())
 
     def test_web_studio_javascript_and_event_handlers_syntax_via_node_check(self) -> None:
         """Ensure HTML_TEMPLATE script blocks and all static HTML event handlers have 0 JS syntax errors."""

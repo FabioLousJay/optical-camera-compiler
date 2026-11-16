@@ -1760,6 +1760,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         <!-- Reference Workflow Modes & Anti-Drift Controls -->
         <div id="refControls" style="display: none; flex-direction: column; gap: 0.75rem; margin-top: 0.15rem;">
+          <div style="background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(167, 139, 250, 0.4); border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 0.7rem; color: #ddd6fe; line-height: 1.35;">
+            <strong style="color: #fff;">Subject Reference + Custom Prompt Workflow:</strong> Attach your subject photo here + type your custom scene in <strong>02. Scene Creative Intent</strong> &rarr; click <strong>Generate Locally (Qwen-Image-2.1)</strong>. Select <strong>🎯 Subject + Prompt</strong> below to lock facial identity/body build while changing the pose, outfit, or setting.
+          </div>
           <div class="field-group">
             <label>Reference Workflow Mode</label>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 0.35rem;">
@@ -1788,9 +1791,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 </div>
               </button>
               <button type="button" class="mode-card" id="btnModeTransform" onclick="setRefMode('transform')">
-                <div style="font-size: 0.72rem; font-weight: 700; color: #fff;">🎨 Re-Shoot</div>
+                <div style="font-size: 0.72rem; font-weight: 700; color: #fff;">🎯 Subject + Prompt</div>
                 <div style="font-size: 0.60rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.2;">
-                  Adapt scene with bones
+                  Lock subject, follow prompt
                 </div>
               </button>
               <button type="button" class="mode-card" id="btnModeOutpaint" onclick="setRefMode('outpaint')">
@@ -2417,6 +2420,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <button class="action-btn-shield" onclick="copyPrompt('negative')" title="Copy only the negative artifact suppression tokens">
             <span>Copy Shield Only</span>
           </button>
+          <select id="qwenPyramidScaleSelect" title="Post-generation 4X Pro Camera SR + Skin Retouch" style="background: var(--bg-input); border: 1px solid rgba(167, 139, 250, 0.55); color: #ddd6fe; padding: 0.42rem 0.65rem; border-radius: 6px; font-size: 0.72rem; font-family: var(--font-mono); font-weight: 600;">
+            <option value="4" selected>⚡ 4X Pro Camera SR + Skin Retouch (16–21 MP)</option>
+            <option value="1">1X Native Resolution (Fast ~35s)</option>
+          </select>
           <button type="button" onclick="runLocalQwenGeneration()" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); border: 1px solid rgba(167, 139, 250, 0.6); color: #fff; padding: 0.42rem 0.95rem; border-radius: 6px; font-size: 0.74rem; font-family: var(--font-mono); font-weight: 700; cursor: pointer;" title="Generate this compiled optical prompt locally on your M5 Pro via Qwen-Image-2.1 Unsloth GGUF">
             <span>🟣 Generate Locally (Qwen-Image-2.1 M5 Metal)</span>
           </button>
@@ -5503,7 +5510,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         json: "JSON ALL-IN-ONE PROMPT // STRUCTURED PAYLOAD",
       };
       document.getElementById('targetBadge').textContent = badgeMap[engine] || engine.toUpperCase();
-      compile();
+      return compile();
     }
 
     function onScenarioPromptInput(val) {
@@ -5970,11 +5977,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         clearInterval(qwenRenderTimer);
         qwenRenderTimer = null;
       }
+      const pyrScale = parseInt((document.getElementById('qwenPyramidScaleSelect') || {}).value || '4', 10);
+      const hasRefImg = Boolean(typeof refData !== 'undefined' && refData && refData.active && (refData.absolute_path || refData.saved_path));
       let elapsedSec = 0;
       const updateWaitingBanner = () => {
+        const refTag = hasRefImg ? ' • Reference Subject Lock' : '';
+        const srTag = pyrScale === 4 ? ' • 4X Pro Camera SR (Remacri + UltraSharp + Skin Retouch)' : ' • 1X Native';
+        const estSecs = pyrScale === 4 ? '~65s' : '~45s';
         box.innerHTML = `<div style="color: var(--accent-cyan); display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
-          <span>⏳ Generating locally on Apple M5 Pro Metal GPU via Qwen-Image-2.1-Turbo (Unsloth Q8_0 GGUF + Qwen3-VL-8B)...</span>
-          <strong style="color: var(--accent-green); font-family: var(--font-mono); white-space:nowrap;">${elapsedSec}s / ~45s</strong>
+          <span>⏳ Generating locally on Apple M5 Pro Metal GPU via Qwen-Image-2.1-Turbo${refTag}${srTag}...</span>
+          <strong style="color: var(--accent-green); font-family: var(--font-mono); white-space:nowrap;">${elapsedSec}s / ${estSecs}</strong>
         </div>`;
       };
       updateWaitingBanner();
@@ -5984,6 +5996,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }, 1000);
 
       try {
+        if (typeof setTarget === 'function' && activeTarget !== 'qwen_image') {
+          await setTarget('qwen_image');
+        } else if (typeof compile === 'function') {
+          await compile();
+        }
         const promptText = (typeof currentPayload !== 'undefined' && currentPayload && currentPayload.positive_prompt)
           ? currentPayload.positive_prompt
           : ((document.getElementById('positiveOutput') && document.getElementById('positiveOutput').textContent) || '');
@@ -6004,7 +6021,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             seed: Math.floor(Math.random() * 1000000),
             ref_image_path: refImgPath,
             apply_lightroom_pyramid: true,
-            pyramid_scale: 1
+            pyramid_scale: pyrScale
           })
         });
         const data = await res.json();

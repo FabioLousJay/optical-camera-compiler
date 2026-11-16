@@ -33,6 +33,9 @@ def get_qwen_engine_status() -> dict[str, Any]:
     denoiser_std_q8 = models_dir / "qwen-image-2.1-Q8_0.gguf"
     denoiser_q4 = models_dir / "qwen-image-2.1-Q4_K_M.gguf"
     llm_encoder = models_dir / "Qwen3-VL-8B-Instruct-UD-Q4_K_XL.gguf"
+    llm_vision_f16 = models_dir / "mmproj-F16.gguf"
+    llm_vision_bf16 = models_dir / "mmproj-BF16.gguf"
+    llm_vision = llm_vision_bf16 if (llm_vision_bf16.is_file() and llm_vision_bf16.stat().st_size > 1_000_000_000) else llm_vision_f16
     vae_model = models_dir / "qwen_image_2.1_vae_bf16.safetensors"
 
     active_denoiser: Path | None = None
@@ -52,6 +55,7 @@ def get_qwen_engine_status() -> dict[str, Any]:
 
     sd_cli_ok = sd_cli.is_file() and os.access(sd_cli, os.X_OK)
     llm_ok = llm_encoder.is_file() and llm_encoder.stat().st_size > 1_000_000_000
+    llm_vision_ok = llm_vision.is_file() and llm_vision.stat().st_size > 1_000_000_000
     vae_ok = vae_model.is_file() and vae_model.stat().st_size > 100_000_000
     ready = bool(sd_cli_ok and active_denoiser is not None and llm_ok and vae_ok)
 
@@ -68,6 +72,8 @@ def get_qwen_engine_status() -> dict[str, Any]:
             "is_turbo": bool(active_denoiser and "turbo" in active_denoiser.name.lower()),
             "denoiser_turbo_q8": _file_info(denoiser_turbo_q8),
             "llm_encoder": _file_info(llm_encoder),
+            "llm_vision": _file_info(llm_vision),
+            "vision_ready": llm_vision_ok,
             "vae": _file_info(vae_model),
         },
     }
@@ -107,6 +113,9 @@ def run_qwen_image_local(
     sd_cli = Path(status["sd_cli"]["path"])
     denoiser = Path(status["models"]["active_denoiser"])
     llm = Path(status["models"]["llm_encoder"]["path"])
+    llm_vision_info = status["models"].get("llm_vision") or {}
+    llm_vision = Path(llm_vision_info["path"]) if llm_vision_info.get("path") else None
+    llm_vision_ok = bool(status["models"].get("vision_ready")) and llm_vision is not None and llm_vision.is_file()
     vae = Path(status["models"]["vae"]["path"])
     is_turbo = bool(status["models"]["is_turbo"])
 
@@ -161,11 +170,19 @@ def run_qwen_image_local(
     elif negative_prompt:
         cmd.extend(["-n", negative_prompt])
 
+    ref_p: Path | None = None
     if ref_image_path:
         ref_p = Path(ref_image_path).expanduser().resolve()
         if not ref_p.is_file():
             raise FileNotFoundError(f"Reference image not found: {ref_p}")
-        cmd.extend(["-r", str(ref_p)])
+        if not llm_vision_ok or llm_vision is None:
+            raise RuntimeError(
+                "Reference-guided Qwen-Image-2.1 generation requires Qwen3-VL vision weights "
+                f"(mmproj-F16.gguf / mmproj-BF16.gguf) in {llm.parent}."
+            )
+        cmd.extend(["--llm_vision", str(llm_vision), "-r", str(ref_p)])
+    elif llm_vision_ok and llm_vision is not None:
+        cmd.extend(["--llm_vision", str(llm_vision)])
 
     t0 = time.monotonic()
     proc = subprocess.run(
@@ -208,6 +225,8 @@ def run_qwen_image_local(
         "method": "qwen_image_2_1_local_metal_gguf",
         "denoiser": denoiser.name,
         "llm_encoder": llm.name,
+        "llm_vision": llm_vision.name if (llm_vision_ok and llm_vision is not None) else None,
+        "ref_image_used": str(ref_p) if ref_p is not None else None,
         "vae": vae.name,
         "is_turbo": is_turbo,
         "steps": eff_steps,
