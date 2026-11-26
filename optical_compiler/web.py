@@ -2420,15 +2420,66 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <button class="action-btn-shield" onclick="copyPrompt('negative')" title="Copy only the negative artifact suppression tokens">
             <span>Copy Shield Only</span>
           </button>
-          <select id="qwenPyramidScaleSelect" title="Post-generation 4X Pro Camera SR + Skin Retouch" style="background: var(--bg-input); border: 1px solid rgba(167, 139, 250, 0.55); color: #ddd6fe; padding: 0.42rem 0.65rem; border-radius: 6px; font-size: 0.72rem; font-family: var(--font-mono); font-weight: 600;">
-            <option value="4" selected>⚡ 4X Pro Camera SR + Skin Retouch (16–21 MP)</option>
-            <option value="1">1X Native Resolution (Fast ~35s)</option>
+          <select id="qwenPyramidScaleSelect" title="Post-generation resolution (keep 1X Native to avoid GAN/ESRGAN artifacts; choose 4X only if upscaling small drafts)" style="background: var(--bg-input); border: 1px solid rgba(167, 139, 250, 0.55); color: #ddd6fe; padding: 0.42rem 0.65rem; border-radius: 6px; font-size: 0.72rem; font-family: var(--font-mono); font-weight: 600;">
+            <option value="1" selected>1X Native Clean Resolution (Recommended)</option>
+            <option value="4">⚡ 4X Pro Camera SR + Skin Retouch (16–21 MP)</option>
           </select>
           <button type="button" onclick="runLocalQwenGeneration()" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); border: 1px solid rgba(167, 139, 250, 0.6); color: #fff; padding: 0.42rem 0.95rem; border-radius: 6px; font-size: 0.74rem; font-family: var(--font-mono); font-weight: 700; cursor: pointer;" title="Generate this compiled optical prompt locally on your M5 Pro via Qwen-Image-2.1 Unsloth GGUF">
-            <span>🟣 Generate Locally (Qwen-Image-2.1 M5 Metal)</span>
+            <span>🟣 Generate Image Locally (Qwen-Image-2.1 M5 Metal)</span>
           </button>
         </div>
         <div id="localQwenResultBox" style="display: none; margin-top: 0.65rem; padding: 0.7rem; border-radius: 6px; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.35); font-family: var(--font-mono); font-size: 0.73rem;"></div>
+
+        <!-- Local Metal Image-to-Video Studio (Wan2.2-I2V-A14B & LTX-2.3 Audio-Video) -->
+        <div style="margin-top: 0.85rem; padding: 0.8rem; border-radius: 8px; background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.32);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.55rem;">
+            <strong style="color: var(--accent-cyan); font-family: var(--font-mono); font-size: 0.76rem;">🎬 LOCAL IMAGE-TO-VIDEO STUDIO (M5 METAL // 48 GB)</strong>
+            <span id="videoEngineStatusBadge" style="font-size: 0.67rem; font-family: var(--font-mono); color: var(--text-muted);">Checking local video models...</span>
+          </div>
+          <div style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 0.55rem; line-height: 1.35;">
+            Uses your attached photo (Section 03) as frame 1 + your prompt (Section 02 / Motion cue below). Pick <strong>Wan2.2-I2V 4-Step</strong> (photo required, best subject lock, ~7 min @ 480p) or <strong>LTX-2.3</strong> (synced 48kHz AI audio + 24fps, photo or text-only, ~4 min @ 480p).
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 0.45rem; margin-bottom: 0.5rem;">
+            <div>
+              <label style="font-size: 0.64rem; color: var(--text-muted); font-family: var(--font-mono); display: block; margin-bottom: 2px;">VIDEO MODEL ENGINE</label>
+              <select id="videoEngineSelect" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); color: #fff; padding: 0.38rem 0.5rem; border-radius: 5px; font-size: 0.71rem; font-family: var(--font-mono);">
+                <option value="wan22" selected>Wan2.2-I2V 4-Step (Photo Lock • Silent)</option>
+                <option value="ltx23">LTX-2.3 22B (Synced AI Audio + 24fps)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.64rem; color: var(--text-muted); font-family: var(--font-mono); display: block; margin-bottom: 2px;">RESOLUTION TIER</label>
+              <select id="videoQualitySelect" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); color: #fff; padding: 0.38rem 0.5rem; border-radius: 5px; font-size: 0.71rem; font-family: var(--font-mono);">
+                <option value="fast_480p" selected>Fast 480p (Iteration Speed)</option>
+                <option value="hd_720p">HD 720p (Balanced Quality)</option>
+                <option value="pro_1080p">Pro 1080p (Base + Sharp 2x Upscale)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.64rem; color: var(--text-muted); font-family: var(--font-mono); display: block; margin-bottom: 2px;">CLIP LENGTH</label>
+              <select id="videoDurationSelect" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); color: #fff; padding: 0.38rem 0.5rem; border-radius: 5px; font-size: 0.71rem; font-family: var(--font-mono);">
+                <option value="3" selected>~3 sec Clip (Faster)</option>
+                <option value="5">~5 sec Clip (Max Single Shot)</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; margin-bottom: 0.5rem;">
+            <div>
+              <label style="font-size: 0.64rem; color: var(--text-muted); font-family: var(--font-mono); display: block; margin-bottom: 2px;">MOTION / AUDIO ACTION CUE (OPTIONAL)</label>
+              <input type="text" id="videoMotionInput" placeholder="e.g. waves gently crash, man blinks and turns slightly, slow camera push-in, ocean surf sound" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); color: #fff; padding: 0.38rem 0.5rem; border-radius: 5px; font-size: 0.71rem;">
+            </div>
+            <div style="display: flex; gap: 0.4rem; align-items: flex-end; flex-wrap: wrap;">
+              <input type="file" id="videoEndImgInput" accept="image/*" style="display: none;" onchange="uploadVideoEndFrame(event)">
+              <input type="file" id="videoAudioFileInput" accept="audio/*" style="display: none;" onchange="uploadVideoAudioFile(event)">
+              <label for="videoEndImgInput" class="pill-btn" style="font-size: 0.66rem; padding: 0.38rem 0.6rem; cursor: pointer; border-color: rgba(245, 158, 11, 0.45); color: var(--accent-amber);" title="Optional target closing frame (First-to-Last Frame lock)">🎯 End Frame: <span id="videoEndImgLabel">None</span></label>
+              <label for="videoAudioFileInput" class="pill-btn" style="font-size: 0.66rem; padding: 0.38rem 0.6rem; cursor: pointer; border-color: rgba(16, 185, 129, 0.45); color: var(--accent-green);" title="Optional .mp3 / .wav soundtrack or voiceover to mux into MP4">🎵 Custom Audio: <span id="videoAudioLabel">None</span></label>
+              <button type="button" onclick="runLocalVideoGeneration()" style="background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%); border: 1px solid rgba(56, 189, 248, 0.65); color: #fff; padding: 0.42rem 0.9rem; border-radius: 6px; font-size: 0.73rem; font-family: var(--font-mono); font-weight: 700; cursor: pointer;">
+                <span>🎬 Generate Video (M5 Metal)</span>
+              </button>
+            </div>
+          </div>
+          <div id="localVideoResultBox" style="display: none; margin-top: 0.55rem; padding: 0.65rem; border-radius: 6px; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.35); font-family: var(--font-mono); font-size: 0.72rem;"></div>
+        </div>
       </div>
 
       <!-- Anti-Artifact Shield / Negative Prompt Breakdown -->
@@ -6055,6 +6106,206 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
     }
 
+    let videoAuxState = { endImgPath: null, audioPath: null, lastVideoPath: null };
+    let videoRenderTimer = null;
+
+    async function refreshVideoEngineStatus() {
+      const badge = document.getElementById('videoEngineStatusBadge');
+      if (!badge) return;
+      try {
+        const res = await fetch('/api/video/status');
+        if (!res.ok) return;
+        const st = await res.json();
+        const parts = [];
+        parts.push(st.wan22_ready ? 'Wan2.2: READY' : 'Wan2.2: Missing');
+        parts.push(st.ltx23_ready ? 'LTX-2.3: READY' : 'LTX-2.3: Missing');
+        parts.push(st.ffmpeg_ready ? 'FFmpeg: OK' : 'FFmpeg: Missing');
+        badge.textContent = parts.join(' • ');
+        badge.style.color = st.ready ? 'var(--accent-green)' : 'var(--accent-amber)';
+      } catch (e) {}
+    }
+
+    function uploadVideoEndFrame(event) {
+      const file = event && event.target && event.target.files ? event.target.files[0] : null;
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const res = await fetch('/api/photonqc/upload-local-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, data_url: ev.target.result })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Upload failed');
+          videoAuxState.endImgPath = data.absolute_path || data.saved_path;
+          const lbl = document.getElementById('videoEndImgLabel');
+          if (lbl) lbl.textContent = file.name.slice(0, 18);
+          showToast('End frame loaded: ' + file.name);
+        } catch (err) {
+          alert('End frame upload error: ' + err.message);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function uploadVideoAudioFile(event) {
+      const file = event && event.target && event.target.files ? event.target.files[0] : null;
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const res = await fetch('/api/video/upload-audio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, data_url: ev.target.result })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Audio upload failed');
+          videoAuxState.audioPath = data.absolute_path || data.saved_path;
+          const lbl = document.getElementById('videoAudioLabel');
+          if (lbl) lbl.textContent = file.name.slice(0, 18);
+          showToast('Audio track attached: ' + file.name);
+        } catch (err) {
+          alert('Audio upload error: ' + err.message);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderVideoResultCard(data, titleLabel) {
+      const box = document.getElementById('localVideoResultBox');
+      if (!box) return;
+      videoAuxState.lastVideoPath = data.output_path;
+      const encPath = encodeURIComponent(data.output_path || '');
+      const dims = (data.output_dimensions || []).join('x');
+      const audTag = data.has_audio ? ('Audio: ' + (data.audio_codec || 'aac')) : 'Silent MP4';
+      box.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.45rem; margin-bottom:0.45rem;">
+          <strong style="color: var(--accent-green);">✅ ${titleLabel} (${dims}, ${data.duration_seconds}s, ${audTag})</strong>
+          <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+            <button type="button" onclick="runLocalVideoGeneration(videoAuxState.lastVideoPath)" style="background:rgba(139,92,246,0.22); border:1px solid #a78bfa; color:#c4b5fd; padding:2px 8px; border-radius:4px; font-size:0.68rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">➕ Extend Clip</button>
+            <button type="button" onclick="postEditLocalVideo('upscale_1080p')" style="background:rgba(245,158,11,0.2); border:1px solid var(--accent-amber); color:var(--accent-amber); padding:2px 8px; border-radius:4px; font-size:0.68rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">⚡ 1080p Upscale</button>
+            <button type="button" onclick="promptVideoPostEdit()" style="background:rgba(16,185,129,0.18); border:1px solid var(--accent-green); color:var(--accent-green); padding:2px 8px; border-radius:4px; font-size:0.68rem; font-family:var(--font-mono); cursor:pointer; font-weight:700;">✂️ Trim / Speed / Mux Audio</button>
+            <a href="/api/photonqc/file?path=${encPath}&download=1" download style="background:rgba(6,182,212,0.18); border:1px solid var(--accent-cyan); color:var(--accent-cyan); padding:2px 8px; border-radius:4px; font-size:0.68rem; text-decoration:none; font-weight:700;">💾 Download MP4</a>
+          </div>
+        </div>
+        <div style="font-size:0.68rem; color:var(--text-secondary); margin-bottom:0.45rem;">
+          Engine: <code>${data.method || data.engine}</code> • Upscaler: <code>${data.upscale_method || 'none'}</code> • Saved: <code>${data.output_path}</code>
+        </div>
+        <div style="text-align:center;">
+          <video controls loop autoplay muted playsinline src="/api/photonqc/file?path=${encPath}&t=${Date.now()}" style="max-width:100%; max-height:440px; border-radius:6px; border:1px solid var(--border-subtle); background:#000;"></video>
+        </div>
+      `;
+    }
+
+    async function runLocalVideoGeneration(extendFromPath) {
+      const box = document.getElementById('localVideoResultBox');
+      if (!box) return;
+      box.style.display = 'block';
+      if (videoRenderTimer) {
+        clearInterval(videoRenderTimer);
+        videoRenderTimer = null;
+      }
+      const engine = (document.getElementById('videoEngineSelect') || {}).value || 'wan22';
+      const quality = (document.getElementById('videoQualitySelect') || {}).value || 'fast_480p';
+      const durSec = parseInt((document.getElementById('videoDurationSelect') || {}).value || '3', 10);
+      const motionCue = ((document.getElementById('videoMotionInput') || {}).value || '').trim();
+      const aspect = document.getElementById('aspectSelect') ? document.getElementById('aspectSelect').value : '16:9';
+      const initImgPath = (!extendFromPath && typeof refData !== 'undefined' && refData && refData.active && (refData.absolute_path || refData.saved_path))
+        ? (refData.absolute_path || refData.saved_path)
+        : null;
+
+      let elapsedSec = 0;
+      const updateTimer = () => {
+        const modeTxt = extendFromPath ? 'EXTENDING CLIP (+' + durSec + 's)' : (initImgPath ? 'IMAGE-TO-VIDEO' : 'TEXT-TO-VIDEO');
+        box.innerHTML = `<div style="color: var(--accent-cyan); display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
+          <span>⏳ Generating ${modeTxt} on Apple M5 Pro Metal GPU (${engine.toUpperCase()}, ${quality})...</span>
+          <strong style="color: var(--accent-green); font-family: var(--font-mono); white-space:nowrap;">${elapsedSec}s</strong>
+        </div>`;
+      };
+      updateTimer();
+      videoRenderTimer = setInterval(() => {
+        elapsedSec += 1;
+        updateTimer();
+      }, 1000);
+
+      try {
+        if (typeof compile === 'function') await compile();
+        const compiledPrompt = (typeof currentPayload !== 'undefined' && currentPayload && currentPayload.positive_prompt)
+          ? currentPayload.positive_prompt
+          : ((document.getElementById('subjectInput') || {}).value || 'Cinematic scene');
+        const fullPrompt = motionCue ? (motionCue + '. ' + compiledPrompt) : compiledPrompt;
+        const negText = (typeof currentPayload !== 'undefined' && currentPayload && currentPayload.negative_prompt)
+          ? currentPayload.negative_prompt
+          : '';
+
+        const res = await fetch('/api/video/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: fullPrompt,
+            negative_prompt: negText,
+            engine: engine,
+            quality_tier: quality,
+            aspect_ratio: aspect,
+            duration_sec: durSec,
+            seed: Math.floor(Math.random() * 1000000),
+            init_image_path: initImgPath,
+            end_image_path: videoAuxState.endImgPath,
+            custom_audio_path: videoAuxState.audioPath,
+            extend_from_video: extendFromPath || null
+          })
+        });
+        const data = await res.json();
+        if (videoRenderTimer) { clearInterval(videoRenderTimer); videoRenderTimer = null; }
+        if (!res.ok) throw new Error(data.error || 'Video generation failed');
+        renderVideoResultCard(data, 'LOCAL METAL VIDEO READY');
+      } catch (err) {
+        if (videoRenderTimer) { clearInterval(videoRenderTimer); videoRenderTimer = null; }
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Video Error: ${err.message}</div>`;
+      }
+    }
+
+    async function postEditLocalVideo(action, opts) {
+      if (!videoAuxState.lastVideoPath) {
+        alert('Generate a video first.');
+        return;
+      }
+      const box = document.getElementById('localVideoResultBox');
+      box.innerHTML = `<div style="color: var(--accent-cyan);">⏳ Running ${action} on ${videoAuxState.lastVideoPath}...</div>`;
+      try {
+        const res = await fetch('/api/video/post-edit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.assign({
+            input_video_path: videoAuxState.lastVideoPath,
+            action: action,
+            custom_audio_path: videoAuxState.audioPath
+          }, opts || {}))
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Post-edit failed');
+        renderVideoResultCard(data, 'POST-EDITED VIDEO READY');
+      } catch (err) {
+        box.innerHTML = `<div style="color: var(--accent-rose);">❌ Post-Edit Error: ${err.message}</div>`;
+      }
+    }
+
+    function promptVideoPostEdit() {
+      const startStr = prompt('Trim start seconds (0 for start):', '0');
+      if (startStr === null) return;
+      const endStr = prompt('Trim end seconds (leave blank for full length):', '');
+      const speedStr = prompt('Playback speed (1.0 normal, 0.5 slow-mo, 1.5 faster):', '1.0');
+      postEditLocalVideo('trim_audio', {
+        trim_start_sec: parseFloat(startStr || '0') || 0.0,
+        trim_end_sec: (endStr && endStr.trim()) ? parseFloat(endStr.trim()) : null,
+        speed_factor: parseFloat(speedStr || '1.0') || 1.0
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { refreshVideoEngineStatus(); });
+
     function sendQwenRenderToLaplacianLab(imgPath) {
       openPhotonQCModal('pyramids');
       const inEl = document.getElementById('pqcPyrInput');
@@ -7349,6 +7600,15 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
             return
 
+        if parsed_path == "/api/video/status":
+            try:
+                from .video_engine import get_video_engine_status
+
+                self._send_json(get_video_engine_status())
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            return
+
         if parsed_path == "/api/photonqc/status":
             try:
                 from pathlib import Path
@@ -7395,8 +7655,9 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     self.send_error(HTTPStatus.BAD_REQUEST, "Missing path query parameter")
                     return
                 fp = self._resolve_studio_path(raw_path)
-                if not fp.is_file() or fp.suffix.lower() not in (".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp"):
-                    self.send_error(HTTPStatus.NOT_FOUND, "Image file not found")
+                allowed_exts = (".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp", ".mp4", ".webm", ".avi", ".wav", ".mp3", ".m4a")
+                if not fp.is_file() or fp.suffix.lower() not in allowed_exts:
+                    self.send_error(HTTPStatus.NOT_FOUND, "Media file not found")
                     return
                 mime_map = {
                     ".png": "image/png",
@@ -7405,11 +7666,37 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     ".tif": "image/tiff",
                     ".tiff": "image/tiff",
                     ".webp": "image/webp",
+                    ".mp4": "video/mp4",
+                    ".webm": "video/webm",
+                    ".avi": "video/x-msvideo",
+                    ".wav": "audio/wav",
+                    ".mp3": "audio/mpeg",
+                    ".m4a": "audio/mp4",
                 }
                 data_bytes = fp.read_bytes()
+                total_len = len(data_bytes)
+                mime_type = mime_map.get(fp.suffix.lower(), "application/octet-stream")
+                range_hdr = self.headers.get("Range")
+                if range_hdr and range_hdr.startswith("bytes="):
+                    byte_spec = range_hdr.split("=", 1)[1].split(",")[0].strip()
+                    start_str, _, end_str = byte_spec.partition("-")
+                    start = int(start_str) if start_str else 0
+                    end = int(end_str) if end_str else total_len - 1
+                    start = max(0, min(start, total_len - 1))
+                    end = max(start, min(end, total_len - 1))
+                    chunk = data_bytes[start : end + 1]
+                    self.send_response(HTTPStatus.PARTIAL_CONTENT)
+                    self.send_header("Content-Type", mime_type)
+                    self.send_header("Accept-Ranges", "bytes")
+                    self.send_header("Content-Range", f"bytes {start}-{end}/{total_len}")
+                    self.send_header("Content-Length", str(len(chunk)))
+                    self.end_headers()
+                    self.wfile.write(chunk)
+                    return
                 self.send_response(HTTPStatus.OK)
-                self.send_header("Content-Type", mime_map.get(fp.suffix.lower(), "application/octet-stream"))
-                self.send_header("Content-Length", str(len(data_bytes)))
+                self.send_header("Content-Type", mime_type)
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Content-Length", str(total_len))
                 if (qs.get("download") or ["0"])[0] == "1":
                     self.send_header("Content-Disposition", f'attachment; filename="{fp.name}"')
                 self.end_headers()
@@ -7442,6 +7729,9 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             "/api/photonqc/pyramid-blend",
             "/api/photonqc/upload-local-image",
             "/api/qwen-image/generate",
+            "/api/video/generate",
+            "/api/video/post-edit",
+            "/api/video/upload-audio",
         )
         if parsed_path not in allowed_post_paths:
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
@@ -7484,6 +7774,103 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                     pyramid_scale=int(body.get("pyramid_scale", 1)),
                 )
                 self._send_json(res)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/video/generate":
+            prompt_str = str(body.get("prompt") or "").strip()
+            if not prompt_str:
+                self._send_json({"error": "Missing required 'prompt'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                from pathlib import Path
+                import time
+                from .video_engine import run_video_generation_local
+
+                repo_root = Path(__file__).resolve().parent.parent
+                engine = str(body.get("engine") or "wan22").strip().lower()
+                out_str = body.get("output_path") or str(
+                    repo_root / "outputs" / f"video_{engine}_{int(time.time())}.mp4"
+                )
+                init_p = self._resolve_studio_path(body["init_image_path"]) if body.get("init_image_path") else None
+                end_p = self._resolve_studio_path(body["end_image_path"]) if body.get("end_image_path") else None
+                aud_p = self._resolve_studio_path(body["custom_audio_path"]) if body.get("custom_audio_path") else None
+                ext_p = self._resolve_studio_path(body["extend_from_video"]) if body.get("extend_from_video") else None
+                out_p = self._resolve_studio_path(out_str)
+                res = run_video_generation_local(
+                    prompt=prompt_str,
+                    output_path=out_p,
+                    engine=engine,
+                    negative_prompt=str(body.get("negative_prompt") or ""),
+                    aspect_ratio=str(body.get("aspect_ratio") or "16:9"),
+                    quality_tier=str(body.get("quality_tier") or "fast_480p"),
+                    duration_sec=int(body.get("duration_sec", 3)),
+                    seed=int(body.get("seed", 42)),
+                    init_image_path=init_p,
+                    end_image_path=end_p,
+                    custom_audio_path=aud_p,
+                    extend_from_video=ext_p,
+                )
+                self._send_json(res)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/video/post-edit":
+            in_str = body.get("input_video_path")
+            if not in_str:
+                self._send_json({"error": "Missing required 'input_video_path'"}, status=HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                from pathlib import Path
+                import time
+                from .video_engine import post_edit_video_local
+
+                in_p = self._resolve_studio_path(str(in_str))
+                act = str(body.get("action") or "trim_audio")
+                out_str = body.get("output_path") or str(
+                    in_p.parent / f"{in_p.stem}_{act}_{int(time.time())}.mp4"
+                )
+                out_p = self._resolve_studio_path(out_str)
+                aud_p = self._resolve_studio_path(body["custom_audio_path"]) if body.get("custom_audio_path") else None
+                res = post_edit_video_local(
+                    input_video_path=in_p,
+                    output_path=out_p,
+                    action=act,
+                    trim_start_sec=float(body.get("trim_start_sec", 0.0)),
+                    trim_end_sec=float(body["trim_end_sec"]) if body.get("trim_end_sec") is not None else None,
+                    speed_factor=float(body.get("speed_factor", 1.0)),
+                    custom_audio_path=aud_p,
+                )
+                self._send_json(res)
+            except Exception as err:
+                self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        if parsed_path == "/api/video/upload-audio":
+            try:
+                import base64
+                import re
+                from pathlib import Path
+
+                raw_name = str(body.get("filename") or "audio.mp3")
+                safe_name = re.sub(r"[^A-Za-z0-9._-]", "_", Path(raw_name).name) or "audio.mp3"
+                data_url = str(body.get("data_url") or "")
+                b64_payload = data_url.split(",", 1)[1] if "," in data_url else data_url
+                raw_bytes = base64.b64decode(b64_payload)
+                repo_root = Path(__file__).resolve().parent.parent
+                uploads_dir = repo_root / "uploads"
+                uploads_dir.mkdir(parents=True, exist_ok=True)
+                dest_p = uploads_dir / safe_name
+                dest_p.write_bytes(raw_bytes)
+                self._send_json(
+                    {
+                        "saved_path": f"uploads/{safe_name}",
+                        "absolute_path": str(dest_p),
+                        "size_bytes": len(raw_bytes),
+                    }
+                )
             except Exception as err:
                 self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
             return
@@ -8274,6 +8661,7 @@ def run_server(host: str = "127.0.0.1", port: int = 8765, open_browser: bool = F
     repo_root = Path(__file__).resolve().parent.parent
     os.chdir(str(repo_root))
     server_address = (host, port)
+    ThreadingHTTPServer.allow_reuse_address = True
     httpd = ThreadingHTTPServer(server_address, StudioAPIHandler)
     url = f"http://{host}:{port}"
 

@@ -643,6 +643,12 @@ def frequency_separate_portrait_lighting(
     w_in, h_in = image.size
     scale = max(1, int(cfg.scale_factor))
     target_w, target_h = w_in * scale, h_in * scale
+    if scale > 1 and (target_w * target_h) > 65_000_000:
+        mp = (target_w * target_h) / 1_000_000.0
+        raise ValueError(
+            f"Requested {scale}x upscale ({target_w}x{target_h}, {mp:.1f} MP) exceeds the 65 MP safe limit. "
+            "Your input image appears already upscaled — switch Super-Resolution Scale to 1x Refinement instead of 4x."
+        )
 
     arr_1x = np.asarray(image, dtype=np.float64)
     # 1. Exact Rec.709 / sRGB Luminance (Y) and Chrominance (Cb, Cr) separation + Surgical VAE De-Gridding

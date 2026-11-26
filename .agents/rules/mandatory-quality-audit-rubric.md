@@ -3,9 +3,12 @@ trigger: always_on
 description: Permanent Mandatory Finish-Line Quality Audit Check Rubric required at the completion of every task without user reminder.
 ---
 
-# Permanent Mandatory Constraint: Finish-Line Quality Audit Check Rubric
+# Permanent Mandatory Constraint: Finish-Line Quality Audit Check Rubric & Brutal Honesty Mandate
 
-At the finish of **every** engineering, research, profile addition, bug-fix, or feature implementation task, you **MUST** execute and present a comprehensive **Finish-Line Quality Audit Check Rubric** before concluding your response—without the user ever needing to ask for it.
+1. **Brutal Honesty & Zero Hype**: Be blunt and factual about real image quality, model limits, and failures. Never claim professional camera quality or success if 100% visual inspection shows artifacts, blur, distortion, or collage seams.
+2. **Never Fake It & Never Hallucinate**: Report only verified facts, exact byte/pixel counts, and real visual observations. Never rely on synthetic metrics alone when visual outputs fail.
+3. **Never Drift**: Stick strictly to what the user requested and stop immediately when an approach hits a fundamental model/hardware ceiling instead of wasting tokens on diminishing-returns patches.
+4. **Always QC Everything**: At the finish of **every** engineering, research, profile addition, bug-fix, or feature implementation task, execute real end-to-end QC (live process/endpoints, UI/JS syntax, test suite, and visual inspection of real outputs) and present a comprehensive **Finish-Line Quality Audit Check Rubric** before concluding—without the user ever needing to ask for it.
 
 ## Mandatory Pre-Finish Verification Steps
 1. **Automated Test Suite & JS Syntax Execution**: Run the full unit and integration test suite with `SyntaxWarning` treated as error (`.venv/bin/python -W error::SyntaxWarning -m unittest discover -s tests -v`), which also runs `node --check` on the Web Studio's `<script>` and all static HTML event handlers, and verify 0 failures and 0 regressions.
