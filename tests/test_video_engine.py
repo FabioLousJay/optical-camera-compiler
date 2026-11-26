@@ -8,6 +8,7 @@ from pathlib import Path
 
 from optical_compiler.video_engine import (
     VIDEO_RESOLUTIONS,
+    _stitch_clips,
     get_video_engine_status,
     post_edit_video_local,
     run_video_generation_local,
@@ -111,6 +112,39 @@ class TestLocalVideoEngineIntegration(unittest.TestCase):
             self.assertTrue(up_res["has_audio"])
             self.assertEqual(up_res["output_dimensions"], [640, 512])
             self.assertEqual(up_res["method"], "ffmpeg_lanczos_unsharp_2x")
+
+            # Verify Extend Clip stitch for both audio+audio and silent+silent clips
+            stitched_aud = tmp / "stitched_aud.mp4"
+            _stitch_clips(
+                ffmpeg_bin,
+                status.get("ffprobe_path"),
+                src_mp4,
+                src_mp4,
+                stitched_aud,
+                width=320,
+                height=256,
+                fps=24,
+            )
+            self.assertTrue(stitched_aud.is_file())
+
+            silent_mp4 = tmp / "silent.mp4"
+            subprocess.run(
+                [ffmpeg_bin, "-y", "-f", "lavfi", "-i", "testsrc2=size=832x480:rate=16:duration=1", "-c:v", "libx264", "-pix_fmt", "yuv420p", str(silent_mp4)],
+                capture_output=True,
+                check=True,
+            )
+            stitched_silent = tmp / "stitched_silent.mp4"
+            _stitch_clips(
+                ffmpeg_bin,
+                status.get("ffprobe_path"),
+                silent_mp4,
+                silent_mp4,
+                stitched_silent,
+                width=832,
+                height=480,
+                fps=16,
+            )
+            self.assertTrue(stitched_silent.is_file())
 
     def test_frequency_separate_blocks_accidental_oversize_4x_upscale(self) -> None:
         from PIL import Image

@@ -179,6 +179,70 @@ def _probe_video(ffprobe_bin: str | None, video_path: Path) -> dict[str, Any]:
     return {}
 
 
+def _stitch_clips(
+    ffmpeg_bin: str,
+    ffprobe_bin: str | None,
+    first_mp4: Path,
+    second_mp4: Path,
+    output_mp4: Path,
+    *,
+    width: int,
+    height: int,
+    fps: int,
+) -> Path:
+    """Concatenate two video clips with normalized SAR/FPS and audio streams when present."""
+    p_old = _probe_video(ffprobe_bin, first_mp4)
+    p_new = _probe_video(ffprobe_bin, second_mp4)
+    old_has_aud = any(s.get("codec_type") == "audio" for s in p_old.get("streams", []))
+    new_has_aud = any(s.get("codec_type") == "audio" for s in p_new.get("streams", []))
+    if old_has_aud and new_has_aud:
+        filt = (
+            f"[0:v]scale={width}:{height},setsar=1,fps={fps}[v0];"
+            f"[1:v]scale={width}:{height},setsar=1,fps={fps}[v1];"
+            "[0:a]aformat=sample_rates=48000:channel_layouts=stereo[a0];"
+            "[1:a]aformat=sample_rates=48000:channel_layouts=stereo[a1];"
+            "[v0][a0][v1][a1]concat=n=2:v=1:a=1[v][a]"
+        )
+        maps = ["-map", "[v]", "-map", "[a]", "-c:a", "aac", "-b:a", "192k"]
+    else:
+        filt = (
+            f"[0:v]scale={width}:{height},setsar=1,fps={fps}[v0];"
+            f"[1:v]scale={width}:{height},setsar=1,fps={fps}[v1];"
+            "[v0][v1]concat=n=2:v=1:a=0[v]"
+        )
+        maps = ["-map", "[v]"]
+
+    proc = subprocess.run(
+        [
+            ffmpeg_bin,
+            "-y",
+            "-i",
+            str(first_mp4),
+            "-i",
+            str(second_mp4),
+            "-filter_complex",
+            filt,
+            *maps,
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-crf",
+            "16",
+            "-movflags",
+            "+faststart",
+            str(output_mp4),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=300,
+    )
+    if proc.returncode != 0 or not output_mp4.is_file():
+        raise RuntimeError(f"ffmpeg Extend Clip stitch failed (exit {proc.returncode}): {proc.stderr[-800:]}")
+    return output_mp4
+
+
 def _upscale_clip_2x(
     ffmpeg_bin: str,
     input_video: Path,
@@ -344,50 +408,16 @@ def run_video_generation_local(
         # Optional clip extension (concatenate extend_from_video + newly generated clip)
         if extend_p is not None:
             stitched_mp4 = tmp / "stitched.mp4"
-            p_old = _probe_video(ffprobe_bin, extend_p)
-            p_new = _probe_video(ffprobe_bin, clip_mp4)
-            old_has_aud = any(s.get("codec_type") == "audio" for s in p_old.get("streams", []))
-            new_has_aud = any(s.get("codec_type") == "audio" for s in p_new.get("streams", []))
-            if old_has_aud and new_has_aud:
-                filt = (
-                    f"[0:v]scale={out_w}:{out_h}:setsar=1,fps={fps}[v0];"
-                    f"[1:v]scale={out_w}:{out_h}:setsar=1,fps={fps}[v1];"
-                    "[v0][0:a][v1][1:a]concat=n=2:v=1:a=1[v][a]"
-                )
-                maps = ["-map", "[v]", "-map", "[a]", "-c:a", "aac", "-b:a", "192k"]
-            else:
-                filt = (
-                    f"[0:v]scale={out_w}:{out_h}:setsar=1,fps={fps}[v0];"
-                    f"[1:v]scale={out_w}:{out_h}:setsar=1,fps={fps}[v1];"
-                    "[v0][v1]concat=n=2:v=1:a=0[v]"
-                )
-                maps = ["-map", "[v]"]
-            subprocess.run(
-                [
-                    ffmpeg_bin,
-                    "-y",
-                    "-i",
-                    str(extend_p),
-                    "-i",
-                    str(clip_mp4),
-                    "-filter_complex",
-                    filt,
-                    *maps,
-                    "-c:v",
-                    "libx264",
-                    "-pix_fmt",
-                    "yuv420p",
-                    "-crf",
-                    "16",
-                    "-movflags",
-                    "+faststart",
-                    str(stitched_mp4),
-                ],
-                capture_output=True,
-                text=True,
-                check=True,
+            clip_mp4 = _stitch_clips(
+                ffmpeg_bin,
+                ffprobe_bin,
+                extend_p,
+                clip_mp4,
+                stitched_mp4,
+                width=out_w,
+                height=out_h,
+                fps=fps,
             )
-            clip_mp4 = stitched_mp4
 
         # Optional custom audio track overlay (mux onto video)
         if custom_audio_path:

@@ -7814,6 +7814,8 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
                 )
                 self._send_json(res)
             except Exception as err:
+                sys.stderr.write(f"[Studio Video Error] /api/video/generate: {err}\n")
+                sys.stderr.flush()
                 self._send_json({"error": str(err)}, status=HTTPStatus.BAD_REQUEST)
             return
 
