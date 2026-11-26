@@ -93,6 +93,8 @@ def run_wan22_mps(args: argparse.Namespace) -> None:
         str(wan_dir / "wan_2.1_vae.safetensors"),
         torch_dtype=torch.float32,
     ).to(dev)
+    if hasattr(vae, "enable_tiling"):
+        vae.enable_tiling()
     sched = UniPCMultistepScheduler.from_pretrained(WAN22_HF_REPO, subfolder="scheduler", flow_shift=5.0)
 
     enc_pipe = WanImageToVideoPipeline(
@@ -113,7 +115,7 @@ def run_wan22_mps(args: argparse.Namespace) -> None:
             dtype=torch.bfloat16,
         )
     prompt_embeds = prompt_embeds.cpu()
-    neg_embeds = neg_embeds.cpu()
+    neg_embeds = neg_embeds.cpu() if neg_embeds is not None else None
     del enc_pipe, text_enc
     _clear_mps()
 
@@ -156,8 +158,8 @@ def run_wan22_mps(args: argparse.Namespace) -> None:
         out = pipe(
             image=init_img,
             last_image=last_img,
-            prompt_embeds=prompt_embeds,
-            negative_prompt_embeds=neg_embeds,
+            prompt_embeds=prompt_embeds.to(dev),
+            negative_prompt_embeds=neg_embeds.to(dev) if neg_embeds is not None else None,
             height=args.height,
             width=args.width,
             num_frames=args.frames,
@@ -261,6 +263,8 @@ def run_ltx23_mps(args: argparse.Namespace) -> None:
     avae = AutoencoderKLLTX2Audio.from_pretrained(LTX23_HF_REPO, subfolder="audio_vae", torch_dtype=torch.bfloat16)
     voc = LTX2VocoderWithBWE.from_pretrained(LTX23_HF_REPO, subfolder="vocoder", torch_dtype=torch.bfloat16)
     vae = AutoencoderKLLTX2Video.from_pretrained(LTX23_HF_REPO, subfolder="vae", torch_dtype=torch.bfloat16)
+    if hasattr(vae, "enable_tiling"):
+        vae.enable_tiling()
 
     enc_pipe = LTX2ImageToVideoPipeline(
         scheduler=sched,
@@ -281,7 +285,7 @@ def run_ltx23_mps(args: argparse.Namespace) -> None:
             dtype=torch.bfloat16,
         )
     prompt_embeds = prompt_embeds.cpu()
-    prompt_mask = prompt_mask.cpu()
+    prompt_mask = prompt_mask.cpu() if prompt_mask is not None else None
     del enc_pipe, text_enc
     _clear_mps()
 
@@ -299,8 +303,8 @@ def run_ltx23_mps(args: argparse.Namespace) -> None:
             mod.double_precision = False
 
     common_kwargs = dict(
-        prompt_embeds=prompt_embeds,
-        prompt_attention_mask=prompt_mask,
+        prompt_embeds=prompt_embeds.to(dev),
+        prompt_attention_mask=prompt_mask.to(dev) if prompt_mask is not None else None,
         height=args.height,
         width=args.width,
         num_frames=args.frames,
