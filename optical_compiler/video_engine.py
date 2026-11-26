@@ -20,6 +20,7 @@ VIDEO_RESOLUTIONS: dict[str, dict[str, tuple[int, int, int, int]]] = {
         "4:3": (672, 512, 672, 512),
         "3:4": (512, 672, 512, 672),
         "4:5": (512, 640, 512, 640),
+        "9:11": (512, 640, 512, 640),
         "5:4": (640, 512, 640, 512),
         "3:2": (768, 512, 768, 512),
         "2:3": (512, 768, 512, 768),
@@ -32,6 +33,7 @@ VIDEO_RESOLUTIONS: dict[str, dict[str, tuple[int, int, int, int]]] = {
         "4:3": (1024, 768, 1024, 768),
         "3:4": (768, 1024, 768, 1024),
         "4:5": (768, 960, 768, 960),
+        "9:11": (768, 960, 768, 960),
         "5:4": (960, 768, 960, 768),
         "3:2": (1088, 704, 1088, 704),
         "2:3": (704, 1088, 704, 1088),
@@ -45,6 +47,7 @@ VIDEO_RESOLUTIONS: dict[str, dict[str, tuple[int, int, int, int]]] = {
         "4:3": (704, 544, 1408, 1088),
         "3:4": (544, 704, 1088, 1408),
         "4:5": (544, 672, 1088, 1344),
+        "9:11": (544, 672, 1088, 1344),
         "5:4": (672, 544, 1344, 1088),
         "3:2": (800, 544, 1600, 1088),
         "2:3": (544, 800, 1088, 1600),
@@ -243,6 +246,29 @@ def _stitch_clips(
     return output_mp4
 
 
+def _resolve_video_dimensions(
+    quality_tier: str,
+    aspect_ratio: str,
+    image_path: Path | None = None,
+) -> tuple[str, str, int, int, int, int]:
+    """Resolve quality tier and aspect ratio (`auto` matches attached photo orientation/ratio)."""
+    tier = quality_tier if quality_tier in VIDEO_RESOLUTIONS else "fast_480p"
+    ar_map = VIDEO_RESOLUTIONS[tier]
+    ar_key = (aspect_ratio or "auto").strip().lower()
+    if ar_key == "auto" and image_path is not None and image_path.is_file():
+        from PIL import Image
+
+        with Image.open(image_path) as im:
+            iw, ih = im.size
+        if iw > 0 and ih > 0:
+            target_ratio = iw / ih
+            ar_key = min(ar_map.keys(), key=lambda k: abs((ar_map[k][0] / ar_map[k][1]) - target_ratio))
+    if ar_key not in ar_map:
+        ar_key = "16:9"
+    gen_w, gen_h, out_w, out_h = ar_map[ar_key]
+    return tier, ar_key, gen_w, gen_h, out_w, out_h
+
+
 def _upscale_clip_2x(
     ffmpeg_bin: str,
     input_video: Path,
@@ -299,10 +325,6 @@ def run_video_generation_local(
     models_root = str(_engine_root() / "models" / "video")
     worker_script = Path(__file__).resolve().with_name("video_worker_mps.py")
 
-    tier = quality_tier if quality_tier in VIDEO_RESOLUTIONS else "fast_480p"
-    ar_map = VIDEO_RESOLUTIONS[tier]
-    gen_w, gen_h, out_w, out_h = ar_map.get(aspect_ratio, ar_map["16:9"])
-
     dur = max(2, min(5, int(duration_sec)))
     if engine_key == "ltx23":
         fps = 24
@@ -349,6 +371,10 @@ def run_video_generation_local(
             raise ValueError(
                 "Wan2.2-I2V requires an attached start photo (or Extend Clip). Switch to LTX-2.3 for text-only generation."
             )
+
+        tier, resolved_ar, gen_w, gen_h, out_w, out_h = _resolve_video_dimensions(
+            quality_tier, aspect_ratio, effective_init
+        )
 
         raw_mp4 = tmp / "raw_mps.mp4"
         cmd: list[str] = [

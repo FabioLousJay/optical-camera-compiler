@@ -2456,6 +2456,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               </select>
             </div>
             <div>
+              <label style="font-size: 0.64rem; color: var(--text-muted); font-family: var(--font-mono); display: block; margin-bottom: 2px;">ASPECT RATIO (AR)</label>
+              <select id="videoAspectSelect" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); color: #fff; padding: 0.38rem 0.5rem; border-radius: 5px; font-size: 0.71rem; font-family: var(--font-mono);">
+                <option value="auto" selected>Auto (Match Photo AR)</option>
+                <option value="follow_03">Follow Section 03 AR</option>
+                <option value="16:9">16:9 (Widescreen)</option>
+                <option value="9:16">9:16 (Vertical Story / Reels)</option>
+                <option value="4:5">4:5 (Portrait)</option>
+                <option value="9:11">9:11 (Editorial Portrait)</option>
+                <option value="3:4">3:4 (Classic Portrait)</option>
+                <option value="1:1">1:1 (Square)</option>
+                <option value="3:2">3:2 (35mm Landscape)</option>
+                <option value="4:3">4:3 (Medium Format)</option>
+                <option value="5:4">5:4 (Large Format)</option>
+                <option value="21:9">21:9 (Cinema Scope)</option>
+              </select>
+            </div>
+            <div>
               <label style="font-size: 0.64rem; color: var(--text-muted); font-family: var(--font-mono); display: block; margin-bottom: 2px;">CLIP LENGTH</label>
               <select id="videoDurationSelect" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); color: #fff; padding: 0.38rem 0.5rem; border-radius: 5px; font-size: 0.71rem; font-family: var(--font-mono);">
                 <option value="3" selected>~3 sec Clip (Faster)</option>
@@ -6211,7 +6228,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const quality = (document.getElementById('videoQualitySelect') || {}).value || 'fast_480p';
       const durSec = parseInt((document.getElementById('videoDurationSelect') || {}).value || '3', 10);
       const motionCue = ((document.getElementById('videoMotionInput') || {}).value || '').trim();
-      const aspect = document.getElementById('aspectSelect') ? document.getElementById('aspectSelect').value : '16:9';
+      const rawVideoAr = (document.getElementById('videoAspectSelect') || {}).value || 'auto';
+      const sec03Ar = document.getElementById('aspectSelect') ? document.getElementById('aspectSelect').value : '16:9';
+      const aspect = (rawVideoAr === 'follow_03') ? sec03Ar : rawVideoAr;
       const initImgPath = (!extendFromPath && typeof refData !== 'undefined' && refData && refData.active && (refData.absolute_path || refData.saved_path))
         ? (refData.absolute_path || refData.saved_path)
         : null;

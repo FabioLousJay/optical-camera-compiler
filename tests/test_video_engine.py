@@ -8,6 +8,7 @@ from pathlib import Path
 
 from optical_compiler.video_engine import (
     VIDEO_RESOLUTIONS,
+    _resolve_video_dimensions,
     _stitch_clips,
     get_video_engine_status,
     post_edit_video_local,
@@ -44,11 +45,26 @@ class TestLocalVideoEngineIntegration(unittest.TestCase):
 
     def test_video_resolutions_divisible_by_32(self) -> None:
         for tier, ar_map in VIDEO_RESOLUTIONS.items():
+            self.assertIn("9:11", ar_map)
             for aspect, (gw, gh, ow, oh) in ar_map.items():
                 self.assertEqual(gw % 32, 0, f"{tier} {aspect} gen_w={gw}")
                 self.assertEqual(gh % 32, 0, f"{tier} {aspect} gen_h={gh}")
                 self.assertEqual(ow % 2, 0, f"{tier} {aspect} out_w={ow}")
                 self.assertEqual(oh % 2, 0, f"{tier} {aspect} out_h={oh}")
+
+        from PIL import Image
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            portrait = Path(tmpdir) / "portrait.png"
+            landscape = Path(tmpdir) / "landscape.png"
+            Image.new("RGB", (600, 1000)).save(portrait)
+            Image.new("RGB", (1200, 675)).save(landscape)
+
+            _, ar_p, gw_p, gh_p, _, _ = _resolve_video_dimensions("fast_480p", "auto", portrait)
+            self.assertLess(gw_p, gh_p, f"Expected portrait AR for portrait photo, got {ar_p} {gw_p}x{gh_p}")
+
+            _, ar_l, gw_l, gh_l, _, _ = _resolve_video_dimensions("fast_480p", "auto", landscape)
+            self.assertGreater(gw_l, gh_l, f"Expected landscape AR for landscape photo, got {ar_l} {gw_l}x{gh_l}")
 
     def test_wan22_requires_attached_photo(self) -> None:
         with self.assertRaises(ValueError) as ctx:
