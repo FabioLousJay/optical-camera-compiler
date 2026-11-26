@@ -8655,15 +8655,31 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
 
 
 def run_server(host: str = "127.0.0.1", port: int = 8765, open_browser: bool = False) -> None:
-    """Start local web studio server."""
+    """Start local web studio server, or open existing instance cleanly if already live on `port`."""
+    import errno
     from pathlib import Path
+    import urllib.request
 
     repo_root = Path(__file__).resolve().parent.parent
     os.chdir(str(repo_root))
     server_address = (host, port)
-    ThreadingHTTPServer.allow_reuse_address = True
-    httpd = ThreadingHTTPServer(server_address, StudioAPIHandler)
     url = f"http://{host}:{port}"
+    ThreadingHTTPServer.allow_reuse_address = True
+    try:
+        httpd = ThreadingHTTPServer(server_address, StudioAPIHandler)
+    except OSError as err:
+        if err.errno == errno.EADDRINUSE:
+            try:
+                with urllib.request.urlopen(f"{url}/api/health", timeout=1.5) as resp:
+                    if resp.status == 200 and "ok" in resp.read().decode("utf-8", errors="ignore"):
+                        sys.stdout.write(f"Optical Studio server is already running cleanly at {url}\n")
+                        sys.stdout.flush()
+                        if open_browser:
+                            webbrowser.open(url)
+                        return
+            except Exception:
+                pass
+        raise
 
     sys.stdout.write("=" * 75 + "\n")
     sys.stdout.write("  OPTICAL CAMERA COMPILER // MASTER STUDIO CONSOLE v2.1\n")

@@ -120,6 +120,24 @@ class TestLocalVideoEngineIntegration(unittest.TestCase):
             frequency_separate_portrait_lighting(large, LaplacianPyramidConfig(levels=5, scale_factor=4))
         self.assertIn("65 MP", str(ctx.exception))
 
+    def test_run_server_reuses_live_studio_port(self) -> None:
+        import threading
+        from http.server import ThreadingHTTPServer
+        from optical_compiler.web import StudioAPIHandler, run_server
+
+        ThreadingHTTPServer.allow_reuse_address = True
+        srv = ThreadingHTTPServer(("127.0.0.1", 0), StudioAPIHandler)
+        busy_port = srv.server_address[1]
+        t = threading.Thread(target=srv.serve_forever, daemon=True)
+        t.start()
+        try:
+            # Should detect the already-running /api/health server and exit cleanly without OSError
+            run_server(host="127.0.0.1", port=busy_port, open_browser=False)
+        finally:
+            srv.shutdown()
+            srv.server_close()
+            t.join(timeout=2)
+
 
 if __name__ == "__main__":
     unittest.main()
