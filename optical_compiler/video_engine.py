@@ -289,6 +289,33 @@ def _upscale_clip_2x(
     return output_mp4, "ffmpeg_lanczos_unsharp_2x"
 
 
+def _compute_shot_plan(engine_key: str, duration_sec: int) -> tuple[int, int, int, int, int]:
+    """Plan `(total_dur_sec, fps, frames_per_segment, num_segments, expected_total_frames)`.
+
+    Single shots (`<= 5s`) run in 1 pass; longer clips (`10s–30s`) auto-chain `5s` segments
+    inside one worker load so model weights remain resident across segments.
+    """
+    dur = max(2, min(30, int(duration_sec)))
+    fps = 24 if engine_key == "ltx23" else 16
+    if dur <= 5:
+        segments = 1
+        seg_dur = dur
+    else:
+        segments = max(2, (dur + 4) // 5)
+        seg_dur = 5
+
+    raw_frames = seg_dur * fps
+    if engine_key == "ltx23":
+        # LTX-2.3 requires (frames - 1) divisible by 8
+        frames_per_seg = ((max(16, raw_frames) + 7) // 8) * 8 + 1
+    else:
+        # Wan2.2 requires (frames - 1) divisible by 4
+        frames_per_seg = ((max(16, raw_frames) + 3) // 4) * 4 + 1
+
+    total_frames = frames_per_seg if segments == 1 else (frames_per_seg * segments - (segments - 1))
+    return dur, fps, frames_per_seg, segments, total_frames
+
+
 def run_video_generation_local(
     prompt: str,
     output_path: str | Path,
@@ -325,17 +352,7 @@ def run_video_generation_local(
     models_root = str(_engine_root() / "models" / "video")
     worker_script = Path(__file__).resolve().with_name("video_worker_mps.py")
 
-    dur = max(2, min(5, int(duration_sec)))
-    if engine_key == "ltx23":
-        fps = 24
-        # LTX-2.3 requires (frames - 1) divisible by 8
-        raw_frames = dur * fps
-        video_frames = ((max(16, raw_frames) + 7) // 8) * 8 + 1
-    else:
-        fps = 16
-        # Wan2.2 requires (frames - 1) divisible by 4
-        raw_frames = dur * fps
-        video_frames = ((max(16, raw_frames) + 3) // 4) * 4 + 1
+    dur, fps, video_frames, segments, expected_total_frames = _compute_shot_plan(engine_key, duration_sec)
 
     out_p = Path(output_path).expanduser().resolve()
     if out_p.suffix.lower() != ".mp4":
@@ -395,6 +412,8 @@ def run_video_generation_local(
             str(video_frames),
             "--fps",
             str(fps),
+            "--segments",
+            str(segments),
             "--seed",
             str(seed),
             "--models-root",
@@ -413,7 +432,8 @@ def run_video_generation_local(
             cmd.extend(["--end-image", str(end_p)])
 
         t0 = time.monotonic()
-        proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=2400)
+        run_timeout = max(2400, segments * 1500)
+        proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=run_timeout)
         elapsed_gen = round(time.monotonic() - t0, 2)
         if proc.returncode != 0 or not raw_mp4.is_file():
             tail = (proc.stderr or proc.stdout or "")[-2000:]
@@ -493,7 +513,8 @@ def run_video_generation_local(
         "generated_dimensions": [gen_w, gen_h],
         "output_dimensions": [int(v_stream.get("width", out_w)), int(v_stream.get("height", out_h))],
         "fps": fps,
-        "video_frames": video_frames,
+        "segments": segments,
+        "video_frames": expected_total_frames,
         "has_audio": a_stream is not None,
         "audio_codec": a_stream.get("codec_name") if a_stream else None,
         "duration_seconds": round(float(probe_final.get("format", {}).get("duration", dur)), 2),

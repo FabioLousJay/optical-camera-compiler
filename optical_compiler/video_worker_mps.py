@@ -27,6 +27,18 @@ def _clear_mps() -> None:
         torch.mps.empty_cache()
 
 
+def _reset_and_enable_offload(pipe: object, dev: str) -> None:
+    """Safely strip stale accelerate hooks when switching pipeline classes before enabling MPS offload."""
+    if dev != "mps":
+        return
+    from accelerate.hooks import remove_hook_from_module
+
+    for comp in getattr(pipe, "components", {}).values():
+        if isinstance(comp, torch.nn.Module):
+            remove_hook_from_module(comp, recurse=True)
+    pipe.enable_model_cpu_offload(device="mps")  # type: ignore[attr-defined]
+
+
 def _device() -> str:
     return "mps" if torch.backends.mps.is_available() else "cpu"
 
@@ -93,8 +105,6 @@ def run_wan22_mps(args: argparse.Namespace) -> None:
         str(wan_dir / "wan_2.1_vae.safetensors"),
         torch_dtype=torch.float32,
     ).to(dev)
-    if hasattr(vae, "enable_tiling"):
-        vae.enable_tiling()
     sched = UniPCMultistepScheduler.from_pretrained(WAN22_HF_REPO, subfolder="scheduler", flow_shift=5.0)
 
     enc_pipe = WanImageToVideoPipeline(
@@ -144,35 +154,49 @@ def run_wan22_mps(args: argparse.Namespace) -> None:
         transformer_2=tr_low,
         boundary_ratio=0.9,
     )
-    if dev == "mps":
-        pipe.enable_model_cpu_offload(device="mps")
+    _reset_and_enable_offload(pipe, dev)
 
-    init_img = Image.open(args.init_image).convert("RGB").resize((args.width, args.height), Image.Resampling.LANCZOS)
-    last_img = (
+    num_segments = max(1, int(args.segments))
+    current_init = Image.open(args.init_image).convert("RGB").resize((args.width, args.height), Image.Resampling.LANCZOS)
+    final_end = (
         Image.open(args.end_image).convert("RGB").resize((args.width, args.height), Image.Resampling.LANCZOS)
         if args.end_image
         else None
     )
+    p_embeds_dev = prompt_embeds.to(dev)
+    n_embeds_dev = neg_embeds.to(dev) if neg_embeds is not None else None
 
-    with torch.no_grad():
-        out = pipe(
-            image=init_img,
-            last_image=last_img,
-            prompt_embeds=prompt_embeds.to(dev),
-            negative_prompt_embeds=neg_embeds.to(dev) if neg_embeds is not None else None,
-            height=args.height,
-            width=args.width,
-            num_frames=args.frames,
-            num_inference_steps=4,
-            guidance_scale=1.0,
-            guidance_scale_2=1.0,
-            generator=torch.Generator("cpu").manual_seed(args.seed),
-            output_type="np",
-        )
+    frame_chunks: list[np.ndarray] = []
+    for seg_idx in range(num_segments):
+        seg_last_img = final_end if (seg_idx == num_segments - 1) else None
+        with torch.no_grad():
+            out = pipe(
+                image=current_init,
+                last_image=seg_last_img,
+                prompt_embeds=p_embeds_dev,
+                negative_prompt_embeds=n_embeds_dev,
+                height=args.height,
+                width=args.width,
+                num_frames=args.frames,
+                num_inference_steps=4,
+                guidance_scale=1.0,
+                guidance_scale_2=1.0,
+                generator=torch.Generator("cpu").manual_seed(args.seed + seg_idx),
+                output_type="np",
+            )
+        seg_frames = (np.clip(out.frames[0], 0.0, 1.0) * 255).astype(np.uint8)
+        if seg_idx > 0 and len(seg_frames) > 1:
+            # Skip repeated anchor frame[0] at segment boundary so motion flows without a 1-frame stutter
+            frame_chunks.append(seg_frames[1:])
+        else:
+            frame_chunks.append(seg_frames)
+        current_init = Image.fromarray(seg_frames[-1])
+        del out
+        _clear_mps()
 
-    frames = (np.clip(out.frames[0], 0.0, 1.0) * 255).astype(np.uint8)
+    frames = np.concatenate(frame_chunks, axis=0) if len(frame_chunks) > 1 else frame_chunks[0]
     _write_mp4_h264(frames, Path(args.output_mp4), args.fps, args.ffmpeg_bin)
-    print(f"WAN22_MPS_DONE {frames.shape} in {time.monotonic() - t0:.2f}s", flush=True)
+    print(f"WAN22_MPS_DONE segments={num_segments} {frames.shape} in {time.monotonic() - t0:.2f}s", flush=True)
 
 
 def _load_ltx23_connectors(ltx_dir: Path) -> torch.nn.Module:
@@ -302,9 +326,24 @@ def run_ltx23_mps(args: argparse.Namespace) -> None:
         if hasattr(mod, "double_precision"):
             mod.double_precision = False
 
-    common_kwargs = dict(
-        prompt_embeds=prompt_embeds.to(dev),
-        prompt_attention_mask=prompt_mask.to(dev) if prompt_mask is not None else None,
+    num_segments = max(1, int(args.segments))
+    current_init = (
+        Image.open(args.init_image).convert("RGB").resize((args.width, args.height), Image.Resampling.LANCZOS)
+        if args.init_image
+        else None
+    )
+    final_end = (
+        Image.open(args.end_image).convert("RGB").resize((args.width, args.height), Image.Resampling.LANCZOS)
+        if args.end_image
+        else None
+    )
+    p_embeds_dev = prompt_embeds.to(dev)
+    p_mask_dev = prompt_mask.to(dev) if prompt_mask is not None else None
+    sr = int(getattr(voc.config, "output_sampling_rate", 48000))
+
+    base_kwargs = dict(
+        prompt_embeds=p_embeds_dev,
+        prompt_attention_mask=p_mask_dev,
         height=args.height,
         width=args.width,
         num_frames=args.frames,
@@ -319,73 +358,78 @@ def run_ltx23_mps(args: argparse.Namespace) -> None:
         audio_stg_scale=0.0,
         audio_modality_scale=1.0,
         audio_guidance_rescale=0.0,
-        generator=torch.Generator("cpu").manual_seed(args.seed),
         output_type="np",
     )
 
-    if args.init_image and args.end_image:
-        init_img = Image.open(args.init_image).convert("RGB").resize((args.width, args.height), Image.Resampling.LANCZOS)
-        end_img = Image.open(args.end_image).convert("RGB").resize((args.width, args.height), Image.Resampling.LANCZOS)
-        pipe = LTX2ConditionPipeline(
-            scheduler=sched,
-            vae=vae,
-            audio_vae=avae,
-            text_encoder=None,
-            tokenizer=tok,
-            connectors=conn,
-            transformer=tr,
-            vocoder=voc,
-        )
-        if dev == "mps":
-            pipe.enable_model_cpu_offload(device="mps")
-        with torch.no_grad():
-            out = pipe(
-                conditions=[
-                    LTX2VideoCondition(frames=init_img, index=0, strength=1.0, crf=0),
-                    LTX2VideoCondition(frames=end_img, index=-1, strength=1.0, crf=0),
-                ],
-                **common_kwargs,
-            )
-    elif args.init_image:
-        init_img = Image.open(args.init_image).convert("RGB").resize((args.width, args.height), Image.Resampling.LANCZOS)
-        pipe = LTX2ImageToVideoPipeline(
-            scheduler=sched,
-            vae=vae,
-            audio_vae=avae,
-            text_encoder=None,
-            tokenizer=tok,
-            connectors=conn,
-            transformer=tr,
-            vocoder=voc,
-        )
-        if dev == "mps":
-            pipe.enable_model_cpu_offload(device="mps")
-        with torch.no_grad():
-            out = pipe(image=init_img, image_crf=0, **common_kwargs)
-    else:
-        pipe = LTX2Pipeline(
-            scheduler=sched,
-            vae=vae,
-            audio_vae=avae,
-            text_encoder=None,
-            tokenizer=tok,
-            connectors=conn,
-            transformer=tr,
-            vocoder=voc,
-        )
-        if dev == "mps":
-            pipe.enable_model_cpu_offload(device="mps")
-        with torch.no_grad():
-            out = pipe(**common_kwargs)
+    active_pipe: object | None = None
+    active_mode: str | None = None
+    frame_chunks: list[np.ndarray] = []
+    audio_chunks: list[np.ndarray] = []
 
-    frames = (np.clip(out.frames[0], 0.0, 1.0) * 255).astype(np.uint8)
-    audio_raw = (
-        out.audio[0].float().cpu().numpy() if torch.is_tensor(out.audio) else np.asarray(out.audio[0], dtype=np.float32)
-    )
-    if audio_raw.ndim == 2 and audio_raw.shape[0] <= 2:
-        audio_raw = audio_raw.T
+    for seg_idx in range(num_segments):
+        seg_end = final_end if (seg_idx == num_segments - 1) else None
+        if current_init is not None and seg_end is not None:
+            mode = "cond"
+        elif current_init is not None:
+            mode = "i2v"
+        else:
+            mode = "t2v"
+
+        if active_pipe is None or mode != active_mode:
+            cls = {"cond": LTX2ConditionPipeline, "i2v": LTX2ImageToVideoPipeline, "t2v": LTX2Pipeline}[mode]
+            active_pipe = cls(
+                scheduler=sched,
+                vae=vae,
+                audio_vae=avae,
+                text_encoder=None,
+                tokenizer=tok,
+                connectors=conn,
+                transformer=tr,
+                vocoder=voc,
+            )
+            _reset_and_enable_offload(active_pipe, dev)
+            active_mode = mode
+
+        gen = torch.Generator("cpu").manual_seed(args.seed + seg_idx)
+        with torch.no_grad():
+            if mode == "cond":
+                out = active_pipe(  # type: ignore[operator]
+                    conditions=[
+                        LTX2VideoCondition(frames=current_init, index=0, strength=1.0, crf=0),
+                        LTX2VideoCondition(frames=seg_end, index=-1, strength=1.0, crf=0),
+                    ],
+                    generator=gen,
+                    **base_kwargs,
+                )
+            elif mode == "i2v":
+                out = active_pipe(image=current_init, image_crf=0, generator=gen, **base_kwargs)  # type: ignore[operator]
+            else:
+                out = active_pipe(generator=gen, **base_kwargs)  # type: ignore[operator]
+
+        seg_frames = (np.clip(out.frames[0], 0.0, 1.0) * 255).astype(np.uint8)
+        seg_audio = (
+            out.audio[0].float().cpu().numpy()
+            if torch.is_tensor(out.audio)
+            else np.asarray(out.audio[0], dtype=np.float32)
+        )
+        if seg_audio.ndim == 2 and seg_audio.shape[0] <= 2:
+            seg_audio = seg_audio.T
+
+        if seg_idx > 0 and len(seg_frames) > 1:
+            frame_chunks.append(seg_frames[1:])
+            trim_samples = int(round(sr / float(args.fps)))
+            if len(seg_audio) > trim_samples:
+                seg_audio = seg_audio[trim_samples:]
+        else:
+            frame_chunks.append(seg_frames)
+        audio_chunks.append(seg_audio)
+        current_init = Image.fromarray(seg_frames[-1])
+        del out
+        _clear_mps()
+
+    frames = np.concatenate(frame_chunks, axis=0) if len(frame_chunks) > 1 else frame_chunks[0]
+    audio_raw = np.concatenate(audio_chunks, axis=0) if len(audio_chunks) > 1 else audio_chunks[0]
     pcm = (np.clip(audio_raw, -1.0, 1.0) * 32767.0).astype(np.int16)
-    sr = int(getattr(voc.config, "output_sampling_rate", 48000))
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_vid = Path(tmpdir) / "vid.mp4"
@@ -425,7 +469,7 @@ def run_ltx23_mps(args: argparse.Namespace) -> None:
             text=True,
             check=True,
         )
-    print(f"LTX23_MPS_DONE {frames.shape} sr={sr} in {time.monotonic() - t0:.2f}s", flush=True)
+    print(f"LTX23_MPS_DONE segments={num_segments} {frames.shape} sr={sr} in {time.monotonic() - t0:.2f}s", flush=True)
 
 
 def main() -> None:
@@ -437,6 +481,7 @@ def main() -> None:
     parser.add_argument("--height", type=int, required=True)
     parser.add_argument("--frames", type=int, required=True)
     parser.add_argument("--fps", type=int, required=True)
+    parser.add_argument("--segments", type=int, default=1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--init-image", default=None)
     parser.add_argument("--end-image", default=None)

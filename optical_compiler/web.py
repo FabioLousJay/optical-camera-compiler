@@ -2475,8 +2475,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div>
               <label style="font-size: 0.64rem; color: var(--text-muted); font-family: var(--font-mono); display: block; margin-bottom: 2px;">CLIP LENGTH</label>
               <select id="videoDurationSelect" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); color: #fff; padding: 0.38rem 0.5rem; border-radius: 5px; font-size: 0.71rem; font-family: var(--font-mono);">
-                <option value="3" selected>~3 sec Clip (Faster)</option>
-                <option value="5">~5 sec Clip (Max Single Shot)</option>
+                <option value="3" selected>~3 sec Shot (Fastest • Max Sharpness)</option>
+                <option value="5">~5 sec Shot (Max Single-Shot Sharpness)</option>
+                <option value="10">~10 sec (2×5s Auto-Chain • Best Long Quality)</option>
+                <option value="15">~15 sec (3×5s Auto-Chain • Balanced)</option>
+                <option value="20">~20 sec (4×5s Auto-Chain • Long Render)</option>
+                <option value="30">~30 sec (6×5s Auto-Chain • Max Render)</option>
               </select>
             </div>
           </div>
@@ -6237,7 +6241,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
       let elapsedSec = 0;
       const updateTimer = () => {
-        const modeTxt = extendFromPath ? 'EXTENDING CLIP (+' + durSec + 's)' : (initImgPath ? 'IMAGE-TO-VIDEO' : 'TEXT-TO-VIDEO');
+        const segNote = (!extendFromPath && durSec > 5) ? (' [' + Math.ceil(durSec / 5) + '×5s AUTO-CHAIN]') : '';
+        const modeTxt = extendFromPath ? 'EXTENDING CLIP (+' + durSec + 's)' : ((initImgPath ? 'IMAGE-TO-VIDEO' : 'TEXT-TO-VIDEO') + segNote);
         box.innerHTML = `<div style="color: var(--accent-cyan); display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
           <span>⏳ Generating ${modeTxt} on Apple M5 Pro Metal GPU (${engine.toUpperCase()}, ${quality})...</span>
           <strong style="color: var(--accent-green); font-family: var(--font-mono); white-space:nowrap;">${elapsedSec}s</strong>

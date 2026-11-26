@@ -8,6 +8,7 @@ from pathlib import Path
 
 from optical_compiler.video_engine import (
     VIDEO_RESOLUTIONS,
+    _compute_shot_plan,
     _resolve_video_dimensions,
     _stitch_clips,
     get_video_engine_status,
@@ -19,6 +20,17 @@ from photonqc.pyramids import LaplacianPyramidConfig, frequency_separate_portrai
 
 class TestLocalVideoEngineIntegration(unittest.TestCase):
     """Verify local PyTorch MPS video engine status, resolution presets, FFmpeg post-edit, and 65MP pyramid guard."""
+
+    def test_multi_shot_duration_plan_preserves_single_pass_short_clips(self) -> None:
+        self.assertEqual(_compute_shot_plan("wan22", 3), (3, 16, 49, 1, 49))
+        self.assertEqual(_compute_shot_plan("wan22", 5), (5, 16, 81, 1, 81))
+        self.assertEqual(_compute_shot_plan("wan22", 10), (10, 16, 81, 2, 161))
+        self.assertEqual(_compute_shot_plan("wan22", 15), (15, 16, 81, 3, 241))
+        self.assertEqual(_compute_shot_plan("wan22", 20), (20, 16, 81, 4, 321))
+        self.assertEqual(_compute_shot_plan("wan22", 30), (30, 16, 81, 6, 481))
+        self.assertEqual(_compute_shot_plan("ltx23", 3), (3, 24, 73, 1, 73))
+        self.assertEqual(_compute_shot_plan("ltx23", 10), (10, 24, 121, 2, 241))
+        self.assertEqual(_compute_shot_plan("ltx23", 30), (30, 24, 121, 6, 721))
 
     def test_video_status_and_web_endpoint(self) -> None:
         status = get_video_engine_status()
