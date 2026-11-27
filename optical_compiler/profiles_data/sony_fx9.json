@@ -1,0 +1,61 @@
+{
+  "profile_id": "sony_fx9",
+  "title": "Sony FX9 6K Full-Frame Cinema & Broadcast Camera (PXW-FX9)",
+  "schema_version": "2.0",
+  "purpose": "Ergonomic shoulder-mount and broadcast documentary full-frame cinema camera built around a 6K oversampled Exmor R CMOS sensor, Dual Base ISO 800/4000, Electronic Variable ND filter, and 15+ stops of tonal latitude.",
+  "sensor_and_optics": {
+    "camera_system": "Sony FX9 6K Full-Frame Cinema Camera (PXW-FX9)",
+    "sensor_type": "35.7 x 18.8mm Full-Frame 6K Oversampled Exmor R CMOS sensor (6008x3168 readout downsampled to ultra-crisp 4K 10-bit 4:2:2)",
+    "sensor_dimensions": "35.7x18.8mm 6K oversampled full-frame sensor",
+    "full_frame_equivalent": "35mm full-frame cinema field of view (shoulder-balanced E-mount ENG/cine rig)",
+    "lens": "Sony FE PZ 28-135mm F4 G OSS (SELP28135G) / FE 50mm F1.2 GM cine sweet spot",
+    "aperture_sweet_spot": "f/4.0",
+    "iso_base": "Dual Base ISO 800 / 4000 (S-Log3 / S-Cinetone) with Electronic Variable ND (1/4 to 1/128)",
+    "dynamic_range": "15+ stops dynamic range with 6K-to-4K full-pixel oversampling eliminating moire and aliasing",
+    "shutter": "180-degree cinema shutter angle (1/48s motion cadence) with Genlock broadcast synchronization"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Controlled documentary key with natural architectural bounce and electronic ND daylight balance calibrated to Dual Base ISO 800/4000",
+    "light_transport": "Fine 6K oversampled tonal transitions preserving delicate facial contours, crisp hair texture, and smooth highlight roll-off"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "High-acutance 6K oversampled readout resolving fine weave and clean specular edges without moire or stair-stepping",
+      "Smooth S-Cinetone broadcast-cinema skin reproduction tuned directly to Sony cinema colorimetry",
+      "Zero electronic edge ringing or harsh digital contrast curves"
+    ],
+    "depth_and_optics": [
+      "Full-frame 6K cinema separation with stable shoulder-mounted documentary composition",
+      "Electronic Variable ND maintaining constant T/f-stop depth across changing outdoor exposure",
+      "Fast Hybrid AF tracking subjects smoothly without focus hunting"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "moire aliasing",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression banding"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "harsh ENG camcorder sharpening",
+      "computational bokeh",
+      "clipped digital highlights",
+      "crushed shadows"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Sony FX9 (PXW-FX9) 6K oversampled full-frame Exmor R cinema capture with Dual Base ISO 800/4000, Electronic Variable ND control, zero moire texture fidelity, and 15+ stops S-Cinetone tonal graduation."
+}

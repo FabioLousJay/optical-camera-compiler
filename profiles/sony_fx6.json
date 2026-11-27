@@ -1,0 +1,61 @@
+{
+  "profile_id": "sony_fx6",
+  "title": "Sony FX6 Full-Frame Cinema Workhorse Camera (ILME-FX6)",
+  "schema_version": "2.0",
+  "purpose": "Versatile run-and-gun documentary and commercial full-frame cinema camera pairing a 10.2MP Exmor R sensor, Dual Base ISO 800/12800, and 15+ stops dynamic range with built-in stepless Electronic Variable ND filtration.",
+  "sensor_and_optics": {
+    "camera_system": "Sony FX6 Full-Frame Cinema Line Workhorse (ILME-FX6)",
+    "sensor_type": "35.6 x 23.8mm Full-Frame Back-Illuminated Exmor R CMOS sensor (10.2MP effective cinema readout, 15+ stops S-Log3 latitude)",
+    "sensor_dimensions": "35.6x23.8mm full-frame cinema workhorse sensor",
+    "full_frame_equivalent": "35mm native full-frame field of view (E-mount with 12G-SDI cinema I/O)",
+    "lens": "Sony FE 24-70mm F2.8 GM II (SEL2470GM2) at 50mm f/2.8",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "Dual Base ISO 800 / 12800 with integrated Electronic Variable ND (1/4 to 1/128)",
+    "dynamic_range": "15+ stops dynamic range in S-Log3 / S-Gamut3.Cine and S-Cinetone with 16-bit RAW SDI output capability",
+    "shutter": "180-degree cinema shutter angle (1/48s cadence) maintained under bright daylight via internal Variable ND"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Bright outdoor sunlight balanced at wide-open f/2.8 via built-in Electronic Variable ND filter alongside soft muslin bounce or negative fill",
+    "light_transport": "Controlled wide-aperture daylight highlight roll-off preventing blown highlights while preserving natural midtone skin nuance"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "True documentary cinema acutance resolving natural skin relief, fabric grain, and crisp foliage without artificial clarity",
+      "Consistent S-Cinetone / VENICE color science across bright exterior and interior transitions",
+      "Clean low-noise shadow retention even in fast available-light documentary setups"
+    ],
+    "depth_and_optics": [
+      "Shallow wide-aperture f/2.0–f/2.8 depth in bright sun made physically possible by stepless Electronic Variable ND",
+      "Smooth G-Master II focus falloff with zero computational edge haloing",
+      "Balanced documentary handheld shoulder/rig geometry"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression artifacts",
+      "highlight clipping"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "ENG news sharpness",
+      "computational bokeh",
+      "blown bright sky",
+      "oversaturated rec709 tint"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Sony FX6 (ILME-FX6) full-frame 10.2MP Exmor R documentary cinema capture with Electronic Variable ND wide-aperture daylight control, Dual Base ISO 800/12800 cleanliness, and 15+ stops S-Cinetone roll-off."
+}

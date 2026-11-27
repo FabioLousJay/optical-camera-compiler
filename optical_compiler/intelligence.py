@@ -170,6 +170,12 @@ PROFILE_DISPLAY_NAMES: dict[str, str] = {
     "arri_alexa_35": "ARRI Alexa 35",
     "arri_alexa_265": "ARRI ALEXA 265",
     "sony_fx_series": "Sony VENICE 2",
+    "sony_fx5": "Sony FX5 (ILME-FX5)",
+    "sony_fx3": "Sony FX3 (ILME-FX3)",
+    "sony_fx6": "Sony FX6 (ILME-FX6)",
+    "sony_fx9": "Sony FX9 6K (PXW-FX9)",
+    "sony_burano": "Sony BURANO 8.6K CineAlta",
+    "sony_venice": "Sony VENICE 6K CineAlta",
     "imax_msm_9802": "IMAX MSM 9802 15-Perf 65mm",
     "canon_powershot_g7x_iii": "Canon PowerShot G7 X Mark III",
     "fujifilm_x_e5": "Fujifilm X-E5 40.2MP",
@@ -584,6 +590,78 @@ DEFAULT_HARDWARE_SPECS: dict[str, dict[str, Any]] = {
         "lighting_key": "tungsten_candle",
         "lighting": "Practical Neon and Tungsten Night Illumination with S-Cinetone Color Science",
         "framing": "cinematic medium close-up",
+        "angle": "cinematic eye-level",
+        "medium_type": "cinema_digital",
+    },
+    "sony_fx5": {
+        "lens": "Sony FE 50mm F1.2 GM (SEL50F12GM)",
+        "aperture": "f/2.8",
+        "dof": "Netflix-approved 5K 3:2 Open Gate stacked Exmor RS capture with Triple Base ISO and 16-bit X-OCN latitude",
+        "aspect_ratio": "3:2",
+        "film_stock": "digital_raw",
+        "lighting_key": "tungsten_candle",
+        "lighting": "Practical Tungsten and Blue-Hour Cinema Key across Triple Base ISO",
+        "framing": "cinematic medium close-up",
+        "angle": "cinematic eye-level",
+        "medium_type": "cinema_digital",
+    },
+    "sony_fx3": {
+        "lens": "Sony FE 35mm F1.4 GM (SEL35F14GM)",
+        "aperture": "f/2.0",
+        "dof": "Compact full-frame Exmor R Dual Base ISO 12800 low-light cinema depth with natural S-Cinetone skin",
+        "aspect_ratio": "16:9",
+        "film_stock": "digital_raw",
+        "lighting_key": "tungsten_candle",
+        "lighting": "Available Practical Night Illumination at Dual Base ISO 12800",
+        "framing": "handheld medium documentary frame",
+        "angle": "cinematic eye-level",
+        "medium_type": "cinema_digital",
+    },
+    "sony_fx6": {
+        "lens": "Sony FE 24-70mm F2.8 GM II (SEL2470GM2)",
+        "aperture": "f/2.8",
+        "dof": "Documentary full-frame depth controlled in bright sun via Electronic Variable ND and S-Cinetone color",
+        "aspect_ratio": "16:9",
+        "film_stock": "digital_raw",
+        "lighting_key": "golden_hour",
+        "lighting": "Electronic Variable ND Balanced Daylight with Soft Unbleached Bounce",
+        "framing": "documentary medium portrait",
+        "angle": "cinematic shoulder-height",
+        "medium_type": "cinema_digital",
+    },
+    "sony_fx9": {
+        "lens": "Sony FE PZ 28-135mm F4 G OSS (SELP28135G)",
+        "aperture": "f/4.0",
+        "dof": "6K oversampled moire-free full-frame readout with Dual Base ISO 800/4000 and broadcast-cinema tonal rolloff",
+        "aspect_ratio": "16:9",
+        "film_stock": "digital_raw",
+        "lighting_key": "rembrandt_key",
+        "lighting": "Controlled Broadcast-Cinema Key and Practical Interior Fill",
+        "framing": "shoulder-mounted documentary medium portrait",
+        "angle": "cinematic eye-level",
+        "medium_type": "cinema_digital",
+    },
+    "sony_burano": {
+        "lens": "Cooke S7/i Full Frame Plus 50mm T2.0 Cine Prime",
+        "aperture": "T2.0",
+        "dof": "8.6K CineAlta 16-stop X-OCN latitude with PL-mount optical stabilization and organic highlight graduation",
+        "aspect_ratio": "21:9",
+        "film_stock": "arri_logc4",
+        "lighting_key": "window_daylight",
+        "lighting": "Sculpted Feature Production Clerestory Key with Negative Fill",
+        "framing": "widescreen theatrical character close-up",
+        "angle": "cinematic eye-level",
+        "medium_type": "cinema_digital",
+    },
+    "sony_venice": {
+        "lens": "Cooke Anamorphic/i Full Frame Plus 50mm T2.3",
+        "aperture": "T2.3",
+        "dof": "36x24mm 6K Open Gate CineAlta Dual Base ISO 500/2500 separation with mechanical ND optical purity",
+        "aspect_ratio": "21:9",
+        "film_stock": "digital_raw",
+        "lighting_key": "tungsten_candle",
+        "lighting": "Chiaroscuro Feature Film Key with Practical Tungsten Streetlamps",
+        "framing": "widescreen theatrical medium shot",
         "angle": "cinematic eye-level",
         "medium_type": "cinema_digital",
     },
@@ -1021,7 +1099,7 @@ class PromptIntelligenceEngine:
                 score += 35.0
 
         elif intent.primary_genre == "cinema":
-            if profile_id in ("arri_alexa_35", "arri_alexa_265", "sony_fx_series", "imax_msm_9802"):
+            if profile_id in ("arri_alexa_35", "arri_alexa_265", "sony_fx_series", "sony_burano", "sony_venice", "sony_fx5", "sony_fx6", "sony_fx9", "sony_fx3", "imax_msm_9802"):
                 score += 45.0
             elif profile_id == "hasselblad_xpan":
                 score += 30.0
@@ -1067,7 +1145,7 @@ class PromptIntelligenceEngine:
                 score += 60.0
 
         if intent.is_cinematic_intent:
-            if profile_id in ("arri_alexa_35", "arri_alexa_265", "sony_fx_series", "hasselblad_xpan"):
+            if profile_id in ("arri_alexa_35", "arri_alexa_265", "sony_fx_series", "sony_burano", "sony_venice", "sony_fx5", "sony_fx6", "sony_fx9", "sony_fx3", "hasselblad_xpan"):
                 score += 35.0
 
         if intent.is_action_intent:
@@ -1124,6 +1202,24 @@ class PromptIntelligenceEngine:
                 score += 48.0
             elif profile_id in ("canon_eos_5d_iv", "nikon_d500", "pentax_k1_ii", "nikon_d780", "canon_eos_90d"):
                 score += 35.0
+        elif any(k in prompt_lower for k in ["sony fx5", "ilme-fx5", "fx5", "5k open gate", "triple base iso"]):
+            if profile_id == "sony_fx5":
+                score += 60.0
+        elif any(k in prompt_lower for k in ["sony fx3", "ilme-fx3", "fx3", "fx3a"]):
+            if profile_id == "sony_fx3":
+                score += 60.0
+        elif any(k in prompt_lower for k in ["sony fx6", "ilme-fx6", "fx6"]):
+            if profile_id == "sony_fx6":
+                score += 60.0
+        elif any(k in prompt_lower for k in ["sony fx9", "pxw-fx9", "fx9", "6k oversampled"]):
+            if profile_id == "sony_fx9":
+                score += 60.0
+        elif any(k in prompt_lower for k in ["sony burano", "burano", "mpc-2610", "pl ibis"]):
+            if profile_id == "sony_burano":
+                score += 60.0
+        elif any(k in prompt_lower for k in ["sony venice 6k", "venice 1", "mpc-3610", "base iso 500"]):
+            if profile_id == "sony_venice":
+                score += 60.0
 
         return score
 

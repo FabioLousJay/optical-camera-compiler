@@ -1,0 +1,61 @@
+{
+  "profile_id": "sony_burano",
+  "title": "Sony BURANO 8.6K Full-Frame CineAlta Digital Cinema Camera",
+  "schema_version": "2.0",
+  "purpose": "Flagship 8.6K full-frame single-operator CineAlta motion picture camera uniting Dual PL/E-mount lens support, world-first in-body optical image stabilization for PL cinema lenses, built-in Electronic Variable ND, 16 stops dynamic range, and internal 16-bit X-OCN LT.",
+  "sensor_and_optics": {
+    "camera_system": "Sony BURANO 8.6K Full-Frame CineAlta Camera (MPC-2610)",
+    "sensor_type": "35.9 x 24.0mm Full-Frame 8.6K CineAlta CMOS sensor (8632 x 4856 16:9 / 35.9x20.2mm active, 16-bit internal X-OCN LT RAW)",
+    "sensor_dimensions": "35.9x24.0mm 8.6K full-frame CineAlta sensor",
+    "full_frame_equivalent": "35mm large-area full-frame cinema field of view (native PL & E-mount)",
+    "lens": "Cooke S7/i Full Frame Plus 50mm T2.0 Cine Prime (or ARRI Signature Prime 47mm T1.8 with in-body PL IBIS)",
+    "aperture_sweet_spot": "T2.0",
+    "iso_base": "Dual Base ISO 800 / 3200 (S-Gamut3.Cine / S-Log3) with built-in Electronic Variable ND (0.6–2.1)",
+    "dynamic_range": "16 stops benchmark CineAlta dynamic range in 16-bit X-OCN LT RAW with smooth highlight roll-off",
+    "shutter": "180-degree cinema shutter angle (1/48s motion cadence) stabilized via 5-axis PL/E-mount IBIS"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Feature film production soft key lighting through muslin/diffusion with deep sculpted negative fill across 16 stops of latitude",
+    "light_transport": "Flagship 8.6K CineAlta light transport delivering painterly highlight roll-off, rich shadow micro-contrast, and natural organic skin colorimetry"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "8.6K 16-bit X-OCN optical acuity resolving fine eyelashes, skin micro-relief, and period costume fabric with theatrical softness",
+      "Smooth 16-stop tonal ramp keeping bright practicals and sunlit exteriors completely unclipped",
+      "Zero digital sharpening edge halos or compressed video chroma artifacts"
+    ],
+    "depth_and_optics": [
+      "Full-frame PL cinema prime rendering with sculpted focal transition, circular bokeh, and gentle corner vignette",
+      "Stabilized handheld PL-mount organic movement eliminating micro-jitter",
+      "True rectified theatrical cinema projection geometry"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression banding",
+      "video noise clipping"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "broadcast video sharpness",
+      "computational bokeh",
+      "clipped digital highlights",
+      "crushed blacks"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Sony BURANO 8.6K full-frame CineAlta digital cinema aesthetics with PL-mount cinema prime character, Dual Base ISO 800/3200, 16 stops dynamic range in 16-bit X-OCN LT, and organic S-Gamut3.Cine highlight roll-off."
+}

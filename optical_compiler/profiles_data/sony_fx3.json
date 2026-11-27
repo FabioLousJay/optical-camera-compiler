@@ -1,0 +1,61 @@
+{
+  "profile_id": "sony_fx3",
+  "title": "Sony FX3 Compact Full-Frame Cinema Line Camera (ILME-FX3)",
+  "schema_version": "2.0",
+  "purpose": "Ultra-compact handheld and gimbal full-frame Cinema Line body built around a high-sensitivity 10.2MP effective (12.1MP total) Exmor R BSI CMOS sensor, Dual Base ISO 800/12800, 15+ stops dynamic range, and native S-Cinetone low-light authority.",
+  "sensor_and_optics": {
+    "camera_system": "Sony FX3 Full-Frame Cinema Line Camera (ILME-FX3)",
+    "sensor_type": "35.6 x 23.8mm Full-Frame Back-Illuminated Exmor R CMOS sensor (10.2MP cinema effective / 12.1MP total, large 8.4 µm low-light photosites, BIONZ XR)",
+    "sensor_dimensions": "35.6x23.8mm full-frame low-light cinema sensor (10.2MP effective)",
+    "full_frame_equivalent": "35mm native full-frame field of view (compact handheld/gimbal E-mount)",
+    "lens": "Sony FE 35mm F1.4 GM (SEL35F14GM) stopped down to f/2.0",
+    "aperture_sweet_spot": "f/2.0",
+    "iso_base": "Dual Base ISO 800 / 12800 (expandable to ISO 409,600 in S-Log3)",
+    "dynamic_range": "15+ stops dynamic range with 10-bit 4:2:2 All-Intra S-Log3 and direct S-Cinetone look",
+    "shutter": "180-degree cinema shutter angle (1/48s equivalent cadence) stabilized with 5-axis Active Mode IBIS"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Available practical night neon, tungsten candlelight, or soft natural window light anchored to Dual Base ISO 12800 clean low-light sensitivity",
+    "light_transport": "Large-photosite Exmor R photon gathering with clean shadow floor, smooth S-Cinetone pastel skin tones, and gradual highlight compression"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "Clean low-noise full-frame readout in dim interiors without aggressive chroma noise reduction smearing",
+      "Natural S-Cinetone midtone warmth keeping skin texture organic without harsh broadcast edge enhancement",
+      "Smooth dark shadow falloff retaining subtle textile and architectural detail at ISO 12800"
+    ],
+    "depth_and_optics": [
+      "Intimate full-frame 35mm f/2.0 documentary depth separating subject cleanly inside tight practical environments",
+      "Fluid gimbal/handheld cinema perspective with natural optical breathing control",
+      "Real-time Eye AF maintaining crisp focus across natural subject movement"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "color noise blotches",
+      "compression banding"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "camcorder video look",
+      "computational bokeh",
+      "clipped digital highlights",
+      "oversaturated neon smear"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Sony FX3 (ILME-FX3) 35.6x23.8mm full-frame Exmor R low-light cinema signature with Dual Base ISO 800/12800 cleanliness, 15+ stops dynamic latitude, and natural S-Cinetone skin rendition."
+}

@@ -1,0 +1,61 @@
+{
+  "profile_id": "sony_fx5",
+  "title": "Sony FX5 Compact Full-Frame Cinema Camera (ILME-FX5)",
+  "schema_version": "2.0",
+  "purpose": "Netflix-approved 734g compact full-frame digital cinema camera featuring a 16.6MP (4992x3328) fully-stacked Exmor RS BSI CMOS sensor, BIONZ XR2 processor with integrated AI unit, 5K 3:2 Open Gate capture, internal 16-bit X-OCN RAW, Triple Base ISO 800/4000/12800, and 15+ to 16+ stops dynamic range.",
+  "sensor_and_optics": {
+    "camera_system": "Sony FX5 Compact Full-Frame Cinema Camera (ILME-FX5, 16.6MP Stacked Exmor RS CMOS)",
+    "sensor_type": "35.9 x 24.0mm Full-Frame Fully-Stacked Exmor RS BSI CMOS sensor (16.6MP effective / 18.2MP total, 4992x3328 5K 3:2 Open Gate, BIONZ XR2 + Integrated AI Unit)",
+    "sensor_dimensions": "35.9x24.0mm full-frame stacked cinema sensor (16.6MP, 5K 3:2 Open Gate)",
+    "full_frame_equivalent": "35mm native full-frame field of view (E-mount native optical geometry)",
+    "lens": "Sony FE 50mm F1.2 GM (SEL50F12GM) stopped down to T2.8 cinematic sweet spot",
+    "aperture_sweet_spot": "f/2.8",
+    "iso_base": "Triple Base ISO 800 / 4000 / 12800 (S-Log3 / S-Gamut3.Cine, Dual Gain Shooting)",
+    "dynamic_range": "15+ stops (up to 16+ stops in Dual Gain Shooting) with internal 16-bit X-OCN LT/C1/C2 RAW & S-Cinetone color science",
+    "shutter": "180-degree electronic global-speed stacked cinema shutter (1/48s equivalent motion cadence with minimal rolling skew)"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Narrative cinema key and practical tungsten/daylight mix calibrated across Triple Base ISO 800/4000/12800 and 16-bit X-OCN RAW latitude",
+    "light_transport": "Clean stacked Exmor RS specular roll-off preserving subtle skin highlights, deep noise-free shadow gradients, and true S-Cinetone chromatic balance"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "5K 3:2 Open Gate stacked sensor purity resolving natural dermal pores, fabric weave, and fine hair without edge sharpening halos",
+      "16-bit X-OCN linear highlight and shadow graduation eliminating banding in smooth atmospheric gradients",
+      "Authentic cinema tonal curve balanced for Netflix-grade theatrical and episodic mastering"
+    ],
+    "depth_and_optics": [
+      "Full-frame Sony E-mount optical separation with smooth focus transitions and G-Master II 11-blade circular bokeh",
+      "Virtually zero stacked-sensor rolling shutter skew during dynamic handheld gimbal or whip-pan motion",
+      "Real-time AI subject recognition AF locking naturally onto the near eye"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression banding",
+      "rolling shutter jello"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "broadcast video sharpness",
+      "computational bokeh",
+      "clipped digital highlights",
+      "oversaturated rec709 tint"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Sony FX5 (ILME-FX5) 16.6MP 35.9x24.0mm fully-stacked Exmor RS full-frame cinema capture with Triple Base ISO 800/4000/12800, internal 16-bit X-OCN latitude, 5K 3:2 Open Gate clarity, and organic S-Cinetone highlight roll-off."
+}

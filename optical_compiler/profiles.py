@@ -888,6 +888,72 @@ CAMERA_ROUTER_RULES: list[tuple[str, list[str]]] = [
             "fa 77mm f/1.8 limited",
         ],
     ),
+    (
+        "sony_fx5",
+        [
+            "sony fx5",
+            "ilme-fx5",
+            "ilme fx5",
+            "fx5",
+            "5k open gate",
+            "triple base iso",
+            "734-gram",
+        ],
+    ),
+    (
+        "sony_fx3",
+        [
+            "sony fx3",
+            "ilme-fx3",
+            "ilme fx3",
+            "fx3",
+            "fx3a",
+            "sony x3",
+        ],
+    ),
+    (
+        "sony_fx6",
+        [
+            "sony fx6",
+            "ilme-fx6",
+            "ilme fx6",
+            "fx6",
+            "electronic variable nd",
+            "run-and-gun variable nd",
+        ],
+    ),
+    (
+        "sony_fx9",
+        [
+            "sony fx9",
+            "pxw-fx9",
+            "pxw fx9",
+            "fx9",
+            "6k oversampled cinema",
+            "6k oversampled",
+            "xdca-fx9",
+        ],
+    ),
+    (
+        "sony_burano",
+        [
+            "sony burano",
+            "mpc-2610",
+            "burano",
+            "pl-mount ibis",
+            "8.6k x-ocn",
+        ],
+    ),
+    (
+        "sony_venice",
+        [
+            "sony venice 6k",
+            "sony venice",
+            "mpc-3610",
+            "dual base iso 500",
+            "venice 1",
+        ],
+    ),
 ]
 
 
@@ -918,6 +984,34 @@ def auto_select_profile(scene: Union[str, SceneInput]) -> str:
     else:
         text = str(scene).lower()
 
+    explicit_cinema_models = {
+        "sony venice 2",
+        "sony venice",
+        "sony venice 6k",
+        "mpc-3610",
+        "sony burano",
+        "mpc-2610",
+        "burano",
+        "sony fx9",
+        "pxw-fx9",
+        "pxw fx9",
+        "fx9",
+        "sony fx6",
+        "ilme-fx6",
+        "ilme fx6",
+        "fx6",
+        "sony fx5",
+        "ilme-fx5",
+        "ilme fx5",
+        "fx5",
+        "sony fx3",
+        "ilme-fx3",
+        "ilme fx3",
+        "fx3",
+        "fx3a",
+        "sony x3",
+    }
+
     best_profile: Optional[str] = None
     longest_match_len = 0
 
@@ -925,8 +1019,9 @@ def auto_select_profile(scene: Union[str, SceneInput]) -> str:
         for kw in keywords:
             pattern = r"(?<!\w)" + re.escape(kw) + r"(?!\w)"
             if re.search(pattern, text):
-                if len(kw) > longest_match_len:
-                    longest_match_len = len(kw)
+                weight = len(kw) + (20 if kw in explicit_cinema_models else 0)
+                if weight > longest_match_len:
+                    longest_match_len = weight
                     best_profile = profile_id
 
     if best_profile:
@@ -1282,6 +1377,28 @@ def load_profile(
         "k_1_ii": "pentax_k1_ii",
         "k1_ii": "pentax_k1_ii",
         "k1ii": "pentax_k1_ii",
+        "sony_fx5": "sony_fx5",
+        "ilme_fx5": "sony_fx5",
+        "fx5": "sony_fx5",
+        "sony_fx3": "sony_fx3",
+        "ilme_fx3": "sony_fx3",
+        "fx3": "sony_fx3",
+        "fx3a": "sony_fx3",
+        "sony_x3": "sony_fx3",
+        "x3": "sony_fx3",
+        "sony_fx6": "sony_fx6",
+        "ilme_fx6": "sony_fx6",
+        "fx6": "sony_fx6",
+        "sony_fx9": "sony_fx9",
+        "pxw_fx9": "sony_fx9",
+        "fx9": "sony_fx9",
+        "sony_burano": "sony_burano",
+        "burano": "sony_burano",
+        "mpc_2610": "sony_burano",
+        "sony_venice": "sony_venice",
+        "venice": "sony_venice",
+        "venice_1": "sony_venice",
+        "mpc_3610": "sony_venice",
     }
     normalized_key = name_or_path.strip().lower().replace("-", "_").replace(" ", "_")
     target_name = PROFILE_ALIASES.get(normalized_key, name_or_path)

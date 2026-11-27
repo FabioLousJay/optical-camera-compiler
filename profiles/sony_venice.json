@@ -1,0 +1,61 @@
+{
+  "profile_id": "sony_venice",
+  "title": "Sony VENICE 6K Full-Frame Digital Cinema System (CineAlta MPC-3610)",
+  "schema_version": "2.0",
+  "purpose": "Original flagship Hollywood 36x24mm 6K Full-Frame 3:2 Open Gate CineAlta motion picture camera featuring Dual Base ISO 500/2500, 8-step internal mechanical ND filters, 15+ stops latitude, and 16-bit X-OCN XT/ST/LT filmic color science.",
+  "sensor_and_optics": {
+    "camera_system": "Sony VENICE 6K Full-Frame CineAlta Digital Cinema Camera (MPC-3610)",
+    "sensor_type": "36.0 x 24.0mm Full-Frame 3:2 Open Gate 6K CMOS cinema sensor (6048 x 4032 active pixels, 16-bit X-OCN XT/ST/LT RAW)",
+    "sensor_dimensions": "36.0x24.0mm full-frame 6K Open Gate cinema sensor",
+    "full_frame_equivalent": "35mm VistaVision / Full-Frame 3:2 cinema field of view (native PL & E-mount)",
+    "lens": "Cooke Anamorphic/i Full Frame Plus 50mm T2.3 (or ZEISS Supreme Prime 50mm T1.5)",
+    "aperture_sweet_spot": "T2.3",
+    "iso_base": "Dual Base ISO 500 / 2500 with 8-step internal mechanical optical ND filters (0.3 to 2.4)",
+    "dynamic_range": "15+ stops cinematic latitude (6+ stops over / 9 stops under middle gray) in S-Gamut3 / S-Log3 16-bit X-OCN",
+    "shutter": "180-degree mechanical-style cinema rotary shutter angle (1/48s motion cadence)"
+  },
+  "lighting_and_exposure": {
+    "primary_lighting": "Feature film production lighting ratio (4:1 chiaroscuro key or practical tungsten/neon mix) calibrated to Dual Base ISO 500/2500 with mechanical ND balance",
+    "light_transport": "Signature original VENICE 6K organic light transport with deep shadow nuance, zero harsh digital clipping, and filmic print-emulated highlight compression"
+  },
+  "micro_detail_and_physics": {
+    "surface_rendering": [
+      "6K VistaVision full-frame organic grain texture resolving realistic skin micro-texture without over-sharpened edges",
+      "Iconic VENICE Dual Base ISO 500/2500 clean low-light shadow separation and gentle roll-off above middle gray",
+      "16-bit X-OCN color precision across subtle flesh tones and deep theatrical blacks"
+    ],
+    "depth_and_optics": [
+      "Full-frame 36x24mm PL cinema prime or 1.8x/2x full-frame anamorphic separation with natural falloff toward frame corners",
+      "Classic cinema optical flare and circular/oval iris bokeh free of digital mask edges",
+      "Authentic feature-film spatial depth and physical lens perspective"
+    ]
+  },
+  "negative_embeddings": {
+    "render_defects": [
+      "CGI",
+      "3D render",
+      "illustration",
+      "digital sharpening halos",
+      "chromatic aberration",
+      "denoise smearing",
+      "compression banding",
+      "video noise clipping"
+    ],
+    "skin_and_lighting_drift": [
+      "airbrushed skin",
+      "plastic poreless skin",
+      "broadcast video sharpness",
+      "computational bokeh",
+      "clipped digital highlights",
+      "oversaturated rec709 tint"
+    ],
+    "anatomical_drift": [
+      "mutated hands",
+      "extra digits",
+      "fused limbs",
+      "asymmetrical pupil dilation",
+      "deformed facial features"
+    ]
+  },
+  "execution_directive": "Enforce Sony VENICE (MPC-3610) 36x24mm 6K Full-Frame Open Gate CineAlta digital cinema capture with Dual Base ISO 500/2500, 15+ stops latitude, internal mechanical ND optical purity, and filmic 16-bit X-OCN S-Gamut3 highlight roll-off."
+}
